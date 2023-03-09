@@ -8,4 +8,4 @@ edition = "2021"
 opt-level = 3
 
 [dependencies]
-bevy = "0.9"
+bevy = "0.10.0"
