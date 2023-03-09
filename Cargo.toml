@@ -1,0 +1,11 @@
+[package]
+name = "ichart"
+version = "0.1.0"
+edition = "2021"
+
+# Enable max optimizations for dependencies, but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
+
+[dependencies]
+bevy = "0.9"
