@@ -7,32 +7,17 @@ use image::*;
 use std::convert::TryInto;
 
 #[derive(Component)]
-struct MainCamera;
+pub struct MainCamera;
 
 pub struct HelloPlugin;
 
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup)
-            .add_system(update_pos)
-            .add_system(text_update_system)
-            .add_system(create_new_rectangle);
+        app.add_systems((update_pos, update_text_on_typing, create_new_rectangle));
 
         #[cfg(not(target_arch = "wasm32"))]
-        app.add_system(test_image_from_clipboard);
+        app.add_system(insert_image_from_clipboard);
     }
-}
-
-fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>
-) {
-    let background_image = asset_server.load("bg.png");
-    commands.spawn((Camera2dBundle::default(), MainCamera));
-    commands.spawn(SpriteBundle {
-        texture: background_image,
-        ..Default::default()
-    });
 }
 
 fn update_pos(
@@ -55,7 +40,7 @@ fn update_pos(
 #[derive(Component)]
 struct InputText;
 
-fn text_update_system( 
+fn update_text_on_typing( 
     mut char_evr: EventReader<ReceivedCharacter>,
     keys: Res<Input<KeyCode>>,
     mut query: Query<&mut Text, With<InputText>>
@@ -131,7 +116,7 @@ fn create_new_rectangle(
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn test_image_from_clipboard(
+fn insert_image_from_clipboard(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
 ) {
