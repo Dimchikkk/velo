@@ -14,23 +14,23 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 #+END_SRC
 
 * TODO
-[] Use focus system to set what entity is in focus now
-[] Resize rectangle... points to resize it
-[] Have color pallete to change background color of cube
-[] Have 4 connection points on cube (always visible if in focus)
-[] Draw parrallel line between two cubes
-[] Allow moving rectangles
-[] Creation via moving from shapes panel
-[] Making export as image
-[] Basic import to dot format
-[] Fix newline break on wasm
-[] Full screen on web
-[] Use touch event instead of click for mobile support
-[] Optimize wasm size
-[] Sqlite database for saving different diagrams
-[] Tabs of diagrams
-[] Import/Export world
-[] Push as gist to GitHub
-[] Host it
-[] MacOS, Linux distribution, web (Chrome, Firefox support)
-[] Connect different tabs (org-roam like)
+- Use focus system to set what entity is in focus now
+- Resize rectangle... points to resize it
+- Have color pallete to change background color of cube
+- Have 4 connection points on cube (always visible if in focus)
+- Draw parrallel line between two cubes
+- Allow moving rectangles
+- Creation via moving from shapes panel
+- Making export as image
+- Basic import to dot format
+- Fix newline break on wasm
+- Full screen on web
+- Use touch event instead of click for mobile support
+- Optimize wasm size
+- Sqlite database for saving different diagrams
+- Tabs of diagrams
+- Import/Export world
+- Push as gist to GitHub
+- Host it
+- MacOS, Linux distribution, web (Chrome, Firefox support)
+- Connect different tabs (org-roam like)
