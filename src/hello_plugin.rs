@@ -1,6 +1,9 @@
 use bevy::{prelude::*, ui::RelativeCursorPosition, text::Text2dBounds, render::render_resource::{TextureDimension, TextureFormat, Extent3d}};
+#[cfg(not(target_arch = "wasm32"))]
 use arboard::*;
+#[cfg(not(target_arch = "wasm32"))]
 use image::*;
+#[cfg(not(target_arch = "wasm32"))]
 use std::convert::TryInto;
 
 #[derive(Component)]
@@ -13,8 +16,10 @@ impl Plugin for HelloPlugin {
         app.add_startup_system(setup)
             .add_system(update_pos)
             .add_system(text_update_system)
-            .add_system(create_new_rectangle)
-            .add_system(test_image_from_clipboard);
+            .add_system(create_new_rectangle);
+
+        #[cfg(not(target_arch = "wasm32"))]
+        app.add_system(test_image_from_clipboard);
     }
 }
 
@@ -125,6 +130,7 @@ fn create_new_rectangle(
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn test_image_from_clipboard(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
