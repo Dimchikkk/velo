@@ -12,6 +12,8 @@ opt-level = 'z'
 
 [dependencies]
 bevy = "0.10.0"
+arboard = "3.2.0"
+image = "0.24.5"
 
 [target.wasm32-unknown-unknown]
 runner = "wasm-server-runner"
