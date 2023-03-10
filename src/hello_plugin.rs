@@ -8,10 +8,10 @@ pub struct HelloPlugin;
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup)
-            .add_system(update_pos);
+            .add_system(update_pos)
+            .add_system(text_update_system);
     }
 }
-
 
 fn setup(
     mut commands: Commands,
@@ -41,7 +41,7 @@ fn setup(
         ..default()
     }, RelativeCursorPosition::default()))
     .with_children(|builder| {
-        builder.spawn(Text2dBundle {
+        builder.spawn((Text2dBundle {
             text: Text {
                 sections: vec![TextSection::new(
                     "Hello world",
@@ -57,7 +57,7 @@ fn setup(
             // ensure the text is drawn on top of the box
             transform: Transform::from_translation(Vec3::Z),
             ..default()
-        });
+        }, InputText));
     });
 }
 
@@ -72,6 +72,27 @@ fn update_pos(
             if let Some(world_position) = camera.viewport_to_world_2d(camera_transform, event.position) {
                 transform.translation.x = world_position.x;
                 transform.translation.y = world_position.y;
+            }
+        }
+    }
+}
+
+#[derive(Component)]
+struct InputText;
+
+fn text_update_system( 
+    mut char_evr: EventReader<ReceivedCharacter>,
+    keys: Res<Input<KeyCode>>,
+    mut query: Query<&mut Text, With<InputText>>
+) {
+    for mut text in &mut query {
+        if keys.just_pressed(KeyCode::Back) {
+            let mut str = text.sections[0].value.clone();
+            str.pop();
+            text.sections[0].value = str;
+        } else {
+            for ev in char_evr.iter() {
+                text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char.to_string());
             }
         }
     }
