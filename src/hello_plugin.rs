@@ -1,18 +1,16 @@
+use bevy::{prelude::*, text::Text2dBounds, ui::RelativeCursorPosition};
 #[cfg(not(target_arch = "wasm32"))]
-use arboard::*;
-use bevy::{
-    prelude::*,
-    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
-    text::Text2dBounds,
-    ui::RelativeCursorPosition,
-};
+mod image_from_clipboard;
 #[cfg(not(target_arch = "wasm32"))]
-use image::*;
-#[cfg(not(target_arch = "wasm32"))]
-use std::convert::TryInto;
+pub use image_from_clipboard::*;
 
 #[derive(Component)]
 pub struct MainCamera;
+
+#[derive(Component)]
+pub struct IRectangle {
+    pub is_focused: bool,
+}
 
 pub struct HelloPlugin;
 
@@ -45,12 +43,12 @@ fn update_pos(
 }
 
 #[derive(Component)]
-struct InputText;
+struct IText;
 
 fn update_text_on_typing(
     mut char_evr: EventReader<ReceivedCharacter>,
     keys: Res<Input<KeyCode>>,
-    mut query: Query<&mut Text, With<InputText>>,
+    mut query: Query<&mut Text, With<IText>>,
 ) {
     let last_sprite = query.iter_mut().last();
     if let Some(mut text) = last_sprite {
@@ -103,7 +101,7 @@ fn create_new_rectangle(
                     transform: Transform::from_translation(Vec3::new(x, y, 0.1)),
                     ..default()
                 },
-                RelativeCursorPosition::default(),
+                IRectangle { is_focused: false },
             ))
             .with_children(|builder| {
                 builder.spawn((
@@ -121,38 +119,8 @@ fn create_new_rectangle(
                         transform: Transform::from_translation(Vec3::Z),
                         ..default()
                     },
-                    InputText,
+                    IText,
                 ));
             });
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn insert_image_from_clipboard(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
-    let mut clipboard = Clipboard::new().unwrap();
-    if let Ok(image) = clipboard.get_image() {
-        let image: RgbaImage = ImageBuffer::from_raw(
-            image.width.try_into().unwrap(),
-            image.height.try_into().unwrap(),
-            image.bytes.into_owned(),
-        )
-        .unwrap();
-        let size: Extent3d = Extent3d {
-            width: image.width(),
-            height: image.height(),
-            ..Default::default()
-        };
-        let image = Image::new(
-            size,
-            TextureDimension::D2,
-            image.to_vec(),
-            TextureFormat::Rgba8UnormSrgb,
-        );
-        let image = images.add(image);
-        commands.spawn(SpriteBundle {
-            texture: image,
-            transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
-            ..Default::default()
-        });
     }
 }
