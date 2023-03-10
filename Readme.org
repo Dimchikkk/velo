@@ -1,0 +1,14 @@
+* IChart
+
+** Run native
+
+#+BEGIN_SRC sh
+cargo r 
+#+END_EXAMPLE
+
+** Run web
+
+#+BEGIN_SRC sh
+cargo r --target wasm32-unknown-unknown
+wasm-server-runner  target/wasm32-unknown-unknown/debug/ichart.wasm
+#+END_EXAMPLE

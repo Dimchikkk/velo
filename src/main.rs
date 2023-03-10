@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-mod HelloPlugin;
-pub use HelloPlugin::*;
+mod hello_plugin;
+pub use hello_plugin::*;
 
 fn main() {
     App::new()
