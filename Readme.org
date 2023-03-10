@@ -9,6 +9,6 @@ cargo r
 ** Run web
 
 #+BEGIN_SRC sh
-cargo r --target wasm32-unknown-unknown
-wasm-server-runner  target/wasm32-unknown-unknown/debug/ichart.wasm
+cargo r --target wasm32-unknown-unknown --release
+wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 #+END_SRC
