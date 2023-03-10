@@ -1,4 +1,7 @@
-use bevy::{prelude::*, ui::RelativeCursorPosition, text::Text2dBounds};
+use bevy::{prelude::*, ui::RelativeCursorPosition, text::Text2dBounds, render::render_resource::{TextureDimension, TextureFormat, Extent3d}};
+use arboard::*;
+use image::*;
+use std::convert::TryInto;
 
 #[derive(Component)]
 struct MainCamera;
@@ -10,7 +13,8 @@ impl Plugin for HelloPlugin {
         app.add_startup_system(setup)
             .add_system(update_pos)
             .add_system(text_update_system)
-            .add_system(create_new_rectangle);
+            .add_system(create_new_rectangle)
+            .add_system(test_image_from_clipboard);
     }
 }
 
@@ -117,6 +121,32 @@ fn create_new_rectangle(
                 transform: Transform::from_translation(Vec3::Z),
                 ..default()
             }, InputText));
+        });
+    }
+}
+
+fn test_image_from_clipboard(
+    mut commands: Commands,
+    mut images: ResMut<Assets<Image>>,
+) {
+    let mut clipboard = Clipboard::new().unwrap();
+    if let Ok(image) = clipboard.get_image() {
+        let image: RgbaImage = ImageBuffer::from_raw(
+            image.width.try_into().unwrap(),
+            image.height.try_into().unwrap(),
+            image.bytes.into_owned(),
+        ).unwrap();
+        let size: Extent3d = Extent3d {
+            width: image.width(),
+            height: image.height(),
+            ..Default::default()
+        };
+        let image = Image::new(size, TextureDimension::D2, image.to_vec(), TextureFormat::Rgba8UnormSrgb);
+        let image = images.add(image);
+        commands.spawn(SpriteBundle {
+            texture: image,
+            transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
+            ..Default::default()
         });
     }
 }
