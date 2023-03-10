@@ -12,10 +12,15 @@ fn main() {
 }
 
 fn setup(
-    mut commands: Commands
+    mut commands: Commands,
+    asset_server: Res<AssetServer>
 ) {
+    let background_image = asset_server.load("bg.png");
     commands.spawn((Camera2dBundle::default(), MainCamera));
-
+    commands.spawn(SpriteBundle {
+        texture: background_image,
+        ..Default::default()
+    });
     // Rectangle
     commands.spawn((SpriteBundle {
         sprite: Sprite {
@@ -23,7 +28,7 @@ fn setup(
             custom_size: Some(Vec2::new(50.0, 100.0)),
             ..default()
         },
-        transform: Transform::from_translation(Vec3::new(-50., 0., 0.)),
+        transform: Transform::from_translation(Vec3::new(-50., 0., 0.1)),
         ..default()
     }, RelativeCursorPosition::default()));
 }
@@ -37,8 +42,8 @@ fn update_pos(
     for event in cursor_moved_events.iter() {
         for (mut transform, _) in sprite_position.iter_mut() {
             if let Some(world_position) = camera.viewport_to_world_2d(camera_transform, event.position) {
-                    transform.translation.x = world_position.x;
-                    transform.translation.y = world_position.y;
+                transform.translation.x = world_position.x;
+                transform.translation.y = world_position.y;
             }
         }
     }
