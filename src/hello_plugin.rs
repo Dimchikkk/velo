@@ -107,19 +107,19 @@ fn set_focused_entity(
         (Changed<Interaction>, With<IRectangle>),
     >,
     mut state: ResMut<IChartState>,
-    keys: Res<Input<KeyCode>>,
 ) {
     for (interaction, irectangle) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                state.focused_id = Some(irectangle.id);
+                if state.focused_id == Some(irectangle.id) {
+                    state.focused_id = None;
+                } else {
+                    state.focused_id = Some(irectangle.id);
+                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
         }
-    }
-    if keys.just_pressed(KeyCode::Escape) {
-        state.focused_id = None;
     }
 }
 
