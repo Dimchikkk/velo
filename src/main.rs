@@ -1,4 +1,4 @@
-use bevy::{prelude::*,window::PresentMode};
+use bevy::{prelude::*, window::PresentMode};
 mod hello_plugin;
 pub use hello_plugin::*;
 
