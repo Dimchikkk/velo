@@ -18,11 +18,16 @@ impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<IChartState>();
 
+        app.add_event::<AddRect>();
+
+        app.add_startup_system(init_layout);
+
         app.add_systems((
             update_rectangle_pos,
             update_text_on_typing,
             create_new_rectangle,
             set_focused_entity,
+            create_entity_event,
         ));
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -35,8 +40,72 @@ struct IChartState {
     focused_id: Option<u32>,
 }
 
+#[derive(Component)]
+struct CreateRectButton;
+
+fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
+    let text_style = TextStyle {
+        font,
+        font_size: 18.0,
+        color: Color::BLACK,
+    };
+    commands
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Px(10.),
+                        top: Val::Px(10.),
+                        ..Default::default()
+                    },
+                    size: Size::new(Val::Px(100.), Val::Px(100.)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            CreateRectButton,
+        ))
+        .with_children(|builder| {
+            builder.spawn((
+                TextBundle::from_section("NEW RECT", text_style.clone()).with_style(Style {
+                    position_type: PositionType::Relative,
+                    ..default()
+                }),
+            ));
+        });
+}
+
+struct AddRect;
+
+fn create_entity_event(
+    mut events: EventWriter<AddRect>,
+    interaction_query: Query<
+        (&Interaction, &CreateRectButton),
+        (Changed<Interaction>, With<CreateRectButton>),
+    >,
+) {
+    for (interaction, _) in &interaction_query {
+        match *interaction {
+            Interaction::Clicked => {
+                events.send(AddRect);
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
 fn set_focused_entity(
-    mut interaction_query: Query<(&Interaction, &IRectangle), (Changed<Interaction>, With<IRectangle>)>,
+    mut interaction_query: Query<
+        (&Interaction, &IRectangle),
+        (Changed<Interaction>, With<IRectangle>),
+    >,
     mut state: ResMut<IChartState>,
     keys: Res<Input<KeyCode>>,
 ) {
@@ -120,42 +189,23 @@ struct Counter {
 fn create_new_rectangle(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mouse_button_input: Res<Input<MouseButton>>,
-    mut cursor_moved_events: EventReader<CursorMoved>,
-    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut local_state: Local<Counter>,
-    mut state: ResMut<IChartState>,
+    mut events: EventReader<AddRect>,
 ) {
-    let (camera, camera_transform) = camera_q.single();
-    let mut x = 0.0;
-    let mut y = 0.0;
-    for event in cursor_moved_events.iter() {
-        if let Some(world_position) = camera.viewport_to_world_2d(camera_transform, event.position)
-        {
-            x = world_position.x;
-            y = world_position.y;
-        }
-    }
-    if mouse_button_input.just_pressed(MouseButton::Right) {
+    for _ in events.iter() {
         local_state.count += 1;
-        state.focused_id = Some(local_state.count);
         let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
         let text_style = TextStyle {
             font,
             font_size: 18.0,
             color: Color::BLACK,
         };
-        let box_size = Vec2::new(200.0, 200.0);
+        let box_size = Vec2::new(100.0, 100.0);
         // Rectangle
         commands
             .spawn((
                 NodeBundle {
                     style: Style {
-                        position: UiRect {
-                            left: Val::Px(x),
-                            bottom: Val::Px(y),
-                            ..Default::default()
-                        },
                         position_type: PositionType::Absolute,
                         size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
                         align_items: AlignItems::Center,
@@ -164,7 +214,9 @@ fn create_new_rectangle(
                     },
                     ..default()
                 },
-                Top { id: local_state.count },
+                Top {
+                    id: local_state.count,
+                },
             ))
             .with_children(|builder| {
                 builder
@@ -180,7 +232,9 @@ fn create_new_rectangle(
                             },
                             ..default()
                         },
-                        IRectangle { id: local_state.count },
+                        IRectangle {
+                            id: local_state.count,
+                        },
                     ))
                     .with_children(|builder| {
                         builder.spawn((
@@ -188,7 +242,9 @@ fn create_new_rectangle(
                                 position_type: PositionType::Relative,
                                 ..default()
                             }),
-                            EditableText { id: local_state.count },
+                            EditableText {
+                                id: local_state.count,
+                            },
                         ));
                     });
             });
