@@ -8,9 +8,7 @@ pub use image_from_clipboard::*;
 pub struct MainCamera;
 
 #[derive(Component)]
-pub struct IRectangle {
-    pub is_focused: bool,
-}
+pub struct IRectangle;
 
 pub struct HelloPlugin;
 
@@ -101,7 +99,7 @@ fn create_new_rectangle(
                     transform: Transform::from_translation(Vec3::new(x, y, 0.1)),
                     ..default()
                 },
-                IRectangle { is_focused: false },
+                IRectangle,
             ))
             .with_children(|builder| {
                 builder.spawn((
