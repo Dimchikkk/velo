@@ -1,4 +1,4 @@
-use bevy::{prelude::*, text::Text2dBounds, ui::RelativeCursorPosition};
+use bevy::{prelude::*, ui::RelativeCursorPosition};
 #[cfg(not(target_arch = "wasm32"))]
 mod image_from_clipboard;
 #[cfg(not(target_arch = "wasm32"))]
@@ -41,12 +41,12 @@ fn update_pos(
 }
 
 #[derive(Component)]
-struct IText;
+struct EditableText;
 
 fn update_text_on_typing(
     mut char_evr: EventReader<ReceivedCharacter>,
     keys: Res<Input<KeyCode>>,
-    mut query: Query<&mut Text, With<IText>>,
+    mut query: Query<&mut Text, With<EditableText>>,
 ) {
     let last_sprite = query.iter_mut().last();
     if let Some(mut text) = last_sprite {
@@ -90,35 +90,44 @@ fn create_new_rectangle(
         // Rectangle
         commands
             .spawn((
-                SpriteBundle {
-                    sprite: Sprite {
-                        color: Color::WHITE,
-                        custom_size: Some(box_size),
+                NodeBundle {
+                    style: Style {
+                        position: UiRect {
+                            left: Val::Px(x),
+                            bottom: Val::Px(y),
+                            ..Default::default()
+                        },
+                        position_type: PositionType::Absolute,
+                        size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    transform: Transform::from_translation(Vec3::new(x, y, 0.1)),
                     ..default()
                 },
                 IRectangle,
             ))
             .with_children(|builder| {
-                builder.spawn((
-                    Text2dBundle {
-                        text: Text {
-                            sections: vec![TextSection::new("", text_style.clone())],
-                            alignment: TextAlignment::Center,
-                            linebreak_behaviour: bevy::text::BreakLineOn::WordBoundary,
-                        },
-                        text_2d_bounds: Text2dBounds {
-                            // Wrap text in the rectangle
-                            size: box_size,
-                        },
-                        // ensure the text is drawn on top of the box
-                        transform: Transform::from_translation(Vec3::Z),
+                builder.spawn(ButtonBundle {
+                    style: Style {
+                        size: Size::new(Val::Px(box_size.x), Val::Px(box_size.y)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
                         ..default()
                     },
-                    IText,
-                ));
+                    ..default()
+                }).with_children(|builder| {
+                    builder.spawn((TextBundle::from_section(
+                        "",
+                        text_style.clone(),
+                    )
+                    .with_style(Style {
+                        position_type: PositionType::Relative,
+                        ..default()
+                    }), EditableText));
+                });
             });
     }
 }
