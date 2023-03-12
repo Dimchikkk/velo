@@ -248,10 +248,10 @@ fn create_new_rectangle(
                             style: Style {
                                 position_type: PositionType::Absolute,
                                 position: UiRect {
-                                    left: Val::Px(box_size.x / 2. - 3.),
-                                    right: Val::Px(0.),
-                                    top: Val::Px(-3.),
-                                    bottom: Val::Px(0.),
+                                    left: Val::Percent(50.-1.5),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(0.-3.),
+                                    bottom: Val::Percent(0.),
                                 },
                                 size: Size::new(Val::Px(5.), Val::Px(5.)),
                                 // horizontally center child text
@@ -267,10 +267,10 @@ fn create_new_rectangle(
                             style: Style {
                                 position_type: PositionType::Absolute,
                                 position: UiRect {
-                                    left: Val::Px(box_size.x / 2. - 3.),
-                                    right: Val::Px(0.),
-                                    top: Val::Px(box_size.y - 3.),
-                                    bottom: Val::Px(0.),
+                                    left: Val::Percent(0.-3.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(50.-1.5),
+                                    bottom: Val::Percent(0.),
                                 },
                                 size: Size::new(Val::Px(5.), Val::Px(5.)),
                                 // horizontally center child text
@@ -286,10 +286,10 @@ fn create_new_rectangle(
                             style: Style {
                                 position_type: PositionType::Absolute,
                                 position: UiRect {
-                                    left: Val::Px(-3.),
-                                    right: Val::Px(0.),
-                                    top: Val::Px(box_size.y / 2. - 3.),
-                                    bottom: Val::Px(0.),
+                                    left: Val::Percent(50.-1.5),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(100.-3.),
+                                    bottom: Val::Percent(0.),
                                 },
                                 size: Size::new(Val::Px(5.), Val::Px(5.)),
                                 // horizontally center child text
@@ -305,10 +305,10 @@ fn create_new_rectangle(
                             style: Style {
                                 position_type: PositionType::Absolute,
                                 position: UiRect {
-                                    left: Val::Px(box_size.x - 1.5),
-                                    right: Val::Px(0.),
-                                    top: Val::Px(box_size.y / 2. - 3.),
-                                    bottom: Val::Px(0.),
+                                    left: Val::Percent(100.-1.5),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(50.-1.5),
+                                    bottom: Val::Percent(0.),
                                 },
                                 size: Size::new(Val::Px(5.), Val::Px(5.)),
                                 // horizontally center child text
@@ -324,10 +324,10 @@ fn create_new_rectangle(
                             style: Style {
                                 position_type: PositionType::Absolute,
                                 position: UiRect {
-                                    left: Val::Px(-3.),
-                                    right: Val::Px(0.),
-                                    top: Val::Px(-1.5),
-                                    bottom: Val::Px(0.),
+                                    left: Val::Percent(-3.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(-1.5),
+                                    bottom: Val::Percent(0.),
                                 },
                                 size: Size::new(Val::Px(5.), Val::Px(5.)),
                                 // horizontally center child text
@@ -343,10 +343,10 @@ fn create_new_rectangle(
                             style: Style {
                                 position_type: PositionType::Absolute,
                                 position: UiRect {
-                                    left: Val::Px(box_size.x - 1.5),
-                                    right: Val::Px(0.),
-                                    top: Val::Px(-1.5),
-                                    bottom: Val::Px(0.),
+                                    left: Val::Percent(100. - 1.5),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(-1.5),
+                                    bottom: Val::Percent(0.),
                                 },
                                 size: Size::new(Val::Px(5.), Val::Px(5.)),
                                 // horizontally center child text
@@ -362,10 +362,10 @@ fn create_new_rectangle(
                             style: Style {
                                 position_type: PositionType::Absolute,
                                 position: UiRect {
-                                    left: Val::Px(box_size.x - 3.),
-                                    right: Val::Px(0.),
-                                    top: Val::Px(box_size.y - 3.),
-                                    bottom: Val::Px(0.),
+                                    left: Val::Percent(100. - 3.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(100. - 3.),
+                                    bottom: Val::Percent(0.),
                                 },
                                 size: Size::new(Val::Px(5.), Val::Px(5.)),
                                 // horizontally center child text
@@ -381,10 +381,10 @@ fn create_new_rectangle(
                             style: Style {
                                 position_type: PositionType::Absolute,
                                 position: UiRect {
-                                    left: Val::Px(-3.),
-                                    right: Val::Px(0.),
-                                    top: Val::Px(box_size.y - 3.),
-                                    bottom: Val::Px(0.),
+                                    left: Val::Percent(-3.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(100. - 3.),
+                                    bottom: Val::Percent(0.),
                                 },
                                 size: Size::new(Val::Px(5.), Val::Px(5.)),
                                 // horizontally center child text
