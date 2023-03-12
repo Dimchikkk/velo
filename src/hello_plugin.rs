@@ -45,6 +45,7 @@ fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
             ButtonBundle {
+                z_index: ZIndex::Global(1),
                 style: Style {
                     position_type: PositionType::Absolute,
                     position: UiRect {
@@ -272,35 +273,40 @@ pub fn insert_image_from_clipboard(
                     },
                 ))
                 .with_children(|builder| {
-                    builder.spawn((
-                        ButtonBundle {
-                            style: Style {
-                                size: Size::new(Val::Px(size.width as f32), Val::Px(size.height as f32)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        IRectangle {
-                            id: state.entity_counter,
-                        },
-                    )).with_children(|builder| {
-                        builder.spawn(ImageBundle {
-                            image: image.into(),
-                            style: Style {
-                                position_type: PositionType::Relative,
-                                size: Size {
-                                    width: Val::Px(size.width as f32),
-                                    height: Val::Px(size.height as f32),
+                    builder
+                        .spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    size: Size::new(
+                                        Val::Px(size.width as f32),
+                                        Val::Px(size.height as f32),
+                                    ),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
                                 },
                                 ..default()
                             },
-                            ..Default::default()
+                            IRectangle {
+                                id: state.entity_counter,
+                            },
+                        ))
+                        .with_children(|builder| {
+                            builder.spawn(ImageBundle {
+                                image: image.into(),
+                                style: Style {
+                                    position_type: PositionType::Relative,
+                                    size: Size {
+                                        width: Val::Px(size.width as f32),
+                                        height: Val::Px(size.height as f32),
+                                    },
+                                    ..default()
+                                },
+                                ..Default::default()
+                            });
                         });
-                    });
                 });
         }
         Err(_) => {}
