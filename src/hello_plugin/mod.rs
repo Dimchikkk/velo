@@ -26,6 +26,7 @@ impl Plugin for HelloPlugin {
             update_text_on_typing,
             create_new_rectangle,
             create_entity_event,
+            resize_entity,
         ));
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -106,6 +107,36 @@ fn set_focused_entity(
                     state.focused_id = None;
                 } else {
                     state.focused_id = Some(irectangle.id);
+                }
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+fn resize_entity(
+    mut interaction_query: Query<
+        (&Interaction, &Parent),
+        (Changed<Interaction>, With<ResizeMarker>),
+    >,
+    mut button_query: Query<&mut Style, With<IRectangle>>,
+) {
+    for (interaction, parent) in &mut interaction_query {
+        let mut button_style = button_query.get_mut(parent.get()).unwrap();
+        match *interaction {
+            Interaction::Clicked => {
+                match button_style.size.width {
+                    Val::Px(x) => {
+                        button_style.size.width = Val::Px(x+10.);
+                    }
+                    _ => {}
+                }
+                match button_style.size.height {
+                    Val::Px(x) => {
+                        button_style.size.height = Val::Px(x+10.);
+                    }
+                    _ => {}
                 }
             }
             Interaction::Hovered => {}
@@ -231,7 +262,7 @@ fn create_new_rectangle(
                             },
                             background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                             ..default()
-                        }, TopConnect));
+                        }, ArrowConnectMarker));
                         builder.spawn((ButtonBundle {
                             style: Style {
                                 position_type: PositionType::Absolute,
@@ -250,7 +281,7 @@ fn create_new_rectangle(
                             },
                             background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                             ..default()
-                        }, BottomConnect));
+                        }, ArrowConnectMarker));
                         builder.spawn((ButtonBundle {
                             style: Style {
                                 position_type: PositionType::Absolute,
@@ -269,7 +300,7 @@ fn create_new_rectangle(
                             },
                             background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                             ..default()
-                        }, LeftConnect));
+                        }, ArrowConnectMarker));
                         builder.spawn((ButtonBundle {
                             style: Style {
                                 position_type: PositionType::Absolute,
@@ -288,7 +319,83 @@ fn create_new_rectangle(
                             },
                             background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                             ..default()
-                        }, RightConnect));
+                        }, ArrowConnectMarker));
+                        builder.spawn((ButtonBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    left: Val::Px(-3.),
+                                    right: Val::Px(0.),
+                                    top: Val::Px(-1.5),
+                                    bottom: Val::Px(0.),
+                                },
+                                size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.4, 0.4, 1.0).into(),
+                            ..default()
+                        }, ResizeMarker));
+                        builder.spawn((ButtonBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    left: Val::Px(box_size.x - 1.5),
+                                    right: Val::Px(0.),
+                                    top: Val::Px(-1.5),
+                                    bottom: Val::Px(0.),
+                                },
+                                size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.4, 0.4, 1.0).into(),
+                            ..default()
+                        }, ResizeMarker));
+                        builder.spawn((ButtonBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    left: Val::Px(box_size.x - 3.),
+                                    right: Val::Px(0.),
+                                    top: Val::Px(box_size.y - 3.),
+                                    bottom: Val::Px(0.),
+                                },
+                                size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.4, 0.4, 1.0).into(),
+                            ..default()
+                        }, ResizeMarker));
+                        builder.spawn((ButtonBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    left: Val::Px(-3.),
+                                    right: Val::Px(0.),
+                                    top: Val::Px(box_size.y - 3.),
+                                    bottom: Val::Px(0.),
+                                },
+                                size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.4, 0.4, 1.0).into(),
+                            ..default()
+                        }, ResizeMarker));
                         builder.spawn((
                             TextBundle::from_section("", text_style.clone()).with_style(Style {
                                 position_type: PositionType::Relative,

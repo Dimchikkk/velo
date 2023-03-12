@@ -29,13 +29,7 @@ pub struct AppState {
 }
 
 #[derive(Component)]
-pub struct LeftConnect;
+pub struct ArrowConnectMarker;
 
 #[derive(Component)]
-pub struct RightConnect;
-
-#[derive(Component)]
-pub struct TopConnect;
-
-#[derive(Component)]
-pub struct BottomConnect;
+pub struct ResizeMarker;
