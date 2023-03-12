@@ -213,6 +213,82 @@ fn create_new_rectangle(
                         },
                     ))
                     .with_children(|builder| {
+                        builder.spawn((ButtonBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    left: Val::Px(box_size.x / 2. - 3.),
+                                    right: Val::Px(0.),
+                                    top: Val::Px(-3.),
+                                    bottom: Val::Px(0.),
+                                },
+                                size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                            ..default()
+                        }, TopConnect));
+                        builder.spawn((ButtonBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    left: Val::Px(box_size.x / 2. - 3.),
+                                    right: Val::Px(0.),
+                                    top: Val::Px(box_size.y - 3.),
+                                    bottom: Val::Px(0.),
+                                },
+                                size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                            ..default()
+                        }, BottomConnect));
+                        builder.spawn((ButtonBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    left: Val::Px(-3.),
+                                    right: Val::Px(0.),
+                                    top: Val::Px(box_size.y / 2. - 3.),
+                                    bottom: Val::Px(0.),
+                                },
+                                size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                            ..default()
+                        }, LeftConnect));
+                        builder.spawn((ButtonBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                position: UiRect {
+                                    left: Val::Px(box_size.x - 1.5),
+                                    right: Val::Px(0.),
+                                    top: Val::Px(box_size.y / 2. - 3.),
+                                    bottom: Val::Px(0.),
+                                },
+                                size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                            ..default()
+                        }, RightConnect));
                         builder.spawn((
                             TextBundle::from_section("", text_style.clone()).with_style(Style {
                                 position_type: PositionType::Relative,

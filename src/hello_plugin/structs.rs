@@ -27,3 +27,15 @@ pub struct AppState {
     pub focused_id: Option<u32>,
     pub entity_counter: u32,
 }
+
+#[derive(Component)]
+pub struct LeftConnect;
+
+#[derive(Component)]
+pub struct RightConnect;
+
+#[derive(Component)]
+pub struct TopConnect;
+
+#[derive(Component)]
+pub struct BottomConnect;
