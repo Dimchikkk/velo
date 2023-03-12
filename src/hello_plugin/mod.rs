@@ -3,6 +3,7 @@ use arboard::*;
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+    window::PrimaryWindow,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
@@ -26,7 +27,8 @@ impl Plugin for HelloPlugin {
             update_text_on_typing,
             create_new_rectangle,
             create_entity_event,
-            resize_entity,
+            resize_entity_start,
+            resize_entity_end,
         ));
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -115,28 +117,75 @@ fn set_focused_entity(
     }
 }
 
-fn resize_entity(
+fn resize_entity_end(
+    buttons: Res<Input<MouseButton>>,
+    mut state: ResMut<AppState>,
+    mut button_query: Query<(&mut Style, &IRectangle), With<IRectangle>>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+) {
+    let primary_window = windows.single_mut();
+    let (camera, camera_transform) = camera_q.single();
+    if buttons.just_released(MouseButton::Left) {
+        for (mut style, irectangle) in &mut button_query {
+            if state.entity_to_resize.is_none() {
+                return;
+            }
+            let (id, prev_cursor_pos) = state.entity_to_resize.unwrap();
+            let current_cursor_pos = primary_window.cursor_position();
+            if id == irectangle.id && current_cursor_pos.is_some() {
+                if let Some(world_position) =
+                    camera.viewport_to_world_2d(camera_transform, current_cursor_pos.unwrap())
+                {
+                    let delta = world_position - prev_cursor_pos;
+                    match style.size.width {
+                        Val::Px(width) => {
+                            style.size.width = Val::Px(
+                                width + (primary_window.resolution.scale_factor() as f32 * delta.x),
+                            );
+                        }
+                        _ => {}
+                    }
+                    match style.size.height {
+                        Val::Px(height) => {
+                            style.size.height = Val::Px(
+                                height
+                                    - (primary_window.resolution.scale_factor() as f32 * delta.y),
+                            );
+                        }
+                        _ => {}
+                    }
+                }
+                state.entity_to_resize = None;
+            }
+        }
+    }
+}
+
+fn resize_entity_start(
     mut interaction_query: Query<
         (&Interaction, &Parent),
         (Changed<Interaction>, With<ResizeMarker>),
     >,
-    mut button_query: Query<&mut Style, With<IRectangle>>,
+    mut button_query: Query<&IRectangle, With<IRectangle>>,
+    mut state: ResMut<AppState>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
+    let primary_window = windows.single_mut();
+    let (camera, camera_transform) = camera_q.single();
     for (interaction, parent) in &mut interaction_query {
-        let mut button_style = button_query.get_mut(parent.get()).unwrap();
+        let irectangle = button_query.get_mut(parent.get()).unwrap();
         match *interaction {
             Interaction::Clicked => {
-                match button_style.size.width {
-                    Val::Px(x) => {
-                        button_style.size.width = Val::Px(x+10.);
-                    }
-                    _ => {}
+                if primary_window.cursor_position().is_none() {
+                    return;
                 }
-                match button_style.size.height {
-                    Val::Px(x) => {
-                        button_style.size.height = Val::Px(x+10.);
-                    }
-                    _ => {}
+                if let Some(world_position) = camera.viewport_to_world_2d(
+                    camera_transform,
+                    primary_window.cursor_position().unwrap(),
+                ) {
+                    state.entity_to_resize = Some((irectangle.id, world_position));
                 }
             }
             Interaction::Hovered => {}
@@ -244,158 +293,182 @@ fn create_new_rectangle(
                         },
                     ))
                     .with_children(|builder| {
-                        builder.spawn((ButtonBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    left: Val::Percent(50.-1.5),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(0.-3.),
-                                    bottom: Val::Percent(0.),
+                        builder.spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    position_type: PositionType::Absolute,
+                                    position: UiRect {
+                                        left: Val::Percent(50.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(0.),
+                                        bottom: Val::Percent(0.),
+                                    },
+                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
                                 },
-                                size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
+                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
-                            background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                            ..default()
-                        }, ArrowConnectMarker));
-                        builder.spawn((ButtonBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    left: Val::Percent(0.-3.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(50.-1.5),
-                                    bottom: Val::Percent(0.),
+                            ArrowConnectMarker,
+                        ));
+                        builder.spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    position_type: PositionType::Absolute,
+                                    position: UiRect {
+                                        left: Val::Percent(0.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(50.),
+                                        bottom: Val::Percent(0.),
+                                    },
+                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
                                 },
-                                size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
+                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
-                            background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                            ..default()
-                        }, ArrowConnectMarker));
-                        builder.spawn((ButtonBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    left: Val::Percent(50.-1.5),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(100.-3.),
-                                    bottom: Val::Percent(0.),
+                            ArrowConnectMarker,
+                        ));
+                        builder.spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    position_type: PositionType::Absolute,
+                                    position: UiRect {
+                                        left: Val::Percent(50.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(100.),
+                                        bottom: Val::Percent(0.),
+                                    },
+                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
                                 },
-                                size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
+                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
-                            background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                            ..default()
-                        }, ArrowConnectMarker));
-                        builder.spawn((ButtonBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    left: Val::Percent(100.-1.5),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(50.-1.5),
-                                    bottom: Val::Percent(0.),
+                            ArrowConnectMarker,
+                        ));
+                        builder.spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    position_type: PositionType::Absolute,
+                                    position: UiRect {
+                                        left: Val::Percent(100.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(50.),
+                                        bottom: Val::Percent(0.),
+                                    },
+                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
                                 },
-                                size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
+                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
-                            background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                            ..default()
-                        }, ArrowConnectMarker));
-                        builder.spawn((ButtonBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    left: Val::Percent(-3.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(-1.5),
-                                    bottom: Val::Percent(0.),
+                            ArrowConnectMarker,
+                        ));
+                        builder.spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    position_type: PositionType::Absolute,
+                                    position: UiRect {
+                                        left: Val::Percent(0.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(0.),
+                                        bottom: Val::Percent(0.),
+                                    },
+                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
                                 },
-                                size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
+                                background_color: Color::rgb(0.4, 0.4, 1.0).into(),
                                 ..default()
                             },
-                            background_color: Color::rgb(0.4, 0.4, 1.0).into(),
-                            ..default()
-                        }, ResizeMarker));
-                        builder.spawn((ButtonBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    left: Val::Percent(100. - 1.5),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(-1.5),
-                                    bottom: Val::Percent(0.),
+                            ResizeMarker,
+                        ));
+                        builder.spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    position_type: PositionType::Absolute,
+                                    position: UiRect {
+                                        left: Val::Percent(100.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(0.),
+                                        bottom: Val::Percent(0.),
+                                    },
+                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
                                 },
-                                size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
+                                background_color: Color::rgb(0.4, 0.4, 1.0).into(),
                                 ..default()
                             },
-                            background_color: Color::rgb(0.4, 0.4, 1.0).into(),
-                            ..default()
-                        }, ResizeMarker));
-                        builder.spawn((ButtonBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    left: Val::Percent(100. - 3.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(100. - 3.),
-                                    bottom: Val::Percent(0.),
+                            ResizeMarker,
+                        ));
+                        builder.spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    position_type: PositionType::Absolute,
+                                    position: UiRect {
+                                        left: Val::Percent(100.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(100.),
+                                        bottom: Val::Percent(0.),
+                                    },
+                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
                                 },
-                                size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
+                                background_color: Color::rgb(0.4, 0.4, 1.0).into(),
                                 ..default()
                             },
-                            background_color: Color::rgb(0.4, 0.4, 1.0).into(),
-                            ..default()
-                        }, ResizeMarker));
-                        builder.spawn((ButtonBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                position: UiRect {
-                                    left: Val::Percent(-3.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(100. - 3.),
-                                    bottom: Val::Percent(0.),
+                            ResizeMarker,
+                        ));
+                        builder.spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    position_type: PositionType::Absolute,
+                                    position: UiRect {
+                                        left: Val::Percent(0.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(100.),
+                                        bottom: Val::Percent(0.),
+                                    },
+                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
                                 },
-                                size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
+                                background_color: Color::rgb(0.4, 0.4, 1.0).into(),
                                 ..default()
                             },
-                            background_color: Color::rgb(0.4, 0.4, 1.0).into(),
-                            ..default()
-                        }, ResizeMarker));
+                            ResizeMarker,
+                        ));
                         builder.spawn((
                             TextBundle::from_section("", text_style.clone()).with_style(Style {
                                 position_type: PositionType::Relative,
