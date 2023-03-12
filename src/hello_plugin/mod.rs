@@ -7,7 +7,7 @@ use bevy::{
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 use std::convert::TryInto;
-#[path ="structs.rs"]
+#[path = "structs.rs"]
 mod structs;
 pub use structs::*;
 
