@@ -26,6 +26,7 @@ pub struct AddRect;
 pub struct AppState {
     pub focused_id: Option<u32>,
     pub entity_counter: u32,
+    pub entity_to_resize: Option<(u32, Vec2)>,
 }
 
 #[derive(Component)]
