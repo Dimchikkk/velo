@@ -1,22 +1,21 @@
-use bevy::prelude::*;
 #[cfg(not(target_arch = "wasm32"))]
-mod image_from_clipboard;
+use arboard::*;
+use bevy::{
+    prelude::*,
+    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+};
 #[cfg(not(target_arch = "wasm32"))]
-pub use image_from_clipboard::*;
+use image::*;
+use std::convert::TryInto;
 
-#[derive(Component)]
-pub struct MainCamera;
-
-#[derive(Component)]
-pub struct IRectangle {
-    id: u32,
-}
+mod structs;
+pub use structs::*;
 
 pub struct HelloPlugin;
 
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<IChartState>();
+        app.init_resource::<AppState>();
 
         app.add_event::<AddRect>();
 
@@ -26,22 +25,15 @@ impl Plugin for HelloPlugin {
             update_rectangle_pos,
             update_text_on_typing,
             create_new_rectangle,
-            set_focused_entity,
             create_entity_event,
         ));
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_system(insert_image_from_clipboard);
+
+        app.add_system(set_focused_entity);
     }
 }
-
-#[derive(Resource, Default)]
-struct IChartState {
-    focused_id: Option<u32>,
-}
-
-#[derive(Component)]
-struct CreateRectButton;
 
 fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
@@ -81,8 +73,6 @@ fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
-struct AddRect;
-
 fn create_entity_event(
     mut events: EventWriter<AddRect>,
     interaction_query: Query<
@@ -106,7 +96,7 @@ fn set_focused_entity(
         (&Interaction, &IRectangle),
         (Changed<Interaction>, With<IRectangle>),
     >,
-    mut state: ResMut<IChartState>,
+    mut state: ResMut<AppState>,
 ) {
     for (interaction, irectangle) in &mut interaction_query {
         match *interaction {
@@ -127,7 +117,7 @@ fn update_rectangle_pos(
     mut cursor_moved_events: EventReader<CursorMoved>,
     mut sprite_position: Query<(&mut Style, &Top)>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    state: Res<IChartState>,
+    state: Res<AppState>,
 ) {
     if state.focused_id.is_none() {
         return;
@@ -147,21 +137,11 @@ fn update_rectangle_pos(
     }
 }
 
-#[derive(Component)]
-struct EditableText {
-    id: u32,
-}
-
-#[derive(Component)]
-struct Top {
-    id: u32,
-}
-
 fn update_text_on_typing(
     mut char_evr: EventReader<ReceivedCharacter>,
     keys: Res<Input<KeyCode>>,
     mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
-    state: Res<IChartState>,
+    state: Res<AppState>,
 ) {
     if state.focused_id.is_none() {
         return;
@@ -181,19 +161,14 @@ fn update_text_on_typing(
     }
 }
 
-#[derive(Default)]
-struct Counter {
-    count: u32,
-}
-
 fn create_new_rectangle(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut local_state: Local<Counter>,
     mut events: EventReader<AddRect>,
+    mut state: ResMut<AppState>,
 ) {
     for _ in events.iter() {
-        local_state.count += 1;
+        state.entity_counter += 1;
         let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
         let text_style = TextStyle {
             font,
@@ -215,7 +190,7 @@ fn create_new_rectangle(
                     ..default()
                 },
                 Top {
-                    id: local_state.count,
+                    id: state.entity_counter,
                 },
             ))
             .with_children(|builder| {
@@ -233,7 +208,7 @@ fn create_new_rectangle(
                             ..default()
                         },
                         IRectangle {
-                            id: local_state.count,
+                            id: state.entity_counter,
                         },
                     ))
                     .with_children(|builder| {
@@ -243,10 +218,91 @@ fn create_new_rectangle(
                                 ..default()
                             }),
                             EditableText {
-                                id: local_state.count,
+                                id: state.entity_counter,
                             },
                         ));
                     });
             });
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn insert_image_from_clipboard(
+    mut commands: Commands,
+    mut images: ResMut<Assets<Image>>,
+    mut state: ResMut<AppState>,
+) {
+    let mut clipboard = Clipboard::new().unwrap();
+    match clipboard.get_image() {
+        Ok(image) => {
+            state.entity_counter += 1;
+            clipboard.clear().unwrap();
+            let image: RgbaImage = ImageBuffer::from_raw(
+                image.width.try_into().unwrap(),
+                image.height.try_into().unwrap(),
+                image.bytes.into_owned(),
+            )
+            .unwrap();
+            let size: Extent3d = Extent3d {
+                width: image.width(),
+                height: image.height(),
+                ..Default::default()
+            };
+            let image = Image::new(
+                size,
+                TextureDimension::D2,
+                image.to_vec(),
+                TextureFormat::Rgba8UnormSrgb,
+            );
+            let image = images.add(image);
+            commands
+                .spawn((
+                    NodeBundle {
+                        style: Style {
+                            position_type: PositionType::Absolute,
+                            size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        },
+                        ..default()
+                    },
+                    Top {
+                        id: state.entity_counter,
+                    },
+                ))
+                .with_children(|builder| {
+                    builder.spawn((
+                        ButtonBundle {
+                            style: Style {
+                                size: Size::new(Val::Px(size.width as f32), Val::Px(size.height as f32)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            ..default()
+                        },
+                        IRectangle {
+                            id: state.entity_counter,
+                        },
+                    )).with_children(|builder| {
+                        builder.spawn(ImageBundle {
+                            image: image.into(),
+                            style: Style {
+                                position_type: PositionType::Relative,
+                                size: Size {
+                                    width: Val::Px(size.width as f32),
+                                    height: Val::Px(size.height as f32),
+                                },
+                                ..default()
+                            },
+                            ..Default::default()
+                        });
+                    });
+                });
+        }
+        Err(_) => {}
     }
 }
