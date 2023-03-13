@@ -12,9 +12,9 @@ use std::convert::TryInto;
 mod structs;
 pub use structs::*;
 
-pub struct HelloPlugin;
+pub struct ChartPlugin;
 
-impl Plugin for HelloPlugin {
+impl Plugin for ChartPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AppState>();
 
@@ -97,18 +97,18 @@ fn create_entity_event(
 
 fn set_focused_entity(
     mut interaction_query: Query<
-        (&Interaction, &IRectangle),
-        (Changed<Interaction>, With<IRectangle>),
+        (&Interaction, &Rectangle),
+        (Changed<Interaction>, With<Rectangle>),
     >,
     mut state: ResMut<AppState>,
 ) {
-    for (interaction, irectangle) in &mut interaction_query {
+    for (interaction, rectangle) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                if state.focused_id == Some(irectangle.id) {
+                if state.focused_id == Some(rectangle.id) {
                     state.focused_id = None;
                 } else {
-                    state.focused_id = Some(irectangle.id);
+                    state.focused_id = Some(rectangle.id);
                 }
             }
             Interaction::Hovered => {}
@@ -120,7 +120,7 @@ fn set_focused_entity(
 fn resize_entity_end(
     buttons: Res<Input<MouseButton>>,
     mut state: ResMut<AppState>,
-    mut top_query: Query<(&IRectangle, &mut Style), With<IRectangle>>,
+    mut top_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
@@ -130,10 +130,10 @@ fn resize_entity_end(
         return;
     }
     if buttons.just_released(MouseButton::Left) {
-        for (irectangle, mut button_style) in &mut top_query {
+        for (rectangle, mut button_style) in &mut top_query {
             let (id, prev_cursor_pos, resize_marker) = state.entity_to_resize.unwrap();
             let current_cursor_pos = primary_window.cursor_position();
-            if id == irectangle.id && current_cursor_pos.is_some() {
+            if id == rectangle.id && current_cursor_pos.is_some() {
                 if let Some(world_position) =
                     camera.viewport_to_world_2d(camera_transform, current_cursor_pos.unwrap())
                 {
@@ -241,7 +241,7 @@ fn resize_entity_start(
         (&Interaction, &Parent, &ResizeMarker),
         (Changed<Interaction>, With<ResizeMarker>),
     >,
-    mut button_query: Query<&IRectangle, With<IRectangle>>,
+    mut button_query: Query<&Rectangle, With<Rectangle>>,
     mut state: ResMut<AppState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
@@ -249,7 +249,7 @@ fn resize_entity_start(
     let primary_window = windows.single_mut();
     let (camera, camera_transform) = camera_q.single();
     for (interaction, parent, resize_marker) in &mut interaction_query {
-        let irectangle = button_query.get_mut(parent.get()).unwrap();
+        let rectangle = button_query.get_mut(parent.get()).unwrap();
         match *interaction {
             Interaction::Clicked => {
                 if primary_window.cursor_position().is_none() {
@@ -259,7 +259,7 @@ fn resize_entity_start(
                     camera_transform,
                     primary_window.cursor_position().unwrap(),
                 ) {
-                    state.entity_to_resize = Some((irectangle.id, world_position, *resize_marker));
+                    state.entity_to_resize = Some((rectangle.id, world_position, *resize_marker));
                 }
             }
             Interaction::Hovered => {}
@@ -367,7 +367,7 @@ fn create_new_rectangle(
                             },
                             ..default()
                         },
-                        IRectangle {
+                        Rectangle {
                             id: state.entity_counter,
                         },
                     ))
@@ -624,7 +624,7 @@ pub fn insert_image_from_clipboard(
                                 },
                                 ..default()
                             },
-                            IRectangle {
+                            Rectangle {
                                 id: state.entity_counter,
                             },
                         ))

@@ -4,7 +4,7 @@ use bevy::prelude::*;
 pub struct MainCamera;
 
 #[derive(Component)]
-pub struct IRectangle {
+pub struct Rectangle {
     pub id: u32,
 }
 
