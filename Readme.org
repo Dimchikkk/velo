@@ -50,4 +50,5 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 - Hide cursor when typing
 - Implement pasting screenshot for wasm target
 - Add ability to resize screenshots
+- Improve UI/UX (see lucid.app for inspiration, for example change the way rectangles are moved to same way it's done in lucid.app)
 - Collaboarative editing
