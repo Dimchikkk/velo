@@ -11,6 +11,9 @@ use std::convert::TryInto;
 #[path = "structs.rs"]
 mod structs;
 pub use structs::*;
+#[path = "ui_helpers.rs"]
+mod ui_helpers;
+pub use ui_helpers::*;
 
 pub struct ChartPlugin;
 
@@ -138,7 +141,6 @@ fn resize_entity_end(
                     camera.viewport_to_world_2d(camera_transform, current_cursor_pos.unwrap())
                 {
                     let delta = world_position - prev_cursor_pos;
-                    eprintln!("delta: {:?}", delta);
                     match resize_marker {
                         ResizeMarker::TopLeft => {
                             match button_style.size.width {
@@ -374,21 +376,12 @@ fn create_new_rectangle(
                     .with_children(|builder| {
                         builder.spawn((
                             ButtonBundle {
-                                style: Style {
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Percent(50.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(0.),
-                                        bottom: Val::Percent(0.),
-                                    },
-                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                    // horizontally center child text
-                                    justify_content: JustifyContent::Center,
-                                    // vertically center child text
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
+                                style: get_marker_style(UiRect {
+                                    left: Val::Percent(50.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(0.),
+                                    bottom: Val::Percent(0.),
+                                }),
                                 background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
@@ -396,21 +389,12 @@ fn create_new_rectangle(
                         ));
                         builder.spawn((
                             ButtonBundle {
-                                style: Style {
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Percent(0.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(50.),
-                                        bottom: Val::Percent(0.),
-                                    },
-                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                    // horizontally center child text
-                                    justify_content: JustifyContent::Center,
-                                    // vertically center child text
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
+                                style: get_marker_style(UiRect {
+                                    left: Val::Percent(0.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(50.),
+                                    bottom: Val::Percent(0.),
+                                }),
                                 background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
@@ -418,21 +402,12 @@ fn create_new_rectangle(
                         ));
                         builder.spawn((
                             ButtonBundle {
-                                style: Style {
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Percent(50.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(100.),
-                                        bottom: Val::Percent(0.),
-                                    },
-                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                    // horizontally center child text
-                                    justify_content: JustifyContent::Center,
-                                    // vertically center child text
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
+                                style: get_marker_style(UiRect {
+                                    left: Val::Percent(50.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(100.),
+                                    bottom: Val::Percent(0.),
+                                }),
                                 background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
@@ -440,21 +415,12 @@ fn create_new_rectangle(
                         ));
                         builder.spawn((
                             ButtonBundle {
-                                style: Style {
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Percent(100.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(50.),
-                                        bottom: Val::Percent(0.),
-                                    },
-                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                    // horizontally center child text
-                                    justify_content: JustifyContent::Center,
-                                    // vertically center child text
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
+                                style: get_marker_style(UiRect {
+                                    left: Val::Percent(100.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(50.),
+                                    bottom: Val::Percent(0.),
+                                }),
                                 background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
@@ -462,21 +428,12 @@ fn create_new_rectangle(
                         ));
                         builder.spawn((
                             ButtonBundle {
-                                style: Style {
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Percent(0.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(0.),
-                                        bottom: Val::Percent(0.),
-                                    },
-                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                    // horizontally center child text
-                                    justify_content: JustifyContent::Center,
-                                    // vertically center child text
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
+                                style: get_marker_style(UiRect {
+                                    left: Val::Percent(0.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(0.),
+                                    bottom: Val::Percent(0.),
+                                }),
                                 background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
@@ -484,21 +441,12 @@ fn create_new_rectangle(
                         ));
                         builder.spawn((
                             ButtonBundle {
-                                style: Style {
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Percent(100.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(0.),
-                                        bottom: Val::Percent(0.),
-                                    },
-                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                    // horizontally center child text
-                                    justify_content: JustifyContent::Center,
-                                    // vertically center child text
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
+                                style: get_marker_style(UiRect {
+                                    left: Val::Percent(100.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(0.),
+                                    bottom: Val::Percent(0.),
+                                }),
                                 background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
@@ -506,21 +454,12 @@ fn create_new_rectangle(
                         ));
                         builder.spawn((
                             ButtonBundle {
-                                style: Style {
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Percent(100.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(100.),
-                                        bottom: Val::Percent(0.),
-                                    },
-                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                    // horizontally center child text
-                                    justify_content: JustifyContent::Center,
-                                    // vertically center child text
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
+                                style: get_marker_style(UiRect {
+                                    left: Val::Percent(100.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(100.),
+                                    bottom: Val::Percent(0.),
+                                }),
                                 background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
@@ -528,21 +467,12 @@ fn create_new_rectangle(
                         ));
                         builder.spawn((
                             ButtonBundle {
-                                style: Style {
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Percent(0.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(100.),
-                                        bottom: Val::Percent(0.),
-                                    },
-                                    size: Size::new(Val::Px(5.), Val::Px(5.)),
-                                    // horizontally center child text
-                                    justify_content: JustifyContent::Center,
-                                    // vertically center child text
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
+                                style: get_marker_style(UiRect {
+                                    left: Val::Percent(0.),
+                                    right: Val::Percent(0.),
+                                    top: Val::Percent(100.),
+                                    bottom: Val::Percent(0.),
+                                }),
                                 background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
