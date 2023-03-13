@@ -28,6 +28,13 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 #+END_SRC
 
 
+** Pre-commit actions
+
+#+BEGIN_SRC
+cargo fmt
+cargo clippy --fix --allow-staged
+#+END_SRC
+
 * Tasks to todo
 - Add button to change z-index of rectangle
 - Have color pallete to change background color of cube
@@ -47,7 +54,7 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 - MacOS, Linux distribution, web (Chrome, Firefox support)
 - Connect different tabs (org-roam like)
 - Delete button (last 5 entities)
-- Hide cursor when typing
+- Proper cursor on typing
 - Implement pasting screenshot for wasm target
 - Add ability to resize screenshots
 - Improve UI/UX (see lucid.app for inspiration, for example change the way rectangles are moved to same way it's done in lucid.app)

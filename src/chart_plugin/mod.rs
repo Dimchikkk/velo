@@ -3,7 +3,7 @@ use arboard::*;
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
-    window::{PrimaryWindow, Cursor},
+    window::{PrimaryWindow},
 };
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
@@ -310,7 +310,7 @@ fn update_text_on_typing(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let mut window = windows.single_mut();
-    if state.focused_id == None {
+    if state.focused_id.is_none() {
         window.cursor.icon = CursorIcon::Default;
         return;
     }
