@@ -131,7 +131,7 @@ fn resize_entity_end(
             if state.entity_to_resize.is_none() {
                 return;
             }
-            let (id, prev_cursor_pos) = state.entity_to_resize.unwrap();
+            let (id, prev_cursor_pos, _) = state.entity_to_resize.unwrap();
             let current_cursor_pos = primary_window.cursor_position();
             if id == irectangle.id && current_cursor_pos.is_some() {
                 if let Some(world_position) =
@@ -164,7 +164,7 @@ fn resize_entity_end(
 
 fn resize_entity_start(
     mut interaction_query: Query<
-        (&Interaction, &Parent),
+        (&Interaction, &Parent, &ResizeMarker),
         (Changed<Interaction>, With<ResizeMarker>),
     >,
     mut button_query: Query<&IRectangle, With<IRectangle>>,
@@ -174,7 +174,7 @@ fn resize_entity_start(
 ) {
     let primary_window = windows.single_mut();
     let (camera, camera_transform) = camera_q.single();
-    for (interaction, parent) in &mut interaction_query {
+    for (interaction, parent, resize_marker) in &mut interaction_query {
         let irectangle = button_query.get_mut(parent.get()).unwrap();
         match *interaction {
             Interaction::Clicked => {
@@ -185,7 +185,7 @@ fn resize_entity_start(
                     camera_transform,
                     primary_window.cursor_position().unwrap(),
                 ) {
-                    state.entity_to_resize = Some((irectangle.id, world_position));
+                    state.entity_to_resize = Some((irectangle.id, world_position, *resize_marker));
                 }
             }
             Interaction::Hovered => {}
@@ -310,7 +310,7 @@ fn create_new_rectangle(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                                background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
                             ArrowConnectMarker,
@@ -332,7 +332,7 @@ fn create_new_rectangle(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                                background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
                             ArrowConnectMarker,
@@ -354,7 +354,7 @@ fn create_new_rectangle(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                                background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
                             ArrowConnectMarker,
@@ -376,7 +376,7 @@ fn create_new_rectangle(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                                background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
                             ArrowConnectMarker,
@@ -398,10 +398,10 @@ fn create_new_rectangle(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::rgb(0.4, 0.4, 1.0).into(),
+                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
-                            ResizeMarker,
+                            ResizeMarker::TopLeft,
                         ));
                         builder.spawn((
                             ButtonBundle {
@@ -420,10 +420,10 @@ fn create_new_rectangle(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::rgb(0.4, 0.4, 1.0).into(),
+                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
-                            ResizeMarker,
+                            ResizeMarker::TopRight,
                         ));
                         builder.spawn((
                             ButtonBundle {
@@ -442,10 +442,10 @@ fn create_new_rectangle(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::rgb(0.4, 0.4, 1.0).into(),
+                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
-                            ResizeMarker,
+                            ResizeMarker::BottomRight,
                         ));
                         builder.spawn((
                             ButtonBundle {
@@ -464,10 +464,10 @@ fn create_new_rectangle(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::rgb(0.4, 0.4, 1.0).into(),
+                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                 ..default()
                             },
-                            ResizeMarker,
+                            ResizeMarker::BottomLeft,
                         ));
                         builder.spawn((
                             TextBundle::from_section("", text_style.clone()).with_style(Style {
