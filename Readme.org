@@ -49,4 +49,5 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 - Delete button (last 5 entities)
 - Hide cursor when typing
 - Implement pasting screenshot for wasm target
+- Add ability to resize screenshots
 - Collaboarative editing
