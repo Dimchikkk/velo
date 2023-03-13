@@ -26,11 +26,16 @@ pub struct AddRect;
 pub struct AppState {
     pub focused_id: Option<u32>,
     pub entity_counter: u32,
-    pub entity_to_resize: Option<(u32, Vec2)>,
+    pub entity_to_resize: Option<(u32, Vec2, ResizeMarker)>,
 }
 
 #[derive(Component)]
 pub struct ArrowConnectMarker;
 
-#[derive(Component)]
-pub struct ResizeMarker;
+#[derive(Component, Copy, Clone, Debug)]
+pub enum ResizeMarker {
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+}

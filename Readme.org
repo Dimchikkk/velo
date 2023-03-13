@@ -1,4 +1,16 @@
-* IChart
+* I(nteractive)Chart
+
+** Motivation
+I use lucid.app at work quite often to brainstorm ideas with colleagues or even solo.
+I often share my ideas via sharing lucid.app diagrams or just screenshot of it. I don't use banch of features there. 
+Just simple rectangles, arrows, why not build rust analog of it for the sake of learning rust and having some fun?
+
+** What's implemented
+*** ability to add rectangle
+*** ability to re-size rectangle (only left bottom corner works correctly as for now)
+*** ability to move rectangles
+*** ability to type text in rectangles
+*** ability to paste screenshot from clipboard
 
 ** Run native
 
@@ -13,13 +25,12 @@ cargo r --target wasm32-unknown-unknown --release
 wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 #+END_SRC
 
+<img src="./ichart.gif"/>
+
 * Tasks to todo
-- Add border around rectangles
 - Add button to change z-index of rectangle
-- Resize rectangle... points to resize it
 - Have color pallete to change background color of cube
-- Have 4 connection points on cube (always visible if in focus) for scalying
-- Draw parrallel line between two cubes
+- Draw parrallel line between two cubes (add ability to connect cubes)
 - Creation via moving from shapes panel (note: added button for now)
 - Making export as image
 - Basic import to dot format
@@ -36,3 +47,5 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 - Connect different tabs (org-roam like)
 - Delete button (last 5 entities)
 - Hide cursor when typing
+- Implement pasting screenshot for wasm target
+- Collaboarative editing
