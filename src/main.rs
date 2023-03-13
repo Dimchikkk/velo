@@ -1,6 +1,6 @@
 use bevy::{prelude::*, window::PresentMode};
-mod hello_plugin;
-pub use hello_plugin::*;
+mod chart_plugin;
+pub use chart_plugin::*;
 
 fn main() {
     App::new()
@@ -17,7 +17,7 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugin(HelloPlugin)
+        .add_plugin(ChartPlugin)
         .run();
 }
 
