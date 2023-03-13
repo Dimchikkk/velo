@@ -34,7 +34,7 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 - Draw parrallel line between two cubes (add ability to connect cubes)
 - Creation via moving from shapes panel (note: added button for now)
 - Making export as image
-- Basic import to dot format
+- Basic export to dot format
 - Fix newline break on wasm
 - Use touch event instead of click for mobile support
 - Optimize wasm size
@@ -42,8 +42,8 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 - Tabs of diagrams
 - Import/Export world
 - Push as gist to GitHub
-- Host it
-- Make text inside rectangle smart (similar to text2d)
+- Host web version
+- Make text inside rectangle smart wrapping (similar to text2d)
 - MacOS, Linux distribution, web (Chrome, Firefox support)
 - Connect different tabs (org-roam like)
 - Delete button (last 5 entities)
@@ -51,5 +51,5 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 - Implement pasting screenshot for wasm target
 - Add ability to resize screenshots
 - Improve UI/UX (see lucid.app for inspiration, for example change the way rectangles are moved to same way it's done in lucid.app)
-- Add separate panel for creating rectangles (control panel). Use grid layout for it.
-- Collaboarative editing
+- Add separate panel for creating rectangles (control panel), use grid layout for it
+- Collaborative editing
