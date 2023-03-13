@@ -120,40 +120,114 @@ fn set_focused_entity(
 fn resize_entity_end(
     buttons: Res<Input<MouseButton>>,
     mut state: ResMut<AppState>,
-    mut button_query: Query<(&mut Style, &IRectangle), With<IRectangle>>,
+    mut top_query: Query<(&IRectangle, &mut Style), With<IRectangle>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let primary_window = windows.single_mut();
     let (camera, camera_transform) = camera_q.single();
+    if state.entity_to_resize.is_none() {
+        return;
+    }
     if buttons.just_released(MouseButton::Left) {
-        for (mut style, irectangle) in &mut button_query {
-            if state.entity_to_resize.is_none() {
-                return;
-            }
-            let (id, prev_cursor_pos, _) = state.entity_to_resize.unwrap();
+        for (irectangle, mut button_style) in &mut top_query {
+            let (id, prev_cursor_pos, resize_marker) = state.entity_to_resize.unwrap();
             let current_cursor_pos = primary_window.cursor_position();
             if id == irectangle.id && current_cursor_pos.is_some() {
                 if let Some(world_position) =
                     camera.viewport_to_world_2d(camera_transform, current_cursor_pos.unwrap())
                 {
                     let delta = world_position - prev_cursor_pos;
-                    match style.size.width {
-                        Val::Px(width) => {
-                            style.size.width = Val::Px(
-                                width + (primary_window.resolution.scale_factor() as f32 * delta.x),
-                            );
+                    eprintln!("delta: {:?}", delta);
+                    match resize_marker {
+                        ResizeMarker::TopLeft => {
+                            match button_style.size.width {
+                                Val::Px(width) => {
+                                    button_style.size.width = Val::Px(
+                                        width
+                                            - (primary_window.resolution.scale_factor() as f32
+                                                * delta.x),
+                                    );
+                                }
+                                _ => {}
+                            }
+                            match button_style.size.height {
+                                Val::Px(height) => {
+                                    button_style.size.height = Val::Px(
+                                        height
+                                            + (primary_window.resolution.scale_factor() as f32
+                                                * delta.y),
+                                    );
+                                }
+                                _ => {}
+                            }
                         }
-                        _ => {}
-                    }
-                    match style.size.height {
-                        Val::Px(height) => {
-                            style.size.height = Val::Px(
-                                height
-                                    - (primary_window.resolution.scale_factor() as f32 * delta.y),
-                            );
+                        ResizeMarker::TopRight => {
+                            match button_style.size.width {
+                                Val::Px(width) => {
+                                    button_style.size.width = Val::Px(
+                                        width
+                                            + (primary_window.resolution.scale_factor() as f32
+                                                * delta.x),
+                                    );
+                                }
+                                _ => {}
+                            }
+                            match button_style.size.height {
+                                Val::Px(height) => {
+                                    button_style.size.height = Val::Px(
+                                        height
+                                            + (primary_window.resolution.scale_factor() as f32
+                                                * delta.y),
+                                    );
+                                }
+                                _ => {}
+                            }
                         }
-                        _ => {}
+                        ResizeMarker::BottomLeft => {
+                            match button_style.size.width {
+                                Val::Px(width) => {
+                                    button_style.size.width = Val::Px(
+                                        width
+                                            - (primary_window.resolution.scale_factor() as f32
+                                                * delta.x),
+                                    );
+                                }
+                                _ => {}
+                            }
+                            match button_style.size.height {
+                                Val::Px(height) => {
+                                    button_style.size.height = Val::Px(
+                                        height
+                                            - (primary_window.resolution.scale_factor() as f32
+                                                * delta.y),
+                                    );
+                                }
+                                _ => {}
+                            }
+                        }
+                        ResizeMarker::BottomRight => {
+                            match button_style.size.width {
+                                Val::Px(width) => {
+                                    button_style.size.width = Val::Px(
+                                        width
+                                            + (primary_window.resolution.scale_factor() as f32
+                                                * delta.x),
+                                    );
+                                }
+                                _ => {}
+                            }
+                            match button_style.size.height {
+                                Val::Px(height) => {
+                                    button_style.size.height = Val::Px(
+                                        height
+                                            - (primary_window.resolution.scale_factor() as f32
+                                                * delta.y),
+                                    );
+                                }
+                                _ => {}
+                            }
+                        }
                     }
                 }
                 state.entity_to_resize = None;
@@ -263,6 +337,11 @@ fn create_new_rectangle(
                 NodeBundle {
                     style: Style {
                         position_type: PositionType::Absolute,
+                        position: UiRect {
+                            left: Val::Px(0.0),
+                            bottom: Val::Px(0.0),
+                            ..Default::default()
+                        },
                         size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
