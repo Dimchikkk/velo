@@ -9,7 +9,7 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 
 ** What's implemented
 - ability to add rectangle
-- ability to re-size rectangle (only right bottom corner works correctly as for now)
+- ability to re-size rectangle
 - ability to move rectangles
 - ability to type text in rectangles
 - ability to paste screenshot from clipboard
