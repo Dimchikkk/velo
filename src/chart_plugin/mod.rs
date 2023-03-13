@@ -552,6 +552,7 @@ pub fn insert_image_from_clipboard(
                     builder
                         .spawn((
                             ButtonBundle {
+                                image: image.into(),
                                 style: Style {
                                     size: Size::new(
                                         Val::Px(size.width as f32),
@@ -570,18 +571,58 @@ pub fn insert_image_from_clipboard(
                             },
                         ))
                         .with_children(|builder| {
-                            builder.spawn(ImageBundle {
-                                image: image.into(),
-                                style: Style {
-                                    position_type: PositionType::Relative,
-                                    size: Size {
-                                        width: Val::Px(size.width as f32),
-                                        height: Val::Px(size.height as f32),
-                                    },
+                            builder.spawn((
+                                ButtonBundle {
+                                    style: get_marker_style(UiRect {
+                                        left: Val::Percent(0.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(0.),
+                                        bottom: Val::Percent(0.),
+                                    }),
+                                    background_color: Color::rgb(0.8, 0.8, 1.0).into(),
                                     ..default()
                                 },
-                                ..Default::default()
-                            });
+                                ResizeMarker::TopLeft,
+                            ));
+                            builder.spawn((
+                                ButtonBundle {
+                                    style: get_marker_style(UiRect {
+                                        left: Val::Percent(100.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(0.),
+                                        bottom: Val::Percent(0.),
+                                    }),
+                                    background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                                    ..default()
+                                },
+                                ResizeMarker::TopRight,
+                            ));
+                            builder.spawn((
+                                ButtonBundle {
+                                    style: get_marker_style(UiRect {
+                                        left: Val::Percent(100.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(100.),
+                                        bottom: Val::Percent(0.),
+                                    }),
+                                    background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                                    ..default()
+                                },
+                                ResizeMarker::BottomRight,
+                            ));
+                            builder.spawn((
+                                ButtonBundle {
+                                    style: get_marker_style(UiRect {
+                                        left: Val::Percent(0.),
+                                        right: Val::Percent(0.),
+                                        top: Val::Percent(100.),
+                                        bottom: Val::Percent(0.),
+                                    }),
+                                    background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+                                    ..default()
+                                },
+                                ResizeMarker::BottomLeft,
+                            ));
                         });
                 });
         }
