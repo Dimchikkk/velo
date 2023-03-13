@@ -3,7 +3,7 @@ use arboard::*;
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
-    window::PrimaryWindow,
+    window::{PrimaryWindow, Cursor},
 };
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
@@ -287,9 +287,6 @@ fn update_rectangle_pos(
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     state: Res<AppState>,
 ) {
-    if state.focused_id.is_none() {
-        return;
-    }
     let (camera, camera_transform) = camera_q.single();
     for event in cursor_moved_events.iter() {
         for (mut style, top) in &mut sprite_position.iter_mut() {
@@ -310,12 +307,16 @@ fn update_text_on_typing(
     keys: Res<Input<KeyCode>>,
     mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
     state: Res<AppState>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    if state.focused_id.is_none() {
+    let mut window = windows.single_mut();
+    if state.focused_id == None {
+        window.cursor.icon = CursorIcon::Default;
         return;
     }
     for (mut text, editable_text) in &mut query.iter_mut() {
         if Some(editable_text.id) == state.focused_id {
+            window.cursor.icon = CursorIcon::Text;
             if keys.just_pressed(KeyCode::Back) {
                 let mut str = text.sections[0].value.clone();
                 str.pop();
