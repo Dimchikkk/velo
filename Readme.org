@@ -37,26 +37,27 @@ cargo clippy --fix --allow-staged
 
 * Tasks to todo
 - Add button to change z-index of rectangle
-- Have color pallete to change background color of cube
-- Draw parrallel line between two cubes (add ability to connect cubes)
+- Have color pallete to change background color of rectangle
+- Draw parrallel connection line between two rectangles (add ability to connect them, use bevy_debug_lines maybe)
 - Creation via moving from shapes panel (note: added button for now)
-- Making export as image
 - Basic export to dot format
 - Fix newline break on wasm
-- Use touch event instead of click for mobile support
+- Add "ctrl+a" to select text in rectangle
+- Use touch event for mobile support
 - Optimize wasm size
 - Sqlite database for saving different diagrams
 - Tabs of diagrams
-- Import/Export world
+- Import/Export world to file
 - Push as gist to GitHub
 - Host web version
 - Make text inside rectangle smart wrapping (similar to text2d)
 - MacOS, Linux distribution, web (Chrome, Firefox support)
-- Connect different tabs (org-roam like)
-- Delete button (last 5 entities)
+- Connect different tabs (org-roam like between pages)
+- Add tagging system to rectangles & add search on tags
+- Delete entities functionality
 - Proper cursor on typing
 - Implement pasting screenshot for wasm target
-- Add ability to resize screenshots
-- Improve UI/UX (see lucid.app for inspiration, for example change the way rectangles are moved to same way it's done in lucid.app)
+- Implement pasting data on "ctrl+v"
+- Improve UI/UX, use lucid.app for inspiration
 - Add separate panel for creating rectangles (control panel), use grid layout for it
 - Collaborative editing
