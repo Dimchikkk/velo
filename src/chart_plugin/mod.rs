@@ -105,39 +105,46 @@ fn set_focused_entity(
         (Changed<Interaction>, With<Rectangle>),
     >,
     mut state: ResMut<AppState>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    buttons: Res<Input<MouseButton>>,
 ) {
+    let mut window = windows.single_mut();
     for (interaction, rectangle) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                if state.focused_id == Some(rectangle.id) {
-                    state.focused_id = None;
-                } else {
-                    state.focused_id = Some(rectangle.id);
+                state.focused_entity = Some(rectangle.id);
+            }
+            Interaction::Hovered => {
+                window.cursor.icon = CursorIcon::Text;
+                state.entity_to_edit = Some(rectangle.id);
+                if state.focused_entity.is_none() {
+                    window.cursor.icon = CursorIcon::Move;
                 }
             }
-            Interaction::Hovered => {}
-            Interaction::None => {}
+            Interaction::None => {
+                state.entity_to_edit = None;
+                window.cursor.icon = CursorIcon::Default;
+            }
         }
+    }
+    if buttons.just_released(MouseButton::Left) {
+        state.focused_entity = None;
+        state.entity_to_resize = None;
     }
 }
 
 fn resize_entity_end(
     mut mouse_motion_events: EventReader<MouseMotion>,
-    buttons: Res<Input<MouseButton>>,
-    mut state: ResMut<AppState>,
+    state: Res<AppState>,
     mut top_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let primary_window = windows.single_mut();
     let (_camera, _camera_transform) = camera_q.single();
-
-    if buttons.just_released(MouseButton::Left) {
-        state.entity_to_resize = None;
-    }
     for event in mouse_motion_events.iter() {
-        for (rectangle, mut button_style) in &mut top_query {
-            if let Some((id, resize_marker)) = state.entity_to_resize {
+        if let Some((id, resize_marker)) = state.entity_to_resize {
+            for (rectangle, mut button_style) in &mut top_query {
                 if id == rectangle.id {
                     let delta = event.delta;
                     match resize_marker {
@@ -199,14 +206,29 @@ fn resize_entity_start(
     >,
     mut button_query: Query<&Rectangle, With<Rectangle>>,
     mut state: ResMut<AppState>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
+    let mut primary_window = windows.single_mut();
     for (interaction, parent, resize_marker) in &mut interaction_query {
         let rectangle = button_query.get_mut(parent.get()).unwrap();
         match *interaction {
             Interaction::Clicked => {
                 state.entity_to_resize = Some((rectangle.id, *resize_marker));
             }
-            Interaction::Hovered => {}
+            Interaction::Hovered => match *resize_marker {
+                ResizeMarker::TopLeft => {
+                    primary_window.cursor.icon = CursorIcon::NwseResize;
+                }
+                ResizeMarker::TopRight => {
+                    primary_window.cursor.icon = CursorIcon::NeswResize;
+                }
+                ResizeMarker::BottomLeft => {
+                    primary_window.cursor.icon = CursorIcon::NeswResize;
+                }
+                ResizeMarker::BottomRight => {
+                    primary_window.cursor.icon = CursorIcon::NwseResize;
+                }
+            },
             Interaction::None => {}
         }
     }
@@ -216,12 +238,12 @@ fn update_rectangle_pos(
     mut cursor_moved_events: EventReader<CursorMoved>,
     mut sprite_position: Query<(&mut Style, &Top)>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    state: Res<AppState>,
+    state: ResMut<AppState>,
 ) {
     let (camera, camera_transform) = camera_q.single();
     for event in cursor_moved_events.iter() {
         for (mut style, top) in &mut sprite_position.iter_mut() {
-            if Some(top.id) == state.focused_id {
+            if Some(top.id) == state.focused_entity {
                 if let Some(world_position) =
                     camera.viewport_to_world_2d(camera_transform, event.position)
                 {
@@ -238,16 +260,9 @@ fn update_text_on_typing(
     keys: Res<Input<KeyCode>>,
     mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
     state: Res<AppState>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    let mut window = windows.single_mut();
-    if state.focused_id.is_none() {
-        window.cursor.icon = CursorIcon::Default;
-        return;
-    }
     for (mut text, editable_text) in &mut query.iter_mut() {
-        if Some(editable_text.id) == state.focused_id {
-            window.cursor.icon = CursorIcon::Text;
+        if Some(editable_text.id) == state.entity_to_edit {
             if keys.just_pressed(KeyCode::Back) {
                 let mut str = text.sections[0].value.clone();
                 str.pop();
