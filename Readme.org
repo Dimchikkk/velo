@@ -36,6 +36,8 @@ cargo clippy --fix --allow-staged
 #+END_SRC
 
 * Tasks to todo
+- Add borders (once https://github.com/bevyengine/bevy/pull/7795 merged)
+- Add separate panel for creating rectangles (control panel), use grid layout for it (once https://github.com/bevyengine/bevy/pull/8026  merged)
 - Add button to change z-index of rectangle
 - Have color pallete to change background color of rectangle
 - Draw parrallel connection line between two rectangles (add ability to connect them, use bevy_debug_lines maybe)
@@ -59,5 +61,4 @@ cargo clippy --fix --allow-staged
 - Implement pasting screenshot for wasm target
 - Implement pasting data on "ctrl+v"
 - Improve UI/UX, use lucid.app for inspiration
-- Add separate panel for creating rectangles (control panel), use grid layout for it
 - Collaborative editing
