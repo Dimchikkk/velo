@@ -1,6 +1,6 @@
 * I(nteractive)Chart
 
-[[file:ichart.gif]]
+[[file:ichart.png]]
 
 ** Inspiration
 I use lucid.app at work quite often to brainstorm ideas with colleagues or even solo.
