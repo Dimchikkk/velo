@@ -6,6 +6,7 @@ use bevy::{
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     window::PrimaryWindow,
 };
+use bevy_prototype_lyon::{prelude::*, shapes};
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 use std::convert::TryInto;
@@ -33,6 +34,7 @@ impl Plugin for ChartPlugin {
             create_entity_event,
             resize_entity_start,
             resize_entity_end,
+            connect_rectangles,
         ));
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -81,6 +83,49 @@ fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
+fn connect_rectangles(
+    mut commands: Commands,
+    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<ArrowConnectMarker>)>,
+    mut state: ResMut<AppState>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+) {
+    let window = windows.single();
+    let (camera, camera_transform) = camera_q.single();
+    for interaction in interaction_query.iter_mut() {
+        if let Interaction::Clicked = interaction {
+            match state.line_to_draw_start {
+                Some(start) => {
+                    if let Some(end) = window.cursor_position() {
+                        let shape = shapes::Line(
+                            camera
+                                .viewport_to_world_2d(camera_transform, start)
+                                .unwrap(),
+                            camera.viewport_to_world_2d(camera_transform, end).unwrap(),
+                        );
+                        eprint!("end: {:?}", end);
+                        commands.spawn((
+                            ShapeBundle {
+                                path: GeometryBuilder::build_as(&shape),
+                                ..default()
+                            },
+                            Stroke::new(Color::BLACK, 2.0),
+                        ));
+
+                        state.line_to_draw_start = None;
+                    }
+                }
+                None => {
+                    if let Some(pos) = window.cursor_position() {
+                        eprint!("start: {:?}", pos);
+                        state.line_to_draw_start = Some(pos);
+                    }
+                }
+            }
+        }
+    }
+}
+
 fn create_entity_event(
     mut events: EventWriter<AddRect>,
     interaction_query: Query<
@@ -112,12 +157,12 @@ fn set_focused_entity(
     for (interaction, rectangle) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                state.focused_entity = Some(rectangle.id);
+                state.hold_entity = Some(rectangle.id);
             }
             Interaction::Hovered => {
                 window.cursor.icon = CursorIcon::Text;
                 state.entity_to_edit = Some(rectangle.id);
-                if state.focused_entity.is_none() {
+                if state.hold_entity.is_none() {
                     window.cursor.icon = CursorIcon::Move;
                 }
             }
@@ -128,7 +173,7 @@ fn set_focused_entity(
         }
     }
     if buttons.just_released(MouseButton::Left) {
-        state.focused_entity = None;
+        state.hold_entity = None;
         state.entity_to_resize = None;
     }
 }
@@ -138,10 +183,8 @@ fn resize_entity_end(
     state: Res<AppState>,
     mut top_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let primary_window = windows.single_mut();
-    let (_camera, _camera_transform) = camera_q.single();
     for event in mouse_motion_events.iter() {
         if let Some((id, resize_marker)) = state.entity_to_resize {
             for (rectangle, mut button_style) in &mut top_query {
@@ -243,7 +286,7 @@ fn update_rectangle_pos(
     let (camera, camera_transform) = camera_q.single();
     for event in cursor_moved_events.iter() {
         for (mut style, top) in &mut sprite_position.iter_mut() {
-            if Some(top.id) == state.focused_entity {
+            if Some(top.id) == state.hold_entity {
                 if let Some(world_position) =
                     camera.viewport_to_world_2d(camera_transform, event.position)
                 {
@@ -343,7 +386,7 @@ fn create_new_rectangle(
                                 background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
-                            ArrowConnectMarker,
+                            ArrowConnectMarker::Top,
                         ));
                         builder.spawn((
                             ButtonBundle {
@@ -356,7 +399,7 @@ fn create_new_rectangle(
                                 background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
-                            ArrowConnectMarker,
+                            ArrowConnectMarker::Left,
                         ));
                         builder.spawn((
                             ButtonBundle {
@@ -369,7 +412,7 @@ fn create_new_rectangle(
                                 background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
-                            ArrowConnectMarker,
+                            ArrowConnectMarker::Bottom,
                         ));
                         builder.spawn((
                             ButtonBundle {
@@ -382,7 +425,7 @@ fn create_new_rectangle(
                                 background_color: Color::rgb(0.9, 0.9, 1.0).into(),
                                 ..default()
                             },
-                            ArrowConnectMarker,
+                            ArrowConnectMarker::Right,
                         ));
                         builder.spawn((
                             ButtonBundle {
@@ -437,10 +480,12 @@ fn create_new_rectangle(
                             ResizeMarker::BottomLeft,
                         ));
                         builder.spawn((
-                            TextBundle::from_section("", text_style.clone()).with_style(Style {
-                                position_type: PositionType::Relative,
-                                ..default()
-                            }),
+                            TextBundle::from_section("", text_style.clone())
+                                .with_style(Style {
+                                    position_type: PositionType::Relative,
+                                    ..default()
+                                })
+                                .with_text_alignment(TextAlignment::Center),
                             EditableText {
                                 id: state.entity_counter,
                             },
