@@ -52,7 +52,7 @@ cargo clippy --fix --allow-staged
 - Import/Export world to file
 - Push as gist to GitHub
 - Host web version
-- Make text inside rectangle smart wrapping (similar to text2d)
+- Make text inside rectangle smart wrapping (once https://github.com/bevyengine/bevy/pull/7761 merged)
 - MacOS, Linux distribution, web (Chrome, Firefox support)
 - Connect different tabs (org-roam like between pages)
 - Add tagging system to rectangles & add search on tags
