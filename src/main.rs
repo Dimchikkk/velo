@@ -1,5 +1,6 @@
 use bevy::{prelude::*, window::PresentMode};
 mod chart_plugin;
+use bevy_prototype_lyon::prelude::ShapePlugin;
 pub use chart_plugin::*;
 
 fn main() {
@@ -18,6 +19,7 @@ fn main() {
             ..default()
         }))
         .add_plugin(ChartPlugin)
+        .add_plugin(ShapePlugin)
         .run();
 }
 
