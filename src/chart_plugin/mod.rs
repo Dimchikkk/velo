@@ -10,14 +10,22 @@ use bevy_prototype_lyon::{prelude::*, shapes};
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 use std::convert::TryInto;
-#[path = "structs.rs"]
-mod structs;
-pub use structs::*;
 #[path = "ui_helpers.rs"]
 mod ui_helpers;
 pub use ui_helpers::*;
 
 pub struct ChartPlugin;
+
+pub struct AddRect;
+
+#[derive(Resource, Default)]
+pub struct AppState {
+    pub entity_to_edit: Option<u32>,
+    pub hold_entity: Option<u32>,
+    pub entity_counter: u32,
+    pub entity_to_resize: Option<(u32, ResizeMarker)>,
+    pub line_to_draw_start: Option<Vec2>,
+}
 
 impl Plugin for ChartPlugin {
     fn build(&self, app: &mut App) {
@@ -35,51 +43,21 @@ impl Plugin for ChartPlugin {
             resize_entity_start,
             resize_entity_end,
             connect_rectangles,
+            set_focused_entity,
         ));
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_system(insert_image_from_clipboard);
-
-        app.add_system(set_focused_entity);
     }
 }
 
 fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
-    let text_style = TextStyle {
-        font,
-        font_size: 18.0,
-        color: Color::BLACK,
-    };
+    let font = asset_server.load("fonts/iosevka-regular.ttf");
+
     commands
-        .spawn((
-            ButtonBundle {
-                z_index: ZIndex::Global(1),
-                style: Style {
-                    position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Px(10.),
-                        top: Val::Px(10.),
-                        ..Default::default()
-                    },
-                    size: Size::new(Val::Px(100.), Val::Px(100.)),
-                    // horizontally center child text
-                    justify_content: JustifyContent::Center,
-                    // vertically center child text
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                ..default()
-            },
-            CreateRectButton,
-        ))
+        .spawn((add_rectangle_btn(), CreateRectButton))
         .with_children(|builder| {
-            builder.spawn((
-                TextBundle::from_section("NEW RECT", text_style.clone()).with_style(Style {
-                    position_type: PositionType::Relative,
-                    ..default()
-                }),
-            ));
+            builder.spawn(add_rectangle_txt(font.clone()));
         });
 }
 
@@ -103,7 +81,6 @@ fn connect_rectangles(
                                 .unwrap(),
                             camera.viewport_to_world_2d(camera_transform, end).unwrap(),
                         );
-                        eprint!("end: {:?}", end);
                         commands.spawn((
                             ShapeBundle {
                                 path: GeometryBuilder::build_as(&shape),
@@ -117,7 +94,6 @@ fn connect_rectangles(
                 }
                 None => {
                     if let Some(pos) = window.cursor_position() {
-                        eprint!("start: {:?}", pos);
                         state.line_to_draw_start = Some(pos);
                     }
                 }
@@ -326,172 +302,17 @@ fn create_new_rectangle(
     mut state: ResMut<AppState>,
 ) {
     for _ in events.iter() {
+        let font = asset_server.load("fonts/iosevka-regular.ttf");
         state.entity_counter += 1;
-        let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
-        let text_style = TextStyle {
-            font,
-            font_size: 18.0,
-            color: Color::BLACK,
-        };
-        let box_size = Vec2::new(100.0, 100.0);
-        // Rectangle
-        commands
-            .spawn((
-                NodeBundle {
-                    style: Style {
-                        position_type: PositionType::Absolute,
-                        position: UiRect {
-                            left: Val::Px(0.0),
-                            bottom: Val::Px(0.0),
-                            ..Default::default()
-                        },
-                        size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        ..default()
-                    },
-                    ..default()
-                },
-                Top {
-                    id: state.entity_counter,
-                },
-            ))
-            .with_children(|builder| {
-                builder
-                    .spawn((
-                        ButtonBundle {
-                            style: Style {
-                                size: Size::new(Val::Px(box_size.x), Val::Px(box_size.y)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        Rectangle {
-                            id: state.entity_counter,
-                        },
-                    ))
-                    .with_children(|builder| {
-                        builder.spawn((
-                            ButtonBundle {
-                                style: get_marker_style(UiRect {
-                                    left: Val::Percent(50.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(0.),
-                                    bottom: Val::Percent(0.),
-                                }),
-                                background_color: Color::rgb(0.9, 0.9, 1.0).into(),
-                                ..default()
-                            },
-                            ArrowConnectMarker::Top,
-                        ));
-                        builder.spawn((
-                            ButtonBundle {
-                                style: get_marker_style(UiRect {
-                                    left: Val::Percent(0.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(50.),
-                                    bottom: Val::Percent(0.),
-                                }),
-                                background_color: Color::rgb(0.9, 0.9, 1.0).into(),
-                                ..default()
-                            },
-                            ArrowConnectMarker::Left,
-                        ));
-                        builder.spawn((
-                            ButtonBundle {
-                                style: get_marker_style(UiRect {
-                                    left: Val::Percent(50.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(100.),
-                                    bottom: Val::Percent(0.),
-                                }),
-                                background_color: Color::rgb(0.9, 0.9, 1.0).into(),
-                                ..default()
-                            },
-                            ArrowConnectMarker::Bottom,
-                        ));
-                        builder.spawn((
-                            ButtonBundle {
-                                style: get_marker_style(UiRect {
-                                    left: Val::Percent(100.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(50.),
-                                    bottom: Val::Percent(0.),
-                                }),
-                                background_color: Color::rgb(0.9, 0.9, 1.0).into(),
-                                ..default()
-                            },
-                            ArrowConnectMarker::Right,
-                        ));
-                        builder.spawn((
-                            ButtonBundle {
-                                style: get_marker_style(UiRect {
-                                    left: Val::Percent(0.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(0.),
-                                    bottom: Val::Percent(0.),
-                                }),
-                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                                ..default()
-                            },
-                            ResizeMarker::TopLeft,
-                        ));
-                        builder.spawn((
-                            ButtonBundle {
-                                style: get_marker_style(UiRect {
-                                    left: Val::Percent(100.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(0.),
-                                    bottom: Val::Percent(0.),
-                                }),
-                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                                ..default()
-                            },
-                            ResizeMarker::TopRight,
-                        ));
-                        builder.spawn((
-                            ButtonBundle {
-                                style: get_marker_style(UiRect {
-                                    left: Val::Percent(100.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(100.),
-                                    bottom: Val::Percent(0.),
-                                }),
-                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                                ..default()
-                            },
-                            ResizeMarker::BottomRight,
-                        ));
-                        builder.spawn((
-                            ButtonBundle {
-                                style: get_marker_style(UiRect {
-                                    left: Val::Percent(0.),
-                                    right: Val::Percent(0.),
-                                    top: Val::Percent(100.),
-                                    bottom: Val::Percent(0.),
-                                }),
-                                background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                                ..default()
-                            },
-                            ResizeMarker::BottomLeft,
-                        ));
-                        builder.spawn((
-                            TextBundle::from_section("", text_style.clone())
-                                .with_style(Style {
-                                    position_type: PositionType::Relative,
-                                    ..default()
-                                })
-                                .with_text_alignment(TextAlignment::Center),
-                            EditableText {
-                                id: state.entity_counter,
-                            },
-                        ));
-                    });
-            });
+        spawn_item(
+            &mut commands,
+            ItemMeta {
+                font,
+                size: Vec2::new(100., 100.),
+                id: state.entity_counter,
+                image: None,
+            },
+        );
     }
 }
 
@@ -504,7 +325,6 @@ pub fn insert_image_from_clipboard(
     let mut clipboard = Clipboard::new().unwrap();
     match clipboard.get_image() {
         Ok(image) => {
-            state.entity_counter += 1;
             clipboard.clear().unwrap();
             let image: RgbaImage = ImageBuffer::from_raw(
                 image.width.try_into().unwrap(),
@@ -524,99 +344,16 @@ pub fn insert_image_from_clipboard(
                 TextureFormat::Rgba8UnormSrgb,
             );
             let image = images.add(image);
-            commands
-                .spawn((
-                    NodeBundle {
-                        style: Style {
-                            position_type: PositionType::Absolute,
-                            size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                            align_items: AlignItems::Center,
-                            justify_content: JustifyContent::Center,
-                            ..default()
-                        },
-                        ..default()
-                    },
-                    Top {
-                        id: state.entity_counter,
-                    },
-                ))
-                .with_children(|builder| {
-                    builder
-                        .spawn((
-                            ButtonBundle {
-                                image: image.into(),
-                                style: Style {
-                                    size: Size::new(
-                                        Val::Px(size.width as f32),
-                                        Val::Px(size.height as f32),
-                                    ),
-                                    // horizontally center child text
-                                    justify_content: JustifyContent::Center,
-                                    // vertically center child text
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
-                                ..default()
-                            },
-                            Rectangle {
-                                id: state.entity_counter,
-                            },
-                        ))
-                        .with_children(|builder| {
-                            builder.spawn((
-                                ButtonBundle {
-                                    style: get_marker_style(UiRect {
-                                        left: Val::Percent(0.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(0.),
-                                        bottom: Val::Percent(0.),
-                                    }),
-                                    background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                                    ..default()
-                                },
-                                ResizeMarker::TopLeft,
-                            ));
-                            builder.spawn((
-                                ButtonBundle {
-                                    style: get_marker_style(UiRect {
-                                        left: Val::Percent(100.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(0.),
-                                        bottom: Val::Percent(0.),
-                                    }),
-                                    background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                                    ..default()
-                                },
-                                ResizeMarker::TopRight,
-                            ));
-                            builder.spawn((
-                                ButtonBundle {
-                                    style: get_marker_style(UiRect {
-                                        left: Val::Percent(100.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(100.),
-                                        bottom: Val::Percent(0.),
-                                    }),
-                                    background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                                    ..default()
-                                },
-                                ResizeMarker::BottomRight,
-                            ));
-                            builder.spawn((
-                                ButtonBundle {
-                                    style: get_marker_style(UiRect {
-                                        left: Val::Percent(0.),
-                                        right: Val::Percent(0.),
-                                        top: Val::Percent(100.),
-                                        bottom: Val::Percent(0.),
-                                    }),
-                                    background_color: Color::rgb(0.8, 0.8, 1.0).into(),
-                                    ..default()
-                                },
-                                ResizeMarker::BottomLeft,
-                            ));
-                        });
-                });
+            state.entity_counter += 1;
+            spawn_item(
+                &mut commands,
+                ItemMeta {
+                    font: Handle::default(),
+                    size: Vec2::new(size.width as f32, size.height as f32),
+                    id: state.entity_counter,
+                    image: Some(image.into()),
+                },
+            );
         }
         Err(_) => {}
     }
