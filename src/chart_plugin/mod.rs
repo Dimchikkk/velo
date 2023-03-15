@@ -71,20 +71,23 @@ fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn connect_rectangles(
     mut commands: Commands,
     mut interaction_query: Query<
-        (&Interaction, &ArrowConnect),
+        (&Interaction, &ArrowConnect, Entity),
         (Changed<Interaction>, With<ArrowConnect>),
     >,
     mut state: ResMut<AppState>,
-    windows: Query<&Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    labelled: Query<&GlobalTransform>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>, 
 ) {
-    let window = windows.single();
+    let primary_window = windows.single_mut();
     let (camera, camera_transform) = camera_q.single();
-    for (interaction, arrow_connect) in interaction_query.iter_mut() {
+    for (interaction, arrow_connect, entity) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
             match state.line_to_draw_start {
                 Some(start) => {
-                    if let Some(end) = window.cursor_position() {
+                   if let Ok(global_transform) = labelled.get(entity) {
+                        let end = global_transform.affine().translation;
+                        let end = Vec2::new(end.x, primary_window.height() - end.y);
                         let shape = shapes::Line(
                             camera
                                 .viewport_to_world_2d(camera_transform, start.1)
@@ -97,8 +100,8 @@ fn connect_rectangles(
                                 ..default()
                             },
                             ArrowMeta {
-                                start,
-                                end: (*arrow_connect, end),
+                                start: start.0,
+                                end: *arrow_connect,
                             },
                             Stroke::new(Color::BLACK, 2.0),
                         ));
@@ -107,8 +110,12 @@ fn connect_rectangles(
                     }
                 }
                 None => {
-                    if let Some(pos) = window.cursor_position() {
-                        state.line_to_draw_start = Some((*arrow_connect, pos));
+                    if let Ok(global_transform) = labelled.get(entity) {
+                        let world_position = global_transform.affine().translation;
+                        state.line_to_draw_start = Some((
+                            *arrow_connect,
+                            Vec2::new(world_position.x, primary_window.height() - world_position.y),
+                        ));
                     }
                 }
             }
@@ -180,7 +187,7 @@ fn redraw_arrows(
             if despawned.contains(&event.id) {
                 continue;
             }
-            if arrow.start.0.id == event.id || arrow.end.0.id == event.id {
+            if arrow.start.id == event.id || arrow.end.id == event.id {
                 if let Some(entity) = commands.get_entity(entity) {
                     despawned.insert(event.id);
                     entity.despawn_recursive();
