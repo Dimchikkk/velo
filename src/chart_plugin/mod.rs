@@ -7,7 +7,6 @@ use bevy::{
     utils::HashSet,
     window::PrimaryWindow,
 };
-use bevy_prototype_lyon::prelude::*;
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 use std::convert::TryInto;
@@ -85,20 +84,24 @@ fn connect_rectangles(
         if let Interaction::Clicked = interaction {
             match state.line_to_draw_start {
                 Some(start_arrow) => {
+                    if start_arrow.0.id == arrow_connect.id {
+                        continue;
+                    }
                     if let Ok(global_transform) = labelled.get(entity) {
                         let end = global_transform.affine().translation;
                         let end = Vec2::new(end.x, primary_window.height() - end.y);
                         let start = camera.viewport_to_world_2d(camera_transform, start_arrow.1);
                         let end = camera.viewport_to_world_2d(camera_transform, end);
                         if let (Some(start), Some(end)) = (start, end) {
-                            commands.spawn((
-                                create_arrow(start, end),
+                            create_arrow(
+                                &mut commands,
+                                start,
+                                end,
                                 ArrowMeta {
                                     start: start_arrow.0,
                                     end: *arrow_connect,
                                 },
-                                Stroke::new(Color::BLACK, 2.0),
-                            ));
+                            );
                             state.line_to_draw_start = None;
                         }
                     }
@@ -225,11 +228,7 @@ fn redraw_arrows(
             let start = camera.viewport_to_world_2d(camera_transform, start);
             let end = camera.viewport_to_world_2d(camera_transform, end);
             if let (Some(start), Some(end)) = (start, end) {
-                commands.spawn((
-                    create_arrow(start, end),
-                    arrow_meta,
-                    Stroke::new(Color::BLACK, 2.0),
-                ));
+                create_arrow(&mut commands, start, end, arrow_meta);
             }
         }
     }
