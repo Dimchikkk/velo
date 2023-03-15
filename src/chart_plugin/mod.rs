@@ -63,7 +63,7 @@ fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn connect_rectangles(
     mut commands: Commands,
-    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<ArrowConnectMarker>)>,
+    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<ArrowConnect>)>,
     mut state: ResMut<AppState>,
     windows: Query<&Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
