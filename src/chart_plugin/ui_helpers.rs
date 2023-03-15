@@ -1,6 +1,8 @@
+use std::f32::consts::PI;
+
 use bevy::prelude::*;
 use bevy_prototype_lyon::{
-    prelude::{GeometryBuilder, ShapeBundle},
+    prelude::{GeometryBuilder, ShapeBundle, Stroke},
     shapes,
 };
 
@@ -243,10 +245,49 @@ pub fn spawn_item(commands: &mut Commands, item_meta: ItemMeta) {
         });
 }
 
-pub fn create_arrow(start: Vec2, end: Vec2) -> ShapeBundle {
-    let shape = shapes::Line(start, end);
-    ShapeBundle {
-        path: GeometryBuilder::build_as(&shape),
-        ..default()
-    }
+pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta: ArrowMeta) {
+    let headlen = 10.0;
+    let main = shapes::Line(start, end);
+    let dt = end.x - start.x;
+    let dy = end.y - start.y;
+    let angle = dy.atan2(dt);
+    let part_one = shapes::Line(
+        end,
+        Vec2::new(
+            end.x - headlen * (angle - PI / 6.).cos(),
+            end.y - headlen * (angle - PI / 6.).sin(),
+        ),
+    );
+    let part_two = shapes::Line(
+        end,
+        Vec2::new(
+            end.x - headlen * (angle + PI / 6.).cos(),
+            end.y - headlen * (angle + PI / 6.).sin(),
+        ),
+    );
+    commands
+        .spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&main),
+                ..default()
+            },
+            arrow_meta,
+            Stroke::new(Color::BLACK, 2.0),
+        ))
+        .with_children(|builder| {
+            builder.spawn((
+                ShapeBundle {
+                    path: GeometryBuilder::build_as(&part_one),
+                    ..default()
+                },
+                Stroke::new(Color::BLACK, 2.0),
+            ));
+            builder.spawn((
+                ShapeBundle {
+                    path: GeometryBuilder::build_as(&part_two),
+                    ..default()
+                },
+                Stroke::new(Color::BLACK, 2.0),
+            ));
+        });
 }
