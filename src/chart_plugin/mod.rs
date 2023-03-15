@@ -179,20 +179,65 @@ fn redraw_arrows(
     mut commands: Commands,
     mut events: EventReader<RedrawArrow>,
     mut arrow_query: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    labelled: Query<&GlobalTransform>,
+    mut arrow_markers: Query<(Entity, &ArrowConnect), With<ArrowConnect>>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>, 
 ) {
-    let mut despawned: HashSet<u32> = HashSet::new();
+    let primary_window = windows.single_mut();
+    let (camera, camera_transform) = camera_q.single();
+    let mut despawned: HashSet<ArrowMeta> = HashSet::new();
 
     for event in events.iter() {
         for (entity, arrow) in &mut arrow_query.iter_mut() {
-            if despawned.contains(&event.id) {
+            if despawned.contains(arrow) {
                 continue;
             }
             if arrow.start.id == event.id || arrow.end.id == event.id {
                 if let Some(entity) = commands.get_entity(entity) {
-                    despawned.insert(event.id);
+                    despawned.insert(*arrow);
                     entity.despawn_recursive();
                 }
             }
+        }
+    }
+
+    for arrow_meta in despawned {
+        let mut start = None;
+        let mut end= None;
+        for (entity, arrow_connect) in &mut arrow_markers.iter_mut() {
+            if arrow_connect.id == arrow_meta.start.id && arrow_connect.pos == arrow_meta.start.pos {
+                if let Ok(global_transform) = labelled.get(entity) {
+                    let world_position = global_transform.affine().translation;
+                    start = Some(Vec2::new(world_position.x, primary_window.height() - world_position.y));
+                }
+            }
+            if arrow_connect.id == arrow_meta.end.id && arrow_connect.pos == arrow_meta.end.pos {
+                if let Ok(global_transform) = labelled.get(entity) {
+                    let world_position = global_transform.affine().translation;
+                    end = Some(Vec2::new(world_position.x, primary_window.height() - world_position.y));
+                }
+            }
+        }
+
+        match (start, end) {
+            (Some(start), Some(end)) => {
+                let shape = shapes::Line(
+                    camera
+                        .viewport_to_world_2d(camera_transform, start)
+                        .unwrap(),
+                    camera.viewport_to_world_2d(camera_transform, end).unwrap(),
+                );
+                commands.spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&shape),
+                        ..default()
+                    },
+                    arrow_meta,
+                    Stroke::new(Color::BLACK, 2.0),
+                ));
+            }
+            _ => {}
         }
     }
 }
