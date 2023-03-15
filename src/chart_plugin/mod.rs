@@ -4,6 +4,7 @@ use bevy::{
     input::mouse::MouseMotion,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+    utils::HashSet,
     window::PrimaryWindow,
 };
 use bevy_prototype_lyon::{prelude::*, shapes};
@@ -16,7 +17,11 @@ pub use ui_helpers::*;
 
 pub struct ChartPlugin;
 
-pub struct AddRect;
+struct AddRect;
+
+struct RedrawArrow {
+    pub id: u32,
+}
 
 #[derive(Resource, Default)]
 pub struct AppState {
@@ -24,7 +29,7 @@ pub struct AppState {
     pub hold_entity: Option<u32>,
     pub entity_counter: u32,
     pub entity_to_resize: Option<(u32, ResizeMarker)>,
-    pub line_to_draw_start: Option<Vec2>,
+    pub line_to_draw_start: Option<(ArrowConnect, Vec2)>,
 }
 
 impl Plugin for ChartPlugin {
@@ -32,6 +37,7 @@ impl Plugin for ChartPlugin {
         app.init_resource::<AppState>();
 
         app.add_event::<AddRect>();
+        app.add_event::<RedrawArrow>();
 
         app.add_startup_system(init_layout);
 
@@ -44,6 +50,7 @@ impl Plugin for ChartPlugin {
             resize_entity_end,
             connect_rectangles,
             set_focused_entity,
+            redraw_arrows,
         ));
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -63,21 +70,24 @@ fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn connect_rectangles(
     mut commands: Commands,
-    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<ArrowConnect>)>,
+    mut interaction_query: Query<
+        (&Interaction, &ArrowConnect),
+        (Changed<Interaction>, With<ArrowConnect>),
+    >,
     mut state: ResMut<AppState>,
     windows: Query<&Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let window = windows.single();
     let (camera, camera_transform) = camera_q.single();
-    for interaction in interaction_query.iter_mut() {
+    for (interaction, arrow_connect) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
             match state.line_to_draw_start {
                 Some(start) => {
                     if let Some(end) = window.cursor_position() {
                         let shape = shapes::Line(
                             camera
-                                .viewport_to_world_2d(camera_transform, start)
+                                .viewport_to_world_2d(camera_transform, start.1)
                                 .unwrap(),
                             camera.viewport_to_world_2d(camera_transform, end).unwrap(),
                         );
@@ -85,6 +95,10 @@ fn connect_rectangles(
                             ShapeBundle {
                                 path: GeometryBuilder::build_as(&shape),
                                 ..default()
+                            },
+                            ArrowMeta {
+                                start,
+                                end: (*arrow_connect, end),
                             },
                             Stroke::new(Color::BLACK, 2.0),
                         ));
@@ -94,7 +108,7 @@ fn connect_rectangles(
                 }
                 None => {
                     if let Some(pos) = window.cursor_position() {
-                        state.line_to_draw_start = Some(pos);
+                        state.line_to_draw_start = Some((*arrow_connect, pos));
                     }
                 }
             }
@@ -154,17 +168,41 @@ fn set_focused_entity(
     }
 }
 
+fn redraw_arrows(
+    mut commands: Commands,
+    mut events: EventReader<RedrawArrow>,
+    mut arrow_query: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
+) {
+    let mut despawned: HashSet<u32> = HashSet::new();
+
+    for event in events.iter() {
+        for (entity, arrow) in &mut arrow_query.iter_mut() {
+            if despawned.contains(&event.id) {
+                continue;
+            }
+            if arrow.start.0.id == event.id || arrow.end.0.id == event.id {
+                if let Some(entity) = commands.get_entity(entity) {
+                    despawned.insert(event.id);
+                    entity.despawn_recursive();
+                }
+            }
+        }
+    }
+}
+
 fn resize_entity_end(
     mut mouse_motion_events: EventReader<MouseMotion>,
     state: Res<AppState>,
     mut top_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    mut events: EventWriter<RedrawArrow>,
 ) {
     let primary_window = windows.single_mut();
     for event in mouse_motion_events.iter() {
         if let Some((id, resize_marker)) = state.entity_to_resize {
             for (rectangle, mut button_style) in &mut top_query {
                 if id == rectangle.id {
+                    events.send(RedrawArrow { id });
                     let delta = event.delta;
                     match resize_marker {
                         ResizeMarker::TopLeft => {
@@ -258,11 +296,13 @@ fn update_rectangle_pos(
     mut sprite_position: Query<(&mut Style, &Top)>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     state: ResMut<AppState>,
+    mut events: EventWriter<RedrawArrow>,
 ) {
     let (camera, camera_transform) = camera_q.single();
     for event in cursor_moved_events.iter() {
         for (mut style, top) in &mut sprite_position.iter_mut() {
             if Some(top.id) == state.hold_entity {
+                events.send(RedrawArrow { id: top.id });
                 if let Some(world_position) =
                     camera.viewport_to_world_2d(camera_transform, event.position)
                 {
