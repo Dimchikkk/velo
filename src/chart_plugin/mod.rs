@@ -7,7 +7,7 @@ use bevy::{
     utils::HashSet,
     window::PrimaryWindow,
 };
-use bevy_prototype_lyon::{prelude::*, shapes};
+use bevy_prototype_lyon::prelude::*;
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 use std::convert::TryInto;
@@ -77,36 +77,30 @@ fn connect_rectangles(
     mut state: ResMut<AppState>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     labelled: Query<&GlobalTransform>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>, 
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let primary_window = windows.single_mut();
     let (camera, camera_transform) = camera_q.single();
     for (interaction, arrow_connect, entity) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
             match state.line_to_draw_start {
-                Some(start) => {
-                   if let Ok(global_transform) = labelled.get(entity) {
+                Some(start_arrow) => {
+                    if let Ok(global_transform) = labelled.get(entity) {
                         let end = global_transform.affine().translation;
                         let end = Vec2::new(end.x, primary_window.height() - end.y);
-                        let shape = shapes::Line(
-                            camera
-                                .viewport_to_world_2d(camera_transform, start.1)
-                                .unwrap(),
-                            camera.viewport_to_world_2d(camera_transform, end).unwrap(),
-                        );
-                        commands.spawn((
-                            ShapeBundle {
-                                path: GeometryBuilder::build_as(&shape),
-                                ..default()
-                            },
-                            ArrowMeta {
-                                start: start.0,
-                                end: *arrow_connect,
-                            },
-                            Stroke::new(Color::BLACK, 2.0),
-                        ));
-
-                        state.line_to_draw_start = None;
+                        let start = camera.viewport_to_world_2d(camera_transform, start_arrow.1);
+                        let end = camera.viewport_to_world_2d(camera_transform, end);
+                        if let (Some(start), Some(end)) = (start, end) {
+                            commands.spawn((
+                                create_arrow(start, end),
+                                ArrowMeta {
+                                    start: start_arrow.0,
+                                    end: *arrow_connect,
+                                },
+                                Stroke::new(Color::BLACK, 2.0),
+                            ));
+                            state.line_to_draw_start = None;
+                        }
                     }
                 }
                 None => {
@@ -182,7 +176,7 @@ fn redraw_arrows(
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     labelled: Query<&GlobalTransform>,
     mut arrow_markers: Query<(Entity, &ArrowConnect), With<ArrowConnect>>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>, 
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let primary_window = windows.single_mut();
     let (camera, camera_transform) = camera_q.single();
@@ -204,40 +198,39 @@ fn redraw_arrows(
 
     for arrow_meta in despawned {
         let mut start = None;
-        let mut end= None;
+        let mut end = None;
         for (entity, arrow_connect) in &mut arrow_markers.iter_mut() {
-            if arrow_connect.id == arrow_meta.start.id && arrow_connect.pos == arrow_meta.start.pos {
+            if arrow_connect.id == arrow_meta.start.id && arrow_connect.pos == arrow_meta.start.pos
+            {
                 if let Ok(global_transform) = labelled.get(entity) {
                     let world_position = global_transform.affine().translation;
-                    start = Some(Vec2::new(world_position.x, primary_window.height() - world_position.y));
+                    start = Some(Vec2::new(
+                        world_position.x,
+                        primary_window.height() - world_position.y,
+                    ));
                 }
             }
             if arrow_connect.id == arrow_meta.end.id && arrow_connect.pos == arrow_meta.end.pos {
                 if let Ok(global_transform) = labelled.get(entity) {
                     let world_position = global_transform.affine().translation;
-                    end = Some(Vec2::new(world_position.x, primary_window.height() - world_position.y));
+                    end = Some(Vec2::new(
+                        world_position.x,
+                        primary_window.height() - world_position.y,
+                    ));
                 }
             }
         }
 
-        match (start, end) {
-            (Some(start), Some(end)) => {
-                let shape = shapes::Line(
-                    camera
-                        .viewport_to_world_2d(camera_transform, start)
-                        .unwrap(),
-                    camera.viewport_to_world_2d(camera_transform, end).unwrap(),
-                );
+        if let (Some(start), Some(end)) = (start, end) {
+            let start = camera.viewport_to_world_2d(camera_transform, start);
+            let end = camera.viewport_to_world_2d(camera_transform, end);
+            if let (Some(start), Some(end)) = (start, end) {
                 commands.spawn((
-                    ShapeBundle {
-                        path: GeometryBuilder::build_as(&shape),
-                        ..default()
-                    },
+                    create_arrow(start, end),
                     arrow_meta,
                     Stroke::new(Color::BLACK, 2.0),
                 ));
             }
-            _ => {}
         }
     }
 }
