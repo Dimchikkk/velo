@@ -21,7 +21,7 @@ pub struct Top {
     pub id: u32,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub enum ArrowConnectPos {
     Top,
     Bottom,
@@ -29,7 +29,7 @@ pub enum ArrowConnectPos {
     Right,
 }
 
-#[derive(Component, Copy, Clone, Debug)]
+#[derive(Component, Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct ArrowConnect {
     pub id: u32,
     pub pos: ArrowConnectPos,
@@ -43,7 +43,7 @@ pub enum ResizeMarker {
     BottomRight,
 }
 
-#[derive(Component, Copy, Clone, Debug)]
+#[derive(Component, Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct ArrowMeta {
     pub start: ArrowConnect,
     pub end: ArrowConnect,
