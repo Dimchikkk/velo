@@ -30,12 +30,18 @@ pub struct AppState {
     pub line_to_draw_start: Option<Vec2>,
 }
 
-#[derive(Component, Copy, Clone, Debug)]
-pub enum ArrowConnectMarker {
+#[derive(Copy, Clone, Debug)]
+pub enum ArrowConnectPos {
     Top,
     Bottom,
     Left,
     Right,
+}
+
+#[derive(Component, Copy, Clone, Debug)]
+pub struct ArrowConnect {
+    pub id: u32,
+    pub pos: ArrowConnectPos,
 }
 
 #[derive(Component, Copy, Clone, Debug)]
@@ -189,19 +195,31 @@ pub fn spawn_item(commands: &mut Commands, item_meta: ItemMeta) {
                 .with_children(|builder| {
                     builder.spawn((
                         create_arrow_marker(50.0, 0., 0., 0.),
-                        ArrowConnectMarker::Top,
+                        ArrowConnect {
+                            pos: ArrowConnectPos::Top,
+                            id: item_meta.id,
+                        },
                     ));
                     builder.spawn((
                         create_arrow_marker(0., 0., 50., 0.),
-                        ArrowConnectMarker::Left,
+                        ArrowConnect {
+                            pos: ArrowConnectPos::Left,
+                            id: item_meta.id,
+                        },
                     ));
                     builder.spawn((
                         create_arrow_marker(50., 0., 100., 0.),
-                        ArrowConnectMarker::Bottom,
+                        ArrowConnect {
+                            pos: ArrowConnectPos::Bottom,
+                            id: item_meta.id,
+                        },
                     ));
                     builder.spawn((
                         create_arrow_marker(100., 0., 50., 0.),
-                        ArrowConnectMarker::Right,
+                        ArrowConnect {
+                            pos: ArrowConnectPos::Right,
+                            id: item_meta.id,
+                        },
                     ));
                     builder.spawn((create_resize_marker(0., 0., 0., 0.), ResizeMarker::TopLeft));
                     builder.spawn((
