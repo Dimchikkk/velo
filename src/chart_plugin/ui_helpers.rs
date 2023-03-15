@@ -45,8 +45,8 @@ pub enum ResizeMarker {
 
 #[derive(Component, Copy, Clone, Debug)]
 pub struct ArrowMeta {
-    pub start: (ArrowConnect, Vec2),
-    pub end: (ArrowConnect, Vec2),
+    pub start: ArrowConnect,
+    pub end: ArrowConnect,
 }
 
 fn get_marker_style(position: UiRect) -> Style {
