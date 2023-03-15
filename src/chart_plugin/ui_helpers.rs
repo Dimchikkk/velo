@@ -1,4 +1,8 @@
 use bevy::prelude::*;
+use bevy_prototype_lyon::{
+    prelude::{GeometryBuilder, ShapeBundle},
+    shapes,
+};
 
 #[derive(Component)]
 pub struct MainCamera;
@@ -125,8 +129,8 @@ fn create_rectangle_btn(size: Vec2, image: Option<UiImage>) -> ButtonBundle {
         },
         ..default()
     };
-    if image.is_some() {
-        button.image = image.unwrap();
+    if let Some(image) = image {
+        button.image = image;
     }
     button
 }
@@ -237,4 +241,12 @@ pub fn spawn_item(commands: &mut Commands, item_meta: ItemMeta) {
                     ));
                 });
         });
+}
+
+pub fn create_arrow(start: Vec2, end: Vec2) -> ShapeBundle {
+    let shape = shapes::Line(start, end);
+    ShapeBundle {
+        path: GeometryBuilder::build_as(&shape),
+        ..default()
+    }
 }
