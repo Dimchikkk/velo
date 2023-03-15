@@ -21,15 +21,6 @@ pub struct Top {
     pub id: u32,
 }
 
-#[derive(Resource, Default)]
-pub struct AppState {
-    pub entity_to_edit: Option<u32>,
-    pub hold_entity: Option<u32>,
-    pub entity_counter: u32,
-    pub entity_to_resize: Option<(u32, ResizeMarker)>,
-    pub line_to_draw_start: Option<Vec2>,
-}
-
 #[derive(Copy, Clone, Debug)]
 pub enum ArrowConnectPos {
     Top,
@@ -50,6 +41,12 @@ pub enum ResizeMarker {
     TopRight,
     BottomLeft,
     BottomRight,
+}
+
+#[derive(Component, Copy, Clone, Debug)]
+pub struct ArrowMeta {
+    pub start: (ArrowConnect, Vec2),
+    pub end: (ArrowConnect, Vec2),
 }
 
 fn get_marker_style(position: UiRect) -> Style {
