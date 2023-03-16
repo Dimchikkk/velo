@@ -170,7 +170,7 @@ fn create_rectangle_txt(font: Handle<Font>) -> TextBundle {
         color: Color::BLACK,
     };
     TextBundle {
-        text: Text::from_section("", text_style).with_alignment(TextAlignment::Center),
+        text: Text::from_section("", text_style),
         style: Style {
             position_type: PositionType::Relative,
             ..default()
