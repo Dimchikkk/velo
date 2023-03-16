@@ -37,7 +37,7 @@ cargo clippy --fix --allow-staged
 #+END_SRC
 
 * Tasks to todo
-- Implement pasting data on "ctrl+v"
+- Implement pasting data on "ctrl+v" for wasm target
 - Add borders (once https://github.com/bevyengine/bevy/pull/7795 merged)
 - Add separate panel for creating rectangles (control panel), use grid layout for it (once https://github.com/bevyengine/bevy/pull/8026  merged)
 - Add button to change z-index of rectangle
@@ -57,7 +57,6 @@ cargo clippy --fix --allow-staged
 - Delete entities functionality
 - Undo/redo functionality
 - Proper cursor on typing
-- Implement pasting screenshot for wasm target
 - Improve UI/UX, use lucid.app for inspiration
 - Wasm executable code in rectangle
 - Org support in rectangles
