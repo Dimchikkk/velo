@@ -50,10 +50,8 @@ impl Plugin for ChartPlugin {
             connect_rectangles,
             set_focused_entity,
             redraw_arrows,
+            keyboard_input_system
         ));
-
-        #[cfg(not(target_arch = "wasm32"))]
-        app.add_system(insert_image_from_clipboard);
     }
 }
 
@@ -400,16 +398,28 @@ fn create_new_rectangle(
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
-pub fn insert_image_from_clipboard(
+fn keyboard_input_system(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
     mut state: ResMut<AppState>,
+    input: Res<Input<KeyCode>>
+) {
+    let ctrl = input.any_pressed([KeyCode::LControl, KeyCode::RControl]);
+
+    if ctrl && input.just_pressed(KeyCode::V) {
+        insert_from_clipboard(&mut commands, &mut images, &mut state);
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn insert_from_clipboard(
+    commands: &mut Commands,
+    images: &mut ResMut<Assets<Image>>,
+    state: &mut ResMut<AppState>,
 ) {
     let mut clipboard = Clipboard::new().unwrap();
     match clipboard.get_image() {
         Ok(image) => {
-            clipboard.clear().unwrap();
             let image: RgbaImage = ImageBuffer::from_raw(
                 image.width.try_into().unwrap(),
                 image.height.try_into().unwrap(),
@@ -430,7 +440,7 @@ pub fn insert_image_from_clipboard(
             let image = images.add(image);
             state.entity_counter += 1;
             spawn_item(
-                &mut commands,
+                commands,
                 ItemMeta {
                     font: Handle::default(),
                     size: Vec2::new(size.width as f32, size.height as f32),
