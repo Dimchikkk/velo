@@ -49,7 +49,7 @@ cargo clippy --fix --allow-staged
 - Use touch event for mobile support
 - Optimize wasm size
 - Github private gist to save diagrams
-- Export/import to ron format
+- Export/import to ron format (may need https://github.com/bevyengine/bevy/pull/6793 to be merged)
 - Github auth, push gist to github
 - Tabs of diagrams
 - Make text inside rectangle smart wrapping (once https://github.com/bevyengine/bevy/pull/7761 merged)
