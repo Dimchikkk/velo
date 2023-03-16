@@ -42,7 +42,6 @@ impl Plugin for ChartPlugin {
 
         app.add_systems((
             update_rectangle_pos,
-            update_text_on_typing,
             create_new_rectangle,
             create_entity_event,
             resize_entity_start,
@@ -356,35 +355,6 @@ fn update_rectangle_pos(
     }
 }
 
-fn update_text_on_typing(
-    mut char_evr: EventReader<ReceivedCharacter>,
-    keys: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
-    state: Res<AppState>,
-    input: Res<Input<KeyCode>>,
-) {
-    let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
-
-    if command && input.just_pressed(KeyCode::V) {
-        return;
-    }
-
-    for (mut text, editable_text) in &mut query.iter_mut() {
-        if Some(editable_text.id) == state.entity_to_edit {
-
-            if keys.just_pressed(KeyCode::Back) {
-                let mut str = text.sections[0].value.clone();
-                str.pop();
-                text.sections[0].value = str;
-            } else {
-                for ev in char_evr.iter() {
-                    text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
-                }
-            }
-        }
-    }
-}
-
 fn create_new_rectangle(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -412,12 +382,27 @@ fn keyboard_input_system(
     mut state: ResMut<AppState>,
     input: Res<Input<KeyCode>>,
     mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
+    mut char_evr: EventReader<ReceivedCharacter>,
 ) {
     let ctrl = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
 
     if ctrl && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(&mut commands, &mut images, &mut state, &mut query);
+    } else {
+        for (mut text, editable_text) in &mut query.iter_mut() {
+            if Some(editable_text.id) == state.entity_to_edit {
+                if input.just_pressed(KeyCode::Back) {
+                    let mut str = text.sections[0].value.clone();
+                    str.pop();
+                    text.sections[0].value = str;
+                } else {
+                    for ev in char_evr.iter() {
+                        text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
+                    }
+                }
+            }
+        }
     }
 }
 
