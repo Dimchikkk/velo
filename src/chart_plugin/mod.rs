@@ -50,7 +50,7 @@ impl Plugin for ChartPlugin {
             connect_rectangles,
             set_focused_entity,
             redraw_arrows,
-            keyboard_input_system
+            keyboard_input_system,
         ));
     }
 }
@@ -149,11 +149,11 @@ fn set_focused_entity(
     for (interaction, rectangle) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
+                window.cursor.icon = CursorIcon::Text;
                 state.hold_entity = Some(rectangle.id);
+                state.entity_to_edit = Some(rectangle.id);
             }
             Interaction::Hovered => {
-                window.cursor.icon = CursorIcon::Text;
-                state.entity_to_edit = Some(rectangle.id);
                 if state.hold_entity.is_none() {
                     window.cursor.icon = CursorIcon::Move;
                 }
@@ -361,9 +361,17 @@ fn update_text_on_typing(
     keys: Res<Input<KeyCode>>,
     mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
     state: Res<AppState>,
+    input: Res<Input<KeyCode>>,
 ) {
+    let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
+
+    if command && input.just_pressed(KeyCode::V) {
+        return;
+    }
+
     for (mut text, editable_text) in &mut query.iter_mut() {
         if Some(editable_text.id) == state.entity_to_edit {
+
             if keys.just_pressed(KeyCode::Back) {
                 let mut str = text.sections[0].value.clone();
                 str.pop();
@@ -402,12 +410,14 @@ fn keyboard_input_system(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
     mut state: ResMut<AppState>,
-    input: Res<Input<KeyCode>>
+    input: Res<Input<KeyCode>>,
+    mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
 ) {
-    let ctrl = input.any_pressed([KeyCode::LControl, KeyCode::RControl]);
+    let ctrl = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
 
     if ctrl && input.just_pressed(KeyCode::V) {
-        insert_from_clipboard(&mut commands, &mut images, &mut state);
+        #[cfg(not(target_arch = "wasm32"))]
+        insert_from_clipboard(&mut commands, &mut images, &mut state, &mut query);
     }
 }
 
@@ -416,39 +426,46 @@ pub fn insert_from_clipboard(
     commands: &mut Commands,
     images: &mut ResMut<Assets<Image>>,
     state: &mut ResMut<AppState>,
+    query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
 ) {
     let mut clipboard = Clipboard::new().unwrap();
-    match clipboard.get_image() {
-        Ok(image) => {
-            let image: RgbaImage = ImageBuffer::from_raw(
-                image.width.try_into().unwrap(),
-                image.height.try_into().unwrap(),
-                image.bytes.into_owned(),
-            )
-            .unwrap();
-            let size: Extent3d = Extent3d {
-                width: image.width(),
-                height: image.height(),
-                ..Default::default()
-            };
-            let image = Image::new(
-                size,
-                TextureDimension::D2,
-                image.to_vec(),
-                TextureFormat::Rgba8UnormSrgb,
-            );
-            let image = images.add(image);
-            state.entity_counter += 1;
-            spawn_item(
-                commands,
-                ItemMeta {
-                    font: Handle::default(),
-                    size: Vec2::new(size.width as f32, size.height as f32),
-                    id: state.entity_counter,
-                    image: Some(image.into()),
-                },
-            );
+    if let Ok(image) = clipboard.get_image() {
+        let image: RgbaImage = ImageBuffer::from_raw(
+            image.width.try_into().unwrap(),
+            image.height.try_into().unwrap(),
+            image.bytes.into_owned(),
+        )
+        .unwrap();
+        let size: Extent3d = Extent3d {
+            width: image.width(),
+            height: image.height(),
+            ..Default::default()
+        };
+        let image = Image::new(
+            size,
+            TextureDimension::D2,
+            image.to_vec(),
+            TextureFormat::Rgba8UnormSrgb,
+        );
+        let image = images.add(image);
+        state.entity_counter += 1;
+        spawn_item(
+            commands,
+            ItemMeta {
+                font: Handle::default(),
+                size: Vec2::new(size.width as f32, size.height as f32),
+                id: state.entity_counter,
+                image: Some(image.into()),
+            },
+        );
+    }
+
+    if let Ok(clipboard_text) = clipboard.get_text() {
+        for (mut text, editable_text) in &mut query.iter_mut() {
+            if Some(editable_text.id) == state.entity_to_edit {
+                text.sections[0].value =
+                    format!("{}{}", text.sections[0].value, clipboard_text.clone());
+            }
         }
-        Err(_) => {}
     }
 }
