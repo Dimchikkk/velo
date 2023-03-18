@@ -9,7 +9,7 @@ use bevy_prototype_lyon::{
 #[derive(Component)]
 pub struct MainCamera;
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct Rectangle {
     pub id: u32,
 }
@@ -22,7 +22,7 @@ pub struct EditableText {
     pub id: u32,
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct Top {
     pub id: u32,
 }
