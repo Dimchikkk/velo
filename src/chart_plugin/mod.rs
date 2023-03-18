@@ -5,7 +5,7 @@ use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     utils::HashSet,
-    window::PrimaryWindow,
+    window::PrimaryWindow, ecs::system::SystemState,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
@@ -50,9 +50,24 @@ impl Plugin for ChartPlugin {
             set_focused_entity,
             redraw_arrows,
             keyboard_input_system,
+            // serialize,
         ));
     }
 }
+
+// fn serialize(world: &mut World) {
+//     let mut sys_state: SystemState<(ResMut<Input<KeyCode>>, ResMut<Assets<Image>>, Query<(&Rectangle, &Style, &UiImage)>,)> =
+//         SystemState::new(world);
+//     let (mut keys, mut image, mut rec) = sys_state.get_mut(world);
+//     if keys.just_released(KeyCode::Space) {
+//         for entity in rec.iter_mut() {
+//             println!("Rectangle: {:?}", entity);
+//             if let Some(image) = image.get(&entity.2.texture) {
+//                 println!("Image: {:?}", image);
+//             }
+//         }
+//     }
+// }
 
 fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");

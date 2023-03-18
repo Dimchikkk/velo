@@ -21,13 +21,12 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 cargo r 
 #+END_SRC
 
-** Run web
+** Run web (some features are not working)
 
 #+BEGIN_SRC sh
 cargo r --target wasm32-unknown-unknown --release
 wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 #+END_SRC
-
 
 ** Pre-commit actions
 
