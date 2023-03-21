@@ -19,6 +19,7 @@ use moonshine_save::{
     prelude::{LoadSet, SaveSet, Unload},
     save::{self, save, Save, Saved},
 };
+use regex::Regex;
 use ron::Deserializer;
 use serde_json::{json, Value};
 use std::{collections::VecDeque, convert::TryInto, io::Cursor, path::PathBuf};
@@ -36,7 +37,7 @@ struct RedrawArrow {
     pub id: u32,
 }
 
-const MAX_AMOUNT_OF_CHECKPOINTS: usize = 30;
+const MAX_AMOUNT_OF_CHECKPOINTS: usize = 7;
 
 #[derive(Resource, Debug)]
 pub struct SaveRequest {
@@ -110,20 +111,33 @@ impl Plugin for ChartPlugin {
     }
 }
 
-fn post_load(_request: Res<LoadRequest>) {}
+
+pub fn save_ron_as_checkpoint(
+    In(saved): In<Saved>,
+    type_registry: Res<AppTypeRegistry>,
+    mut state: ResMut<AppState>,
+) -> Result<Saved, save::Error> {
+    let input = saved.scene.serialize_ron(&type_registry)?;
+    let re = Regex::new(r"generation: (\d+)").unwrap();
+    // lol
+    let input = re.replace_all(&input, "generation: 0").to_string();
+    let ron = general_purpose::STANDARD.encode(input);
+    if state.checkpoints.len() > MAX_AMOUNT_OF_CHECKPOINTS {
+        state.checkpoints.pop_front();
+    }
+    state.checkpoints.push_back(ron);
+    Ok(saved)
+}
 
 fn post_save(
     saved: Res<Saved>,
     images: Res<Assets<Image>>,
     rec: Query<(&Rectangle, &UiImage), With<Rectangle>>,
     request: Res<SaveRequest>,
-    state: ResMut<AppState>,
+    mut state: ResMut<AppState>,
 ) {
     eprintln!("post save: {:?}", request);
-    if request.path.is_none() {
-        return;
-    }
-    let ron = state.checkpoints.back().unwrap().clone();
+    let ron = state.checkpoints.pop_back().unwrap();
     let mut json = json!({
         "bevy_version": "0.10",
         "images": {},
@@ -156,8 +170,11 @@ fn post_save(
             }
         }
     }
-    std::fs::write(request.path.clone().unwrap(), json.to_string())
-        .expect("Error saving state to file");
+    if let Some(path) = request.path.clone() {
+        std::fs::write(path, json.to_string()).expect("Error saving state to file")
+    } else {
+        state.checkpoints.push_back(json.to_string()); 
+    }
 }
 
 fn should_save(request: Option<Res<SaveRequest>>) -> bool {
@@ -191,6 +208,55 @@ pub fn load_ron() -> SystemConfig {
         .in_set(LoadSet::Load)
 }
 
+fn post_load(
+    mut rec: Query<(&Rectangle, &mut UiImage), With<Rectangle>>,
+    request: Res<LoadRequest>, 
+    mut state: ResMut<AppState>,
+    mut res_images: ResMut<Assets<Image>>,
+) {
+    match &request.path {
+        Some(path) => {
+
+        }
+        None => {
+            let json = if state.checkpoints.len() == 1 { 
+                state.checkpoints.back().unwrap().clone()
+            } else {
+                state.checkpoints.pop_back().unwrap()
+            };
+            let mut json: Value = serde_json::from_str(&json).unwrap();
+            let images = json["images"].as_object_mut().unwrap();
+            for (key, image) in images.into_iter() {
+                let id = key;
+                let input = image.as_str().unwrap().as_bytes().to_vec();
+                let mut image_bytes = general_purpose::STANDARD.decode(input).unwrap();
+                for (rect, mut ui_image) in rec.iter_mut() {
+                    eprintln!("{} {}", rect.id, id);
+                    if rect.id == id.parse::<u32>().unwrap() {
+                        let img = load_from_memory_with_format(
+                            &mut image_bytes,
+                            ImageFormat::Png,
+                        ).unwrap();
+                        let size: Extent3d = Extent3d {
+                            width: img.width(),
+                            height: img.height(),
+                            ..Default::default()
+                        };
+                        let image = Image::new(
+                            size,
+                            TextureDimension::D2,
+                            img.into_bytes(),
+                            TextureFormat::Rgba8UnormSrgb,
+                        );
+                        let image_handle = res_images.add(image);
+                        ui_image.texture = image_handle;
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn from_file_or_memory(
     type_registry: Res<AppTypeRegistry>,
     request: Res<LoadRequest>,
@@ -213,11 +279,9 @@ pub fn from_file_or_memory(
             state.checkpoints = VecDeque::new();
         }
         None => {
-            if state.checkpoints.len() == 1 {
-                ron = state.checkpoints.back().unwrap().to_string();
-            } else {
-                ron = state.checkpoints.pop_back().unwrap();
-            }
+            let json: Value = serde_json::from_str(state.checkpoints.back().unwrap()).unwrap();
+            ron = json["ron"].as_str().unwrap().to_string();
+            state.entity_counter = json["counter"].as_u64().unwrap() as u32;
         }
     }
     let ron = general_purpose::STANDARD.decode(ron.as_bytes()).unwrap();
@@ -228,20 +292,6 @@ pub fn from_file_or_memory(
         scene_deserializer.deserialize(&mut deserializer)
     }?;
     Ok(Saved { scene })
-}
-
-pub fn save_ron_as_checkpoint(
-    In(saved): In<Saved>,
-    type_registry: Res<AppTypeRegistry>,
-    mut state: ResMut<AppState>,
-) -> Result<Saved, save::Error> {
-    let input = saved.scene.serialize_ron(&type_registry)?;
-    let ron = general_purpose::STANDARD.encode(input);
-    if state.checkpoints.len() > MAX_AMOUNT_OF_CHECKPOINTS {
-        state.checkpoints.pop_front();
-    }
-    state.checkpoints.push_back(ron);
-    Ok(saved)
 }
 
 fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
