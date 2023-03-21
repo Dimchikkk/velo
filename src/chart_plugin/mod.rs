@@ -1,17 +1,32 @@
+use base64::{engine::general_purpose, Engine};
 #[cfg(not(target_arch = "wasm32"))]
-use arboard::*;
 use bevy::{
+    ecs::schedule::SystemConfig,
     input::mouse::MouseMotion,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+    text::BreakLineOn,
     utils::HashSet,
-    window::PrimaryWindow, ecs::system::SystemState,
+    window::PrimaryWindow,
+};
+use bevy::{
+    reflect::{erased_serde::__private::serde::de::DeserializeSeed, DynamicStruct},
+    scene::serde::SceneDeserializer,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
-use std::convert::TryInto;
+use moonshine_save::{
+    load::{self, load, unload},
+    prelude::{LoadSet, SaveSet, Unload},
+    save::{self, save, Save, Saved},
+};
+use ron::Deserializer;
+use serde_json::{json, Value};
+use std::{collections::VecDeque, convert::TryInto, io::Cursor, path::PathBuf};
 #[path = "ui_helpers.rs"]
 mod ui_helpers;
+pub use ron::de::SpannedError as ParseError;
+pub use ron::Error as DeserializeError;
 pub use ui_helpers::*;
 
 pub struct ChartPlugin;
@@ -22,6 +37,18 @@ struct RedrawArrow {
     pub id: u32,
 }
 
+const MAX_AMOUNT_OF_CHECKPOINTS: usize = 30;
+
+#[derive(Resource, Debug)]
+pub struct SaveRequest {
+    pub path: Option<PathBuf>,
+}
+
+#[derive(Resource, Debug)]
+pub struct LoadRequest {
+    pub path: Option<PathBuf>,
+}
+
 #[derive(Resource, Default)]
 pub struct AppState {
     pub entity_to_edit: Option<u32>,
@@ -29,11 +56,21 @@ pub struct AppState {
     pub entity_counter: u32,
     pub entity_to_resize: Option<(u32, ResizeMarker)>,
     pub line_to_draw_start: Option<(ArrowConnect, Vec2)>,
+    pub checkpoints: VecDeque<String>,
 }
 
 impl Plugin for ChartPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AppState>();
+
+        app.register_type::<Rectangle>();
+        app.register_type::<EditableText>();
+        app.register_type::<Top>();
+        app.register_type::<ArrowConnect>();
+        app.register_type::<ResizeMarker>();
+        app.register_type::<ArrowMeta>();
+        app.register_type::<ArrowConnectPos>();
+        app.register_type::<BreakLineOn>();
 
         app.add_event::<AddRect>();
         app.add_event::<RedrawArrow>();
@@ -50,24 +87,162 @@ impl Plugin for ChartPlugin {
             set_focused_entity,
             redraw_arrows,
             keyboard_input_system,
-            // serialize,
         ));
+
+        app.add_systems(
+            (
+                save_ron(),
+                post_save.in_set(SaveSet::PostSave),
+                remove_save_request,
+            )
+                .chain()
+                .distributive_run_if(should_save),
+        );
+
+        app.add_systems(
+            (
+                load_ron(),
+                post_load.in_set(LoadSet::PostLoad),
+                remove_load_request,
+            )
+                .chain()
+                .distributive_run_if(should_load),
+        );
     }
 }
 
-// fn serialize(world: &mut World) {
-//     let mut sys_state: SystemState<(ResMut<Input<KeyCode>>, ResMut<Assets<Image>>, Query<(&Rectangle, &Style, &UiImage)>,)> =
-//         SystemState::new(world);
-//     let (mut keys, mut image, mut rec) = sys_state.get_mut(world);
-//     if keys.just_released(KeyCode::Space) {
-//         for entity in rec.iter_mut() {
-//             println!("Rectangle: {:?}", entity);
-//             if let Some(image) = image.get(&entity.2.texture) {
-//                 println!("Image: {:?}", image);
-//             }
-//         }
-//     }
-// }
+fn post_load(_request: Res<LoadRequest>) {}
+
+fn post_save(
+    saved: Res<Saved>,
+    images: Res<Assets<Image>>,
+    rec: Query<(&Rectangle, &UiImage), With<Rectangle>>,
+    request: Res<SaveRequest>,
+    state: ResMut<AppState>,
+) {
+    eprintln!("post save: {:?}", request);
+    if request.path.is_none() {
+        return;
+    }
+    let ron = state.checkpoints.back().unwrap().clone();
+    let mut json = json!({
+        "bevy_version": "0.10",
+        "images": {},
+        "ron": ron,
+        "counter": state.entity_counter,
+    });
+    let json_images = json["images"].as_object_mut().unwrap();
+    for entity in saved.scene.entities.iter() {
+        for component in entity.components.iter() {
+            if let Some(dynamic_struct) = component.downcast_ref::<DynamicStruct>() {
+                if let Some(texture) = dynamic_struct.get_field::<DynamicStruct>("texture") {
+                    for (rect, image) in rec.iter() {
+                        if texture.reflect_partial_eq(&image.texture).unwrap() {
+                            if let Some(image) = images.get(&image.texture) {
+                                if let Ok(img) = image.clone().try_into_dynamic() {
+                                    let mut image_data: Vec<u8> = Vec::new();
+                                    img.write_to(
+                                        &mut Cursor::new(&mut image_data),
+                                        ImageOutputFormat::Png,
+                                    )
+                                    .unwrap();
+                                    let res_base64 = general_purpose::STANDARD.encode(image_data);
+                                    json_images.insert(rect.id.to_string(), json!(res_base64));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    std::fs::write(request.path.clone().unwrap(), json.to_string())
+        .expect("Error saving state to file");
+}
+
+fn should_save(request: Option<Res<SaveRequest>>) -> bool {
+    request.is_some()
+}
+
+fn remove_save_request(world: &mut World) {
+    world.remove_resource::<SaveRequest>().unwrap();
+}
+
+fn should_load(request: Option<Res<LoadRequest>>) -> bool {
+    request.is_some()
+}
+
+fn remove_load_request(world: &mut World) {
+    world.remove_resource::<LoadRequest>().unwrap();
+}
+
+pub fn save_ron() -> SystemConfig {
+    save::<With<Save>>
+        .pipe(save_ron_as_checkpoint)
+        .pipe(save::finish)
+        .in_set(SaveSet::Save)
+}
+
+pub fn load_ron() -> SystemConfig {
+    from_file_or_memory
+        .pipe(unload::<Or<(With<Save>, With<Unload>)>>)
+        .pipe(load)
+        .pipe(load::finish)
+        .in_set(LoadSet::Load)
+}
+
+pub fn from_file_or_memory(
+    type_registry: Res<AppTypeRegistry>,
+    request: Res<LoadRequest>,
+    mut state: ResMut<AppState>,
+) -> Result<Saved, load::Error> {
+    eprintln!("load: {:?}", request);
+
+    state.entity_to_edit = None;
+    state.hold_entity = None;
+    state.entity_to_resize = None;
+    state.line_to_draw_start = None;
+
+    let ron;
+    match &request.path {
+        Some(path) => {
+            let json_bytes = std::fs::read(path).unwrap();
+            let json: Value = serde_json::from_slice(&json_bytes).unwrap();
+            ron = json["ron"].as_str().unwrap().to_string();
+            state.entity_counter = json["counter"].as_u64().unwrap() as u32;
+            state.checkpoints = VecDeque::new();
+        }
+        None => {
+            if state.checkpoints.len() == 1 {
+                ron = state.checkpoints.back().unwrap().to_string();
+            } else {
+                ron = state.checkpoints.pop_back().unwrap();
+            }
+        }
+    }
+    let ron = general_purpose::STANDARD.decode(ron.as_bytes()).unwrap();
+    let mut deserializer = Deserializer::from_bytes(&ron)?;
+    let scene = {
+        let type_registry = &type_registry.read();
+        let scene_deserializer = SceneDeserializer { type_registry };
+        scene_deserializer.deserialize(&mut deserializer)
+    }?;
+    Ok(Saved { scene })
+}
+
+pub fn save_ron_as_checkpoint(
+    In(saved): In<Saved>,
+    type_registry: Res<AppTypeRegistry>,
+    mut state: ResMut<AppState>,
+) -> Result<Saved, save::Error> {
+    let input = saved.scene.serialize_ron(&type_registry)?;
+    let ron = general_purpose::STANDARD.encode(input);
+    if state.checkpoints.len() > MAX_AMOUNT_OF_CHECKPOINTS {
+        state.checkpoints.pop_front();
+    }
+    state.checkpoints.push_back(ron);
+    Ok(saved)
+}
 
 fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
@@ -399,11 +574,24 @@ fn keyboard_input_system(
     mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
     mut char_evr: EventReader<ReceivedCharacter>,
 ) {
-    let ctrl = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
+    let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
+    let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
 
-    if ctrl && input.just_pressed(KeyCode::V) {
+    if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(&mut commands, &mut images, &mut state, &mut query);
+    } else if command && shift && input.just_pressed(KeyCode::S) {
+        commands.insert_resource(SaveRequest {
+            path: Some(PathBuf::from("ichart.json")),
+        });
+    } else if command && shift && input.just_pressed(KeyCode::L) {
+        commands.insert_resource(LoadRequest {
+            path: Some(PathBuf::from("ichart.json")),
+        });
+    } else if command && input.just_pressed(KeyCode::S) {
+        commands.insert_resource(SaveRequest { path: None });
+    } else if command && input.just_pressed(KeyCode::L) {
+        commands.insert_resource(LoadRequest { path: None });
     } else {
         for (mut text, editable_text) in &mut query.iter_mut() {
             if Some(editable_text.id) == state.entity_to_edit {
@@ -428,7 +616,7 @@ pub fn insert_from_clipboard(
     state: &mut ResMut<AppState>,
     query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
 ) {
-    let mut clipboard = Clipboard::new().unwrap();
+    let mut clipboard = arboard::Clipboard::new().unwrap();
     if let Ok(image) = clipboard.get_image() {
         let image: RgbaImage = ImageBuffer::from_raw(
             image.width.try_into().unwrap(),
