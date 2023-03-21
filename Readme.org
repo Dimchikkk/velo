@@ -15,13 +15,16 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 - ability to paste screenshot from clipboard
 - ability to connect nodes with arrows
 
-** Run native
+** Next steps
+- save/load/undo/redo
+
+** Run (supported platforms: linux, macos, windows)
 
 #+BEGIN_SRC sh
 cargo r 
 #+END_SRC
 
-** Run web (some features are not working)
+Wasm minimal support:
 
 #+BEGIN_SRC sh
 cargo r --target wasm32-unknown-unknown --release
@@ -36,19 +39,13 @@ cargo clippy --fix --allow-staged
 #+END_SRC
 
 * Tasks to todo
-- Implement pasting data on "ctrl+v" for wasm target
 - Add borders (once https://github.com/bevyengine/bevy/pull/7795 merged)
 - Add separate panel for creating rectangles (control panel), use grid layout for it (once https://github.com/bevyengine/bevy/pull/8026  merged)
 - Add button to change z-index of rectangle
 - Have color pallete to change background color of rectangle
 - Have two arrow mods: direct and parallel (see lucid.app) 
 - Creation via moving from shapes panel (note: added button for now)
-- Fix newline break on wasm
 - Add "ctrl+a" to select text in rectangle
-- Use touch event for mobile support
-- Optimize wasm size
-- Github private gist to save diagrams
-- Export/import to ron format (may need https://github.com/bevyengine/bevy/pull/6793 to be merged)
 - Github auth, push gist to github
 - Tabs of diagrams
 - Make text inside rectangle smart wrapping (once https://github.com/bevyengine/bevy/pull/7761 merged)

@@ -1,5 +1,4 @@
 use base64::{engine::general_purpose, Engine};
-#[cfg(not(target_arch = "wasm32"))]
 use bevy::{
     ecs::schedule::SystemConfig,
     input::mouse::MouseMotion,
@@ -141,6 +140,7 @@ fn post_save(
                             if let Some(image) = images.get(&image.texture) {
                                 if let Ok(img) = image.clone().try_into_dynamic() {
                                     let mut image_data: Vec<u8> = Vec::new();
+                                    #[cfg(not(target_arch = "wasm32"))]
                                     img.write_to(
                                         &mut Cursor::new(&mut image_data),
                                         ImageOutputFormat::Png,
