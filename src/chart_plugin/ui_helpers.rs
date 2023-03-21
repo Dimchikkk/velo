@@ -5,51 +5,60 @@ use bevy_prototype_lyon::{
     prelude::{GeometryBuilder, ShapeBundle, Stroke},
     shapes,
 };
+use moonshine_save::save::Save;
 
 #[derive(Component)]
 pub struct MainCamera;
 
-#[derive(Component, Debug)]
+#[derive(Component, Default, Reflect, Debug)]
+#[reflect(Component)]
 pub struct Rectangle {
     pub id: u32,
 }
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct CreateRectButton;
 
-#[derive(Component)]
+#[derive(Component, Default, Reflect)]
+#[reflect(Component)]
 pub struct EditableText {
     pub id: u32,
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Reflect, Default)]
+#[reflect(Component)]
 pub struct Top {
     pub id: u32,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default)]
 pub enum ArrowConnectPos {
+    #[default]
     Top,
     Bottom,
     Left,
     Right,
 }
 
-#[derive(Component, Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Component, Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default)]
+#[reflect(Component)]
 pub struct ArrowConnect {
     pub id: u32,
     pub pos: ArrowConnectPos,
 }
 
-#[derive(Component, Copy, Clone, Debug)]
+#[derive(Component, Copy, Clone, Debug, Reflect, Default)]
+#[reflect(Component)]
 pub enum ResizeMarker {
+    #[default]
     TopLeft,
     TopRight,
     BottomLeft,
     BottomRight,
 }
 
-#[derive(Component, Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Component, Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default)]
+#[reflect(Component)]
 pub struct ArrowMeta {
     pub start: ArrowConnect,
     pub end: ArrowConnect,
@@ -188,12 +197,13 @@ pub struct ItemMeta {
 
 pub fn spawn_item(commands: &mut Commands, item_meta: ItemMeta) {
     commands
-        .spawn((create_rectangle_node(), Top { id: item_meta.id }))
+        .spawn((create_rectangle_node(), Top { id: item_meta.id }, Save))
         .with_children(|builder| {
             builder
                 .spawn((
                     create_rectangle_btn(item_meta.size, item_meta.image),
                     Rectangle { id: item_meta.id },
+                    Save,
                 ))
                 .with_children(|builder| {
                     builder.spawn((
@@ -202,6 +212,7 @@ pub fn spawn_item(commands: &mut Commands, item_meta: ItemMeta) {
                             pos: ArrowConnectPos::Top,
                             id: item_meta.id,
                         },
+                        Save,
                     ));
                     builder.spawn((
                         create_arrow_marker(0., 0., 50., 0.),
@@ -209,6 +220,7 @@ pub fn spawn_item(commands: &mut Commands, item_meta: ItemMeta) {
                             pos: ArrowConnectPos::Left,
                             id: item_meta.id,
                         },
+                        Save,
                     ));
                     builder.spawn((
                         create_arrow_marker(50., 0., 100., 0.),
@@ -216,6 +228,7 @@ pub fn spawn_item(commands: &mut Commands, item_meta: ItemMeta) {
                             pos: ArrowConnectPos::Bottom,
                             id: item_meta.id,
                         },
+                        Save,
                     ));
                     builder.spawn((
                         create_arrow_marker(100., 0., 50., 0.),
@@ -223,23 +236,32 @@ pub fn spawn_item(commands: &mut Commands, item_meta: ItemMeta) {
                             pos: ArrowConnectPos::Right,
                             id: item_meta.id,
                         },
+                        Save,
                     ));
-                    builder.spawn((create_resize_marker(0., 0., 0., 0.), ResizeMarker::TopLeft));
+                    builder.spawn((
+                        create_resize_marker(0., 0., 0., 0.),
+                        ResizeMarker::TopLeft,
+                        Save,
+                    ));
                     builder.spawn((
                         create_resize_marker(100., 0., 0., 0.),
                         ResizeMarker::TopRight,
+                        Save,
                     ));
                     builder.spawn((
                         create_resize_marker(100., 0., 100., 0.),
                         ResizeMarker::BottomRight,
+                        Save,
                     ));
                     builder.spawn((
                         create_resize_marker(0., 0., 100., 0.),
                         ResizeMarker::BottomLeft,
+                        Save,
                     ));
                     builder.spawn((
                         create_rectangle_txt(item_meta.font),
                         EditableText { id: item_meta.id },
+                        Save,
                     ));
                 });
         });
@@ -273,6 +295,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             },
             arrow_meta,
             Stroke::new(Color::BLACK, 2.0),
+            Save,
         ))
         .with_children(|builder| {
             builder.spawn((
@@ -281,6 +304,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 Stroke::new(Color::BLACK, 2.0),
+                Save,
             ));
             builder.spawn((
                 ShapeBundle {
@@ -288,6 +312,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 Stroke::new(Color::BLACK, 2.0),
+                Save,
             ));
         });
 }
