@@ -1893,6 +1893,7 @@ dependencies = [
  "bevy_prototype_lyon",
  "image",
  "moonshine-save",
+ "regex",
  "ron",
  "serde_json",
  "uuid",
