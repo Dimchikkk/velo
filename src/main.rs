@@ -2,6 +2,7 @@ use bevy::{prelude::*, window::PresentMode};
 mod chart_plugin;
 use bevy_prototype_lyon::prelude::ShapePlugin;
 pub use chart_plugin::*;
+use moonshine_save::{prelude::LoadPlugin, save::SavePlugin};
 
 fn main() {
     App::new()
@@ -20,6 +21,8 @@ fn main() {
         }))
         .add_plugin(ChartPlugin)
         .add_plugin(ShapePlugin)
+        .add_plugin(SavePlugin)
+        .add_plugin(LoadPlugin)
         .run();
 }
 
