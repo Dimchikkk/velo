@@ -44,18 +44,18 @@ cargo clippy --fix --allow-staged
 * Tasks to todo
 - Add borders (once https://github.com/bevyengine/bevy/pull/7795 merged)
 - Add separate panel for creating rectangles (control panel), use grid layout for it (once https://github.com/bevyengine/bevy/pull/8026  merged)
+- Make text inside rectangle smart wrapping (once https://github.com/bevyengine/bevy/pull/7761 merged)
+- Tag systems for nodes
+- Github auth, repo to sync diagrams
 - Add button to change z-index of rectangle
 - Have color pallete to change background color of rectangle
 - Have two arrow mods: direct and parallel (see lucid.app) 
 - Creation via moving from shapes panel (note: added button for now)
-- Add "ctrl+a" to select text in rectangle
-- Github auth, push gist to github
 - Tabs of diagrams
-- Make text inside rectangle smart wrapping (once https://github.com/bevyengine/bevy/pull/7761 merged)
-- Tag systems for nodes and search (load gist files to memory and search, sync button)
+- Add "ctrl+a" to select text in rectangle
+- Search system
 - Delete entities functionality
 - Proper cursor on typing
 - Improve UI/UX, use lucid.app for inspiration
 - Wasm executable code in rectangle
 - Org support in rectangles
-- Collaborative editing
