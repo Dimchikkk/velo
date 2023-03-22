@@ -1,4 +1,5 @@
 use std::f32::consts::PI;
+use serde::{Serialize, Deserialize};
 
 use bevy::prelude::*;
 use bevy_prototype_lyon::{
@@ -6,14 +7,19 @@ use bevy_prototype_lyon::{
     shapes,
 };
 use moonshine_save::save::Save;
+use uuid::Uuid;
 
 #[derive(Component)]
 pub struct MainCamera;
 
+#[derive(Clone, Reflect, Default, Debug, Copy, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[reflect_value]
+pub struct ReflectableUuid(pub Uuid);
+
 #[derive(Component, Default, Reflect, Debug)]
 #[reflect(Component)]
 pub struct Rectangle {
-    pub id: u32,
+    pub id: ReflectableUuid,
 }
 
 #[derive(Component, Default)]
@@ -22,13 +28,13 @@ pub struct CreateRectButton;
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
 pub struct EditableText {
-    pub id: u32,
+    pub id: ReflectableUuid,
 }
 
 #[derive(Component, Debug, Reflect, Default)]
 #[reflect(Component)]
 pub struct Top {
-    pub id: u32,
+    pub id: ReflectableUuid,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default)]
@@ -43,7 +49,7 @@ pub enum ArrowConnectPos {
 #[derive(Component, Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default)]
 #[reflect(Component)]
 pub struct ArrowConnect {
-    pub id: u32,
+    pub id: ReflectableUuid,
     pub pos: ArrowConnectPos,
 }
 
@@ -189,7 +195,7 @@ fn create_rectangle_txt(font: Handle<Font>) -> TextBundle {
 }
 
 pub struct ItemMeta {
-    pub id: u32,
+    pub id: ReflectableUuid,
     pub size: Vec2,
     pub font: Handle<Font>,
     pub image: Option<UiImage>,

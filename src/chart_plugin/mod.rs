@@ -19,10 +19,10 @@ use moonshine_save::{
     prelude::{LoadSet, Loaded, SaveSet, Unload},
     save::{self, save, Save, Saved},
 };
-use rand::Rng;
 use regex::Regex;
 use ron::Deserializer;
 use serde_json::{json, Value};
+use uuid::Uuid;
 use std::{collections::VecDeque, convert::TryInto, io::Cursor, path::PathBuf};
 #[path = "ui_helpers.rs"]
 mod ui_helpers;
@@ -35,7 +35,7 @@ pub struct ChartPlugin;
 struct AddRect;
 
 struct RedrawArrow {
-    pub id: u32,
+    pub id: ReflectableUuid,
 }
 
 const MAX_AMOUNT_OF_CHECKPOINTS: usize = 7;
@@ -52,9 +52,9 @@ pub struct LoadRequest {
 
 #[derive(Resource, Default)]
 pub struct AppState {
-    pub entity_to_edit: Option<u32>,
-    pub hold_entity: Option<u32>,
-    pub entity_to_resize: Option<(u32, ResizeMarker)>,
+    pub entity_to_edit: Option<ReflectableUuid>,
+    pub hold_entity: Option<ReflectableUuid>,
+    pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
     pub line_to_draw_start: Option<(ArrowConnect, Vec2)>,
     pub checkpoints: VecDeque<String>,
 }
@@ -69,7 +69,11 @@ impl Plugin for ChartPlugin {
         app.register_type::<ArrowConnect>();
         app.register_type::<ResizeMarker>();
         app.register_type::<ArrowMeta>();
+        app.register_type::<ReflectableUuid>();
+        app.register_type_data::<ReflectableUuid, ReflectSerialize>();
+        app.register_type_data::<ReflectableUuid, ReflectDeserialize>();
         app.register_type::<ArrowConnectPos>();
+        
         app.register_type::<BreakLineOn>();
 
         app.add_event::<AddRect>();
@@ -159,7 +163,7 @@ fn post_save(
                                     )
                                     .unwrap();
                                     let res_base64 = general_purpose::STANDARD.encode(image_data);
-                                    json_images.insert(rect.id.to_string(), json!(res_base64));
+                                    json_images.insert(rect.id.0.to_string(), json!(res_base64));
                                 }
                             }
                         }
@@ -235,7 +239,7 @@ fn post_load(
         for (rect, mut ui_image, entity) in rec.iter_mut() {
             let e = loaded.entity(entity.index());
             eprintln!("entity: {:?}", e);
-            if rect.id == id.parse::<u32>().unwrap() {
+            if rect.id == ReflectableUuid(Uuid::parse_str(id.as_str()).unwrap()) {
                 let img = load_from_memory_with_format(&mut image_bytes, ImageFormat::Png).unwrap();
                 let size: Extent3d = Extent3d {
                     width: img.width(),
@@ -598,14 +602,12 @@ fn create_new_rectangle(
 ) {
     for _ in events.iter() {
         let font = asset_server.load("fonts/iosevka-regular.ttf");
-        // TODO: use uuid instead
-        let id: u32 = rand::thread_rng().gen_range(0..4294967295);
         spawn_item(
             &mut commands,
             ItemMeta {
                 font,
                 size: Vec2::new(100., 100.),
-                id,
+                id: ReflectableUuid(Uuid::new_v4()),
                 image: None,
             },
         );
@@ -682,14 +684,12 @@ pub fn insert_from_clipboard(
             TextureFormat::Rgba8UnormSrgb,
         );
         let image = images.add(image);
-        // TODO: use uuid
-        let id: u32 = rand::thread_rng().gen_range(0..4294967295);
         spawn_item(
             commands,
             ItemMeta {
                 font: Handle::default(),
                 size: Vec2::new(size.width as f32, size.height as f32),
-                id,
+                id: ReflectableUuid(Uuid::new_v4()),
                 image: Some(image.into()),
             },
         );
