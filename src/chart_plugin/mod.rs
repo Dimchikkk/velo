@@ -22,8 +22,8 @@ use moonshine_save::{
 use regex::Regex;
 use ron::Deserializer;
 use serde_json::{json, Value};
-use uuid::Uuid;
 use std::{collections::VecDeque, convert::TryInto, io::Cursor, path::PathBuf};
+use uuid::Uuid;
 #[path = "ui_helpers.rs"]
 mod ui_helpers;
 pub use ron::de::SpannedError as ParseError;
@@ -73,7 +73,7 @@ impl Plugin for ChartPlugin {
         app.register_type_data::<ReflectableUuid, ReflectSerialize>();
         app.register_type_data::<ReflectableUuid, ReflectDeserialize>();
         app.register_type::<ArrowConnectPos>();
-        
+
         app.register_type::<BreakLineOn>();
 
         app.add_event::<AddRect>();
@@ -235,12 +235,12 @@ fn post_load(
     for (key, image) in images.into_iter() {
         let id = key;
         let input = image.as_str().unwrap().as_bytes().to_vec();
-        let mut image_bytes = general_purpose::STANDARD.decode(input).unwrap();
+        let image_bytes = general_purpose::STANDARD.decode(input).unwrap();
         for (rect, mut ui_image, entity) in rec.iter_mut() {
             let e = loaded.entity(entity.index());
             eprintln!("entity: {:?}", e);
             if rect.id == ReflectableUuid(Uuid::parse_str(id.as_str()).unwrap()) {
-                let img = load_from_memory_with_format(&mut image_bytes, ImageFormat::Png).unwrap();
+                let img = load_from_memory_with_format(&image_bytes, ImageFormat::Png).unwrap();
                 let size: Extent3d = Extent3d {
                     width: img.width(),
                     height: img.height(),
