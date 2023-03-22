@@ -14,8 +14,7 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 - ability to type text in rectangles
 - ability to paste screenshot from clipboard
 - ability to connect nodes with arrows
-- ability to make a snapshot of the game
-- ability to make game snapshot and load from it
+- ability to make game snapshot in memory and load from it
 - ability to save game state to file and load from it
 
 ** Next steps
@@ -55,7 +54,6 @@ cargo clippy --fix --allow-staged
 - Make text inside rectangle smart wrapping (once https://github.com/bevyengine/bevy/pull/7761 merged)
 - Tag systems for nodes and search (load gist files to memory and search, sync button)
 - Delete entities functionality
-- Undo/redo functionality
 - Proper cursor on typing
 - Improve UI/UX, use lucid.app for inspiration
 - Wasm executable code in rectangle
