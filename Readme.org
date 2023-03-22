@@ -14,9 +14,13 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 - ability to type text in rectangles
 - ability to paste screenshot from clipboard
 - ability to connect nodes with arrows
+- ability to make a snapshot of the game
+- ability to make game snapshot and load from it
+- ability to save game state to file and load from it
 
 ** Next steps
-- save/load/undo/redo
+- re-create arrows on load from ron file
+- add redo
 
 ** Run (supported platforms: linux, macos, windows)
 
