@@ -1,5 +1,5 @@
+use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
-use serde::{Serialize, Deserialize};
 
 use bevy::prelude::*;
 use bevy_prototype_lyon::{
