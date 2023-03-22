@@ -16,9 +16,10 @@ use bevy::{
 use image::*;
 use moonshine_save::{
     load::{self, load, unload},
-    prelude::{LoadSet, SaveSet, Unload},
+    prelude::{LoadSet, Loaded, SaveSet, Unload},
     save::{self, save, Save, Saved},
 };
+use rand::Rng;
 use regex::Regex;
 use ron::Deserializer;
 use serde_json::{json, Value};
@@ -53,7 +54,6 @@ pub struct LoadRequest {
 pub struct AppState {
     pub entity_to_edit: Option<u32>,
     pub hold_entity: Option<u32>,
-    pub entity_counter: u32,
     pub entity_to_resize: Option<(u32, ResizeMarker)>,
     pub line_to_draw_start: Option<(ArrowConnect, Vec2)>,
     pub checkpoints: VecDeque<String>,
@@ -111,7 +111,6 @@ impl Plugin for ChartPlugin {
     }
 }
 
-
 pub fn save_ron_as_checkpoint(
     In(saved): In<Saved>,
     type_registry: Res<AppTypeRegistry>,
@@ -142,7 +141,6 @@ fn post_save(
         "bevy_version": "0.10",
         "images": {},
         "ron": ron,
-        "counter": state.entity_counter,
     });
     let json_images = json["images"].as_object_mut().unwrap();
     for entity in saved.scene.entities.iter() {
@@ -173,7 +171,7 @@ fn post_save(
     if let Some(path) = request.path.clone() {
         std::fs::write(path, json.to_string()).expect("Error saving state to file")
     } else {
-        state.checkpoints.push_back(json.to_string()); 
+        state.checkpoints.push_back(json.to_string());
     }
 }
 
@@ -209,49 +207,49 @@ pub fn load_ron() -> SystemConfig {
 }
 
 fn post_load(
-    mut rec: Query<(&Rectangle, &mut UiImage), With<Rectangle>>,
-    request: Res<LoadRequest>, 
+    mut rec: Query<(&Rectangle, &mut UiImage, Entity), With<Rectangle>>,
+    request: Res<LoadRequest>,
+    loaded: ResMut<Loaded>,
     mut state: ResMut<AppState>,
     mut res_images: ResMut<Assets<Image>>,
 ) {
-    match &request.path {
+    let mut json: Value = match &request.path {
         Some(path) => {
-
+            let json = std::fs::read_to_string(path).expect("Error reading state from file");
+            serde_json::from_str(&json).unwrap()
         }
         None => {
-            let json = if state.checkpoints.len() == 1 { 
+            let json = if state.checkpoints.len() == 1 {
                 state.checkpoints.back().unwrap().clone()
             } else {
                 state.checkpoints.pop_back().unwrap()
             };
-            let mut json: Value = serde_json::from_str(&json).unwrap();
-            let images = json["images"].as_object_mut().unwrap();
-            for (key, image) in images.into_iter() {
-                let id = key;
-                let input = image.as_str().unwrap().as_bytes().to_vec();
-                let mut image_bytes = general_purpose::STANDARD.decode(input).unwrap();
-                for (rect, mut ui_image) in rec.iter_mut() {
-                    eprintln!("{} {}", rect.id, id);
-                    if rect.id == id.parse::<u32>().unwrap() {
-                        let img = load_from_memory_with_format(
-                            &mut image_bytes,
-                            ImageFormat::Png,
-                        ).unwrap();
-                        let size: Extent3d = Extent3d {
-                            width: img.width(),
-                            height: img.height(),
-                            ..Default::default()
-                        };
-                        let image = Image::new(
-                            size,
-                            TextureDimension::D2,
-                            img.into_bytes(),
-                            TextureFormat::Rgba8UnormSrgb,
-                        );
-                        let image_handle = res_images.add(image);
-                        ui_image.texture = image_handle;
-                    }
-                }
+            serde_json::from_str(&json).unwrap()
+        }
+    };
+    let images = json["images"].as_object_mut().unwrap();
+    for (key, image) in images.into_iter() {
+        let id = key;
+        let input = image.as_str().unwrap().as_bytes().to_vec();
+        let mut image_bytes = general_purpose::STANDARD.decode(input).unwrap();
+        for (rect, mut ui_image, entity) in rec.iter_mut() {
+            let e = loaded.entity(entity.index());
+            eprintln!("entity: {:?}", e);
+            if rect.id == id.parse::<u32>().unwrap() {
+                let img = load_from_memory_with_format(&mut image_bytes, ImageFormat::Png).unwrap();
+                let size: Extent3d = Extent3d {
+                    width: img.width(),
+                    height: img.height(),
+                    ..Default::default()
+                };
+                let image = Image::new(
+                    size,
+                    TextureDimension::D2,
+                    img.into_bytes(),
+                    TextureFormat::Rgba8UnormSrgb,
+                );
+                let image_handle = res_images.add(image);
+                ui_image.texture = image_handle;
             }
         }
     }
@@ -275,13 +273,11 @@ pub fn from_file_or_memory(
             let json_bytes = std::fs::read(path).unwrap();
             let json: Value = serde_json::from_slice(&json_bytes).unwrap();
             ron = json["ron"].as_str().unwrap().to_string();
-            state.entity_counter = json["counter"].as_u64().unwrap() as u32;
             state.checkpoints = VecDeque::new();
         }
         None => {
             let json: Value = serde_json::from_str(state.checkpoints.back().unwrap()).unwrap();
             ron = json["ron"].as_str().unwrap().to_string();
-            state.entity_counter = json["counter"].as_u64().unwrap() as u32;
         }
     }
     let ron = general_purpose::STANDARD.decode(ron.as_bytes()).unwrap();
@@ -599,17 +595,17 @@ fn create_new_rectangle(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut events: EventReader<AddRect>,
-    mut state: ResMut<AppState>,
 ) {
     for _ in events.iter() {
         let font = asset_server.load("fonts/iosevka-regular.ttf");
-        state.entity_counter += 1;
+        // TODO: use uuid instead
+        let id: u32 = rand::thread_rng().gen_range(0..4294967295);
         spawn_item(
             &mut commands,
             ItemMeta {
                 font,
                 size: Vec2::new(100., 100.),
-                id: state.entity_counter,
+                id,
                 image: None,
             },
         );
@@ -686,13 +682,14 @@ pub fn insert_from_clipboard(
             TextureFormat::Rgba8UnormSrgb,
         );
         let image = images.add(image);
-        state.entity_counter += 1;
+        // TODO: use uuid
+        let id: u32 = rand::thread_rng().gen_range(0..4294967295);
         spawn_item(
             commands,
             ItemMeta {
                 font: Handle::default(),
                 size: Vec2::new(size.width as f32, size.height as f32),
-                id: state.entity_counter,
+                id,
                 image: Some(image.into()),
             },
         );
