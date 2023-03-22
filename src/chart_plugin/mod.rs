@@ -9,14 +9,14 @@ use bevy::{
     window::PrimaryWindow,
 };
 use bevy::{
-    reflect::{erased_serde::__private::serde::de::DeserializeSeed, DynamicStruct},
+    reflect::{erased_serde::__private::serde::de::DeserializeSeed},
     scene::serde::SceneDeserializer,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 use moonshine_save::{
     load::{self, load, unload},
-    prelude::{LoadSet, Loaded, SaveSet, Unload},
+    prelude::{LoadSet, SaveSet, Unload},
     save::{self, save, Save, Saved},
 };
 use regex::Regex;
@@ -38,7 +38,7 @@ struct RedrawArrow {
     pub id: ReflectableUuid,
 }
 
-const MAX_AMOUNT_OF_CHECKPOINTS: usize = 7;
+const MAX_AMOUNT_OF_CHECKPOINTS: usize = 30;
 
 #[derive(Resource, Debug)]
 pub struct SaveRequest {
@@ -133,7 +133,6 @@ pub fn save_ron_as_checkpoint(
 }
 
 fn post_save(
-    saved: Res<Saved>,
     images: Res<Assets<Image>>,
     rec: Query<(&Rectangle, &UiImage), With<Rectangle>>,
     request: Res<SaveRequest>,
@@ -147,31 +146,19 @@ fn post_save(
         "ron": ron,
     });
     let json_images = json["images"].as_object_mut().unwrap();
-    for entity in saved.scene.entities.iter() {
-        for component in entity.components.iter() {
-            if let Some(dynamic_struct) = component.downcast_ref::<DynamicStruct>() {
-                if let Some(texture) = dynamic_struct.get_field::<DynamicStruct>("texture") {
-                    for (rect, image) in rec.iter() {
-                        if texture.reflect_partial_eq(&image.texture).unwrap() {
-                            if let Some(image) = images.get(&image.texture) {
-                                if let Ok(img) = image.clone().try_into_dynamic() {
-                                    let mut image_data: Vec<u8> = Vec::new();
-                                    #[cfg(not(target_arch = "wasm32"))]
-                                    img.write_to(
-                                        &mut Cursor::new(&mut image_data),
-                                        ImageOutputFormat::Png,
-                                    )
-                                    .unwrap();
-                                    let res_base64 = general_purpose::STANDARD.encode(image_data);
-                                    json_images.insert(rect.id.0.to_string(), json!(res_base64));
-                                }
-                            }
-                        }
-                    }
-                }
+    for (rect, image) in rec.iter() {
+        if let Some(image) = images.get(&image.texture) {
+            if let Ok(img) = image.clone().try_into_dynamic() {
+                let mut image_data: Vec<u8> = Vec::new();
+                #[cfg(not(target_arch = "wasm32"))]
+                img.write_to(&mut Cursor::new(&mut image_data), ImageOutputFormat::Png)
+                    .unwrap();
+                let res_base64 = general_purpose::STANDARD.encode(image_data);
+                json_images.insert(rect.id.0.to_string(), json!(res_base64));
             }
         }
     }
+
     if let Some(path) = request.path.clone() {
         std::fs::write(path, json.to_string()).expect("Error saving state to file")
     } else {
@@ -211,9 +198,8 @@ pub fn load_ron() -> SystemConfig {
 }
 
 fn post_load(
-    mut rec: Query<(&Rectangle, &mut UiImage, Entity), With<Rectangle>>,
+    mut rec: Query<(&Rectangle, &mut UiImage), With<Rectangle>>,
     request: Res<LoadRequest>,
-    loaded: ResMut<Loaded>,
     mut state: ResMut<AppState>,
     mut res_images: ResMut<Assets<Image>>,
 ) {
@@ -232,29 +218,26 @@ fn post_load(
         }
     };
     let images = json["images"].as_object_mut().unwrap();
-    for (key, image) in images.into_iter() {
-        let id = key;
-        let input = image.as_str().unwrap().as_bytes().to_vec();
-        let image_bytes = general_purpose::STANDARD.decode(input).unwrap();
-        for (rect, mut ui_image, entity) in rec.iter_mut() {
-            let e = loaded.entity(entity.index());
-            eprintln!("entity: {:?}", e);
-            if rect.id == ReflectableUuid(Uuid::parse_str(id.as_str()).unwrap()) {
-                let img = load_from_memory_with_format(&image_bytes, ImageFormat::Png).unwrap();
-                let size: Extent3d = Extent3d {
-                    width: img.width(),
-                    height: img.height(),
-                    ..Default::default()
-                };
-                let image = Image::new(
-                    size,
-                    TextureDimension::D2,
-                    img.into_bytes(),
-                    TextureFormat::Rgba8UnormSrgb,
-                );
-                let image_handle = res_images.add(image);
-                ui_image.texture = image_handle;
-            }
+    for (rect, mut ui_image) in rec.iter_mut() {
+        if images.contains_key(&rect.id.0.to_string()) {
+            let image = images.get(&rect.id.0.to_string()).unwrap();
+            let image_bytes = general_purpose::STANDARD
+                .decode(image.as_str().unwrap().as_bytes())
+                .unwrap();
+            let img = load_from_memory_with_format(&image_bytes, ImageFormat::Png).unwrap();
+            let size: Extent3d = Extent3d {
+                width: img.width(),
+                height: img.height(),
+                ..Default::default()
+            };
+            let image = Image::new(
+                size,
+                TextureDimension::D2,
+                img.into_bytes(),
+                TextureFormat::Rgba8UnormSrgb,
+            );
+            let image_handle = res_images.add(image);
+            ui_image.texture = image_handle;
         }
     }
 }
@@ -296,6 +279,8 @@ pub fn from_file_or_memory(
 
 fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
+
+    commands.insert_resource(SaveRequest { path: None });
 
     commands
         .spawn((add_rectangle_btn(), CreateRectButton))
