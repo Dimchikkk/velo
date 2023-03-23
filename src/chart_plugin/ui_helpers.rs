@@ -37,7 +37,7 @@ pub struct Top {
     pub id: ReflectableUuid,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default, Serialize, Deserialize)]
 pub enum ArrowConnectPos {
     #[default]
     Top,
@@ -46,7 +46,9 @@ pub enum ArrowConnectPos {
     Right,
 }
 
-#[derive(Component, Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default)]
+#[derive(
+    Component, Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default, Serialize, Deserialize,
+)]
 #[reflect(Component)]
 pub struct ArrowConnect {
     pub id: ReflectableUuid,
@@ -63,7 +65,9 @@ pub enum ResizeMarker {
     BottomRight,
 }
 
-#[derive(Component, Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default)]
+#[derive(
+    Component, Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default, Serialize, Deserialize,
+)]
 #[reflect(Component)]
 pub struct ArrowMeta {
     pub start: ArrowConnect,
@@ -309,7 +313,6 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 Stroke::new(Color::BLACK, 2.0),
-                Save,
             ));
             builder.spawn((
                 ShapeBundle {
@@ -317,7 +320,6 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 Stroke::new(Color::BLACK, 2.0),
-                Save,
             ));
         });
 }
