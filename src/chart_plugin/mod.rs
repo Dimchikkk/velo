@@ -1,6 +1,6 @@
 use base64::{engine::general_purpose, Engine};
 use bevy::{
-    ecs::{schedule::SystemConfig},
+    ecs::schedule::SystemConfig,
     input::mouse::MouseMotion,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
@@ -20,7 +20,12 @@ use moonshine_save::{
 use regex::Regex;
 use ron::Deserializer;
 use serde_json::{json, Value};
-use std::{collections::VecDeque, convert::TryInto, io::Cursor, path::PathBuf};
+use std::{
+    collections::{HashSet, VecDeque},
+    convert::TryInto,
+    io::Cursor,
+    path::PathBuf,
+};
 use uuid::Uuid;
 #[path = "ui_helpers.rs"]
 mod ui_helpers;
@@ -304,7 +309,7 @@ fn create_arrow_end(
 ) {
     let primary_window = windows.single_mut();
     let (camera, camera_transform) = camera_q.single();
-    if let Some(event) = events.iter().next() {
+    for event in events.iter() {
         let mut start = None;
         let mut end = None;
         for (entity, arrow_connect) in &mut arrow_markers.iter_mut() {
@@ -433,16 +438,27 @@ fn redraw_arrows(
     mut arrow_query: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
     mut commands: Commands,
 ) {
-    for (entity, arrow) in &mut arrow_query.iter_mut() {
-        if let Some(event) = redraw_arrow.into_iter().next() {
+    let mut despawned: HashSet<ArrowMeta> = HashSet::new();
+
+    for event in redraw_arrow.iter() {
+        for (entity, arrow) in &mut arrow_query.iter_mut() {
+            if despawned.contains(arrow) {
+                continue;
+            }
             if arrow.start.id == event.id || arrow.end.id == event.id {
-                commands.entity(entity).despawn_recursive();
-                create_arrow.send(CreateArrow {
-                    start: arrow.start,
-                    end: arrow.end,
-                });
+                if let Some(entity) = commands.get_entity(entity) {
+                    despawned.insert(*arrow);
+                    entity.despawn_recursive();
+                }
             }
         }
+    }
+
+    for arrow_meta in despawned {
+        create_arrow.send(CreateArrow {
+            start: arrow_meta.start,
+            end: arrow_meta.end,
+        });
     }
 }
 
