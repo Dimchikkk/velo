@@ -1,6 +1,6 @@
 use base64::{engine::general_purpose, Engine};
 use bevy::{
-    ecs::{event, schedule::SystemConfig},
+    ecs::{schedule::SystemConfig},
     input::mouse::MouseMotion,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
@@ -308,7 +308,7 @@ fn create_arrow_end(
         let mut start = None;
         let mut end = None;
         for (entity, arrow_connect) in &mut arrow_markers.iter_mut() {
-            if arrow_connect.clone() == event.start {
+            if *arrow_connect == event.start {
                 if let Ok(global_transform) = labelled.get(entity) {
                     let world_position = global_transform.affine().translation;
                     start = Some(Vec2::new(
@@ -317,7 +317,7 @@ fn create_arrow_end(
                     ));
                 }
             }
-            if arrow_connect.clone() == event.end {
+            if *arrow_connect == event.end {
                 if let Ok(global_transform) = labelled.get(entity) {
                     let world_position = global_transform.affine().translation;
                     end = Some(Vec2::new(
@@ -327,7 +327,7 @@ fn create_arrow_end(
                 }
             }
         }
-    
+
         if let (Some(start), Some(end)) = (start, end) {
             let start = camera.viewport_to_world_2d(camera_transform, start);
             let end = camera.viewport_to_world_2d(camera_transform, end);
@@ -344,7 +344,6 @@ fn create_arrow_end(
             }
         }
     }
-
 }
 
 fn create_arrow_start(
