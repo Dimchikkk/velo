@@ -301,7 +301,6 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             },
             arrow_meta,
             Stroke::new(Color::BLACK, 2.0),
-            Save,
         ))
         .with_children(|builder| {
             builder.spawn((
