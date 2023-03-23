@@ -5,6 +5,7 @@ use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     text::BreakLineOn,
+    transform::commands,
     window::PrimaryWindow,
 };
 use bevy::{
@@ -145,6 +146,7 @@ pub fn save_ron_as_checkpoint(
 fn post_save(
     images: Res<Assets<Image>>,
     rec: Query<(&Rectangle, &UiImage), With<Rectangle>>,
+    arrows: Query<&ArrowMeta, With<ArrowMeta>>,
     request: Res<SaveRequest>,
     mut state: ResMut<AppState>,
 ) {
@@ -153,6 +155,7 @@ fn post_save(
     let mut json = json!({
         "bevy_version": "0.10",
         "images": {},
+        "arrows": [],
         "ron": ron,
     });
     let json_images = json["images"].as_object_mut().unwrap();
@@ -167,6 +170,11 @@ fn post_save(
                 json_images.insert(rect.id.0.to_string(), json!(res_base64));
             }
         }
+    }
+
+    let json_arrows = json["arrows"].as_array_mut().unwrap();
+    for arrow_meta in arrows.iter() {
+        json_arrows.push(json!(arrow_meta));
     }
 
     if let Some(path) = request.path.clone() {
@@ -211,7 +219,10 @@ fn post_load(
     mut rec: Query<(&Rectangle, &mut UiImage), With<Rectangle>>,
     request: Res<LoadRequest>,
     mut state: ResMut<AppState>,
+    mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
+    old_arrows: Query<Entity, With<ArrowMeta>>,
+    mut create_arrow: EventWriter<CreateArrow>,
 ) {
     let mut json: Value = match &request.path {
         Some(path) => {
@@ -249,6 +260,18 @@ fn post_load(
             let image_handle = res_images.add(image);
             ui_image.texture = image_handle;
         }
+    }
+
+    for entity in old_arrows.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+    let arrows = json["arrows"].as_array_mut().unwrap();
+    for arrow in arrows.iter() {
+        let arrow_meta: ArrowMeta = serde_json::from_value(arrow.clone()).unwrap();
+        create_arrow.send(CreateArrow {
+            start: arrow_meta.start,
+            end: arrow_meta.end,
+        });
     }
 }
 
@@ -357,7 +380,7 @@ fn create_arrow_start(
         (Changed<Interaction>, With<ArrowConnect>),
     >,
     mut state: ResMut<AppState>,
-    mut connect_arrow: EventWriter<CreateArrow>,
+    mut create_arrow: EventWriter<CreateArrow>,
 ) {
     for (interaction, arrow_connect) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
@@ -367,7 +390,7 @@ fn create_arrow_start(
                         continue;
                     }
                     state.arrow_to_draw_start = None;
-                    connect_arrow.send(CreateArrow {
+                    create_arrow.send(CreateArrow {
                         start: start_arrow,
                         end: *arrow_connect,
                     });

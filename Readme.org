@@ -17,10 +17,6 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 - ability to make game snapshot in memory and load from it
 - ability to save game state to file and load from it
 
-** Next steps
-- re-create arrows on load from ron file
-- add redo
-
 ** Run (supported platforms: linux, macos, windows)
 
 #+BEGIN_SRC sh
