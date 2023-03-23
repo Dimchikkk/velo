@@ -1,16 +1,14 @@
 use base64::{engine::general_purpose, Engine};
 use bevy::{
-    ecs::schedule::SystemConfig,
+    ecs::{event, schedule::SystemConfig},
     input::mouse::MouseMotion,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     text::BreakLineOn,
-    utils::HashSet,
     window::PrimaryWindow,
 };
 use bevy::{
-    reflect::{erased_serde::__private::serde::de::DeserializeSeed},
-    scene::serde::SceneDeserializer,
+    reflect::erased_serde::__private::serde::de::DeserializeSeed, scene::serde::SceneDeserializer,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
@@ -38,6 +36,12 @@ struct RedrawArrow {
     pub id: ReflectableUuid,
 }
 
+#[derive(Eq, PartialEq, Hash, Debug, Clone, Copy)]
+struct CreateArrow {
+    pub start: ArrowConnect,
+    pub end: ArrowConnect,
+}
+
 const MAX_AMOUNT_OF_CHECKPOINTS: usize = 30;
 
 #[derive(Resource, Debug)]
@@ -55,7 +59,7 @@ pub struct AppState {
     pub entity_to_edit: Option<ReflectableUuid>,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
-    pub line_to_draw_start: Option<(ArrowConnect, Vec2)>,
+    pub arrow_to_draw_start: Option<ArrowConnect>,
     pub checkpoints: VecDeque<String>,
 }
 
@@ -68,7 +72,6 @@ impl Plugin for ChartPlugin {
         app.register_type::<Top>();
         app.register_type::<ArrowConnect>();
         app.register_type::<ResizeMarker>();
-        app.register_type::<ArrowMeta>();
         app.register_type::<ReflectableUuid>();
         app.register_type_data::<ReflectableUuid, ReflectSerialize>();
         app.register_type_data::<ReflectableUuid, ReflectDeserialize>();
@@ -77,6 +80,7 @@ impl Plugin for ChartPlugin {
         app.register_type::<BreakLineOn>();
 
         app.add_event::<AddRect>();
+        app.add_event::<CreateArrow>();
         app.add_event::<RedrawArrow>();
 
         app.add_startup_system(init_layout);
@@ -87,7 +91,8 @@ impl Plugin for ChartPlugin {
             create_entity_event,
             resize_entity_start,
             resize_entity_end,
-            connect_rectangles,
+            create_arrow_start,
+            create_arrow_end,
             set_focused_entity,
             redraw_arrows,
             keyboard_input_system,
@@ -252,7 +257,7 @@ pub fn from_file_or_memory(
     state.entity_to_edit = None;
     state.hold_entity = None;
     state.entity_to_resize = None;
-    state.line_to_draw_start = None;
+    state.arrow_to_draw_start = None;
 
     let ron;
     match &request.path {
@@ -289,53 +294,82 @@ fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
-fn connect_rectangles(
+fn create_arrow_end(
     mut commands: Commands,
-    mut interaction_query: Query<
-        (&Interaction, &ArrowConnect, Entity),
-        (Changed<Interaction>, With<ArrowConnect>),
-    >,
-    mut state: ResMut<AppState>,
+    mut events: EventReader<CreateArrow>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     labelled: Query<&GlobalTransform>,
+    mut arrow_markers: Query<(Entity, &ArrowConnect), With<ArrowConnect>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let primary_window = windows.single_mut();
     let (camera, camera_transform) = camera_q.single();
-    for (interaction, arrow_connect, entity) in interaction_query.iter_mut() {
+    if let Some(event) = events.iter().next() {
+        let mut start = None;
+        let mut end = None;
+        for (entity, arrow_connect) in &mut arrow_markers.iter_mut() {
+            if arrow_connect.clone() == event.start {
+                if let Ok(global_transform) = labelled.get(entity) {
+                    let world_position = global_transform.affine().translation;
+                    start = Some(Vec2::new(
+                        world_position.x,
+                        primary_window.height() - world_position.y,
+                    ));
+                }
+            }
+            if arrow_connect.clone() == event.end {
+                if let Ok(global_transform) = labelled.get(entity) {
+                    let world_position = global_transform.affine().translation;
+                    end = Some(Vec2::new(
+                        world_position.x,
+                        primary_window.height() - world_position.y,
+                    ));
+                }
+            }
+        }
+    
+        if let (Some(start), Some(end)) = (start, end) {
+            let start = camera.viewport_to_world_2d(camera_transform, start);
+            let end = camera.viewport_to_world_2d(camera_transform, end);
+            if let (Some(start), Some(end)) = (start, end) {
+                create_arrow(
+                    &mut commands,
+                    start,
+                    end,
+                    ArrowMeta {
+                        start: event.start,
+                        end: event.end,
+                    },
+                );
+            }
+        }
+    }
+
+}
+
+fn create_arrow_start(
+    mut interaction_query: Query<
+        (&Interaction, &ArrowConnect),
+        (Changed<Interaction>, With<ArrowConnect>),
+    >,
+    mut state: ResMut<AppState>,
+    mut connect_arrow: EventWriter<CreateArrow>,
+) {
+    for (interaction, arrow_connect) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
-            match state.line_to_draw_start {
+            match state.arrow_to_draw_start {
                 Some(start_arrow) => {
-                    if start_arrow.0.id == arrow_connect.id {
+                    if start_arrow.id == arrow_connect.id {
                         continue;
                     }
-                    if let Ok(global_transform) = labelled.get(entity) {
-                        let end = global_transform.affine().translation;
-                        let end = Vec2::new(end.x, primary_window.height() - end.y);
-                        let start = camera.viewport_to_world_2d(camera_transform, start_arrow.1);
-                        let end = camera.viewport_to_world_2d(camera_transform, end);
-                        if let (Some(start), Some(end)) = (start, end) {
-                            create_arrow(
-                                &mut commands,
-                                start,
-                                end,
-                                ArrowMeta {
-                                    start: start_arrow.0,
-                                    end: *arrow_connect,
-                                },
-                            );
-                            state.line_to_draw_start = None;
-                        }
-                    }
+                    state.arrow_to_draw_start = None;
+                    connect_arrow.send(CreateArrow {
+                        start: start_arrow,
+                        end: *arrow_connect,
+                    });
                 }
                 None => {
-                    if let Ok(global_transform) = labelled.get(entity) {
-                        let world_position = global_transform.affine().translation;
-                        state.line_to_draw_start = Some((
-                            *arrow_connect,
-                            Vec2::new(world_position.x, primary_window.height() - world_position.y),
-                        ));
-                    }
+                    state.arrow_to_draw_start = Some(*arrow_connect);
                 }
             }
         }
@@ -395,62 +429,19 @@ fn set_focused_entity(
 }
 
 fn redraw_arrows(
-    mut commands: Commands,
-    mut events: EventReader<RedrawArrow>,
+    mut redraw_arrow: EventReader<RedrawArrow>,
+    mut create_arrow: EventWriter<CreateArrow>,
     mut arrow_query: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
-    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    labelled: Query<&GlobalTransform>,
-    mut arrow_markers: Query<(Entity, &ArrowConnect), With<ArrowConnect>>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    mut commands: Commands,
 ) {
-    let primary_window = windows.single_mut();
-    let (camera, camera_transform) = camera_q.single();
-    let mut despawned: HashSet<ArrowMeta> = HashSet::new();
-
-    for event in events.iter() {
-        for (entity, arrow) in &mut arrow_query.iter_mut() {
-            if despawned.contains(arrow) {
-                continue;
-            }
+    for (entity, arrow) in &mut arrow_query.iter_mut() {
+        if let Some(event) = redraw_arrow.into_iter().next() {
             if arrow.start.id == event.id || arrow.end.id == event.id {
-                if let Some(entity) = commands.get_entity(entity) {
-                    despawned.insert(*arrow);
-                    entity.despawn_recursive();
-                }
-            }
-        }
-    }
-
-    for arrow_meta in despawned {
-        let mut start = None;
-        let mut end = None;
-        for (entity, arrow_connect) in &mut arrow_markers.iter_mut() {
-            if arrow_connect.id == arrow_meta.start.id && arrow_connect.pos == arrow_meta.start.pos
-            {
-                if let Ok(global_transform) = labelled.get(entity) {
-                    let world_position = global_transform.affine().translation;
-                    start = Some(Vec2::new(
-                        world_position.x,
-                        primary_window.height() - world_position.y,
-                    ));
-                }
-            }
-            if arrow_connect.id == arrow_meta.end.id && arrow_connect.pos == arrow_meta.end.pos {
-                if let Ok(global_transform) = labelled.get(entity) {
-                    let world_position = global_transform.affine().translation;
-                    end = Some(Vec2::new(
-                        world_position.x,
-                        primary_window.height() - world_position.y,
-                    ));
-                }
-            }
-        }
-
-        if let (Some(start), Some(end)) = (start, end) {
-            let start = camera.viewport_to_world_2d(camera_transform, start);
-            let end = camera.viewport_to_world_2d(camera_transform, end);
-            if let (Some(start), Some(end)) = (start, end) {
-                create_arrow(&mut commands, start, end, arrow_meta);
+                commands.entity(entity).despawn_recursive();
+                create_arrow.send(CreateArrow {
+                    start: arrow.start,
+                    end: arrow.end,
+                });
             }
         }
     }
