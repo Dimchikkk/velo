@@ -198,14 +198,14 @@ fn create_rectangle_txt(font: Handle<Font>) -> TextBundle {
     }
 }
 
-pub struct ItemMeta {
+pub struct NodeMeta {
     pub id: ReflectableUuid,
     pub size: Vec2,
     pub font: Handle<Font>,
     pub image: Option<UiImage>,
 }
 
-pub fn spawn_item(commands: &mut Commands, item_meta: ItemMeta) {
+pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) {
     commands
         .spawn((create_rectangle_node(), Top { id: item_meta.id }, Save))
         .with_children(|builder| {
