@@ -5,7 +5,6 @@ use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     text::BreakLineOn,
-    transform::commands,
     window::PrimaryWindow,
 };
 use bevy::{
@@ -245,20 +244,23 @@ fn post_load(
             let image_bytes = general_purpose::STANDARD
                 .decode(image.as_str().unwrap().as_bytes())
                 .unwrap();
-            let img = load_from_memory_with_format(&image_bytes, ImageFormat::Png).unwrap();
-            let size: Extent3d = Extent3d {
-                width: img.width(),
-                height: img.height(),
-                ..Default::default()
-            };
-            let image = Image::new(
-                size,
-                TextureDimension::D2,
-                img.into_bytes(),
-                TextureFormat::Rgba8UnormSrgb,
-            );
-            let image_handle = res_images.add(image);
-            ui_image.texture = image_handle;
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let img = load_from_memory_with_format(&image_bytes, ImageFormat::Png).unwrap();
+                let size: Extent3d = Extent3d {
+                    width: img.width(),
+                    height: img.height(),
+                    ..Default::default()
+                };
+                let image = Image::new(
+                    size,
+                    TextureDimension::D2,
+                    img.into_bytes(),
+                    TextureFormat::Rgba8UnormSrgb,
+                );
+                let image_handle = res_images.add(image);
+                ui_image.texture = image_handle;
+            }
         }
     }
 
@@ -616,9 +618,9 @@ fn create_new_rectangle(
 ) {
     for _ in events.iter() {
         let font = asset_server.load("fonts/iosevka-regular.ttf");
-        spawn_item(
+        spawn_node(
             &mut commands,
-            ItemMeta {
+            NodeMeta {
                 font,
                 size: Vec2::new(100., 100.),
                 id: ReflectableUuid(Uuid::new_v4()),
@@ -698,9 +700,9 @@ pub fn insert_from_clipboard(
             TextureFormat::Rgba8UnormSrgb,
         );
         let image = images.add(image);
-        spawn_item(
+        spawn_node(
             commands,
-            ItemMeta {
+            NodeMeta {
                 font: Handle::default(),
                 size: Vec2::new(size.width as f32, size.height as f32),
                 id: ReflectableUuid(Uuid::new_v4()),
