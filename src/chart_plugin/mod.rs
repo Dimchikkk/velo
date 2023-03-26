@@ -1,37 +1,31 @@
-use base64::{engine::general_purpose, Engine};
 use bevy::{
-    ecs::schedule::SystemConfig,
     input::mouse::MouseMotion,
     prelude::*,
-    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     text::BreakLineOn,
     window::PrimaryWindow,
 };
-use bevy::{
-    reflect::erased_serde::__private::serde::de::DeserializeSeed, scene::serde::SceneDeserializer,
-};
-#[cfg(not(target_arch = "wasm32"))]
-use image::*;
-use moonshine_save::{
-    load::{self, load, unload},
-    prelude::{LoadSet, SaveSet, Unload},
-    save::{self, save, Save, Saved},
-};
-use regex::Regex;
-use ron::Deserializer;
-use serde_json::{json, Value};
+use moonshine_save::prelude::{LoadSet, SaveSet};
+
+pub use ron::de::SpannedError as ParseError;
+pub use ron::Error as DeserializeError;
 use std::{
     collections::{HashSet, VecDeque},
-    convert::TryInto,
-    io::Cursor,
     path::PathBuf,
 };
 use uuid::Uuid;
+
 #[path = "ui_helpers.rs"]
 mod ui_helpers;
-pub use ron::de::SpannedError as ParseError;
-pub use ron::Error as DeserializeError;
-pub use ui_helpers::*;
+use ui_helpers::*;
+#[path = "systems/save.rs"]
+mod save_systems;
+use save_systems::*;
+#[path = "systems/load.rs"]
+mod load_systems;
+use load_systems::*;
+#[path = "systems/keyboard.rs"]
+mod keyboard_systems;
+use keyboard_systems::*;
 
 pub struct ChartPlugin;
 
@@ -41,13 +35,8 @@ struct RedrawArrow {
     pub id: ReflectableUuid,
 }
 
-#[derive(Eq, PartialEq, Hash, Debug, Clone, Copy)]
-struct CreateArrow {
-    pub start: ArrowConnect,
-    pub end: ArrowConnect,
-}
-
-const MAX_AMOUNT_OF_CHECKPOINTS: usize = 30;
+#[derive(Component)]
+pub struct MainCamera;
 
 #[derive(Resource, Debug)]
 pub struct SaveRequest {
@@ -91,7 +80,7 @@ impl Plugin for ChartPlugin {
         app.add_startup_system(init_layout);
 
         app.add_systems((
-            update_rectangle_pos,
+            update_rectangle_position,
             create_new_rectangle,
             create_entity_event,
             resize_entity_start,
@@ -123,193 +112,6 @@ impl Plugin for ChartPlugin {
                 .distributive_run_if(should_load),
         );
     }
-}
-
-pub fn save_ron_as_checkpoint(
-    In(saved): In<Saved>,
-    type_registry: Res<AppTypeRegistry>,
-    mut state: ResMut<AppState>,
-) -> Result<Saved, save::Error> {
-    let input = saved.scene.serialize_ron(&type_registry)?;
-    let re = Regex::new(r"generation: (\d+)").unwrap();
-    // lol
-    let input = re.replace_all(&input, "generation: 0").to_string();
-    let ron = general_purpose::STANDARD.encode(input);
-    if state.checkpoints.len() > MAX_AMOUNT_OF_CHECKPOINTS {
-        state.checkpoints.pop_front();
-    }
-    state.checkpoints.push_back(ron);
-    Ok(saved)
-}
-
-fn post_save(
-    images: Res<Assets<Image>>,
-    rec: Query<(&Rectangle, &UiImage), With<Rectangle>>,
-    arrows: Query<&ArrowMeta, With<ArrowMeta>>,
-    request: Res<SaveRequest>,
-    mut state: ResMut<AppState>,
-) {
-    eprintln!("post save: {:?}", request);
-    let ron = state.checkpoints.pop_back().unwrap();
-    let mut json = json!({
-        "bevy_version": "0.10",
-        "images": {},
-        "arrows": [],
-        "ron": ron,
-    });
-    let json_images = json["images"].as_object_mut().unwrap();
-    for (rect, image) in rec.iter() {
-        if let Some(image) = images.get(&image.texture) {
-            if let Ok(img) = image.clone().try_into_dynamic() {
-                let mut image_data: Vec<u8> = Vec::new();
-                #[cfg(not(target_arch = "wasm32"))]
-                img.write_to(&mut Cursor::new(&mut image_data), ImageOutputFormat::Png)
-                    .unwrap();
-                let res_base64 = general_purpose::STANDARD.encode(image_data);
-                json_images.insert(rect.id.0.to_string(), json!(res_base64));
-            }
-        }
-    }
-
-    let json_arrows = json["arrows"].as_array_mut().unwrap();
-    for arrow_meta in arrows.iter() {
-        json_arrows.push(json!(arrow_meta));
-    }
-
-    if let Some(path) = request.path.clone() {
-        std::fs::write(path, json.to_string()).expect("Error saving state to file")
-    } else {
-        state.checkpoints.push_back(json.to_string());
-    }
-}
-
-fn should_save(request: Option<Res<SaveRequest>>) -> bool {
-    request.is_some()
-}
-
-fn remove_save_request(world: &mut World) {
-    world.remove_resource::<SaveRequest>().unwrap();
-}
-
-fn should_load(request: Option<Res<LoadRequest>>) -> bool {
-    request.is_some()
-}
-
-fn remove_load_request(world: &mut World) {
-    world.remove_resource::<LoadRequest>().unwrap();
-}
-
-pub fn save_ron() -> SystemConfig {
-    save::<With<Save>>
-        .pipe(save_ron_as_checkpoint)
-        .pipe(save::finish)
-        .in_set(SaveSet::Save)
-}
-
-pub fn load_ron() -> SystemConfig {
-    from_file_or_memory
-        .pipe(unload::<Or<(With<Save>, With<Unload>)>>)
-        .pipe(load)
-        .pipe(load::finish)
-        .in_set(LoadSet::Load)
-}
-
-fn post_load(
-    mut rec: Query<(&Rectangle, &mut UiImage), With<Rectangle>>,
-    request: Res<LoadRequest>,
-    mut state: ResMut<AppState>,
-    mut commands: Commands,
-    mut res_images: ResMut<Assets<Image>>,
-    old_arrows: Query<Entity, With<ArrowMeta>>,
-    mut create_arrow: EventWriter<CreateArrow>,
-) {
-    let mut json: Value = match &request.path {
-        Some(path) => {
-            let json = std::fs::read_to_string(path).expect("Error reading state from file");
-            serde_json::from_str(&json).unwrap()
-        }
-        None => {
-            let json = if state.checkpoints.len() == 1 {
-                state.checkpoints.back().unwrap().clone()
-            } else {
-                state.checkpoints.pop_back().unwrap()
-            };
-            serde_json::from_str(&json).unwrap()
-        }
-    };
-    let images = json["images"].as_object_mut().unwrap();
-    for (rect, mut ui_image) in rec.iter_mut() {
-        if images.contains_key(&rect.id.0.to_string()) {
-            let image = images.get(&rect.id.0.to_string()).unwrap();
-            let image_bytes = general_purpose::STANDARD
-                .decode(image.as_str().unwrap().as_bytes())
-                .unwrap();
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                let img = load_from_memory_with_format(&image_bytes, ImageFormat::Png).unwrap();
-                let size: Extent3d = Extent3d {
-                    width: img.width(),
-                    height: img.height(),
-                    ..Default::default()
-                };
-                let image = Image::new(
-                    size,
-                    TextureDimension::D2,
-                    img.into_bytes(),
-                    TextureFormat::Rgba8UnormSrgb,
-                );
-                let image_handle = res_images.add(image);
-                ui_image.texture = image_handle;
-            }
-        }
-    }
-
-    for entity in old_arrows.iter() {
-        commands.entity(entity).despawn_recursive();
-    }
-    let arrows = json["arrows"].as_array_mut().unwrap();
-    for arrow in arrows.iter() {
-        let arrow_meta: ArrowMeta = serde_json::from_value(arrow.clone()).unwrap();
-        create_arrow.send(CreateArrow {
-            start: arrow_meta.start,
-            end: arrow_meta.end,
-        });
-    }
-}
-
-pub fn from_file_or_memory(
-    type_registry: Res<AppTypeRegistry>,
-    request: Res<LoadRequest>,
-    mut state: ResMut<AppState>,
-) -> Result<Saved, load::Error> {
-    eprintln!("load: {:?}", request);
-
-    state.entity_to_edit = None;
-    state.hold_entity = None;
-    state.entity_to_resize = None;
-    state.arrow_to_draw_start = None;
-
-    let ron;
-    match &request.path {
-        Some(path) => {
-            let json_bytes = std::fs::read(path).unwrap();
-            let json: Value = serde_json::from_slice(&json_bytes).unwrap();
-            ron = json["ron"].as_str().unwrap().to_string();
-            state.checkpoints = VecDeque::new();
-        }
-        None => {
-            let json: Value = serde_json::from_str(state.checkpoints.back().unwrap()).unwrap();
-            ron = json["ron"].as_str().unwrap().to_string();
-        }
-    }
-    let ron = general_purpose::STANDARD.decode(ron.as_bytes()).unwrap();
-    let mut deserializer = Deserializer::from_bytes(&ron)?;
-    let scene = {
-        let type_registry = &type_registry.read();
-        let scene_deserializer = SceneDeserializer { type_registry };
-        scene_deserializer.deserialize(&mut deserializer)
-    }?;
-    Ok(Saved { scene })
 }
 
 fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -588,7 +390,7 @@ fn resize_entity_start(
     }
 }
 
-fn update_rectangle_pos(
+fn update_rectangle_position(
     mut cursor_moved_events: EventReader<CursorMoved>,
     mut sprite_position: Query<(&mut Style, &Top)>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
@@ -627,100 +429,5 @@ fn create_new_rectangle(
                 image: None,
             },
         );
-    }
-}
-
-fn keyboard_input_system(
-    mut commands: Commands,
-    mut images: ResMut<Assets<Image>>,
-    mut state: ResMut<AppState>,
-    input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
-    mut char_evr: EventReader<ReceivedCharacter>,
-    asset_server: Res<AssetServer>,
-) {
-    // let font = asset_server.load("fonts/iosevka-regular.ttf");
-    let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
-    let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
-
-    if command && input.just_pressed(KeyCode::V) {
-        #[cfg(not(target_arch = "wasm32"))]
-        insert_from_clipboard(&mut commands, &mut images, &mut state, &mut query);
-    } else if command && shift && input.just_pressed(KeyCode::S) {
-        // spawn_path_modal(&mut commands, font, ReflectableUuid(Uuid::new_v4()), true);
-        commands.insert_resource(SaveRequest {
-            path: Some(PathBuf::from("ichart.json")),
-        });
-    } else if command && shift && input.just_pressed(KeyCode::L) {
-        // spawn_path_modal(&mut commands, font, ReflectableUuid(Uuid::new_v4()), false);
-        commands.insert_resource(LoadRequest {
-            path: Some(PathBuf::from("ichart.json")),
-        });
-    } else if command && input.just_pressed(KeyCode::S) {
-        commands.insert_resource(SaveRequest { path: None });
-    } else if command && input.just_pressed(KeyCode::L) {
-        commands.insert_resource(LoadRequest { path: None });
-    } else {
-        for (mut text, editable_text) in &mut query.iter_mut() {
-            if Some(editable_text.id) == state.entity_to_edit {
-                if input.just_pressed(KeyCode::Back) {
-                    let mut str = text.sections[0].value.clone();
-                    str.pop();
-                    text.sections[0].value = str;
-                } else {
-                    for ev in char_evr.iter() {
-                        text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
-                    }
-                }
-            }
-        }
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn insert_from_clipboard(
-    commands: &mut Commands,
-    images: &mut ResMut<Assets<Image>>,
-    state: &mut ResMut<AppState>,
-    query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
-) {
-    let mut clipboard = arboard::Clipboard::new().unwrap();
-    if let Ok(image) = clipboard.get_image() {
-        let image: RgbaImage = ImageBuffer::from_raw(
-            image.width.try_into().unwrap(),
-            image.height.try_into().unwrap(),
-            image.bytes.into_owned(),
-        )
-        .unwrap();
-        let size: Extent3d = Extent3d {
-            width: image.width(),
-            height: image.height(),
-            ..Default::default()
-        };
-        let image = Image::new(
-            size,
-            TextureDimension::D2,
-            image.to_vec(),
-            TextureFormat::Rgba8UnormSrgb,
-        );
-        let image = images.add(image);
-        spawn_node(
-            commands,
-            NodeMeta {
-                font: Handle::default(),
-                size: Vec2::new(size.width as f32, size.height as f32),
-                id: ReflectableUuid(Uuid::new_v4()),
-                image: Some(image.into()),
-            },
-        );
-    }
-
-    if let Ok(clipboard_text) = clipboard.get_text() {
-        for (mut text, editable_text) in &mut query.iter_mut() {
-            if Some(editable_text.id) == state.entity_to_edit {
-                text.sections[0].value =
-                    format!("{}{}", text.sections[0].value, clipboard_text.clone());
-            }
-        }
     }
 }
