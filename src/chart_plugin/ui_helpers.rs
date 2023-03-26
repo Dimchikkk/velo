@@ -77,6 +77,28 @@ pub struct ArrowMeta {
     pub end: ArrowConnect,
 }
 
+#[derive(Component, Default)]
+pub struct PathModalTop {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component, Default)]
+pub struct PathModalValue {
+    pub id: ReflectableUuid,
+    pub save: bool,
+}
+
+#[derive(Component, Default)]
+pub struct ConfirmPathModal {
+    pub id: ReflectableUuid,
+    pub save: bool,
+}
+
+#[derive(Component, Default)]
+pub struct CancelPathModal {
+    pub id: ReflectableUuid,
+}
+
 fn get_marker_style(position: UiRect) -> Style {
     Style {
         position_type: PositionType::Absolute,
@@ -201,35 +223,6 @@ fn create_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
     }
 }
 
-pub struct NodeMeta {
-    pub id: ReflectableUuid,
-    pub size: Vec2,
-    pub font: Handle<Font>,
-    pub image: Option<UiImage>,
-}
-
-#[derive(Component, Default)]
-pub struct PathModalTop {
-    pub id: ReflectableUuid,
-}
-
-#[derive(Component, Default)]
-pub struct PathModalValue {
-    pub id: ReflectableUuid,
-    pub save: bool,
-}
-
-#[derive(Component, Default)]
-pub struct ConfirmPathModal {
-    pub id: ReflectableUuid,
-    pub save: bool,
-}
-
-#[derive(Component, Default)]
-pub struct CancelPathModal {
-    pub id: ReflectableUuid,
-}
-
 pub fn spawn_path_modal(
     commands: &mut Commands,
     font: Handle<Font>,
@@ -310,6 +303,13 @@ pub fn spawn_path_modal(
                         });
                 });
         });
+}
+
+pub struct NodeMeta {
+    pub id: ReflectableUuid,
+    pub size: Vec2,
+    pub font: Handle<Font>,
+    pub image: Option<UiImage>,
 }
 
 pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) {
