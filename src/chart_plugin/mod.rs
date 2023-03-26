@@ -1,9 +1,4 @@
-use bevy::{
-    input::mouse::MouseMotion,
-    prelude::*,
-    text::BreakLineOn,
-    window::PrimaryWindow,
-};
+use bevy::{input::mouse::MouseMotion, prelude::*, text::BreakLineOn, window::PrimaryWindow};
 use moonshine_save::prelude::{LoadSet, SaveSet};
 
 pub use ron::de::SpannedError as ParseError;
