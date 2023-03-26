@@ -9,8 +9,11 @@ use bevy_prototype_lyon::{
 use moonshine_save::save::Save;
 use uuid::Uuid;
 
-#[derive(Component)]
-pub struct MainCamera;
+#[derive(Eq, PartialEq, Hash, Debug, Clone, Copy)]
+pub struct CreateArrow {
+    pub start: ArrowConnect,
+    pub end: ArrowConnect,
+}
 
 #[derive(Clone, Reflect, Default, Debug, Copy, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[reflect_value]
