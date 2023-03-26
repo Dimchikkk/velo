@@ -108,13 +108,13 @@ pub fn add_rectangle_btn() -> ButtonBundle {
     }
 }
 
-pub fn add_rectangle_txt(font: Handle<Font>) -> TextBundle {
+pub fn add_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
     let text_style = TextStyle {
         font,
         font_size: 18.0,
         color: Color::BLACK,
     };
-    TextBundle::from_section("NEW RECT", text_style).with_style(Style {
+    TextBundle::from_section(text, text_style).with_style(Style {
         position_type: PositionType::Relative,
         ..default()
     })
@@ -182,14 +182,14 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
     }
 }
 
-fn create_rectangle_txt(font: Handle<Font>) -> TextBundle {
+fn create_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
     let text_style = TextStyle {
         font,
         font_size: 18.0,
         color: Color::BLACK,
     };
     TextBundle {
-        text: Text::from_section("", text_style),
+        text: Text::from_section(text, text_style),
         style: Style {
             position_type: PositionType::Relative,
             ..default()
@@ -203,6 +203,110 @@ pub struct NodeMeta {
     pub size: Vec2,
     pub font: Handle<Font>,
     pub image: Option<UiImage>,
+}
+
+#[derive(Component, Default)]
+pub struct PathModalTop {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component, Default)]
+pub struct PathModalValue {
+    pub id: ReflectableUuid,
+    pub save: bool,
+}
+
+#[derive(Component, Default)]
+pub struct ConfirmPathModal {
+    pub id: ReflectableUuid,
+    pub save: bool,
+}
+
+#[derive(Component, Default)]
+pub struct CancelPathModal {
+    pub id: ReflectableUuid,
+}
+
+pub fn spawn_path_modal(
+    commands: &mut Commands,
+    font: Handle<Font>,
+    id: ReflectableUuid,
+    save: bool,
+) {
+    commands
+        .spawn((create_rectangle_node(), PathModalTop { id }))
+        .with_children(|builder| {
+            builder
+                .spawn(NodeBundle {
+                    style: Style {
+                        size: Size::new(Val::Px(300.0), Val::Px(200.0)),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        flex_direction: FlexDirection::Column,
+                        ..default()
+                    },
+                    ..default()
+                })
+                .with_children(|builder| {
+                    builder
+                        .spawn(create_rectangle_btn(Vec2::new(300., 50.), None))
+                        .with_children(|builder| {
+                            builder.spawn(add_rectangle_txt(
+                                font.clone(),
+                                "Enter file name:".to_string(),
+                            ));
+                        });
+                    builder
+                        .spawn((
+                            create_rectangle_btn(Vec2::new(300., 50.), None),
+                            PathModalValue { id, save },
+                        ))
+                        .with_children(|builder| {
+                            builder.spawn((
+                                create_rectangle_txt(font.clone(), "./ichart.json".to_string()),
+                                EditableText { id },
+                            ));
+                        });
+                    builder
+                        .spawn(NodeBundle {
+                            style: Style {
+                                size: Size::new(Val::Px(300.0), Val::Px(50.0)),
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::SpaceAround,
+                                ..default()
+                            },
+                            ..default()
+                        })
+                        .with_children(|builder| {
+                            builder
+                                .spawn((
+                                    create_rectangle_btn(Vec2::new(150., 50.), None),
+                                    ConfirmPathModal { id, save },
+                                ))
+                                .with_children(|builder| {
+                                    builder.spawn(add_rectangle_txt(
+                                        font.clone(),
+                                        if save {
+                                            "Save".to_string()
+                                        } else {
+                                            "Load".to_string()
+                                        },
+                                    ));
+                                });
+                            builder
+                                .spawn((
+                                    create_rectangle_btn(Vec2::new(150., 50.), None),
+                                    CancelPathModal { id },
+                                ))
+                                .with_children(|builder| {
+                                    builder.spawn(add_rectangle_txt(
+                                        font.clone(),
+                                        "Cancel".to_string(),
+                                    ));
+                                });
+                        });
+                });
+        });
 }
 
 pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) {
@@ -269,7 +373,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) {
                         Save,
                     ));
                     builder.spawn((
-                        create_rectangle_txt(item_meta.font),
+                        create_rectangle_txt(item_meta.font, "".to_string()),
                         EditableText { id: item_meta.id },
                         Save,
                     ));
