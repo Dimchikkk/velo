@@ -320,7 +320,7 @@ fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((add_rectangle_btn(), CreateRectButton))
         .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone()));
+            builder.spawn(add_rectangle_txt(font.clone(), "Add Rectangle".to_string()));
         });
 }
 
@@ -490,14 +490,14 @@ fn redraw_arrows(
 fn resize_entity_end(
     mut mouse_motion_events: EventReader<MouseMotion>,
     state: Res<AppState>,
-    mut top_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
+    mut rectangle_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut events: EventWriter<RedrawArrow>,
 ) {
     let primary_window = windows.single_mut();
     for event in mouse_motion_events.iter() {
         if let Some((id, resize_marker)) = state.entity_to_resize {
-            for (rectangle, mut button_style) in &mut top_query {
+            for (rectangle, mut button_style) in &mut rectangle_query {
                 if id == rectangle.id {
                     events.send(RedrawArrow { id });
                     let delta = event.delta;
@@ -637,7 +637,9 @@ fn keyboard_input_system(
     input: Res<Input<KeyCode>>,
     mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
     mut char_evr: EventReader<ReceivedCharacter>,
+    asset_server: Res<AssetServer>,
 ) {
+    // let font = asset_server.load("fonts/iosevka-regular.ttf");
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
 
@@ -645,10 +647,12 @@ fn keyboard_input_system(
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(&mut commands, &mut images, &mut state, &mut query);
     } else if command && shift && input.just_pressed(KeyCode::S) {
+        // spawn_path_modal(&mut commands, font, ReflectableUuid(Uuid::new_v4()), true);
         commands.insert_resource(SaveRequest {
             path: Some(PathBuf::from("ichart.json")),
         });
     } else if command && shift && input.just_pressed(KeyCode::L) {
+        // spawn_path_modal(&mut commands, font, ReflectableUuid(Uuid::new_v4()), false);
         commands.insert_resource(LoadRequest {
             path: Some(PathBuf::from("ichart.json")),
         });
