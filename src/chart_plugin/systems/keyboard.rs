@@ -13,7 +13,7 @@ use uuid::Uuid;
 
 use crate::{AppState, LoadRequest, SaveRequest};
 
-use super::ui_helpers::EditableText;
+use super::ui_helpers::{spawn_path_modal, EditableText, ReflectableUuid};
 
 pub fn keyboard_input_system(
     mut commands: Commands,
@@ -22,9 +22,9 @@ pub fn keyboard_input_system(
     input: Res<Input<KeyCode>>,
     mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
     mut char_evr: EventReader<ReceivedCharacter>,
-    _asset_server: Res<AssetServer>,
+    asset_server: Res<AssetServer>,
 ) {
-    // let font = asset_server.load("fonts/iosevka-regular.ttf");
+    let font = asset_server.load("fonts/iosevka-regular.ttf");
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
 
@@ -32,10 +32,10 @@ pub fn keyboard_input_system(
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(&mut commands, &mut images, &mut state, &mut query);
     } else if command && shift && input.just_pressed(KeyCode::S) {
-        // spawn_path_modal(&mut commands, font, ReflectableUuid(Uuid::new_v4()), true);
-        commands.insert_resource(SaveRequest {
-            path: Some(PathBuf::from("ichart.json")),
-        });
+        spawn_path_modal(&mut commands, font, ReflectableUuid(Uuid::new_v4()), true);
+        // commands.insert_resource(SaveRequest {
+        //     path: Some(PathBuf::from("ichart.json")),
+        // });
     } else if command && shift && input.just_pressed(KeyCode::L) {
         // spawn_path_modal(&mut commands, font, ReflectableUuid(Uuid::new_v4()), false);
         commands.insert_resource(LoadRequest {
@@ -69,9 +69,8 @@ pub fn insert_from_clipboard(
     state: &mut ResMut<AppState>,
     query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
 ) {
-    use crate::chart_plugin::ui_helpers::{NodeMeta, ReflectableUuid};
-
     use super::ui_helpers::spawn_node;
+    use crate::chart_plugin::ui_helpers::NodeMeta;
 
     let mut clipboard = arboard::Clipboard::new().unwrap();
     if let Ok(image) = clipboard.get_image() {
