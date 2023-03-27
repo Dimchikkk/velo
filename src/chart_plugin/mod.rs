@@ -250,10 +250,8 @@ fn set_focused_entity(
         match *interaction {
             Interaction::Clicked => {
                 window.cursor.icon = CursorIcon::Text;
+                state.hold_entity = Some(rectangle.id);
                 state.entity_to_edit = Some(rectangle.id);
-                if state.entity_to_edit.is_some() {
-                    state.hold_entity = Some(rectangle.id);
-                }
             }
             Interaction::Hovered => {
                 if state.hold_entity.is_none() {
