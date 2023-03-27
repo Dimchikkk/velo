@@ -48,6 +48,7 @@ pub struct LoadRequest {
 
 #[derive(Resource, Default)]
 pub struct AppState {
+    pub path_modal_id: Option<ReflectableUuid>,
     pub entity_to_edit: Option<ReflectableUuid>,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
@@ -89,6 +90,9 @@ impl Plugin for ChartPlugin {
             redraw_arrows,
             keyboard_input_system,
             cancel_path_modal,
+            path_modal_keyboard_input_system,
+            set_focused_modal,
+            confirm_path_modal,
         ));
 
         app.add_systems(

@@ -83,7 +83,13 @@ pub struct PathModalTop {
 }
 
 #[derive(Component, Default)]
-pub struct PathModalValue {
+pub struct PathModalText {
+    pub id: ReflectableUuid,
+    pub save: bool,
+}
+
+#[derive(Component, Default)]
+pub struct PathModalTextInput {
     pub id: ReflectableUuid,
     pub save: bool,
 }
@@ -167,9 +173,7 @@ fn create_rectangle_btn(size: Vec2, image: Option<UiImage>) -> ButtonBundle {
     let mut button = ButtonBundle {
         style: Style {
             size: Size::new(Val::Px(size.x), Val::Px(size.y)),
-            // horizontally center child text
             justify_content: JustifyContent::Center,
-            // vertically center child text
             align_items: AlignItems::Center,
             ..default()
         },
@@ -234,6 +238,7 @@ pub fn spawn_path_modal(
         .with_children(|builder| {
             builder
                 .spawn(NodeBundle {
+                    z_index: ZIndex::Global(1),
                     style: Style {
                         size: Size::new(Val::Px(300.0), Val::Px(200.0)),
                         align_items: AlignItems::Center,
@@ -255,12 +260,12 @@ pub fn spawn_path_modal(
                     builder
                         .spawn((
                             create_rectangle_btn(Vec2::new(300., 50.), None),
-                            PathModalValue { id, save },
+                            PathModalText { id, save },
                         ))
                         .with_children(|builder| {
                             builder.spawn((
-                                create_rectangle_txt(font.clone(), "./ichart.json".to_string()),
-                                EditableText { id },
+                                create_rectangle_txt(font.clone(), "./data/ichart.json".to_string()),
+                                PathModalTextInput { id, save },
                             ));
                         });
                     builder
