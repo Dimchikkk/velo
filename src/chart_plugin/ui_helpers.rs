@@ -89,13 +89,13 @@ pub struct PathModalValue {
 }
 
 #[derive(Component, Default)]
-pub struct ConfirmPathModal {
+pub struct PathModalConfirm {
     pub id: ReflectableUuid,
     pub save: bool,
 }
 
 #[derive(Component, Default)]
-pub struct CancelPathModal {
+pub struct PathModalCancel {
     pub id: ReflectableUuid,
 }
 
@@ -277,7 +277,7 @@ pub fn spawn_path_modal(
                             builder
                                 .spawn((
                                     create_rectangle_btn(Vec2::new(150., 50.), None),
-                                    ConfirmPathModal { id, save },
+                                    PathModalConfirm { id, save },
                                 ))
                                 .with_children(|builder| {
                                     builder.spawn(add_rectangle_txt(
@@ -292,7 +292,7 @@ pub fn spawn_path_modal(
                             builder
                                 .spawn((
                                     create_rectangle_btn(Vec2::new(150., 50.), None),
-                                    CancelPathModal { id },
+                                    PathModalCancel { id },
                                 ))
                                 .with_children(|builder| {
                                     builder.spawn(add_rectangle_txt(
