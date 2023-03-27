@@ -8,7 +8,7 @@ use image::*;
 
 pub use ron::de::SpannedError as ParseError;
 pub use ron::Error as DeserializeError;
-use std::{convert::TryInto};
+use std::convert::TryInto;
 use uuid::Uuid;
 
 use crate::{AppState, LoadRequest, SaveRequest};
