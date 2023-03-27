@@ -8,7 +8,7 @@ use image::*;
 
 pub use ron::de::SpannedError as ParseError;
 pub use ron::Error as DeserializeError;
-use std::{convert::TryInto, path::PathBuf};
+use std::{convert::TryInto};
 use uuid::Uuid;
 
 use crate::{AppState, LoadRequest, SaveRequest};
@@ -32,15 +32,13 @@ pub fn keyboard_input_system(
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(&mut commands, &mut images, &mut state, &mut query);
     } else if command && shift && input.just_pressed(KeyCode::S) {
-        spawn_path_modal(&mut commands, font, ReflectableUuid(Uuid::new_v4()), true);
-        // commands.insert_resource(SaveRequest {
-        //     path: Some(PathBuf::from("ichart.json")),
-        // });
+        let id = ReflectableUuid(Uuid::new_v4());
+        state.path_modal_id = Some(id);
+        spawn_path_modal(&mut commands, font, id, true);
     } else if command && shift && input.just_pressed(KeyCode::L) {
-        // spawn_path_modal(&mut commands, font, ReflectableUuid(Uuid::new_v4()), false);
-        commands.insert_resource(LoadRequest {
-            path: Some(PathBuf::from("ichart.json")),
-        });
+        let id = ReflectableUuid(Uuid::new_v4());
+        state.path_modal_id = Some(id);
+        spawn_path_modal(&mut commands, font, id, false);
     } else if command && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveRequest { path: None });
     } else if command && input.just_pressed(KeyCode::L) {
