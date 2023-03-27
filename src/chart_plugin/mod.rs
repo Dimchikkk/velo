@@ -193,29 +193,27 @@ fn create_arrow_start(
     let mut primary_window = windows.single_mut();
     for (interaction, arrow_connect) in interaction_query.iter_mut() {
         match interaction {
-            Interaction::Clicked => {
-                match state.arrow_to_draw_start {
-                    Some(start_arrow) => {
-                        if start_arrow.id == arrow_connect.id {
-                            continue;
-                        }
-                        state.arrow_to_draw_start = None;
-                        create_arrow.send(CreateArrow {
-                            start: start_arrow,
-                            end: *arrow_connect,
-                        });
+            Interaction::Clicked => match state.arrow_to_draw_start {
+                Some(start_arrow) => {
+                    if start_arrow.id == arrow_connect.id {
+                        continue;
                     }
-                    None => {
-                        state.arrow_to_draw_start = Some(*arrow_connect);
-                    }
+                    state.arrow_to_draw_start = None;
+                    create_arrow.send(CreateArrow {
+                        start: start_arrow,
+                        end: *arrow_connect,
+                    });
+                }
+                None => {
+                    state.arrow_to_draw_start = Some(*arrow_connect);
                 }
             },
             Interaction::Hovered => {
                 primary_window.cursor.icon = CursorIcon::Crosshair;
-            },
+            }
             Interaction::None => {
                 primary_window.cursor.icon = CursorIcon::Default;
-            },
+            }
         }
     }
 }
@@ -438,7 +436,7 @@ fn create_new_rectangle(
     for _ in events.iter() {
         let font = asset_server.load("fonts/iosevka-regular.ttf");
         let id = ReflectableUuid(Uuid::new_v4());
-        state.entity_to_edit = Some(id); 
+        state.entity_to_edit = Some(id);
         spawn_node(
             &mut commands,
             NodeMeta {

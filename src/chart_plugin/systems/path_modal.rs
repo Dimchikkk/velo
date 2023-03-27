@@ -50,11 +50,9 @@ pub fn confirm_path_modal(
                             path: Some(PathBuf::from(text.sections[0].value.clone())),
                         });
                     } else if let Ok(path) =
-                        canonicalize(PathBuf::from(text.sections[0].value.trim().clone()))
+                        canonicalize(PathBuf::from(text.sections[0].value.trim()))
                     {
-                        commands.insert_resource(LoadRequest {
-                            path: Some(path.clone()),
-                        });
+                        commands.insert_resource(LoadRequest { path: Some(path) });
                     } else {
                         eprintln!("File not found: {}", text.sections[0].value);
                     }
