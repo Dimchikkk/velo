@@ -115,6 +115,7 @@ pub fn from_file_or_memory(
     state.hold_entity = None;
     state.entity_to_resize = None;
     state.arrow_to_draw_start = None;
+    state.path_modal_id = None;
 
     let ron;
     match &request.path {
