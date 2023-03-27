@@ -21,6 +21,9 @@ use load_systems::*;
 #[path = "systems/keyboard.rs"]
 mod keyboard_systems;
 use keyboard_systems::*;
+#[path = "systems/path_modal.rs"]
+mod path_modal_systems;
+use path_modal_systems::*;
 
 pub struct ChartPlugin;
 
@@ -85,6 +88,7 @@ impl Plugin for ChartPlugin {
             set_focused_entity,
             redraw_arrows,
             keyboard_input_system,
+            cancel_path_modal,
         ));
 
         app.add_systems(
