@@ -188,24 +188,34 @@ fn create_arrow_start(
     >,
     mut state: ResMut<AppState>,
     mut create_arrow: EventWriter<CreateArrow>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
+    let mut primary_window = windows.single_mut();
     for (interaction, arrow_connect) in interaction_query.iter_mut() {
-        if let Interaction::Clicked = interaction {
-            match state.arrow_to_draw_start {
-                Some(start_arrow) => {
-                    if start_arrow.id == arrow_connect.id {
-                        continue;
+        match interaction {
+            Interaction::Clicked => {
+                match state.arrow_to_draw_start {
+                    Some(start_arrow) => {
+                        if start_arrow.id == arrow_connect.id {
+                            continue;
+                        }
+                        state.arrow_to_draw_start = None;
+                        create_arrow.send(CreateArrow {
+                            start: start_arrow,
+                            end: *arrow_connect,
+                        });
                     }
-                    state.arrow_to_draw_start = None;
-                    create_arrow.send(CreateArrow {
-                        start: start_arrow,
-                        end: *arrow_connect,
-                    });
+                    None => {
+                        state.arrow_to_draw_start = Some(*arrow_connect);
+                    }
                 }
-                None => {
-                    state.arrow_to_draw_start = Some(*arrow_connect);
-                }
-            }
+            },
+            Interaction::Hovered => {
+                primary_window.cursor.icon = CursorIcon::Crosshair;
+            },
+            Interaction::None => {
+                primary_window.cursor.icon = CursorIcon::Default;
+            },
         }
     }
 }
@@ -242,8 +252,10 @@ fn set_focused_entity(
         match *interaction {
             Interaction::Clicked => {
                 window.cursor.icon = CursorIcon::Text;
-                state.hold_entity = Some(rectangle.id);
                 state.entity_to_edit = Some(rectangle.id);
+                if state.entity_to_edit.is_some() {
+                    state.hold_entity = Some(rectangle.id);
+                }
             }
             Interaction::Hovered => {
                 if state.hold_entity.is_none() {
@@ -251,7 +263,6 @@ fn set_focused_entity(
                 }
             }
             Interaction::None => {
-                state.entity_to_edit = None;
                 window.cursor.icon = CursorIcon::Default;
             }
         }
@@ -388,7 +399,9 @@ fn resize_entity_start(
                     primary_window.cursor.icon = CursorIcon::NwseResize;
                 }
             },
-            Interaction::None => {}
+            Interaction::None => {
+                primary_window.cursor.icon = CursorIcon::Default;
+            }
         }
     }
 }
@@ -420,15 +433,18 @@ fn create_new_rectangle(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut events: EventReader<AddRect>,
+    mut state: ResMut<AppState>,
 ) {
     for _ in events.iter() {
         let font = asset_server.load("fonts/iosevka-regular.ttf");
+        let id = ReflectableUuid(Uuid::new_v4());
+        state.entity_to_edit = Some(id); 
         spawn_node(
             &mut commands,
             NodeMeta {
                 font,
                 size: Vec2::new(100., 100.),
-                id: ReflectableUuid(Uuid::new_v4()),
+                id,
                 image: None,
             },
         );

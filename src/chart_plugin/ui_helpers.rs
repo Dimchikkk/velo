@@ -175,6 +175,7 @@ fn create_rectangle_btn(size: Vec2, image: Option<UiImage>) -> ButtonBundle {
             size: Size::new(Val::Px(size.x), Val::Px(size.y)),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
+            // overflow: Overflow::Hidden,
             ..default()
         },
         ..default()
