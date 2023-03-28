@@ -1,3 +1,4 @@
+use bevy_ui_borders::BorderColor;
 use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
 
@@ -10,10 +11,16 @@ use moonshine_save::save::Save;
 use uuid::Uuid;
 
 #[derive(Component)]
+pub struct Root;
+
+#[derive(Component)]
 pub struct Menu;
 
 #[derive(Component)]
-pub struct Main;
+pub struct MainPanel;
+
+#[derive(Component)]
+pub struct LeftPanel;
 
 #[derive(Component)]
 pub struct LeftPanelControls;
@@ -43,12 +50,6 @@ pub struct CreateRectButton;
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
 pub struct EditableText {
-    pub id: ReflectableUuid,
-}
-
-#[derive(Component, Debug, Reflect, Default)]
-#[reflect(Component)]
-pub struct Top {
     pub id: ReflectableUuid,
 }
 
@@ -142,16 +143,10 @@ pub fn add_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
     })
 }
 
-fn create_rectangle_node() -> NodeBundle {
+fn create_rectangle_node(size: Vec2) -> NodeBundle {
     NodeBundle {
         style: Style {
-            position_type: PositionType::Absolute,
-            position: UiRect {
-                left: Val::Px(0.0),
-                bottom: Val::Px(0.0),
-                ..Default::default()
-            },
-            size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+            size: Size::new(Val::Px(size.x), Val::Px(size.y)),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             ..default()
@@ -163,10 +158,17 @@ fn create_rectangle_node() -> NodeBundle {
 fn create_rectangle_btn(size: Vec2, image: Option<UiImage>) -> ButtonBundle {
     let mut button = ButtonBundle {
         style: Style {
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Val::Px(0.0),
+                bottom: Val::Px(0.0),
+                ..Default::default()
+            },
             size: Size::new(Val::Px(size.x), Val::Px(size.y)),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             // overflow: Overflow::Hidden,
+            border: UiRect::all(Val::Px(1.)),
             ..default()
         },
         ..default()
@@ -225,14 +227,19 @@ pub fn spawn_path_modal(
     id: ReflectableUuid,
     save: bool,
 ) {
+    let width = 300.;
+    let height = 200.;
     commands
-        .spawn((create_rectangle_node(), PathModalTop { id }))
+        .spawn((
+            create_rectangle_node(Vec2::new(width, height)),
+            PathModalTop { id },
+        ))
         .with_children(|builder| {
             builder
                 .spawn(NodeBundle {
                     z_index: ZIndex::Global(1),
                     style: Style {
-                        size: Size::new(Val::Px(300.0), Val::Px(200.0)),
+                        size: Size::new(Val::Px(width), Val::Px(height)),
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
                         flex_direction: FlexDirection::Column,
@@ -314,73 +321,70 @@ pub struct NodeMeta {
 
 pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
     commands
-        .spawn((create_rectangle_node(), Top { id: item_meta.id }, Save))
+        .spawn((
+            create_rectangle_btn(item_meta.size, item_meta.image),
+            Rectangle { id: item_meta.id },
+            BorderColor(Color::BLACK),
+            Save,
+        ))
         .with_children(|builder| {
-            builder
-                .spawn((
-                    create_rectangle_btn(item_meta.size, item_meta.image),
-                    Rectangle { id: item_meta.id },
-                    Save,
-                ))
-                .with_children(|builder| {
-                    builder.spawn((
-                        create_arrow_marker(50.0, 0., 0., 0.),
-                        ArrowConnect {
-                            pos: ArrowConnectPos::Top,
-                            id: item_meta.id,
-                        },
-                        Save,
-                    ));
-                    builder.spawn((
-                        create_arrow_marker(0., 0., 50., 0.),
-                        ArrowConnect {
-                            pos: ArrowConnectPos::Left,
-                            id: item_meta.id,
-                        },
-                        Save,
-                    ));
-                    builder.spawn((
-                        create_arrow_marker(50., 0., 100., 0.),
-                        ArrowConnect {
-                            pos: ArrowConnectPos::Bottom,
-                            id: item_meta.id,
-                        },
-                        Save,
-                    ));
-                    builder.spawn((
-                        create_arrow_marker(100., 0., 50., 0.),
-                        ArrowConnect {
-                            pos: ArrowConnectPos::Right,
-                            id: item_meta.id,
-                        },
-                        Save,
-                    ));
-                    builder.spawn((
-                        create_resize_marker(0., 0., 0., 0.),
-                        ResizeMarker::TopLeft,
-                        Save,
-                    ));
-                    builder.spawn((
-                        create_resize_marker(100., 0., 0., 0.),
-                        ResizeMarker::TopRight,
-                        Save,
-                    ));
-                    builder.spawn((
-                        create_resize_marker(100., 0., 100., 0.),
-                        ResizeMarker::BottomRight,
-                        Save,
-                    ));
-                    builder.spawn((
-                        create_resize_marker(0., 0., 100., 0.),
-                        ResizeMarker::BottomLeft,
-                        Save,
-                    ));
-                    builder.spawn((
-                        create_rectangle_txt(item_meta.font, "".to_string()),
-                        EditableText { id: item_meta.id },
-                        Save,
-                    ));
-                });
+            builder.spawn((
+                create_arrow_marker(50.0, 0., 0., 0.),
+                ArrowConnect {
+                    pos: ArrowConnectPos::Top,
+                    id: item_meta.id,
+                },
+                Save,
+            ));
+            builder.spawn((
+                create_arrow_marker(0., 0., 50., 0.),
+                ArrowConnect {
+                    pos: ArrowConnectPos::Left,
+                    id: item_meta.id,
+                },
+                Save,
+            ));
+            builder.spawn((
+                create_arrow_marker(50., 0., 100., 0.),
+                ArrowConnect {
+                    pos: ArrowConnectPos::Bottom,
+                    id: item_meta.id,
+                },
+                Save,
+            ));
+            builder.spawn((
+                create_arrow_marker(100., 0., 50., 0.),
+                ArrowConnect {
+                    pos: ArrowConnectPos::Right,
+                    id: item_meta.id,
+                },
+                Save,
+            ));
+            builder.spawn((
+                create_resize_marker(0., 0., 0., 0.),
+                ResizeMarker::TopLeft,
+                Save,
+            ));
+            builder.spawn((
+                create_resize_marker(100., 0., 0., 0.),
+                ResizeMarker::TopRight,
+                Save,
+            ));
+            builder.spawn((
+                create_resize_marker(100., 0., 100., 0.),
+                ResizeMarker::BottomRight,
+                Save,
+            ));
+            builder.spawn((
+                create_resize_marker(0., 0., 100., 0.),
+                ResizeMarker::BottomLeft,
+                Save,
+            ));
+            builder.spawn((
+                create_rectangle_txt(item_meta.font, "".to_string()),
+                EditableText { id: item_meta.id },
+                Save,
+            ));
         })
         .id()
 }
