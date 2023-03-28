@@ -28,7 +28,6 @@ fn main() {
 
 fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
     let background_image = asset_server.load("bg.png");
-    commands.spawn((Camera2dBundle::default(), MainCamera));
     commands.spawn(SpriteBundle {
         texture: background_image,
         ..Default::default()
