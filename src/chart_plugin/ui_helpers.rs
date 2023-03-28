@@ -9,6 +9,18 @@ use bevy_prototype_lyon::{
 use moonshine_save::save::Save;
 use uuid::Uuid;
 
+#[derive(Component)]
+pub struct Menu;
+
+#[derive(Component)]
+pub struct Main;
+
+#[derive(Component)]
+pub struct LeftPanelControls;
+
+#[derive(Component)]
+pub struct LeftPanelExplorer;
+
 #[derive(Eq, PartialEq, Hash, Debug, Clone, Copy)]
 pub struct CreateArrow {
     pub start: ArrowConnect,
@@ -114,27 +126,6 @@ fn get_marker_style(position: UiRect) -> Style {
         justify_content: JustifyContent::Center,
         // vertically center child text
         align_items: AlignItems::Center,
-        ..default()
-    }
-}
-
-pub fn add_rectangle_btn() -> ButtonBundle {
-    ButtonBundle {
-        z_index: ZIndex::Global(1),
-        style: Style {
-            position_type: PositionType::Absolute,
-            position: UiRect {
-                left: Val::Px(10.),
-                top: Val::Px(10.),
-                ..Default::default()
-            },
-            size: Size::new(Val::Px(100.), Val::Px(100.)),
-            // horizontally center child text
-            justify_content: JustifyContent::Center,
-            // vertically center child text
-            align_items: AlignItems::Center,
-            ..default()
-        },
         ..default()
     }
 }

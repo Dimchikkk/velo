@@ -34,10 +34,12 @@ pub fn keyboard_input_system(
     } else if command && shift && input.just_pressed(KeyCode::S) {
         let id = ReflectableUuid(Uuid::new_v4());
         state.path_modal_id = Some(id);
+        state.entity_to_edit = None;
         spawn_path_modal(&mut commands, font, id, true);
     } else if command && shift && input.just_pressed(KeyCode::L) {
         let id = ReflectableUuid(Uuid::new_v4());
         state.path_modal_id = Some(id);
+        state.entity_to_edit = None;
         spawn_path_modal(&mut commands, font, id, false);
     } else if command && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveRequest { path: None });
