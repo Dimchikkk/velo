@@ -24,6 +24,9 @@ use keyboard_systems::*;
 #[path = "systems/path_modal.rs"]
 mod path_modal_systems;
 use path_modal_systems::*;
+#[path = "systems/init_layout.rs"]
+mod init_layout;
+use init_layout::*;
 
 pub struct ChartPlugin;
 
@@ -115,18 +118,6 @@ impl Plugin for ChartPlugin {
                 .distributive_run_if(should_load),
         );
     }
-}
-
-fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
-
-    commands.insert_resource(SaveRequest { path: None });
-
-    commands
-        .spawn((add_rectangle_btn(), CreateRectButton))
-        .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), "Add Rectangle".to_string()));
-        });
 }
 
 fn create_arrow_end(
