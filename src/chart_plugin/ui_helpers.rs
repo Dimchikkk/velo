@@ -312,7 +312,7 @@ pub struct NodeMeta {
     pub image: Option<UiImage>,
 }
 
-pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) {
+pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
     commands
         .spawn((create_rectangle_node(), Top { id: item_meta.id }, Save))
         .with_children(|builder| {
@@ -381,7 +381,8 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) {
                         Save,
                     ));
                 });
-        });
+        })
+        .id()
 }
 
 pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta: ArrowMeta) {
