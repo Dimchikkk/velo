@@ -421,12 +421,13 @@ fn create_new_rectangle(
     asset_server: Res<AssetServer>,
     mut events: EventReader<AddRect>,
     mut state: ResMut<AppState>,
+    main: Query<Entity, With<Main>>,
 ) {
     for _ in events.iter() {
         let font = asset_server.load("fonts/iosevka-regular.ttf");
         let id = ReflectableUuid(Uuid::new_v4());
         state.entity_to_edit = Some(id);
-        spawn_node(
+        let entity = spawn_node(
             &mut commands,
             NodeMeta {
                 font,
@@ -435,5 +436,6 @@ fn create_new_rectangle(
                 image: None,
             },
         );
+        commands.entity(main.single()).add_child(entity);
     }
 }

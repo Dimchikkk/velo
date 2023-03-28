@@ -85,6 +85,7 @@ pub fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
                     size: Size::new(Val::Percent(85.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
+                    overflow: Overflow::Hidden,
                     ..default()
                 },
                 ..default()
