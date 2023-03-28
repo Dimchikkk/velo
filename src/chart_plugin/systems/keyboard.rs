@@ -92,7 +92,7 @@ pub fn insert_from_clipboard(
             TextureFormat::Rgba8UnormSrgb,
         );
         let image = images.add(image);
-        spawn_node(
+        let entity = spawn_node(
             commands,
             NodeMeta {
                 font: Handle::default(),
@@ -101,6 +101,7 @@ pub fn insert_from_clipboard(
                 image: Some(image.into()),
             },
         );
+        commands.entity(state.main_panel.unwrap()).add_child(entity);
     }
 
     if let Ok(clipboard_text) = clipboard.get_text() {

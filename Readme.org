@@ -34,12 +34,10 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
 
 #+BEGIN_SRC
 cargo fmt
-cargo clippy --fix --allow-staged
+cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 #+END_SRC
 
 * Tasks to todo
-- Add borders (once https://github.com/bevyengine/bevy/pull/7795 merged)
-- Add separate panel for creating rectangles (control panel), use grid layout for it (once https://github.com/bevyengine/bevy/pull/8026  merged)
 - Make text inside rectangle smart wrapping (once https://github.com/bevyengine/bevy/pull/7761 merged)
 - Tag systems for nodes
 - Github auth, repo to sync diagrams

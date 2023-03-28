@@ -924,6 +924,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_ui_borders"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6420c106d52589f0e15402e807c014480c6629107120fb7c6ea284a91dd96df2"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "bevy_utils"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1891,6 +1900,7 @@ dependencies = [
  "base64 0.21.0",
  "bevy",
  "bevy_prototype_lyon",
+ "bevy_ui_borders",
  "image",
  "moonshine-save",
  "regex",

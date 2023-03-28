@@ -1,12 +1,9 @@
-use bevy::{input::mouse::MouseMotion, prelude::*, text::BreakLineOn, window::PrimaryWindow};
+use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
 use moonshine_save::prelude::{LoadSet, SaveSet};
 
 pub use ron::de::SpannedError as ParseError;
 pub use ron::Error as DeserializeError;
-use std::{
-    collections::{HashSet, VecDeque},
-    path::PathBuf,
-};
+use std::{collections::VecDeque, path::PathBuf};
 use uuid::Uuid;
 
 #[path = "ui_helpers.rs"]
@@ -27,12 +24,18 @@ use path_modal_systems::*;
 #[path = "systems/init_layout.rs"]
 mod init_layout;
 use init_layout::*;
+#[path = "systems/resize.rs"]
+mod resize;
+use resize::*;
+#[path = "systems/arrows.rs"]
+mod arrows;
+use arrows::*;
 
 pub struct ChartPlugin;
 
-struct AddRect;
+pub struct AddRect;
 
-struct RedrawArrow {
+pub struct RedrawArrow {
     pub id: ReflectableUuid,
 }
 
@@ -57,6 +60,7 @@ pub struct AppState {
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
     pub checkpoints: VecDeque<String>,
+    pub main_panel: Option<Entity>,
 }
 
 impl Plugin for ChartPlugin {
@@ -65,7 +69,6 @@ impl Plugin for ChartPlugin {
 
         app.register_type::<Rectangle>();
         app.register_type::<EditableText>();
-        app.register_type::<Top>();
         app.register_type::<ArrowConnect>();
         app.register_type::<ResizeMarker>();
         app.register_type::<ReflectableUuid>();
@@ -120,95 +123,6 @@ impl Plugin for ChartPlugin {
     }
 }
 
-fn create_arrow_end(
-    mut commands: Commands,
-    mut events: EventReader<CreateArrow>,
-    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    labelled: Query<&GlobalTransform>,
-    mut arrow_markers: Query<(Entity, &ArrowConnect), With<ArrowConnect>>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
-) {
-    let primary_window = windows.single_mut();
-    let (camera, camera_transform) = camera_q.single();
-    for event in events.iter() {
-        let mut start = None;
-        let mut end = None;
-        for (entity, arrow_connect) in &mut arrow_markers.iter_mut() {
-            if *arrow_connect == event.start {
-                if let Ok(global_transform) = labelled.get(entity) {
-                    let world_position = global_transform.affine().translation;
-                    start = Some(Vec2::new(
-                        world_position.x,
-                        primary_window.height() - world_position.y,
-                    ));
-                }
-            }
-            if *arrow_connect == event.end {
-                if let Ok(global_transform) = labelled.get(entity) {
-                    let world_position = global_transform.affine().translation;
-                    end = Some(Vec2::new(
-                        world_position.x,
-                        primary_window.height() - world_position.y,
-                    ));
-                }
-            }
-        }
-
-        if let (Some(start), Some(end)) = (start, end) {
-            let start = camera.viewport_to_world_2d(camera_transform, start);
-            let end = camera.viewport_to_world_2d(camera_transform, end);
-            if let (Some(start), Some(end)) = (start, end) {
-                create_arrow(
-                    &mut commands,
-                    start,
-                    end,
-                    ArrowMeta {
-                        start: event.start,
-                        end: event.end,
-                    },
-                );
-            }
-        }
-    }
-}
-
-fn create_arrow_start(
-    mut interaction_query: Query<
-        (&Interaction, &ArrowConnect),
-        (Changed<Interaction>, With<ArrowConnect>),
-    >,
-    mut state: ResMut<AppState>,
-    mut create_arrow: EventWriter<CreateArrow>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
-) {
-    let mut primary_window = windows.single_mut();
-    for (interaction, arrow_connect) in interaction_query.iter_mut() {
-        match interaction {
-            Interaction::Clicked => match state.arrow_to_draw_start {
-                Some(start_arrow) => {
-                    if start_arrow.id == arrow_connect.id {
-                        continue;
-                    }
-                    state.arrow_to_draw_start = None;
-                    create_arrow.send(CreateArrow {
-                        start: start_arrow,
-                        end: *arrow_connect,
-                    });
-                }
-                None => {
-                    state.arrow_to_draw_start = Some(*arrow_connect);
-                }
-            },
-            Interaction::Hovered => {
-                primary_window.cursor.icon = CursorIcon::Crosshair;
-            }
-            Interaction::None => {
-                primary_window.cursor.icon = CursorIcon::Default;
-            }
-        }
-    }
-}
-
 fn create_entity_event(
     mut events: EventWriter<AddRect>,
     interaction_query: Query<
@@ -260,157 +174,27 @@ fn set_focused_entity(
     }
 }
 
-fn redraw_arrows(
-    mut redraw_arrow: EventReader<RedrawArrow>,
-    mut create_arrow: EventWriter<CreateArrow>,
-    mut arrow_query: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
-    mut commands: Commands,
-) {
-    let mut despawned: HashSet<ArrowMeta> = HashSet::new();
-
-    for event in redraw_arrow.iter() {
-        for (entity, arrow) in &mut arrow_query.iter_mut() {
-            if despawned.contains(arrow) {
-                continue;
-            }
-            if arrow.start.id == event.id || arrow.end.id == event.id {
-                if let Some(entity) = commands.get_entity(entity) {
-                    despawned.insert(*arrow);
-                    entity.despawn_recursive();
-                }
-            }
-        }
-    }
-
-    for arrow_meta in despawned {
-        create_arrow.send(CreateArrow {
-            start: arrow_meta.start,
-            end: arrow_meta.end,
-        });
-    }
-}
-
-fn resize_entity_end(
-    mut mouse_motion_events: EventReader<MouseMotion>,
-    state: Res<AppState>,
-    mut rectangle_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut events: EventWriter<RedrawArrow>,
-) {
-    let primary_window = windows.single_mut();
-    for event in mouse_motion_events.iter() {
-        if let Some((id, resize_marker)) = state.entity_to_resize {
-            for (rectangle, mut button_style) in &mut rectangle_query {
-                if id == rectangle.id {
-                    events.send(RedrawArrow { id });
-                    let delta = event.delta;
-                    match resize_marker {
-                        ResizeMarker::TopLeft => {
-                            if let Val::Px(width) = button_style.size.width {
-                                let scale_factor = primary_window.resolution.scale_factor() as f32;
-                                button_style.size.width = Val::Px(width - scale_factor * delta.x);
-                            }
-
-                            if let Val::Px(height) = button_style.size.height {
-                                let scale_factor = primary_window.resolution.scale_factor() as f32;
-                                button_style.size.height = Val::Px(height - scale_factor * delta.y);
-                            }
-                        }
-                        ResizeMarker::TopRight => {
-                            if let Val::Px(width) = button_style.size.width {
-                                let scale_factor = primary_window.resolution.scale_factor() as f32;
-                                button_style.size.width = Val::Px(width + scale_factor * delta.x);
-                            }
-
-                            if let Val::Px(height) = button_style.size.height {
-                                let scale_factor = primary_window.resolution.scale_factor() as f32;
-                                button_style.size.height = Val::Px(height - scale_factor * delta.y);
-                            }
-                        }
-                        ResizeMarker::BottomLeft => {
-                            if let Val::Px(width) = button_style.size.width {
-                                let scale_factor = primary_window.resolution.scale_factor() as f32;
-                                button_style.size.width = Val::Px(width - scale_factor * delta.x);
-                            }
-
-                            if let Val::Px(height) = button_style.size.height {
-                                let scale_factor = primary_window.resolution.scale_factor() as f32;
-                                button_style.size.height = Val::Px(height + scale_factor * delta.y);
-                            }
-                        }
-                        ResizeMarker::BottomRight => {
-                            if let Val::Px(width) = button_style.size.width {
-                                let scale_factor = primary_window.resolution.scale_factor() as f32;
-                                button_style.size.width = Val::Px(width + scale_factor * delta.x);
-                            }
-
-                            if let Val::Px(height) = button_style.size.height {
-                                let scale_factor = primary_window.resolution.scale_factor() as f32;
-                                button_style.size.height = Val::Px(height + scale_factor * delta.y);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-fn resize_entity_start(
-    mut interaction_query: Query<
-        (&Interaction, &Parent, &ResizeMarker),
-        (Changed<Interaction>, With<ResizeMarker>),
-    >,
-    mut button_query: Query<&Rectangle, With<Rectangle>>,
-    mut state: ResMut<AppState>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
-) {
-    let mut primary_window = windows.single_mut();
-    for (interaction, parent, resize_marker) in &mut interaction_query {
-        let rectangle = button_query.get_mut(parent.get()).unwrap();
-        match *interaction {
-            Interaction::Clicked => {
-                state.entity_to_resize = Some((rectangle.id, *resize_marker));
-            }
-            Interaction::Hovered => match *resize_marker {
-                ResizeMarker::TopLeft => {
-                    primary_window.cursor.icon = CursorIcon::NwseResize;
-                }
-                ResizeMarker::TopRight => {
-                    primary_window.cursor.icon = CursorIcon::NeswResize;
-                }
-                ResizeMarker::BottomLeft => {
-                    primary_window.cursor.icon = CursorIcon::NeswResize;
-                }
-                ResizeMarker::BottomRight => {
-                    primary_window.cursor.icon = CursorIcon::NwseResize;
-                }
-            },
-            Interaction::None => {
-                primary_window.cursor.icon = CursorIcon::Default;
-            }
-        }
-    }
-}
-
 fn update_rectangle_position(
     mut cursor_moved_events: EventReader<CursorMoved>,
-    mut sprite_position: Query<(&mut Style, &Top)>,
-    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    state: ResMut<AppState>,
+    mut node_position: Query<(&mut Style, &Rectangle), With<Rectangle>>,
+    state: Res<AppState>,
+    mut query: Query<(&Style, &LeftPanel), Without<Rectangle>>,
     mut events: EventWriter<RedrawArrow>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let (camera, camera_transform) = camera_q.single();
+    let primary_window = windows.single();
     for event in cursor_moved_events.iter() {
-        for (mut style, top) in &mut sprite_position.iter_mut() {
+        for (mut style, top) in &mut node_position.iter_mut() {
             if Some(top.id) == state.hold_entity {
-                events.send(RedrawArrow { id: top.id });
-                if let Some(world_position) =
-                    camera.viewport_to_world_2d(camera_transform, event.position)
-                {
-                    style.position.left = Val::Px(world_position.x);
-                    style.position.bottom = Val::Px(world_position.y);
+                let size = query.single_mut().0.size;
+                if let (Val::Percent(x), Val::Px(element_width)) = (size.width, style.size.width) {
+                    let width = (primary_window.width() * x) / 100.;
+                    style.position.left = Val::Px(event.position.x - width - element_width / 2.);
                 }
+                if let Val::Px(element_height) = style.size.height {
+                    style.position.bottom = Val::Px(event.position.y - element_height / 2.);
+                }
+                events.send(RedrawArrow { id: top.id });
             }
         }
     }
@@ -421,7 +205,6 @@ fn create_new_rectangle(
     asset_server: Res<AssetServer>,
     mut events: EventReader<AddRect>,
     mut state: ResMut<AppState>,
-    main: Query<Entity, With<Main>>,
 ) {
     for _ in events.iter() {
         let font = asset_server.load("fonts/iosevka-regular.ttf");
@@ -436,6 +219,6 @@ fn create_new_rectangle(
                 image: None,
             },
         );
-        commands.entity(main.single()).add_child(entity);
+        commands.entity(state.main_panel.unwrap()).add_child(entity);
     }
 }
