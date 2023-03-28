@@ -41,13 +41,13 @@ pub fn confirm_path_modal(
     mut query_path: Query<(&Text, &PathModalTextInput), With<PathModalTextInput>>,
     query_top: Query<(Entity, &PathModalTop), With<PathModalTop>>,
 ) {
-    for (interaction, path_modal_cancel) in interaction_query.iter_mut() {
+    for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
             for (text, modal) in &mut query_path.iter_mut() {
                 if Some(modal.id) == state.path_modal_id {
                     if modal.save {
                         commands.insert_resource(SaveRequest {
-                            path: Some(PathBuf::from(text.sections[0].value.clone())),
+                            path: Some(PathBuf::from(text.sections[0].value.trim())),
                         });
                     } else if let Ok(path) =
                         canonicalize(PathBuf::from(text.sections[0].value.trim()))
@@ -59,7 +59,7 @@ pub fn confirm_path_modal(
                 }
             }
             for (entity, path_modal_top) in query_top.iter() {
-                if path_modal_cancel.id == path_modal_top.id {
+                if path_modal_confirm.id == path_modal_top.id {
                     commands.entity(entity).despawn_recursive();
                     state.path_modal_id = None;
                 }
@@ -70,9 +70,11 @@ pub fn confirm_path_modal(
 
 pub fn path_modal_keyboard_input_system(
     mut query: Query<(&mut Text, &PathModalTextInput), With<PathModalTextInput>>,
-    state: Res<AppState>,
+    mut state: ResMut<AppState>,
     input: Res<Input<KeyCode>>,
     mut char_evr: EventReader<ReceivedCharacter>,
+    query_top: Query<(Entity, &PathModalTop), With<PathModalTop>>,
+    mut commands: Commands,
 ) {
     for (mut text, modal) in &mut query.iter_mut() {
         if Some(modal.id) == state.path_modal_id {
@@ -84,6 +86,28 @@ pub fn path_modal_keyboard_input_system(
                 for ev in char_evr.iter() {
                     text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
                 }
+            }
+        }
+    }
+    if input.just_pressed(KeyCode::Return) {
+        for (text, modal) in &mut query.iter_mut() {
+            if Some(modal.id) == state.path_modal_id {
+                if modal.save {
+                    commands.insert_resource(SaveRequest {
+                        path: Some(PathBuf::from(text.sections[0].value.trim())),
+                    });
+                } else if let Ok(path) = canonicalize(PathBuf::from(text.sections[0].value.trim()))
+                {
+                    commands.insert_resource(LoadRequest { path: Some(path) });
+                } else {
+                    eprintln!("File not found: {}", text.sections[0].value);
+                }
+            }
+        }
+        for (entity, path_modal_top) in query_top.iter() {
+            if path_modal_top.id == path_modal_top.id {
+                commands.entity(entity).despawn_recursive();
+                state.path_modal_id = None;
             }
         }
     }
@@ -102,6 +126,7 @@ pub fn set_focused_modal(
         if *interaction == Interaction::Clicked {
             window.cursor.icon = CursorIcon::Text;
             state.path_modal_id = Some(modal.id);
+            state.entity_to_edit = None;
         }
     }
 }
