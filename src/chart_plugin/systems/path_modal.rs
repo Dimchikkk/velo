@@ -105,7 +105,7 @@ pub fn path_modal_keyboard_input_system(
             }
         }
         for (entity, path_modal_top) in query_top.iter() {
-            if path_modal_top.id == path_modal_top.id {
+            if Some(path_modal_top.id) == state.path_modal_id {
                 commands.entity(entity).despawn_recursive();
                 state.path_modal_id = None;
             }

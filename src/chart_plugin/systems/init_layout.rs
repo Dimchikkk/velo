@@ -3,34 +3,42 @@ use bevy::prelude::*;
 pub use ron::de::SpannedError as ParseError;
 pub use ron::Error as DeserializeError;
 
-use crate::{MainCamera, SaveRequest};
+use crate::{AppState, MainCamera, SaveRequest};
 
 use super::ui_helpers::{
-    add_rectangle_txt, CreateRectButton, LeftPanelControls, LeftPanelExplorer, Main, Menu,
+    add_rectangle_txt, CreateRectButton, LeftPanel, LeftPanelControls, LeftPanelExplorer,
+    MainPanel, Menu, Root,
 };
 
-pub fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn init_layout(
+    mut commands: Commands,
+    mut state: ResMut<AppState>,
+    asset_server: Res<AssetServer>,
+) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
     commands.spawn((Camera2dBundle::default(), MainCamera));
     commands.insert_resource(SaveRequest { path: None });
 
     let root_ui = commands
-        .spawn(NodeBundle {
-            style: Style {
-                position_type: PositionType::Absolute,
-                position: UiRect {
-                    left: Val::Px(0.0),
-                    bottom: Val::Px(0.0),
-                    ..Default::default()
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Px(0.0),
+                        bottom: Val::Px(0.0),
+                        ..Default::default()
+                    },
+                    size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                    align_items: AlignItems::Start,
+                    justify_content: JustifyContent::Center,
+                    flex_direction: FlexDirection::Column,
+                    ..default()
                 },
-                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                align_items: AlignItems::Start,
-                justify_content: JustifyContent::Center,
-                flex_direction: FlexDirection::Column,
                 ..default()
             },
-            ..default()
-        })
+            Root,
+        ))
         .id();
 
     let menu = commands
@@ -61,22 +69,25 @@ pub fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
         })
         .id();
     let left_panel = commands
-        .spawn(NodeBundle {
-            background_color: BackgroundColor(Color::Rgba {
-                red: 192.,
-                green: 192.,
-                blue: 192.,
-                alpha: 1.,
-            }),
-            style: Style {
-                size: Size::new(Val::Percent(15.), Val::Percent(100.)),
-                align_items: AlignItems::Start,
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
+        .spawn((
+            NodeBundle {
+                background_color: BackgroundColor(Color::Rgba {
+                    red: 192.,
+                    green: 192.,
+                    blue: 192.,
+                    alpha: 1.,
+                }),
+                style: Style {
+                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                    align_items: AlignItems::Start,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        })
+            LeftPanel,
+        ))
         .id();
     let main_panel = commands
         .spawn((
@@ -90,7 +101,7 @@ pub fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
                 ..default()
             },
-            Main,
+            MainPanel,
         ))
         .id();
 
@@ -150,4 +161,6 @@ pub fn init_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.entity(main_bottom).add_child(main_panel);
     commands.entity(root_ui).add_child(menu);
     commands.entity(root_ui).add_child(main_bottom);
+
+    state.main_panel = Some(main_panel);
 }
