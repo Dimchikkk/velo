@@ -1,6 +1,9 @@
 * Rusticify
 [[file:./assets/icon.png]]
 
+** Screenshot
+[[file:rusticify.png]]
+
 ** Inspiration
 I use lucid.app at work quite often to brainstorm ideas with colleagues or even solo.
 I often share my ideas via sharing lucid.app diagrams or just screenshot of it. I don't use banch of features there. 

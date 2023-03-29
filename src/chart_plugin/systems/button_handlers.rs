@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{AddRect, AppState, JsonNode, NodeType};
 
-use super::ui_helpers::{ArrowMeta, ButtonAction, Rectangle};
+use super::ui_helpers::{ArrowMeta, ButtonAction, Rectangle, ChangeColor};
 
 pub fn button_handler(
     mut commands: Commands,
@@ -16,7 +16,7 @@ pub fn button_handler(
     nodes: Query<(Entity, &Rectangle), With<Rectangle>>,
     arrows: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
     mut state: ResMut<AppState>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = windows.single();
     for (interaction, mut color, button_action) in &mut interaction_query {
@@ -73,6 +73,34 @@ pub fn button_handler(
             }
             Interaction::None => {
                 color.0 = Color::rgb(0.8, 0.8, 0.8);
+            }
+        }
+    }
+}
+
+pub fn change_color_pallete(
+    interaction_query: Query<
+        (&Interaction, &ChangeColor),
+        (Changed<Interaction>, With<ChangeColor>),
+    >,
+    mut nodes: Query<(&mut BackgroundColor, &Rectangle), With<Rectangle>>,
+    state: Res<AppState>,
+) {
+    for (interaction, change_color) in &interaction_query {
+        match *interaction {
+            Interaction::Clicked => {
+                let color = change_color.color;
+                if state.entity_to_edit.is_some() {
+                    for (mut bg_color, node) in nodes.iter_mut() {
+                        if node.id == state.entity_to_edit.unwrap() {
+                            bg_color.0 = color;
+                        }
+                    }
+                }
+            }
+            Interaction::Hovered => {
+            }
+            Interaction::None => {
             }
         }
     }
