@@ -1,7 +1,7 @@
-#+ATTR_HTML: width="100px"
-[[file:./assets/icon.png]]
-
+#+BEGIN_CENTER
 * Rusticify
+[[file:./assets/icon.png]]
+#+END_CENTER
 
 [[file:rusticify.png]]
 
