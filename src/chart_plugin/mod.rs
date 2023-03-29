@@ -139,6 +139,8 @@ impl Plugin for ChartPlugin {
                 .chain()
                 .distributive_run_if(should_load),
         );
+
+        app.add_system(change_color_pallete);
     }
 }
 
