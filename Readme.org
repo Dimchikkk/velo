@@ -46,6 +46,7 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 
 * Tasks to todo
 - Add app icon (make sure that it's embedded in release binary)
+- Create icons for buttons
 - Improve text inside rectangle:
     + text position
     + smart wrapping (see https://github.com/bevyengine/bevy/pull/7761)

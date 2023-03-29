@@ -102,6 +102,8 @@ pub fn insert_from_clipboard(
                 height: Val::Px(size.height as f32),
                 text: "".to_string(),
                 bg_color: Color::WHITE,
+                tags: vec![],
+                text_pos: crate::TextPos::Center
             },
             image: Some(image.into()),
         });

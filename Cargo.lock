@@ -1937,23 +1937,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfa686283ad6dd069f105e5ab091b04c62850d3e4cf5d67debad1933f55023df"
 
 [[package]]
-name = "ichart"
-version = "0.1.0"
-dependencies = [
- "arboard",
- "base64 0.21.0",
- "bevy",
- "bevy_embedded_assets",
- "bevy_prototype_lyon",
- "bevy_ui_borders",
- "image",
- "serde",
- "serde_json",
- "uuid",
- "winit",
-]
-
-[[package]]
 name = "image"
 version = "0.24.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2976,6 +2959,23 @@ name = "rustc-hash"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
+
+[[package]]
+name = "rusticify"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "base64 0.21.0",
+ "bevy",
+ "bevy_embedded_assets",
+ "bevy_prototype_lyon",
+ "bevy_ui_borders",
+ "image",
+ "serde",
+ "serde_json",
+ "uuid",
+ "winit",
+]
 
 [[package]]
 name = "ruzstd"
