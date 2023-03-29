@@ -4,7 +4,7 @@ use crate::{AppState, MainCamera, SaveRequest};
 
 use super::ui_helpers::{
     add_rectangle_txt, create_rectangle_txt, CreateRectButton, LeftPanel, LeftPanelControls,
-    LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState,
+    LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState, DelRectButton,
 };
 
 pub fn init_layout(
@@ -171,6 +171,7 @@ pub fn init_layout(
             NodeBundle {
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(30.)),
+                    flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()
@@ -205,6 +206,12 @@ pub fn init_layout(
                 style: Style {
                     size: Size::new(Val::Percent(50.), Val::Percent(30.)),
                     align_items: AlignItems::Center,
+                    margin: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
                     justify_content: JustifyContent::Center,
                     ..default()
                 },
@@ -216,7 +223,33 @@ pub fn init_layout(
             builder.spawn(add_rectangle_txt(font.clone(), "NEW".to_string()));
         })
         .id();
+    
+    let del_rect = commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
+                style: Style {
+                    size: Size::new(Val::Percent(50.), Val::Percent(30.)),
+                    align_items: AlignItems::Center,
+                    margin: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            DelRectButton,
+        ))
+        .with_children(|builder| {
+            builder.spawn(add_rectangle_txt(font.clone(), "DEL".to_string()));
+        })
+        .id();
     commands.entity(left_panel_controls).add_child(add_rect);
+    commands.entity(left_panel_controls).add_child(del_rect);
 
     commands.entity(main_bottom).add_child(left_panel);
     commands.entity(main_bottom).add_child(main_panel);
