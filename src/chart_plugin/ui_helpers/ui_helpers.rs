@@ -55,9 +55,12 @@ pub struct Rectangle {
 }
 
 pub enum ButtonTypes {
-    ADD, DEL,
-    FRONT, BACK,
-    TAG, UNTAG
+    ADD,
+    DEL,
+    FRONT,
+    BACK,
+    TAG,
+    UNTAG,
 }
 #[derive(Component)]
 pub struct ButtonAction {
