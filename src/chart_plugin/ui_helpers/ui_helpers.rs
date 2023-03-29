@@ -16,6 +16,11 @@ pub struct Root;
 pub struct Menu;
 
 #[derive(Component)]
+pub struct ChangeColor {
+    pub color: Color,
+}
+
+#[derive(Component)]
 pub struct SaveState;
 
 #[derive(Component)]
@@ -49,11 +54,15 @@ pub struct Rectangle {
     pub id: ReflectableUuid,
 }
 
-#[derive(Component, Default)]
-pub struct CreateRectButton;
-
-#[derive(Component, Default)]
-pub struct DelRectButton;
+pub enum ButtonTypes {
+    ADD, DEL,
+    FRONT, BACK,
+    TAG, UNTAG
+}
+#[derive(Component)]
+pub struct ButtonAction {
+    pub button_type: ButtonTypes,
+}
 
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
