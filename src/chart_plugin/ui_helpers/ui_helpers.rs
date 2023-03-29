@@ -295,7 +295,7 @@ pub fn spawn_path_modal(
                             builder.spawn((
                                 create_rectangle_txt(
                                     font.clone(),
-                                    "./data/ichart.json".to_string(),
+                                    "./data/rusticify.json".to_string(),
                                 ),
                                 PathModalTextInput { id, save },
                             ));

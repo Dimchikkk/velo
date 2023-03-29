@@ -36,6 +36,10 @@ pub struct AddRect {
     pub image: Option<UiImage>,
 }
 
+pub struct SetWindowIcon {
+    pub image: Handle<Image>,
+}
+
 pub struct RedrawArrow {
     pub id: ReflectableUuid,
 }
@@ -97,6 +101,7 @@ impl Plugin for ChartPlugin {
         app.register_type::<BreakLineOn>();
 
         app.add_event::<AddRect>();
+        app.add_event::<SetWindowIcon>();
         app.add_event::<CreateArrow>();
         app.add_event::<RedrawArrow>();
 
