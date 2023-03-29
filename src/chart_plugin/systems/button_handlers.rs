@@ -33,6 +33,8 @@ pub fn button_handler(
                             height: Val::Px(100.0),
                             text: "".to_string(),
                             bg_color: Color::WHITE,
+                            tags: vec![],
+                            text_pos: crate::TextPos::Center,
                         },
                         image: None,
                     });

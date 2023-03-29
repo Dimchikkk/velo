@@ -93,6 +93,8 @@ pub fn load_json(
                 text: json_node.text.clone(),
                 bg_color: json_node.bg_color,
                 position: (json_node.left, json_node.bottom),
+                tags: json_node.tags,
+                text_pos: json_node.text_pos
             },
         );
         commands.entity(state.main_panel.unwrap()).add_child(entity);

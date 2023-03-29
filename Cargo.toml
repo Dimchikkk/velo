@@ -1,5 +1,5 @@
 [package]
-name = "ichart"
+name = "rusticify"
 version = "0.1.0"
 edition = "2021"
 
