@@ -1,8 +1,7 @@
-#+BEGIN_CENTER
 * Rusticify
 [[file:./assets/icon.png]]
-#+END_CENTER
 
+* Screenshot
 [[file:rusticify.png]]
 
 ** Inspiration
