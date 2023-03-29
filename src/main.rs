@@ -1,18 +1,16 @@
-use bevy::{
-    prelude::*,
-    window::{PresentMode},
-};
+use bevy::{prelude::*, window::PresentMode};
 mod chart_plugin;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_prototype_lyon::prelude::ShapePlugin;
 use bevy_ui_borders::BordersPlugin;
 pub use chart_plugin::*;
 
-
 fn main() {
     App::new()
         .add_startup_system(setup_background)
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Rusticify".into(),
                         present_mode: PresentMode::AutoVsync,
