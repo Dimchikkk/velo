@@ -52,6 +52,9 @@ pub struct Rectangle {
 #[derive(Component, Default)]
 pub struct CreateRectButton;
 
+#[derive(Component, Default)]
+pub struct DelRectButton;
+
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
 pub struct EditableText {
