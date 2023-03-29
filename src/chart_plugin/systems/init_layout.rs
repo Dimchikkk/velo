@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use crate::{AppState, MainCamera, SaveRequest};
 
 use super::ui_helpers::{
-    add_rectangle_txt, CreateRectButton, LeftPanel, LeftPanelControls, LeftPanelExplorer,
-    MainPanel, Menu, Root,
+    add_rectangle_txt, create_rectangle_txt, CreateRectButton, LeftPanel, LeftPanelControls,
+    LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState,
 };
 
 pub fn init_layout(
@@ -46,7 +46,7 @@ pub fn init_layout(
                     border: UiRect::all(Val::Px(2.0)),
                     size: Size::new(Val::Percent(100.0), Val::Percent(5.)),
                     align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
+                    justify_content: JustifyContent::Start,
                     ..default()
                 },
                 ..default()
@@ -54,6 +54,70 @@ pub fn init_layout(
             Menu,
         ))
         .id();
+
+    let save = commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
+                style: Style {
+                    justify_content: JustifyContent::Center,
+                    margin: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(0.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(0.),
+                    },
+                    padding: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    align_items: AlignItems::Center,
+                    // overflow: Overflow::Hidden,
+                    ..default()
+                },
+                ..default()
+            },
+            SaveState,
+        ))
+        .with_children(|builder| {
+            builder.spawn(create_rectangle_txt(font.clone(), "Save".to_string()));
+        })
+        .id();
+    let load = commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
+                style: Style {
+                    justify_content: JustifyContent::Center,
+                    margin: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(0.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(0.),
+                    },
+                    padding: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    align_items: AlignItems::Center,
+                    // overflow: Overflow::Hidden,
+                    ..default()
+                },
+                ..default()
+            },
+            LoadState,
+        ))
+        .with_children(|builder| {
+            builder.spawn(create_rectangle_txt(font.clone(), "Load".to_string()));
+        })
+        .id();
+    commands.entity(menu).add_child(save);
+    commands.entity(menu).add_child(load);
+
     let main_bottom = commands
         .spawn(NodeBundle {
             style: Style {
