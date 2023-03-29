@@ -6,12 +6,10 @@ use bevy::{
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 
-pub use ron::de::SpannedError as ParseError;
-pub use ron::Error as DeserializeError;
 use std::convert::TryInto;
 use uuid::Uuid;
 
-use crate::{AppState, LoadRequest, SaveRequest};
+use crate::{AddRect, AppState, LoadRequest, SaveRequest};
 
 use super::ui_helpers::{spawn_path_modal, EditableText, ReflectableUuid};
 
@@ -19,9 +17,10 @@ pub fn keyboard_input_system(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
     mut state: ResMut<AppState>,
-    input: Res<Input<KeyCode>>,
     mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
     mut char_evr: EventReader<ReceivedCharacter>,
+    mut events: EventWriter<AddRect>,
+    input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
 ) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
@@ -30,17 +29,19 @@ pub fn keyboard_input_system(
 
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
-        insert_from_clipboard(&mut commands, &mut images, &mut state, &mut query);
+        insert_from_clipboard(&mut images, &mut state, &mut query, &mut events);
     } else if command && shift && input.just_pressed(KeyCode::S) {
         let id = ReflectableUuid(Uuid::new_v4());
         state.path_modal_id = Some(id);
         state.entity_to_edit = None;
-        spawn_path_modal(&mut commands, font, id, true);
+        let entity = spawn_path_modal(&mut commands, font, id, true);
+        commands.entity(state.main_panel.unwrap()).add_child(entity);
     } else if command && shift && input.just_pressed(KeyCode::L) {
         let id = ReflectableUuid(Uuid::new_v4());
         state.path_modal_id = Some(id);
         state.entity_to_edit = None;
-        spawn_path_modal(&mut commands, font, id, false);
+        let entity = spawn_path_modal(&mut commands, font, id, false);
+        commands.entity(state.main_panel.unwrap()).add_child(entity);
     } else if command && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveRequest { path: None });
     } else if command && input.just_pressed(KeyCode::L) {
@@ -64,13 +65,12 @@ pub fn keyboard_input_system(
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn insert_from_clipboard(
-    commands: &mut Commands,
     images: &mut ResMut<Assets<Image>>,
     state: &mut ResMut<AppState>,
     query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
+    events: &mut EventWriter<AddRect>,
 ) {
-    use super::ui_helpers::spawn_node;
-    use crate::chart_plugin::ui_helpers::NodeMeta;
+    use crate::JsonNode;
 
     let mut clipboard = arboard::Clipboard::new().unwrap();
     if let Ok(image) = clipboard.get_image() {
@@ -92,16 +92,19 @@ pub fn insert_from_clipboard(
             TextureFormat::Rgba8UnormSrgb,
         );
         let image = images.add(image);
-        let entity = spawn_node(
-            commands,
-            NodeMeta {
-                font: Handle::default(),
-                size: Vec2::new(size.width as f32, size.height as f32),
-                id: ReflectableUuid(Uuid::new_v4()),
-                image: Some(image.into()),
+        events.send(AddRect {
+            node: JsonNode {
+                id: Uuid::new_v4(),
+                node_type: crate::NodeType::RECT,
+                left: Val::Px(0.0),
+                bottom: Val::Px(0.0),
+                width: Val::Px(size.width as f32),
+                height: Val::Px(size.height as f32),
+                text: "".to_string(),
+                bg_color: Color::WHITE,
             },
-        );
-        commands.entity(state.main_panel.unwrap()).add_child(entity);
+            image: Some(image.into()),
+        });
     }
 
     if let Ok(clipboard_text) = clipboard.get_text() {
