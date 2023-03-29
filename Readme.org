@@ -1,3 +1,4 @@
+#+ATTR_HTML: width="100px"
 [[file:./assets/icon.png]]
 
 * Rusticify
