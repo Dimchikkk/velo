@@ -37,7 +37,7 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 #+END_SRC
 
 * Tasks to todo
-- Add app icon
+- Add app icon (make sure that it's embedded in release binary)
 - Make text inside rectangle smart wrapping (see https://github.com/bevyengine/bevy/pull/7761)
 - Tag systems for nodes
 - Add text selection inside rectangle
