@@ -1,4 +1,4 @@
-use bevy_ui_borders::BorderColor;
+use bevy_ui_borders::{BorderColor, Outline};
 use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
 
@@ -7,7 +7,6 @@ use bevy_prototype_lyon::{
     prelude::{GeometryBuilder, ShapeBundle, Stroke},
     shapes,
 };
-use moonshine_save::save::Save;
 use uuid::Uuid;
 
 #[derive(Component)]
@@ -123,9 +122,7 @@ fn get_marker_style(position: UiRect) -> Style {
         position_type: PositionType::Absolute,
         position,
         size: Size::new(Val::Px(5.), Val::Px(5.)),
-        // horizontally center child text
         justify_content: JustifyContent::Center,
-        // vertically center child text
         align_items: AlignItems::Center,
         ..default()
     }
@@ -143,37 +140,25 @@ pub fn add_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
     })
 }
 
-fn create_rectangle_node(size: Vec2) -> NodeBundle {
-    NodeBundle {
-        style: Style {
-            size: Size::new(Val::Px(size.x), Val::Px(size.y)),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        },
-        ..default()
-    }
-}
-
-fn create_rectangle_btn(size: Vec2, image: Option<UiImage>) -> ButtonBundle {
+fn create_rectangle_btn(item_meta: NodeMeta) -> ButtonBundle {
     let mut button = ButtonBundle {
+        background_color: item_meta.bg_color.into(),
         style: Style {
             position_type: PositionType::Absolute,
             position: UiRect {
-                left: Val::Px(0.0),
-                bottom: Val::Px(0.0),
+                left: item_meta.position.0,
+                bottom: item_meta.position.1,
                 ..Default::default()
             },
-            size: Size::new(Val::Px(size.x), Val::Px(size.y)),
+            size: Size::new(item_meta.size.0, item_meta.size.1),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             // overflow: Overflow::Hidden,
-            border: UiRect::all(Val::Px(1.)),
             ..default()
         },
         ..default()
     };
-    if let Some(image) = image {
+    if let Some(image) = item_meta.image {
         button.image = image;
     }
     button
@@ -226,30 +211,53 @@ pub fn spawn_path_modal(
     font: Handle<Font>,
     id: ReflectableUuid,
     save: bool,
-) {
+) -> Entity {
     let width = 300.;
     let height = 200.;
     commands
         .spawn((
-            create_rectangle_node(Vec2::new(width, height)),
+            NodeBundle {
+                z_index: ZIndex::Global(1),
+                background_color: Color::WHITE.into(),
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    size: Size::new(Val::Px(width), Val::Px(height)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    border: UiRect::all(Val::Px(1.)),
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                },
+                ..default()
+            },
+            BorderColor(Color::BLACK),
             PathModalTop { id },
         ))
         .with_children(|builder| {
             builder
                 .spawn(NodeBundle {
-                    z_index: ZIndex::Global(1),
                     style: Style {
-                        size: Size::new(Val::Px(width), Val::Px(height)),
                         align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::SpaceAround,
+                        size: Size {
+                            width: Val::Percent(100.),
+                            height: Val::Percent(50.),
+                        },
                         ..default()
                     },
                     ..default()
                 })
-                .with_children(|builder| {
+                .with_children(|builder: &mut ChildBuilder| {
                     builder
-                        .spawn(create_rectangle_btn(Vec2::new(300., 50.), None))
+                        .spawn(ButtonBundle {
+                            style: Style {
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                // overflow: Overflow::Hidden,
+                                ..default()
+                            },
+                            ..default()
+                        })
                         .with_children(|builder| {
                             builder.spawn(add_rectangle_txt(
                                 font.clone(),
@@ -258,7 +266,15 @@ pub fn spawn_path_modal(
                         });
                     builder
                         .spawn((
-                            create_rectangle_btn(Vec2::new(300., 50.), None),
+                            ButtonBundle {
+                                style: Style {
+                                    justify_content: JustifyContent::Center,
+                                    align_items: AlignItems::Center,
+                                    // overflow: Overflow::Hidden,
+                                    ..default()
+                                },
+                                ..default()
+                            },
                             PathModalText { id, save },
                         ))
                         .with_children(|builder| {
@@ -270,51 +286,72 @@ pub fn spawn_path_modal(
                                 PathModalTextInput { id, save },
                             ));
                         });
+                });
+
+            builder
+                .spawn(NodeBundle {
+                    style: Style {
+                        align_items: AlignItems::Center,
+                        size: Size {
+                            width: Val::Percent(100.),
+                            height: Val::Percent(50.),
+                        },
+                        justify_content: JustifyContent::SpaceAround,
+                        ..default()
+                    },
+                    ..default()
+                })
+                .with_children(|builder| {
                     builder
-                        .spawn(NodeBundle {
-                            style: Style {
-                                size: Size::new(Val::Px(300.0), Val::Px(50.0)),
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::SpaceAround,
+                        .spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    justify_content: JustifyContent::Center,
+                                    align_items: AlignItems::Center,
+                                    // overflow: Overflow::Hidden,
+                                    ..default()
+                                },
                                 ..default()
                             },
-                            ..default()
-                        })
+                            PathModalConfirm { id, save },
+                        ))
                         .with_children(|builder| {
-                            builder
-                                .spawn((
-                                    create_rectangle_btn(Vec2::new(150., 50.), None),
-                                    PathModalConfirm { id, save },
-                                ))
-                                .with_children(|builder| {
-                                    builder.spawn(add_rectangle_txt(
-                                        font.clone(),
-                                        if save {
-                                            "Save".to_string()
-                                        } else {
-                                            "Load".to_string()
-                                        },
-                                    ));
-                                });
-                            builder
-                                .spawn((
-                                    create_rectangle_btn(Vec2::new(150., 50.), None),
-                                    PathModalCancel { id },
-                                ))
-                                .with_children(|builder| {
-                                    builder.spawn(add_rectangle_txt(
-                                        font.clone(),
-                                        "Cancel".to_string(),
-                                    ));
-                                });
+                            builder.spawn(add_rectangle_txt(
+                                font.clone(),
+                                if save {
+                                    "Save".to_string()
+                                } else {
+                                    "Load".to_string()
+                                },
+                            ));
+                        });
+                    builder
+                        .spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    justify_content: JustifyContent::Center,
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                                ..default()
+                            },
+                            PathModalCancel { id },
+                        ))
+                        .with_children(|builder| {
+                            builder.spawn(add_rectangle_txt(font.clone(), "Cancel".to_string()));
                         });
                 });
-        });
+        })
+        .id()
 }
 
+#[derive(Clone)]
 pub struct NodeMeta {
     pub id: ReflectableUuid,
-    pub size: Vec2,
+    pub size: (Val, Val),
+    pub position: (Val, Val),
+    pub text: String,
+    pub bg_color: Color,
     pub font: Handle<Font>,
     pub image: Option<UiImage>,
 }
@@ -322,10 +359,9 @@ pub struct NodeMeta {
 pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
     commands
         .spawn((
-            create_rectangle_btn(item_meta.size, item_meta.image),
+            create_rectangle_btn(item_meta.clone()),
             Rectangle { id: item_meta.id },
-            BorderColor(Color::BLACK),
-            Save,
+            Outline::all(Color::BLACK, Val::Px(1.)),
         ))
         .with_children(|builder| {
             builder.spawn((
@@ -334,7 +370,6 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                     pos: ArrowConnectPos::Top,
                     id: item_meta.id,
                 },
-                Save,
             ));
             builder.spawn((
                 create_arrow_marker(0., 0., 50., 0.),
@@ -342,7 +377,6 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                     pos: ArrowConnectPos::Left,
                     id: item_meta.id,
                 },
-                Save,
             ));
             builder.spawn((
                 create_arrow_marker(50., 0., 100., 0.),
@@ -350,7 +384,6 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                     pos: ArrowConnectPos::Bottom,
                     id: item_meta.id,
                 },
-                Save,
             ));
             builder.spawn((
                 create_arrow_marker(100., 0., 50., 0.),
@@ -358,32 +391,23 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                     pos: ArrowConnectPos::Right,
                     id: item_meta.id,
                 },
-                Save,
             ));
-            builder.spawn((
-                create_resize_marker(0., 0., 0., 0.),
-                ResizeMarker::TopLeft,
-                Save,
-            ));
+            builder.spawn((create_resize_marker(0., 0., 0., 0.), ResizeMarker::TopLeft));
             builder.spawn((
                 create_resize_marker(100., 0., 0., 0.),
                 ResizeMarker::TopRight,
-                Save,
             ));
             builder.spawn((
                 create_resize_marker(100., 0., 100., 0.),
                 ResizeMarker::BottomRight,
-                Save,
             ));
             builder.spawn((
                 create_resize_marker(0., 0., 100., 0.),
                 ResizeMarker::BottomLeft,
-                Save,
             ));
             builder.spawn((
-                create_rectangle_txt(item_meta.font, "".to_string()),
+                create_rectangle_txt(item_meta.font, item_meta.text),
                 EditableText { id: item_meta.id },
-                Save,
             ));
         })
         .id()

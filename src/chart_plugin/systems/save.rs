@@ -1,24 +1,15 @@
 use base64::{engine::general_purpose, Engine};
-use bevy::{ecs::schedule::SystemConfig, prelude::*};
+use bevy::prelude::*;
 
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
-use moonshine_save::{
-    prelude::SaveSet,
-    save::{self, save, Save, Saved},
-};
-use regex::Regex;
 
-pub use ron::de::SpannedError as ParseError;
-pub use ron::Error as DeserializeError;
 use serde_json::json;
 use std::io::Cursor;
 
-use crate::{AppState, SaveRequest};
+use crate::{AppState, JsonNode, SaveRequest};
 
-use super::ui_helpers::{ArrowMeta, Rectangle};
-
-const MAX_AMOUNT_OF_CHECKPOINTS: usize = 30;
+use super::ui_helpers::{ArrowMeta, EditableText, Rectangle};
 
 pub fn should_save(request: Option<Res<SaveRequest>>) -> bool {
     request.is_some()
@@ -28,47 +19,23 @@ pub fn remove_save_request(world: &mut World) {
     world.remove_resource::<SaveRequest>().unwrap();
 }
 
-pub fn save_ron() -> SystemConfig {
-    save::<With<Save>>
-        .pipe(save_ron_as_checkpoint)
-        .pipe(save::finish)
-        .in_set(SaveSet::Save)
-}
-
-pub fn save_ron_as_checkpoint(
-    In(saved): In<Saved>,
-    type_registry: Res<AppTypeRegistry>,
-    mut state: ResMut<AppState>,
-) -> Result<Saved, save::Error> {
-    let input = saved.scene.serialize_ron(&type_registry)?;
-    let re = Regex::new(r"generation: (\d+)").unwrap();
-    // lol
-    let input = re.replace_all(&input, "generation: 0").to_string();
-    let ron = general_purpose::STANDARD.encode(input);
-    if state.checkpoints.len() > MAX_AMOUNT_OF_CHECKPOINTS {
-        state.checkpoints.pop_front();
-    }
-    state.checkpoints.push_back(ron);
-    Ok(saved)
-}
-
-pub fn post_save(
+pub fn save_json(
     images: Res<Assets<Image>>,
-    rec: Query<(&Rectangle, &UiImage), With<Rectangle>>,
+    rec_query: Query<(&Rectangle, &UiImage, &BackgroundColor, &Style, &Children), With<Rectangle>>,
     arrows: Query<&ArrowMeta, With<ArrowMeta>>,
     request: Res<SaveRequest>,
     mut state: ResMut<AppState>,
+    text_query: Query<&mut Text, With<EditableText>>,
 ) {
-    eprintln!("post save: {:?}", request);
-    let ron = state.checkpoints.pop_back().unwrap();
+    eprintln!("save json: {:?}", request);
     let mut json = json!({
         "bevy_version": "0.10",
         "images": {},
+        "nodes": [],
         "arrows": [],
-        "ron": ron,
     });
     let json_images = json["images"].as_object_mut().unwrap();
-    for (rect, image) in rec.iter() {
+    for (rect, image, _, _, _) in rec_query.iter() {
         if let Some(image) = images.get(&image.texture) {
             if let Ok(img) = image.clone().try_into_dynamic() {
                 let mut image_data: Vec<u8> = Vec::new();
@@ -79,6 +46,26 @@ pub fn post_save(
                 json_images.insert(rect.id.0.to_string(), json!(res_base64));
             }
         }
+    }
+
+    let json_nodes = json["nodes"].as_array_mut().unwrap();
+    for (rect, _, bg_color, style, children) in rec_query.iter() {
+        let text = text_query.get(children[children.len() - 1]).unwrap();
+        let text = text.sections[0].value.clone();
+        let left = style.position.left;
+        let bottom = style.position.bottom;
+        let size = style.size;
+        let bg_color = bg_color.0;
+        json_nodes.push(json!(JsonNode {
+            node_type: crate::NodeType::RECT,
+            id: rect.id.0,
+            left,
+            bottom,
+            width: size.width,
+            height: size.height,
+            bg_color,
+            text,
+        }));
     }
 
     let json_arrows = json["arrows"].as_array_mut().unwrap();
