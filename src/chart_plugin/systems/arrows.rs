@@ -1,7 +1,5 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-pub use ron::de::SpannedError as ParseError;
-pub use ron::Error as DeserializeError;
 use std::collections::HashSet;
 
 use crate::{AppState, MainCamera, RedrawArrow};

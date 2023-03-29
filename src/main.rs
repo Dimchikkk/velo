@@ -3,7 +3,6 @@ mod chart_plugin;
 use bevy_prototype_lyon::prelude::ShapePlugin;
 use bevy_ui_borders::BordersPlugin;
 pub use chart_plugin::*;
-use moonshine_save::{prelude::LoadPlugin, save::SavePlugin};
 
 fn main() {
     App::new()
@@ -22,8 +21,6 @@ fn main() {
         }))
         .add_plugin(ChartPlugin)
         .add_plugin(ShapePlugin)
-        .add_plugin(SavePlugin)
-        .add_plugin(LoadPlugin)
         .add_plugin(BordersPlugin)
         .run();
 }

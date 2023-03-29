@@ -1902,9 +1902,6 @@ dependencies = [
  "bevy_prototype_lyon",
  "bevy_ui_borders",
  "image",
- "moonshine-save",
- "regex",
- "ron",
  "serde",
  "serde_json",
  "uuid",
@@ -2306,22 +2303,6 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys 0.45.0",
-]
-
-[[package]]
-name = "moonshine-save"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d06a80c94c74378d1f3f2c2a1550cde2959284524fd0f40b5713dd67c983c64"
-dependencies = [
- "bevy_app",
- "bevy_ecs",
- "bevy_hierarchy",
- "bevy_reflect",
- "bevy_scene",
- "bevy_utils",
- "ron",
- "serde",
 ]
 
 [[package]]

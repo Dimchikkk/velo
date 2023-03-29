@@ -1,12 +1,10 @@
 use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
-use moonshine_save::prelude::{LoadSet, SaveSet};
+use serde::{Deserialize, Serialize};
 
-pub use ron::de::SpannedError as ParseError;
-pub use ron::Error as DeserializeError;
 use std::{collections::VecDeque, path::PathBuf};
 use uuid::Uuid;
 
-#[path = "ui_helpers.rs"]
+#[path = "ui_helpers/ui_helpers.rs"]
 mod ui_helpers;
 use ui_helpers::*;
 #[path = "systems/save.rs"]
@@ -33,7 +31,10 @@ use arrows::*;
 
 pub struct ChartPlugin;
 
-pub struct AddRect;
+pub struct AddRect {
+    pub node: JsonNode,
+    pub image: Option<UiImage>,
+}
 
 pub struct RedrawArrow {
     pub id: ReflectableUuid,
@@ -50,6 +51,23 @@ pub struct SaveRequest {
 #[derive(Resource, Debug)]
 pub struct LoadRequest {
     pub path: Option<PathBuf>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum NodeType {
+    RECT,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct JsonNode {
+    pub id: Uuid,
+    pub node_type: NodeType,
+    pub left: Val,
+    pub bottom: Val,
+    pub width: Val,
+    pub height: Val,
+    pub text: String,
+    pub bg_color: Color,
 }
 
 #[derive(Resource, Default)]
@@ -102,21 +120,13 @@ impl Plugin for ChartPlugin {
         ));
 
         app.add_systems(
-            (
-                save_ron(),
-                post_save.in_set(SaveSet::PostSave),
-                remove_save_request,
-            )
+            (save_json, remove_save_request)
                 .chain()
                 .distributive_run_if(should_save),
         );
 
         app.add_systems(
-            (
-                load_ron(),
-                post_load.in_set(LoadSet::PostLoad),
-                remove_load_request,
-            )
+            (load_json, remove_load_request)
                 .chain()
                 .distributive_run_if(should_load),
         );
@@ -133,7 +143,19 @@ fn create_entity_event(
     for (interaction, _) in &interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                events.send(AddRect);
+                events.send(AddRect {
+                    node: JsonNode {
+                        id: Uuid::new_v4(),
+                        node_type: NodeType::RECT,
+                        left: Val::Px(0.0),
+                        bottom: Val::Px(0.0),
+                        width: Val::Px(100.0),
+                        height: Val::Px(100.0),
+                        text: "".to_string(),
+                        bg_color: Color::WHITE,
+                    },
+                    image: None,
+                });
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -206,17 +228,19 @@ fn create_new_rectangle(
     mut events: EventReader<AddRect>,
     mut state: ResMut<AppState>,
 ) {
-    for _ in events.iter() {
+    for event in events.iter() {
         let font = asset_server.load("fonts/iosevka-regular.ttf");
-        let id = ReflectableUuid(Uuid::new_v4());
-        state.entity_to_edit = Some(id);
+        state.entity_to_edit = Some(ReflectableUuid(event.node.id));
         let entity = spawn_node(
             &mut commands,
             NodeMeta {
                 font,
-                size: Vec2::new(100., 100.),
-                id,
-                image: None,
+                size: (event.node.width, event.node.height),
+                id: ReflectableUuid(event.node.id),
+                image: event.image.clone(),
+                text: event.node.text.clone(),
+                bg_color: event.node.bg_color,
+                position: (event.node.left, event.node.bottom),
             },
         );
         commands.entity(state.main_panel.unwrap()).add_child(entity);
