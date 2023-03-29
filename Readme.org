@@ -1,9 +1,6 @@
 * Rusticify
 [[file:./assets/icon.png]]
 
-* Screenshot
-[[file:rusticify.png]]
-
 ** Inspiration
 I use lucid.app at work quite often to brainstorm ideas with colleagues or even solo.
 I often share my ideas via sharing lucid.app diagrams or just screenshot of it. I don't use banch of features there. 
@@ -44,14 +41,15 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 - Make text inside rectangle smart wrapping (see https://github.com/bevyengine/bevy/pull/7761)
 - Tag systems for nodes
 - Add text selection inside rectangle
-- Github auth, repo to sync diagrams
+- Text position inside rectangles
+- Links support inside rectangles
 - Add button to change z-index of rectangle
 - Have color pallete to change background color of rectangle
 - Have two arrow mods: direct and parallel (see lucid.app) 
 - Creation via moving from shapes panel (note: added button for now)
-- Tabs of diagrams
+- Tabs of saved files
 - Add "ctrl+a" to select text in rectangle
-- Search system
+- Search system (tag and by text)
 - Improve UI/UX, use lucid.app for inspiration
 - Wasm executable code in rectangle
 - Org support in rectangles
