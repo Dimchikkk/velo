@@ -1,11 +1,13 @@
 use std::{fs::canonicalize, path::PathBuf};
 
 use bevy::{prelude::*, window::PrimaryWindow};
+use uuid::Uuid;
 
 use crate::{AppState, LoadRequest, SaveRequest};
 
 use super::ui_helpers::{
-    PathModalCancel, PathModalConfirm, PathModalText, PathModalTextInput, PathModalTop,
+    spawn_path_modal, LoadState, PathModalCancel, PathModalConfirm, PathModalText,
+    PathModalTextInput, PathModalTop, ReflectableUuid, SaveState,
 };
 
 pub fn cancel_path_modal(
@@ -125,6 +127,34 @@ pub fn set_focused_modal(
             window.cursor.icon = CursorIcon::Text;
             state.path_modal_id = Some(modal.id);
             state.entity_to_edit = None;
+        }
+    }
+}
+
+pub fn open_path_modal(
+    mut save_query: Query<&Interaction, (Changed<Interaction>, With<SaveState>)>,
+    mut load_query: Query<&Interaction, (Changed<Interaction>, With<LoadState>)>,
+    asset_server: Res<AssetServer>,
+    mut commands: Commands,
+    mut state: ResMut<AppState>,
+) {
+    let font = asset_server.load("fonts/iosevka-regular.ttf");
+    for interaction in &mut save_query {
+        if *interaction == Interaction::Clicked {
+            let id = ReflectableUuid(Uuid::new_v4());
+            state.path_modal_id = Some(id);
+            state.entity_to_edit = None;
+            let entity = spawn_path_modal(&mut commands, font.clone(), id, true);
+            commands.entity(state.main_panel.unwrap()).add_child(entity);
+        }
+    }
+    for interaction in &mut load_query {
+        if *interaction == Interaction::Clicked {
+            let id = ReflectableUuid(Uuid::new_v4());
+            state.path_modal_id = Some(id);
+            state.entity_to_edit = None;
+            let entity = spawn_path_modal(&mut commands, font.clone(), id, false);
+            commands.entity(state.main_panel.unwrap()).add_child(entity);
         }
     }
 }

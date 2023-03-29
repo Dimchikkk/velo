@@ -9,7 +9,7 @@ use serde_json::Value;
 
 use crate::{AppState, JsonNode, LoadRequest};
 
-use super::ui_helpers::{ArrowMeta, CreateArrow, Rectangle, ReflectableUuid, spawn_node, NodeMeta};
+use super::ui_helpers::{spawn_node, ArrowMeta, CreateArrow, NodeMeta, Rectangle, ReflectableUuid};
 
 pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
     request.is_some()
@@ -30,7 +30,7 @@ pub fn load_json(
     asset_server: Res<AssetServer>,
 ) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
-    
+
     for entity in old_arrows.iter() {
         commands.entity(entity).despawn_recursive();
     }
