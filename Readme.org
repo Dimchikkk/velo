@@ -10,19 +10,19 @@ I often share my ideas via sharing lucid.app diagrams or just screenshot of it. 
 Just simple rectangles, arrows, why not build rust analog of it for the sake of learning rust and having some *fun*?
 
 ** What's implemented
-✅ add/remove rectangle  
-✅ rectangle resizing  
-✅ rectangles repositioning  
-✅ text inside rectangles  
-✅ paste screenshot from clipboard  
-✅ connect nodes with arrows  
-✅ make game snapshot in memory and load from it (command + s|l)   
-✅ save game state to file and load from it (command + shift + s|l)  
-✅ change background color of rectangle  
-[ ] tag/untag nodes  
-[ ] move rectangle to front/back  
-[ ] load from folder (switch between files)  
-[ ] search by text/tag  
+- ✅ add/remove rectangle  
+- ✅ rectangle resizing  
+- ✅ rectangles repositioning  
+- ✅ text inside rectangles  
+- ✅ paste screenshot from clipboard  
+- ✅ connect nodes with arrows  
+- ✅ make game snapshot in memory and load from it (command + s|l)   
+- ✅ save game state to file and load from it (command + shift + s|l)  
+- ✅ change background color of rectangle  
+- [ ] tag/untag nodes  
+- [ ] move rectangle to front/back  
+- [ ] load from folder (switch between files)  
+- [ ] search by text/tag  
 
 ** Run (supported platforms: linux, macos, windows)
 
