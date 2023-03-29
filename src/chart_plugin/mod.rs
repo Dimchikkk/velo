@@ -1,4 +1,4 @@
-use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow, transform::commands};
+use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
 use serde::{Deserialize, Serialize};
 
 use std::{collections::VecDeque, path::PathBuf};
@@ -131,7 +131,7 @@ impl Plugin for ChartPlugin {
                 .chain()
                 .distributive_run_if(should_load),
         );
-        
+
         app.add_system(delete_entity);
     }
 }
@@ -165,7 +165,6 @@ fn create_entity_event(
         }
     }
 }
-
 
 fn set_focused_entity(
     mut interaction_query: Query<

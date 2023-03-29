@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use crate::{AppState, MainCamera, SaveRequest};
 
 use super::ui_helpers::{
-    add_rectangle_txt, create_rectangle_txt, CreateRectButton, LeftPanel, LeftPanelControls,
-    LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState, DelRectButton,
+    add_rectangle_txt, create_rectangle_txt, CreateRectButton, DelRectButton, LeftPanel,
+    LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState,
 };
 
 pub fn init_layout(
@@ -223,7 +223,7 @@ pub fn init_layout(
             builder.spawn(add_rectangle_txt(font.clone(), "NEW".to_string()));
         })
         .id();
-    
+
     let del_rect = commands
         .spawn((
             ButtonBundle {
