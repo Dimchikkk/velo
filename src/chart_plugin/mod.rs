@@ -1,4 +1,4 @@
-use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
+use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow, transform::commands};
 use serde::{Deserialize, Serialize};
 
 use std::{collections::VecDeque, path::PathBuf};
@@ -131,6 +131,8 @@ impl Plugin for ChartPlugin {
                 .chain()
                 .distributive_run_if(should_load),
         );
+        
+        app.add_system(delete_entity);
     }
 }
 
@@ -163,6 +165,7 @@ fn create_entity_event(
         }
     }
 }
+
 
 fn set_focused_entity(
     mut interaction_query: Query<
@@ -245,5 +248,41 @@ fn create_new_rectangle(
             },
         );
         commands.entity(state.main_panel.unwrap()).add_child(entity);
+    }
+}
+
+fn delete_entity(
+    mut commands: Commands,
+    mut state: ResMut<AppState>,
+    interaction_query: Query<
+        (&Interaction, &DelRectButton),
+        (Changed<Interaction>, With<DelRectButton>),
+    >,
+    nodes: Query<(Entity, &Rectangle), With<Rectangle>>,
+    arrows: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
+) {
+    for (interaction, _) in &interaction_query {
+        match *interaction {
+            Interaction::Clicked => {
+                if let Some(id) = state.entity_to_edit {
+                    state.entity_to_edit = None;
+                    state.entity_to_resize = None;
+                    state.hold_entity = None;
+                    state.arrow_to_draw_start = None;
+                    for (entity, node) in nodes.iter() {
+                        if node.id == id {
+                            commands.entity(entity).despawn_recursive();
+                        }
+                    }
+                    for (entity, arrow) in arrows.iter() {
+                        if arrow.start.id == id || arrow.end.id == id {
+                            commands.entity(entity).despawn_recursive();
+                        }
+                    }
+                }
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
     }
 }
