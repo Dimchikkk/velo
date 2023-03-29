@@ -65,6 +65,11 @@ pub enum NodeType {
     RECT,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub enum TextPos {
+    Center, BottomRight
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct JsonNode {
     pub id: Uuid,
@@ -75,6 +80,8 @@ pub struct JsonNode {
     pub height: Val,
     pub text: String,
     pub bg_color: Color,
+    pub tags: Vec<String>,
+    pub text_pos: TextPos,
 }
 
 #[derive(Resource, Default)]
@@ -222,6 +229,8 @@ fn create_new_rectangle(
                 text: event.node.text.clone(),
                 bg_color: event.node.bg_color,
                 position: (event.node.left, event.node.bottom),
+                text_pos: event.node.text_pos.clone(),
+                tags: event.node.tags.clone(),
             },
         );
         commands.entity(state.main_panel.unwrap()).add_child(entity);

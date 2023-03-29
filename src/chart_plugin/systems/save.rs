@@ -65,6 +65,8 @@ pub fn save_json(
             height: size.height,
             bg_color,
             text,
+            tags: vec![], // TODO
+            text_pos: crate::TextPos::Center // TODO
         }));
     }
 
