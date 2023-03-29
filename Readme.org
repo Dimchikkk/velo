@@ -38,7 +38,7 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 #+END_SRC
 
 * Tasks to todo
-- Make text inside rectangle smart wrapping (once https://github.com/bevyengine/bevy/pull/7761 merged)
+- Make text inside rectangle smart wrapping (see https://github.com/bevyengine/bevy/pull/7761)
 - Tag systems for nodes
 - Github auth, repo to sync diagrams
 - Add button to change z-index of rectangle
@@ -48,8 +48,6 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 - Tabs of diagrams
 - Add "ctrl+a" to select text in rectangle
 - Search system
-- Delete entities functionality
-- Proper cursor on typing
 - Improve UI/UX, use lucid.app for inspiration
 - Wasm executable code in rectangle
 - Org support in rectangles
