@@ -4,8 +4,8 @@ use bevy_ui_borders::BorderColor;
 use crate::{AppState, MainCamera, SaveRequest};
 
 use super::ui_helpers::{
-    add_rectangle_txt, create_rectangle_txt, ChangeColor,
-    LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState,  ButtonAction, self,
+    self, add_rectangle_txt, create_rectangle_txt, ButtonAction, ChangeColor, LeftPanel,
+    LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState,
 };
 
 pub fn init_layout(
@@ -201,30 +201,42 @@ pub fn init_layout(
     commands.entity(left_panel).add_child(left_panel_explorer);
 
     let creation = add_two_buttons(
-        &mut commands, 
-        font.clone(), 
+        &mut commands,
+        font.clone(),
         "NEW".to_string(),
-        "DELETE".to_string(), 
-        ButtonAction { button_type: ui_helpers::ButtonTypes::ADD },
-        ButtonAction { button_type: ui_helpers::ButtonTypes::DEL }
+        "DELETE".to_string(),
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::ADD,
+        },
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::DEL,
+        },
     );
     let z_index = add_two_buttons(
-        &mut commands, 
-        font.clone(), 
+        &mut commands,
+        font.clone(),
         "FRONT".to_string(),
-        "BACK".to_string(), 
-        ButtonAction { button_type: ui_helpers::ButtonTypes::FRONT },
-        ButtonAction { button_type: ui_helpers::ButtonTypes::BACK }
+        "BACK".to_string(),
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::FRONT,
+        },
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::BACK,
+        },
     );
     let tagging = add_two_buttons(
-        &mut commands, 
-        font.clone(), 
+        &mut commands,
+        font,
         "TAG".to_string(),
-        "UNTAG".to_string(), 
-        ButtonAction { button_type: ui_helpers::ButtonTypes::TAG },
-        ButtonAction { button_type: ui_helpers::ButtonTypes::UNTAG }
+        "UNTAG".to_string(),
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::TAG,
+        },
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::UNTAG,
+        },
     );
-    
+
     let color_picker = commands
         .spawn((NodeBundle {
             style: Style {
@@ -297,14 +309,14 @@ fn add_color(commands: &mut Commands, color: Color) -> Entity {
 }
 
 fn add_two_buttons(
-    commands: &mut Commands, 
-    font: Handle<Font>, 
-    label_do: String, 
-    label_undo: String, 
+    commands: &mut Commands,
+    font: Handle<Font>,
+    label_do: String,
+    label_undo: String,
     component_do: impl Component,
     component_undo: impl Component,
 ) -> Entity {
-        let node = commands
+    let node = commands
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
@@ -333,7 +345,7 @@ fn add_two_buttons(
                 },
                 ..default()
             },
-            component_do
+            component_do,
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), label_do));
@@ -352,7 +364,7 @@ fn add_two_buttons(
                 },
                 ..default()
             },
-            component_undo
+            component_undo,
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), label_undo));
