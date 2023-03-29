@@ -16,6 +16,12 @@ pub struct Root;
 pub struct Menu;
 
 #[derive(Component)]
+pub struct SaveState;
+
+#[derive(Component)]
+pub struct LoadState;
+
+#[derive(Component)]
 pub struct MainPanel;
 
 #[derive(Component)]
@@ -140,17 +146,22 @@ pub fn add_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
     })
 }
 
-fn create_rectangle_btn(item_meta: NodeMeta) -> ButtonBundle {
+fn create_rectangle_btn(
+    size: (Val, Val),
+    position: (Val, Val),
+    bg_color: Color,
+    image: Option<UiImage>,
+) -> ButtonBundle {
     let mut button = ButtonBundle {
-        background_color: item_meta.bg_color.into(),
+        background_color: bg_color.into(),
         style: Style {
             position_type: PositionType::Absolute,
             position: UiRect {
-                left: item_meta.position.0,
-                bottom: item_meta.position.1,
+                left: position.0,
+                bottom: position.1,
                 ..Default::default()
             },
-            size: Size::new(item_meta.size.0, item_meta.size.1),
+            size: Size::new(size.0, size.1),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             // overflow: Overflow::Hidden,
@@ -158,7 +169,7 @@ fn create_rectangle_btn(item_meta: NodeMeta) -> ButtonBundle {
         },
         ..default()
     };
-    if let Some(image) = item_meta.image {
+    if let Some(image) = image {
         button.image = image;
     }
     button
@@ -190,7 +201,7 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
     }
 }
 
-fn create_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
+pub fn create_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
     let text_style = TextStyle {
         font,
         font_size: 18.0,
@@ -359,7 +370,12 @@ pub struct NodeMeta {
 pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
     commands
         .spawn((
-            create_rectangle_btn(item_meta.clone()),
+            create_rectangle_btn(
+                item_meta.size,
+                item_meta.position,
+                item_meta.bg_color,
+                item_meta.image,
+            ),
             Rectangle { id: item_meta.id },
             Outline::all(Color::BLACK, Val::Px(1.)),
         ))

@@ -117,6 +117,7 @@ impl Plugin for ChartPlugin {
             path_modal_keyboard_input_system,
             set_focused_modal,
             confirm_path_modal,
+            open_path_modal,
         ));
 
         app.add_systems(
