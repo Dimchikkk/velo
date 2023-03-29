@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::PrimaryWindow};
 
 use uuid::Uuid;
 
@@ -16,7 +16,9 @@ pub fn button_handler(
     nodes: Query<(Entity, &Rectangle), With<Rectangle>>,
     arrows: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
     mut state: ResMut<AppState>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
+    let window = windows.single();
     for (interaction, mut color, button_action) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => match button_action.button_type {
@@ -25,8 +27,8 @@ pub fn button_handler(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::RECT,
-                            left: Val::Px(0.0),
-                            bottom: Val::Px(0.0),
+                            left: Val::Px(window.width() / 2. - 200.),
+                            bottom: Val::Px(window.height() / 2.),
                             width: Val::Px(100.0),
                             height: Val::Px(100.0),
                             text: "".to_string(),
@@ -53,10 +55,18 @@ pub fn button_handler(
                         }
                     }
                 }
-                super::ui_helpers::ButtonTypes::FRONT => {},
-                super::ui_helpers::ButtonTypes::BACK => {},
-                super::ui_helpers::ButtonTypes::TAG => {},
-                super::ui_helpers::ButtonTypes::UNTAG => {},
+                super::ui_helpers::ButtonTypes::FRONT => {
+                    eprintln!("Not implemented yet");
+                },
+                super::ui_helpers::ButtonTypes::BACK => {
+                    eprintln!("Not implemented yet");
+                },
+                super::ui_helpers::ButtonTypes::TAG => {
+                    eprintln!("Not implemented yet");
+                },
+                super::ui_helpers::ButtonTypes::UNTAG => {
+                    eprintln!("Not implemented yet");
+                },
             },
             Interaction::Hovered => {
                 color.0 = Color::GRAY;
