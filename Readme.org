@@ -36,7 +36,7 @@ Wasm minimal support:
 
 #+BEGIN_SRC sh
 cargo r --target wasm32-unknown-unknown --release
-wasm-server-runner  target/wasm32-unknown-unknown/release/ichart.wasm
+wasm-server-runner  target/wasm32-unknown-unknown/release/rusticify.wasm
 #+END_SRC
 
 ** Pre-commit actions
