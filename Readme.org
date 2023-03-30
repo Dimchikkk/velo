@@ -20,7 +20,8 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 - ✅ save game state to file and load from it (command + shift + s|l)  
 - ✅ change background color of rectangle  
 - ✅ move rectangle to front/back  
-- [ ] tag/untag nodes  
+- [ ] tag/untag files
+- [ ] positioning text in rectangle
 - [ ] load from folder (switch between files)  
 - [ ] search by text/tag  
 - [ ] arrow parallel-lines drawing mode
