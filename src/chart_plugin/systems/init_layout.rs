@@ -1,11 +1,15 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
+use uuid::Uuid;
 
-use crate::{AppState, MainCamera, SaveRequest, TextPos};
+use crate::{AppState, MainCamera, SaveRequest, Tab, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, ArrowMode, ArrowType, ButtonAction, ChangeColor,
-    LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState, TextPodMode,
+    LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, ReflectableUuid,
+    Root, SaveState, TextPodMode,
 };
 
 pub fn init_layout(
@@ -15,6 +19,13 @@ pub fn init_layout(
 ) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
     commands.spawn((Camera2dBundle::default(), MainCamera));
+    let tab_id = ReflectableUuid(Uuid::new_v4());
+    state.tabs.push(Tab {
+        id: tab_id,
+        name: "Tab 1".to_string(),
+        checkpoints: VecDeque::new(),
+        is_active: true,
+    });
     commands.insert_resource(SaveRequest { path: None });
 
     let root_ui = commands
@@ -362,27 +373,37 @@ pub fn init_layout(
     let text_pos1 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode { text_pos: TextPos::Center },
+        TextPodMode {
+            text_pos: TextPos::Center,
+        },
     );
     let text_pos2 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode { text_pos: TextPos::BottomRight },
+        TextPodMode {
+            text_pos: TextPos::BottomRight,
+        },
     );
     let text_pos3 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode { text_pos: TextPos::BottomLeft },
+        TextPodMode {
+            text_pos: TextPos::BottomLeft,
+        },
     );
     let text_pos4 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode { text_pos: TextPos::TopLeft },
+        TextPodMode {
+            text_pos: TextPos::TopLeft,
+        },
     );
     let text_pos5 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode { text_pos: TextPos::TopRight },
+        TextPodMode {
+            text_pos: TextPos::TopRight,
+        },
     );
     commands.entity(text_modes).add_child(text_pos1);
     commands.entity(text_modes).add_child(text_pos2);
@@ -475,7 +496,6 @@ fn add_arrow(
         ))
         .id()
 }
-
 
 fn add_text_pos(
     commands: &mut Commands,
