@@ -2,9 +2,11 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use uuid::Uuid;
 
-use crate::{AddRect, AppState, JsonNode, NodeType, JsonNodeText};
+use crate::{AddRect, AppState, JsonNode, JsonNodeText, NodeType};
 
-use super::ui_helpers::{ArrowMeta, ArrowMode, ButtonAction, ChangeColor, Rectangle, TextPodMode, pos_to_style};
+use super::ui_helpers::{
+    pos_to_style, ArrowMeta, ArrowMode, ButtonAction, ChangeColor, Rectangle, TextPodMode,
+};
 
 pub fn button_handler(
     mut commands: Commands,
@@ -101,7 +103,7 @@ pub fn button_handler(
 
 pub fn change_color_pallete(
     mut interaction_query: Query<
-        (&Interaction, &ChangeColor,  &mut BackgroundColor),
+        (&Interaction, &ChangeColor, &mut BackgroundColor),
         (Changed<Interaction>, With<ChangeColor>, Without<Rectangle>),
     >,
     mut nodes: Query<(&mut BackgroundColor, &Rectangle), With<Rectangle>>,
@@ -129,22 +131,22 @@ pub fn change_color_pallete(
     }
 }
 
-
 pub fn change_text_pos(
     mut interaction_query: Query<
-        (&Interaction, &TextPodMode,  &mut BackgroundColor),
+        (&Interaction, &TextPodMode, &mut BackgroundColor),
         (Changed<Interaction>, With<TextPodMode>),
     >,
     mut nodes: Query<(&mut Style, &Rectangle), With<Rectangle>>,
     state: Res<AppState>,
 ) {
-    for (interaction, text_pos_mode , mut bg_color) in &mut interaction_query {
+    for (interaction, text_pos_mode, mut bg_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 if state.entity_to_edit.is_some() {
                     for (mut style, node) in nodes.iter_mut() {
                         if node.id == state.entity_to_edit.unwrap() {
-                            let (justify_content, align_items) = pos_to_style(text_pos_mode.text_pos.clone());
+                            let (justify_content, align_items) =
+                                pos_to_style(text_pos_mode.text_pos.clone());
                             style.justify_content = justify_content;
                             style.align_items = align_items;
                         }
