@@ -107,6 +107,7 @@ pub fn load_json(
         create_arrow.send(CreateArrow {
             start: arrow_meta.start,
             end: arrow_meta.end,
+            arrow_type: arrow_meta.arrow_type,
         });
     }
 }

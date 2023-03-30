@@ -1,6 +1,6 @@
 use bevy_ui_borders::{BorderColor, Outline};
 use serde::{Deserialize, Serialize};
-use std::f32::consts::PI;
+use std::{f32::consts::PI};
 
 use bevy::prelude::*;
 use bevy_prototype_lyon::{
@@ -20,6 +20,22 @@ pub struct Menu;
 #[derive(Component)]
 pub struct ChangeColor {
     pub color: Color,
+}
+
+#[derive(Serialize, Deserialize, Default, Copy, Clone, Reflect, Debug, Eq, PartialEq, Hash)]
+pub enum ArrowType {
+    Line,
+    #[default]
+    Arrow,
+    DoubleArrow,
+    ParallelLine,
+    ParallelArrow,
+    ParallelDoubleArrow
+}
+
+#[derive(Component)]
+pub struct ArrowMode {
+    pub arrow_type: ArrowType,
 }
 
 #[derive(Component)]
@@ -42,6 +58,7 @@ pub struct LeftPanelExplorer;
 
 #[derive(Eq, PartialEq, Hash, Debug, Clone, Copy)]
 pub struct CreateArrow {
+    pub arrow_type: ArrowType,
     pub start: ArrowConnect,
     pub end: ArrowConnect,
 }
@@ -108,6 +125,7 @@ pub enum ResizeMarker {
 )]
 #[reflect(Component)]
 pub struct ArrowMeta {
+    pub arrow_type: ArrowType,
     pub start: ArrowConnect,
     pub end: ArrowConnect,
 }

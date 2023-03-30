@@ -5,7 +5,7 @@ use crate::{AppState, MainCamera, SaveRequest};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, ButtonAction, ChangeColor, LeftPanel,
-    LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState,
+    LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState, ArrowMode, ArrowType,
 };
 
 pub fn init_layout(
@@ -171,6 +171,12 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 style: Style {
+                    padding: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(10.),
+                        top: Val::Px(10.),
+                        bottom: Val::Px(10.),
+                    },
                     size: Size::new(Val::Percent(100.), Val::Percent(20.)),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
@@ -241,7 +247,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(80.), Val::Percent(20.)),
+                size: Size::new(Val::Percent(80.), Val::Percent(12.)),
                 margin: UiRect {
                     left: Val::Px(5.),
                     right: Val::Px(5.),
@@ -268,11 +274,43 @@ pub fn init_layout(
     commands.entity(color_picker).add_child(color3);
     commands.entity(color_picker).add_child(color4);
     commands.entity(color_picker).add_child(color5);
+    
+    let arrow_modes = commands
+        .spawn((NodeBundle {
+            style: Style {
+                align_items: AlignItems::Center,
+                size: Size::new(Val::Percent(100.), Val::Percent(20.)),
+                margin: UiRect {
+                    left: Val::Px(5.),
+                    right: Val::Px(5.),
+                    top: Val::Px(5.),
+                    bottom: Val::Px(5.),
+                },
+                justify_content: JustifyContent::Center,
+                ..default()
+            },
+            ..default()
+        },))
+        .id();
+    let arrow1 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::Line });
+    let arrow2 = add_arrow(&mut commands, &asset_server,  ArrowMode { arrow_type: ArrowType::Arrow });
+    let arrow3 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::DoubleArrow });
+    let arrow4 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::ParallelLine });
+    let arrow5 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::ParallelArrow });
+    let arrow6 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::ParallelDoubleArrow });
+    
+    commands.entity(arrow_modes).add_child(arrow1);
+    commands.entity(arrow_modes).add_child(arrow2);
+    commands.entity(arrow_modes).add_child(arrow3);
+    commands.entity(arrow_modes).add_child(arrow4);
+    commands.entity(arrow_modes).add_child(arrow5);
+    commands.entity(arrow_modes).add_child(arrow6);
 
     commands.entity(left_panel_controls).add_child(creation);
     commands.entity(left_panel_controls).add_child(z_index);
     commands.entity(left_panel_controls).add_child(tagging);
     commands.entity(left_panel_controls).add_child(color_picker);
+    commands.entity(left_panel_controls).add_child(arrow_modes);
 
     commands.entity(main_bottom).add_child(left_panel);
     commands.entity(main_bottom).add_child(main_panel);
@@ -308,6 +346,54 @@ fn add_color(commands: &mut Commands, color: Color) -> Entity {
         .id()
 }
 
+
+fn add_arrow(commands: &mut Commands, arrow_server: &Res<AssetServer>, arrow_mode: ArrowMode) -> Entity {
+    let image = match arrow_mode.arrow_type {
+        ArrowType::Line => {
+            arrow_server.load("line.png")
+        },
+        ArrowType::Arrow => {
+            arrow_server.load("arrow.png")
+        },
+        ArrowType::DoubleArrow => {
+            arrow_server.load("double-arrow.png")
+        },
+        ArrowType::ParallelLine => {
+            arrow_server.load("parallel-line.png")
+        },
+        ArrowType::ParallelArrow => {
+            arrow_server.load("parallel-arrow.png")
+        },
+        ArrowType::ParallelDoubleArrow => {
+            arrow_server.load("parallel-double-arrow.png")
+        },
+    };
+    commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::Rgba { red: 1., green: 1., blue: 1., alpha: 0.5 }.into(),
+                image: image.into(),
+                style: Style {
+                    size: Size::new(Val::Percent(12.), Val::Percent(100.)),
+                    align_items: AlignItems::Center,
+                    margin: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    border: UiRect::all(Val::Px(1.)),
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            BorderColor(Color::BLACK),
+            arrow_mode,
+        ))
+        .id()
+}
+
 fn add_two_buttons(
     commands: &mut Commands,
     font: Handle<Font>,
@@ -320,7 +406,7 @@ fn add_two_buttons(
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(85.), Val::Percent(15.)),
+                size: Size::new(Val::Percent(85.), Val::Percent(12.)),
                 margin: UiRect {
                     left: Val::Px(5.),
                     right: Val::Px(5.),
