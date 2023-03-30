@@ -7,7 +7,7 @@ use image::*;
 use serde_json::json;
 use std::io::Cursor;
 
-use crate::{AppState, JsonNode, SaveRequest, JsonNodeText};
+use crate::{AppState, JsonNode, SaveRequest, JsonNodeText, chart_plugin::ui_helpers::style_to_pos};
 
 use super::ui_helpers::{ArrowMeta, EditableText, Rectangle};
 
@@ -80,7 +80,7 @@ pub fn save_json(
             bg_color,
             text: JsonNodeText {
                 text,
-                pos: crate::TextPos::Center,
+                pos: style_to_pos((style.justify_content, style.align_items)),
             },
             z_index,
             tags: vec![], // TODO
