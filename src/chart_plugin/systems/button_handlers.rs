@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{AddRect, AppState, JsonNode, NodeType};
 
-use super::ui_helpers::{ArrowMeta, ButtonAction, ChangeColor, Rectangle, ArrowMode};
+use super::ui_helpers::{ArrowMeta, ArrowMode, ButtonAction, ChangeColor, Rectangle};
 
 pub fn button_handler(
     mut commands: Commands,
@@ -125,7 +125,7 @@ pub fn change_color_pallete(
 
 pub fn change_arrow_type(
     mut interaction_query: Query<
-        (&Interaction, &ArrowMode,  &mut BackgroundColor),
+        (&Interaction, &ArrowMode, &mut BackgroundColor),
         (Changed<Interaction>, With<ArrowMode>),
     >,
     mut state: ResMut<AppState>,
