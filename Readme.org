@@ -12,7 +12,7 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 ** What's implemented
 - ✅ add/remove rectangle  
 - ✅ rectangle resizing  
-- ✅ rectangles repositioning  
+- ✅ rectangle repositioning  
 - ✅ text inside rectangles  
 - ✅ paste screenshot from clipboard  
 - ✅ connect nodes with arrows  
@@ -23,7 +23,8 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 - [ ] tag/untag nodes  
 - [ ] load from folder (switch between files)  
 - [ ] search by text/tag  
-- [ ] arrow modes
+- [ ] arrow parallel-lines drawing mode
+- [ ] improve text inside rectangle
 
 ** Run (supported platforms: linux, macos, windows)
 
@@ -54,5 +55,5 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
     + smart wrapping (see https://github.com/bevyengine/bevy/pull/7761)
     + text selection
     + links support
-- Exectuble code inside rectangle (wasm?)
-- Org support in rectangles
+    + exectuble code inside rectangle
+    + org/markdown support
