@@ -104,6 +104,7 @@ pub fn insert_from_clipboard(
                 bg_color: Color::WHITE,
                 tags: vec![],
                 text_pos: crate::TextPos::Center,
+                z_index: 0,
             },
             image: Some(image.into()),
         });

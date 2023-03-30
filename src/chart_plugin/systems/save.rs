@@ -21,7 +21,7 @@ pub fn remove_save_request(world: &mut World) {
 
 pub fn save_json(
     images: Res<Assets<Image>>,
-    rec_query: Query<(&Rectangle, &UiImage, &BackgroundColor, &Style, &Children), With<Rectangle>>,
+    rec_query: Query<(&Rectangle, &UiImage, &BackgroundColor, &Style, &Children, &ZIndex), With<Rectangle>>,
     arrows: Query<&ArrowMeta, With<ArrowMeta>>,
     request: Res<SaveRequest>,
     mut state: ResMut<AppState>,
@@ -35,7 +35,7 @@ pub fn save_json(
         "arrows": [],
     });
     let json_images = json["images"].as_object_mut().unwrap();
-    for (rect, image, _, _, _) in rec_query.iter() {
+    for (rect, image, _, _, _, _) in rec_query.iter() {
         if let Some(image) = images.get(&image.texture) {
             if let Ok(img) = image.clone().try_into_dynamic() {
                 let mut image_data: Vec<u8> = Vec::new();
@@ -49,13 +49,17 @@ pub fn save_json(
     }
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
-    for (rect, _, bg_color, style, children) in rec_query.iter() {
+    for (rect, _, bg_color, style, children, z_index) in rec_query.iter() {
         let text = text_query.get(children[children.len() - 1]).unwrap();
         let text = text.sections[0].value.clone();
         let left = style.position.left;
         let bottom = style.position.bottom;
         let size = style.size;
         let bg_color = bg_color.0;
+        let z_index = match *z_index {
+            ZIndex::Local(v) => v,
+            _ => -1,
+        };
         json_nodes.push(json!(JsonNode {
             node_type: crate::NodeType::RECT,
             id: rect.id.0,
@@ -65,6 +69,7 @@ pub fn save_json(
             height: size.height,
             bg_color,
             text,
+            z_index,
             tags: vec![],                     // TODO
             text_pos: crate::TextPos::Center  // TODO
         }));
