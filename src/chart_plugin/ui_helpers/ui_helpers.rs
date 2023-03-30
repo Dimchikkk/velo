@@ -383,7 +383,7 @@ pub struct NodeMeta {
     pub font: Handle<Font>,
     pub image: Option<UiImage>,
     pub tags: Vec<String>,
-    pub text_pos: TextPos
+    pub text_pos: TextPos,
 }
 
 pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
