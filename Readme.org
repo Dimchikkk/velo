@@ -21,11 +21,10 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 - ✅ change background color of rectangle  
 - ✅ move rectangle to front/back  
 - ✅ positioning text in rectangle
-- [ ] tag/untag files
-- [ ] load from folder (switch between files)  
-- [ ] search by text/tag  
+- [ ] introduce tabs 
 - [ ] arrow parallel-lines drawing mode
-- [ ] improve text inside rectangle
+- [ ] text wrapping
+- [ ] links inside text
 
 ** Run (supported platforms: linux, macos, windows)
 
@@ -49,7 +48,10 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 
 * Tasks to todo
 - Add app icon (make sure that it's embedded in release binary)
+- Improve main draw area behaviour on window resize
 - Create icons for buttons
+- Add tagging/untagging of nodes
+- Search by text / tags
 - Accessibility improvements 
 - Multiple nodes selection
 - Improve text inside rectangle:
