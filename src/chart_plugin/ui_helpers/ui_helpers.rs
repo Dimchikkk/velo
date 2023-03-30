@@ -168,9 +168,11 @@ fn create_rectangle_btn(
     position: (Val, Val),
     bg_color: Color,
     image: Option<UiImage>,
+    z_index: i32,
 ) -> ButtonBundle {
     let mut button = ButtonBundle {
         background_color: bg_color.into(),
+        z_index: ZIndex::Local(z_index),
         style: Style {
             position_type: PositionType::Absolute,
             position: UiRect {
@@ -384,6 +386,7 @@ pub struct NodeMeta {
     pub image: Option<UiImage>,
     pub tags: Vec<String>,
     pub text_pos: TextPos,
+    pub z_index: i32,
 }
 
 pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
@@ -394,6 +397,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                 item_meta.position,
                 item_meta.bg_color,
                 item_meta.image,
+                item_meta.z_index,
             ),
             Rectangle { id: item_meta.id },
             Outline::all(Color::BLACK, Val::Px(1.)),

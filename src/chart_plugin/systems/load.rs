@@ -95,6 +95,7 @@ pub fn load_json(
                 position: (json_node.left, json_node.bottom),
                 tags: json_node.tags,
                 text_pos: json_node.text_pos,
+                z_index: json_node.z_index,
             },
         );
         commands.entity(state.main_panel.unwrap()).add_child(entity);

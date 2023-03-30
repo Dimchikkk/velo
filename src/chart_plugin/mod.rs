@@ -83,6 +83,7 @@ pub struct JsonNode {
     pub bg_color: Color,
     pub tags: Vec<String>,
     pub text_pos: TextPos,
+    pub z_index: i32,
 }
 
 #[derive(Resource, Default)]
@@ -232,6 +233,7 @@ fn create_new_rectangle(
                 position: (event.node.left, event.node.bottom),
                 text_pos: event.node.text_pos.clone(),
                 tags: event.node.tags.clone(),
+                z_index: event.node.z_index,
             },
         );
         commands.entity(state.main_panel.unwrap()).add_child(entity);
