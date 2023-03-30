@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use image::*;
 
 use serde_json::json;
-use std::{io::Cursor};
+use std::io::Cursor;
 
 use crate::{
     chart_plugin::ui_helpers::style_to_pos, AppState, JsonNode, JsonNodeText, SaveRequest,
