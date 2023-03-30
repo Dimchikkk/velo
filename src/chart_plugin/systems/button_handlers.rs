@@ -2,7 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use uuid::Uuid;
 
-use crate::{AddRect, AppState, JsonNode, NodeType};
+use crate::{AddRect, AppState, JsonNode, NodeType, JsonNodeText};
 
 use super::ui_helpers::{ArrowMeta, ArrowMode, ButtonAction, ChangeColor, Rectangle};
 
@@ -31,10 +31,12 @@ pub fn button_handler(
                             bottom: Val::Px(window.height() / 2.),
                             width: Val::Px(100.0),
                             height: Val::Px(100.0),
-                            text: "".to_string(),
+                            text: JsonNodeText {
+                                text: "".to_string(),
+                                pos: crate::TextPos::Center,
+                            },
                             bg_color: Color::WHITE,
                             tags: vec![],
-                            text_pos: crate::TextPos::Center,
                             z_index: 0,
                         },
                         image: None,
