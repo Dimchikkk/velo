@@ -5,9 +5,11 @@ use bevy::prelude::*;
 use image::*;
 
 use serde_json::json;
-use std::io::Cursor;
+use std::{io::Cursor};
 
-use crate::{AppState, JsonNode, SaveRequest, JsonNodeText, chart_plugin::ui_helpers::style_to_pos};
+use crate::{
+    chart_plugin::ui_helpers::style_to_pos, AppState, JsonNode, JsonNodeText, SaveRequest,
+};
 
 use super::ui_helpers::{ArrowMeta, EditableText, Rectangle};
 
@@ -18,6 +20,8 @@ pub fn should_save(request: Option<Res<SaveRequest>>) -> bool {
 pub fn remove_save_request(world: &mut World) {
     world.remove_resource::<SaveRequest>().unwrap();
 }
+
+const MAX_CHECKPOINTS: i32 = 10;
 
 pub fn save_json(
     images: Res<Assets<Image>>,
@@ -39,7 +43,6 @@ pub fn save_json(
 ) {
     eprintln!("save json: {:?}", request);
     let mut json = json!({
-        "bevy_version": "0.10",
         "images": {},
         "nodes": [],
         "arrows": [],
@@ -92,9 +95,22 @@ pub fn save_json(
         json_arrows.push(json!(arrow_meta));
     }
 
+    for tab in &mut state.tabs {
+        if tab.is_active {
+            if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
+                tab.checkpoints.pop_front();
+            }
+            tab.checkpoints.push_back(json.to_string());
+            break;
+        }
+    }
+
     if let Some(path) = request.path.clone() {
-        std::fs::write(path, serde_json::to_string_pretty(&json).unwrap()).expect("Error saving state to file")
-    } else {
-        state.checkpoints.push_back(json.to_string());
+        let json = json!({
+            "version": "0.1.0",
+            "tabs": json!(state.tabs),
+        });
+        std::fs::write(path, serde_json::to_string_pretty(&json).unwrap())
+            .expect("Error saving state to file")
     }
 }

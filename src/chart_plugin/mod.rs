@@ -71,7 +71,7 @@ pub enum TextPos {
     BottomRight,
     BottomLeft,
     TopRight,
-    TopLeft
+    TopLeft,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -94,16 +94,24 @@ pub struct JsonNode {
     pub z_index: i32,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct Tab {
+    pub is_active: bool,
+    pub id: ReflectableUuid,
+    pub name: String,
+    pub checkpoints: VecDeque<String>,
+}
+
 #[derive(Resource, Default)]
 pub struct AppState {
     pub path_modal_id: Option<ReflectableUuid>,
+    pub main_panel: Option<Entity>,
+    pub arrow_type: ArrowType,
     pub entity_to_edit: Option<ReflectableUuid>,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
-    pub checkpoints: VecDeque<String>,
-    pub main_panel: Option<Entity>,
-    pub arrow_type: ArrowType,
+    pub tabs: Vec<Tab>,
 }
 
 impl Plugin for ChartPlugin {

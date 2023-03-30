@@ -203,7 +203,7 @@ pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
         (JustifyContent::FlexEnd, AlignItems::FlexEnd) => TextPos::BottomRight,
         (JustifyContent::FlexStart, AlignItems::FlexEnd) => TextPos::BottomLeft,
         (JustifyContent::Center, AlignItems::Center) => TextPos::Center,
-        _ => TextPos::Center
+        _ => TextPos::Center,
     }
 }
 
@@ -242,24 +242,30 @@ fn create_rectangle_btn(
 
 fn create_arrow_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonBundle {
     ButtonBundle {
-        style: get_marker_style(UiRect {
-            left: Val::Percent(left),
-            right: Val::Percent(right),
-            top: Val::Percent(top),
-            bottom: Val::Percent(bottom),
-        }, 3.),
+        style: get_marker_style(
+            UiRect {
+                left: Val::Percent(left),
+                right: Val::Percent(right),
+                top: Val::Percent(top),
+                bottom: Val::Percent(bottom),
+            },
+            3.,
+        ),
         ..default()
     }
 }
 
 fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonBundle {
     ButtonBundle {
-        style: get_marker_style(UiRect {
-            left: Val::Percent(left),
-            right: Val::Percent(right),
-            top: Val::Percent(top),
-            bottom: Val::Percent(bottom),
-        }, 10.),
+        style: get_marker_style(
+            UiRect {
+                left: Val::Percent(left),
+                right: Val::Percent(right),
+                top: Val::Percent(top),
+                bottom: Val::Percent(bottom),
+            },
+            10.,
+        ),
         background_color: Color::rgba(0., 0., 0., 0.).into(),
         ..default()
     }
@@ -313,7 +319,7 @@ pub fn spawn_path_modal(
                 .spawn(NodeBundle {
                     style: Style {
                         align_items: AlignItems::Center,
-                        justify_content: JustifyContent::SpaceAround,
+                        justify_content: JustifyContent::Center,
                         size: Size {
                             width: Val::Percent(100.),
                             height: Val::Percent(50.),
@@ -345,11 +351,13 @@ pub fn spawn_path_modal(
                                 style: Style {
                                     justify_content: JustifyContent::Center,
                                     align_items: AlignItems::Center,
+                                    border: UiRect::all(Val::Px(1.)),
                                     // overflow: Overflow::Hidden,
                                     ..default()
                                 },
                                 ..default()
                             },
+                            BorderColor(Color::BLACK),
                             PathModalText { id, save },
                         ))
                         .with_children(|builder| {
@@ -382,12 +390,14 @@ pub fn spawn_path_modal(
                             ButtonBundle {
                                 style: Style {
                                     justify_content: JustifyContent::Center,
+                                    border: UiRect::all(Val::Px(1.)),
                                     align_items: AlignItems::Center,
                                     // overflow: Overflow::Hidden,
                                     ..default()
                                 },
                                 ..default()
                             },
+                            BorderColor(Color::BLACK),
                             PathModalConfirm { id, save },
                         ))
                         .with_children(|builder| {
@@ -406,10 +416,12 @@ pub fn spawn_path_modal(
                                 style: Style {
                                     justify_content: JustifyContent::Center,
                                     align_items: AlignItems::Center,
+                                    border: UiRect::all(Val::Px(1.)),
                                     ..default()
                                 },
                                 ..default()
                             },
+                            BorderColor(Color::BLACK),
                             PathModalCancel { id },
                         ))
                         .with_children(|builder| {

@@ -100,7 +100,10 @@ pub fn insert_from_clipboard(
                 bottom: Val::Px(0.0),
                 width: Val::Px(size.width as f32),
                 height: Val::Px(size.height as f32),
-                text: crate::JsonNodeText { text: "".to_string(), pos: crate::TextPos::Center },
+                text: crate::JsonNodeText {
+                    text: "".to_string(),
+                    pos: crate::TextPos::Center,
+                },
                 bg_color: Color::WHITE,
                 tags: vec![],
                 z_index: 0,
