@@ -91,7 +91,7 @@ pub fn save_json(
     }
 
     if let Some(path) = request.path.clone() {
-        std::fs::write(path, json.to_string()).expect("Error saving state to file")
+        std::fs::write(path, serde_json::to_string_pretty(&json).unwrap()).expect("Error saving state to file")
     } else {
         state.checkpoints.push_back(json.to_string());
     }
