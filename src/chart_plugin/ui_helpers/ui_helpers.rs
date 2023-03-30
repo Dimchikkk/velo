@@ -163,12 +163,12 @@ pub struct PathModalCancel {
     pub id: ReflectableUuid,
 }
 
-fn get_marker_style(position: UiRect) -> Style {
+fn get_marker_style(position: UiRect, size: f32) -> Style {
     Style {
         position_type: PositionType::Absolute,
         position,
         border: UiRect::all(Val::Px(1.)),
-        size: Size::new(Val::Px(3.), Val::Px(3.)),
+        size: Size::new(Val::Px(size), Val::Px(size)),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         ..default()
@@ -247,7 +247,7 @@ fn create_arrow_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonBu
             right: Val::Percent(right),
             top: Val::Percent(top),
             bottom: Val::Percent(bottom),
-        }),
+        }, 3.),
         ..default()
     }
 }
@@ -259,7 +259,7 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
             right: Val::Percent(right),
             top: Val::Percent(top),
             bottom: Val::Percent(bottom),
-        }),
+        }, 10.),
         background_color: Color::rgba(0., 0., 0., 0.).into(),
         ..default()
     }
