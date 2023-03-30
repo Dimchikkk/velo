@@ -78,6 +78,8 @@ pub fn load_json(
                     let image_handle = res_images.add(image);
                     Some(image_handle.into())
                 }
+                #[cfg(target_arch = "wasm32")]
+                None
             }
             None => None,
         };
