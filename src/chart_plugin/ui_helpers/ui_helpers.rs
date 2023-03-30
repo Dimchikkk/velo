@@ -53,6 +53,9 @@ pub struct LoadState;
 pub struct MainPanel;
 
 #[derive(Component)]
+pub struct BottomPanel;
+
+#[derive(Component)]
 pub struct LeftPanel;
 
 #[derive(Component)]

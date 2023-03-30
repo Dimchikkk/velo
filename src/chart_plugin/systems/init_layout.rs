@@ -9,7 +9,7 @@ use crate::{AppState, MainCamera, SaveRequest, Tab, TextPos};
 use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, ArrowMode, ArrowType, ButtonAction, ChangeColor,
     LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, ReflectableUuid,
-    Root, SaveState, TextPodMode,
+    Root, SaveState, TextPodMode, BottomPanel,
 };
 
 pub fn init_layout(
@@ -145,10 +145,10 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 background_color: BackgroundColor(Color::Rgba {
-                    red: 192.,
-                    green: 192.,
-                    blue: 192.,
-                    alpha: 1.,
+                    red: 192. / 255.,
+                    green: 192. / 255.,
+                    blue: 192. / 255.,
+                    alpha: 0.5,
                 }),
                 style: Style {
                     size: Size::new(Val::Percent(15.), Val::Percent(100.)),
@@ -162,11 +162,25 @@ pub fn init_layout(
             LeftPanel,
         ))
         .id();
-    let main_panel = commands
+    let right_panel = commands
         .spawn((
             NodeBundle {
                 style: Style {
                     size: Size::new(Val::Percent(85.), Val::Percent(100.)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                },
+                ..default()
+            },
+        ))
+        .id();
+    let main_panel = commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(100.), Val::Percent(96.)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     overflow: Overflow::Hidden,
@@ -177,6 +191,24 @@ pub fn init_layout(
             MainPanel,
         ))
         .id();
+    let bottom_panel = commands
+        .spawn((
+            NodeBundle {
+                background_color: Color::rgba(0.29, 0.0, 0.51, 0.5).into(),
+                style: Style {
+                    size: Size::new(Val::Percent(100.), Val::Percent(4.)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    overflow: Overflow::Hidden,
+                    ..default()
+                },
+                ..default()
+            },
+            BottomPanel,
+        ))
+        .id();    
+    commands.entity(right_panel).add_child(main_panel);
+    commands.entity(right_panel).add_child(bottom_panel);
 
     let left_panel_controls = commands
         .spawn((
@@ -220,8 +252,8 @@ pub fn init_layout(
     let creation = add_two_buttons(
         &mut commands,
         font.clone(),
-        "NEW".to_string(),
-        "DELETE".to_string(),
+        "New Rec".to_string(),
+        "Delete".to_string(),
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Add,
         },
@@ -232,8 +264,8 @@ pub fn init_layout(
     let z_index = add_two_buttons(
         &mut commands,
         font.clone(),
-        "FRONT".to_string(),
-        "BACK".to_string(),
+        "Front".to_string(),
+        "Back".to_string(),
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Front,
         },
@@ -419,7 +451,7 @@ pub fn init_layout(
     commands.entity(left_panel_controls).add_child(text_modes);
 
     commands.entity(main_bottom).add_child(left_panel);
-    commands.entity(main_bottom).add_child(main_panel);
+    commands.entity(main_bottom).add_child(right_panel);
     commands.entity(root_ui).add_child(menu);
     commands.entity(root_ui).add_child(main_bottom);
 
