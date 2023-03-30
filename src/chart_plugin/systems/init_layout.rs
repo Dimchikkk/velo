@@ -230,18 +230,18 @@ pub fn init_layout(
             button_type: ui_helpers::ButtonTypes::Back,
         },
     );
-    let tagging = add_two_buttons(
-        &mut commands,
-        font,
-        "TAG".to_string(),
-        "UNTAG".to_string(),
-        ButtonAction {
-            button_type: ui_helpers::ButtonTypes::Tag,
-        },
-        ButtonAction {
-            button_type: ui_helpers::ButtonTypes::Untag,
-        },
-    );
+    // let tagging = add_two_buttons(
+    //     &mut commands,
+    //     font,
+    //     "TAG".to_string(),
+    //     "UNTAG".to_string(),
+    //     ButtonAction {
+    //         button_type: ui_helpers::ButtonTypes::Tag,
+    //     },
+    //     ButtonAction {
+    //         button_type: ui_helpers::ButtonTypes::Untag,
+    //     },
+    // );
 
     let color_picker = commands
         .spawn((NodeBundle {
@@ -313,38 +313,38 @@ pub fn init_layout(
             arrow_type: ArrowType::DoubleArrow,
         },
     );
-    let arrow4 = add_arrow(
-        &mut commands,
-        &asset_server,
-        ArrowMode {
-            arrow_type: ArrowType::ParallelLine,
-        },
-    );
-    let arrow5 = add_arrow(
-        &mut commands,
-        &asset_server,
-        ArrowMode {
-            arrow_type: ArrowType::ParallelArrow,
-        },
-    );
-    let arrow6 = add_arrow(
-        &mut commands,
-        &asset_server,
-        ArrowMode {
-            arrow_type: ArrowType::ParallelDoubleArrow,
-        },
-    );
+    // let arrow4 = add_arrow(
+    //     &mut commands,
+    //     &asset_server,
+    //     ArrowMode {
+    //         arrow_type: ArrowType::ParallelLine,
+    //     },
+    // );
+    // let arrow5 = add_arrow(
+    //     &mut commands,
+    //     &asset_server,
+    //     ArrowMode {
+    //         arrow_type: ArrowType::ParallelArrow,
+    //     },
+    // );
+    // let arrow6 = add_arrow(
+    //     &mut commands,
+    //     &asset_server,
+    //     ArrowMode {
+    //         arrow_type: ArrowType::ParallelDoubleArrow,
+    //     },
+    // );
 
     commands.entity(arrow_modes).add_child(arrow1);
     commands.entity(arrow_modes).add_child(arrow2);
     commands.entity(arrow_modes).add_child(arrow3);
-    commands.entity(arrow_modes).add_child(arrow4);
-    commands.entity(arrow_modes).add_child(arrow5);
-    commands.entity(arrow_modes).add_child(arrow6);
+    // commands.entity(arrow_modes).add_child(arrow4);
+    // commands.entity(arrow_modes).add_child(arrow5);
+    // commands.entity(arrow_modes).add_child(arrow6);
 
     commands.entity(left_panel_controls).add_child(creation);
     commands.entity(left_panel_controls).add_child(z_index);
-    commands.entity(left_panel_controls).add_child(tagging);
+    // commands.entity(left_panel_controls).add_child(tagging);
     commands.entity(left_panel_controls).add_child(color_picker);
     commands.entity(left_panel_controls).add_child(arrow_modes);
 
