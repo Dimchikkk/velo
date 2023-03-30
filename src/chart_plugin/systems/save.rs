@@ -21,7 +21,17 @@ pub fn remove_save_request(world: &mut World) {
 
 pub fn save_json(
     images: Res<Assets<Image>>,
-    rec_query: Query<(&Rectangle, &UiImage, &BackgroundColor, &Style, &Children, &ZIndex), With<Rectangle>>,
+    rec_query: Query<
+        (
+            &Rectangle,
+            &UiImage,
+            &BackgroundColor,
+            &Style,
+            &Children,
+            &ZIndex,
+        ),
+        With<Rectangle>,
+    >,
     arrows: Query<&ArrowMeta, With<ArrowMeta>>,
     request: Res<SaveRequest>,
     mut state: ResMut<AppState>,
@@ -61,7 +71,7 @@ pub fn save_json(
             _ => -1,
         };
         json_nodes.push(json!(JsonNode {
-            node_type: crate::NodeType::RECT,
+            node_type: crate::NodeType::Rect,
             id: rect.id.0,
             left,
             bottom,

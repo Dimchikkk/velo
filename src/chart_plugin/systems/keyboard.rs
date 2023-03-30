@@ -95,7 +95,7 @@ pub fn insert_from_clipboard(
         events.send(AddRect {
             node: JsonNode {
                 id: Uuid::new_v4(),
-                node_type: crate::NodeType::RECT,
+                node_type: crate::NodeType::Rect,
                 left: Val::Px(0.0),
                 bottom: Val::Px(0.0),
                 width: Val::Px(size.width as f32),

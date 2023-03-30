@@ -62,7 +62,7 @@ pub struct LoadRequest {
 
 #[derive(Serialize, Deserialize)]
 pub enum NodeType {
-    RECT,
+    Rect,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -151,6 +151,7 @@ impl Plugin for ChartPlugin {
         );
 
         app.add_system(change_color_pallete);
+        app.add_system(change_arrow_type);
     }
 }
 
