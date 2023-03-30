@@ -35,6 +35,7 @@ pub fn button_handler(
                             bg_color: Color::WHITE,
                             tags: vec![],
                             text_pos: crate::TextPos::Center,
+                            z_index: 0,
                         },
                         image: None,
                     });
