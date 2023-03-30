@@ -4,8 +4,8 @@ use bevy_ui_borders::BorderColor;
 use crate::{AppState, MainCamera, SaveRequest};
 
 use super::ui_helpers::{
-    self, add_rectangle_txt, create_rectangle_txt, ButtonAction, ChangeColor, LeftPanel,
-    LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState, ArrowMode, ArrowType,
+    self, add_rectangle_txt, create_rectangle_txt, ArrowMode, ArrowType, ButtonAction, ChangeColor,
+    LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState,
 };
 
 pub fn init_layout(
@@ -212,10 +212,10 @@ pub fn init_layout(
         "NEW".to_string(),
         "DELETE".to_string(),
         ButtonAction {
-            button_type: ui_helpers::ButtonTypes::ADD,
+            button_type: ui_helpers::ButtonTypes::Add,
         },
         ButtonAction {
-            button_type: ui_helpers::ButtonTypes::DEL,
+            button_type: ui_helpers::ButtonTypes::Del,
         },
     );
     let z_index = add_two_buttons(
@@ -224,10 +224,10 @@ pub fn init_layout(
         "FRONT".to_string(),
         "BACK".to_string(),
         ButtonAction {
-            button_type: ui_helpers::ButtonTypes::FRONT,
+            button_type: ui_helpers::ButtonTypes::Front,
         },
         ButtonAction {
-            button_type: ui_helpers::ButtonTypes::BACK,
+            button_type: ui_helpers::ButtonTypes::Back,
         },
     );
     let tagging = add_two_buttons(
@@ -236,10 +236,10 @@ pub fn init_layout(
         "TAG".to_string(),
         "UNTAG".to_string(),
         ButtonAction {
-            button_type: ui_helpers::ButtonTypes::TAG,
+            button_type: ui_helpers::ButtonTypes::Tag,
         },
         ButtonAction {
-            button_type: ui_helpers::ButtonTypes::UNTAG,
+            button_type: ui_helpers::ButtonTypes::Untag,
         },
     );
 
@@ -274,7 +274,7 @@ pub fn init_layout(
     commands.entity(color_picker).add_child(color3);
     commands.entity(color_picker).add_child(color4);
     commands.entity(color_picker).add_child(color5);
-    
+
     let arrow_modes = commands
         .spawn((NodeBundle {
             style: Style {
@@ -292,13 +292,49 @@ pub fn init_layout(
             ..default()
         },))
         .id();
-    let arrow1 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::Line });
-    let arrow2 = add_arrow(&mut commands, &asset_server,  ArrowMode { arrow_type: ArrowType::Arrow });
-    let arrow3 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::DoubleArrow });
-    let arrow4 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::ParallelLine });
-    let arrow5 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::ParallelArrow });
-    let arrow6 = add_arrow(&mut commands, &asset_server, ArrowMode { arrow_type: ArrowType::ParallelDoubleArrow });
-    
+    let arrow1 = add_arrow(
+        &mut commands,
+        &asset_server,
+        ArrowMode {
+            arrow_type: ArrowType::Line,
+        },
+    );
+    let arrow2 = add_arrow(
+        &mut commands,
+        &asset_server,
+        ArrowMode {
+            arrow_type: ArrowType::Arrow,
+        },
+    );
+    let arrow3 = add_arrow(
+        &mut commands,
+        &asset_server,
+        ArrowMode {
+            arrow_type: ArrowType::DoubleArrow,
+        },
+    );
+    let arrow4 = add_arrow(
+        &mut commands,
+        &asset_server,
+        ArrowMode {
+            arrow_type: ArrowType::ParallelLine,
+        },
+    );
+    let arrow5 = add_arrow(
+        &mut commands,
+        &asset_server,
+        ArrowMode {
+            arrow_type: ArrowType::ParallelArrow,
+        },
+    );
+    let arrow6 = add_arrow(
+        &mut commands,
+        &asset_server,
+        ArrowMode {
+            arrow_type: ArrowType::ParallelDoubleArrow,
+        },
+    );
+
     commands.entity(arrow_modes).add_child(arrow1);
     commands.entity(arrow_modes).add_child(arrow2);
     commands.entity(arrow_modes).add_child(arrow3);
@@ -346,32 +382,29 @@ fn add_color(commands: &mut Commands, color: Color) -> Entity {
         .id()
 }
 
-
-fn add_arrow(commands: &mut Commands, arrow_server: &Res<AssetServer>, arrow_mode: ArrowMode) -> Entity {
+fn add_arrow(
+    commands: &mut Commands,
+    arrow_server: &Res<AssetServer>,
+    arrow_mode: ArrowMode,
+) -> Entity {
     let image = match arrow_mode.arrow_type {
-        ArrowType::Line => {
-            arrow_server.load("line.png")
-        },
-        ArrowType::Arrow => {
-            arrow_server.load("arrow.png")
-        },
-        ArrowType::DoubleArrow => {
-            arrow_server.load("double-arrow.png")
-        },
-        ArrowType::ParallelLine => {
-            arrow_server.load("parallel-line.png")
-        },
-        ArrowType::ParallelArrow => {
-            arrow_server.load("parallel-arrow.png")
-        },
-        ArrowType::ParallelDoubleArrow => {
-            arrow_server.load("parallel-double-arrow.png")
-        },
+        ArrowType::Line => arrow_server.load("line.png"),
+        ArrowType::Arrow => arrow_server.load("arrow.png"),
+        ArrowType::DoubleArrow => arrow_server.load("double-arrow.png"),
+        ArrowType::ParallelLine => arrow_server.load("parallel-line.png"),
+        ArrowType::ParallelArrow => arrow_server.load("parallel-arrow.png"),
+        ArrowType::ParallelDoubleArrow => arrow_server.load("parallel-double-arrow.png"),
     };
     commands
         .spawn((
             ButtonBundle {
-                background_color: Color::Rgba { red: 1., green: 1., blue: 1., alpha: 0.5 }.into(),
+                background_color: Color::Rgba {
+                    red: 1.,
+                    green: 1.,
+                    blue: 1.,
+                    alpha: 0.5,
+                }
+                .into(),
                 image: image.into(),
                 style: Style {
                     size: Size::new(Val::Percent(12.), Val::Percent(100.)),
