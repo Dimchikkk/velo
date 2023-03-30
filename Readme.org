@@ -48,7 +48,7 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 
 * Tasks to todo
 - Add app icon (make sure that it's embedded in release binary)
-- Improve main draw area behaviour on window resize
+- Re-calc position on window resize
 - Improve popup window layout
 - Create icons for buttons
 - Add tagging/untagging of nodes

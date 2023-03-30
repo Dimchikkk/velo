@@ -7,9 +7,9 @@ use uuid::Uuid;
 use crate::{AppState, MainCamera, SaveRequest, Tab, TextPos};
 
 use super::ui_helpers::{
-    self, add_rectangle_txt, create_rectangle_txt, ArrowMode, ArrowType, ButtonAction, ChangeColor,
-    LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, ReflectableUuid,
-    Root, SaveState, TextPodMode, BottomPanel,
+    self, add_rectangle_txt, create_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel,
+    ButtonAction, ChangeColor, LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState,
+    MainPanel, Menu, ReflectableUuid, Root, SaveState, TextPodMode,
 };
 
 pub fn init_layout(
@@ -163,24 +163,22 @@ pub fn init_layout(
         ))
         .id();
     let right_panel = commands
-        .spawn((
-            NodeBundle {
-                style: Style {
-                    size: Size::new(Val::Percent(85.), Val::Percent(100.)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    flex_direction: FlexDirection::Column,
-                    ..default()
-                },
+        .spawn((NodeBundle {
+            style: Style {
+                size: Size::new(Val::Percent(85.), Val::Percent(100.)),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                flex_direction: FlexDirection::Column,
                 ..default()
             },
-        ))
+            ..default()
+        },))
         .id();
     let main_panel = commands
         .spawn((
             NodeBundle {
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(96.)),
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     overflow: Overflow::Hidden,
@@ -196,9 +194,16 @@ pub fn init_layout(
             NodeBundle {
                 background_color: Color::rgba(0.29, 0.0, 0.51, 0.5).into(),
                 style: Style {
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Percent(0.),
+                        right: Val::Percent(0.),
+                        bottom: Val::Percent(0.),
+                        top: Val::Percent(96.),
+                    },
                     size: Size::new(Val::Percent(100.), Val::Percent(4.)),
                     align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
+                    justify_content: JustifyContent::Start,
                     overflow: Overflow::Hidden,
                     ..default()
                 },
@@ -206,7 +211,34 @@ pub fn init_layout(
             },
             BottomPanel,
         ))
-        .id();    
+        .id();
+    let add_tab = commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
+                style: Style {
+                    size: Size::new(Val::Px(60.), Val::Px(30.)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    margin: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(10.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(0.),
+                    },
+                    ..default()
+                },
+
+                ..default()
+            },
+            AddTab,
+        ))
+        .with_children(|builder| {
+            builder.spawn(add_rectangle_txt(font.clone(), "New Tab".to_string()));
+        })
+        .id();
+    commands.entity(bottom_panel).add_child(add_tab);
+
     commands.entity(right_panel).add_child(main_panel);
     commands.entity(right_panel).add_child(bottom_panel);
 

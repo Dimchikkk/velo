@@ -18,6 +18,9 @@ pub struct Root;
 pub struct Menu;
 
 #[derive(Component)]
+pub struct AddTab;
+
+#[derive(Component)]
 pub struct ChangeColor {
     pub color: Color,
 }
