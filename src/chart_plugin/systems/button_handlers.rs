@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{AddRect, AppState, JsonNode, NodeType};
 
-use super::ui_helpers::{ArrowMeta, ButtonAction, Rectangle, ChangeColor};
+use super::ui_helpers::{ArrowMeta, ButtonAction, ChangeColor, Rectangle};
 
 pub fn button_handler(
     mut commands: Commands,
@@ -13,7 +13,7 @@ pub fn button_handler(
         (&Interaction, &mut BackgroundColor, &ButtonAction),
         (Changed<Interaction>, With<ButtonAction>),
     >,
-    nodes: Query<(Entity, &Rectangle), With<Rectangle>>,
+    mut nodes: Query<(Entity, &Rectangle, &mut ZIndex), With<Rectangle>>,
     arrows: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
     mut state: ResMut<AppState>,
     windows: Query<&Window, With<PrimaryWindow>>,
@@ -45,7 +45,7 @@ pub fn button_handler(
                         state.entity_to_resize = None;
                         state.hold_entity = None;
                         state.arrow_to_draw_start = None;
-                        for (entity, node) in nodes.iter() {
+                        for (entity, node, _) in nodes.iter() {
                             if node.id == id {
                                 commands.entity(entity).despawn_recursive();
                             }
@@ -58,17 +58,39 @@ pub fn button_handler(
                     }
                 }
                 super::ui_helpers::ButtonTypes::FRONT => {
-                    eprintln!("Not implemented yet");
-                },
+                    if let Some(id) = state.entity_to_edit {
+                        for (_, node, mut z_index) in nodes.iter_mut() {
+                            if node.id == id {
+                                match *z_index {
+                                    ZIndex::Local(i) => {
+                                        *z_index = ZIndex::Local(i + 1);
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                    }
+                }
                 super::ui_helpers::ButtonTypes::BACK => {
-                    eprintln!("Not implemented yet");
-                },
+                    if let Some(id) = state.entity_to_edit {
+                        for (_, node, mut z_index) in nodes.iter_mut() {
+                            if node.id == id {
+                                match *z_index {
+                                    ZIndex::Local(i) => {
+                                        *z_index = ZIndex::Local(i - 1);
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                    }
+                }
                 super::ui_helpers::ButtonTypes::TAG => {
                     eprintln!("Not implemented yet");
-                },
+                }
                 super::ui_helpers::ButtonTypes::UNTAG => {
                     eprintln!("Not implemented yet");
-                },
+                }
             },
             Interaction::Hovered => {
                 color.0 = Color::GRAY;
@@ -100,10 +122,8 @@ pub fn change_color_pallete(
                     }
                 }
             }
-            Interaction::Hovered => {
-            }
-            Interaction::None => {
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }

@@ -23,6 +23,7 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 - [ ] move rectangle to front/back  
 - [ ] load from folder (switch between files)  
 - [ ] search by text/tag  
+- [ ] arrow modes
 
 ** Run (supported platforms: linux, macos, windows)
 
@@ -47,11 +48,11 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 * Tasks to todo
 - Add app icon (make sure that it's embedded in release binary)
 - Create icons for buttons
+- Multiple nodes selection
 - Improve text inside rectangle:
     + text position
     + smart wrapping (see https://github.com/bevyengine/bevy/pull/7761)
     + text selection
     + links support
-- Have two arrow mods: direct and parallel arrows (see how parrallel arrows drawn in lucid.app)
 - Exectuble code inside rectangle (wasm?)
 - Org support in rectangles

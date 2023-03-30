@@ -103,7 +103,7 @@ pub fn insert_from_clipboard(
                 text: "".to_string(),
                 bg_color: Color::WHITE,
                 tags: vec![],
-                text_pos: crate::TextPos::Center
+                text_pos: crate::TextPos::Center,
             },
             image: Some(image.into()),
         });
