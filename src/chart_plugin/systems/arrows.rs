@@ -27,6 +27,7 @@ pub fn create_arrow_start(
                     create_arrow.send(CreateArrow {
                         start: start_arrow,
                         end: *arrow_connect,
+                        arrow_type: state.arrow_type,
                     });
                 }
                 None => {
@@ -40,36 +41,6 @@ pub fn create_arrow_start(
                 primary_window.cursor.icon = CursorIcon::Default;
             }
         }
-    }
-}
-
-pub fn redraw_arrows(
-    mut redraw_arrow: EventReader<RedrawArrow>,
-    mut create_arrow: EventWriter<CreateArrow>,
-    mut arrow_query: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
-    mut commands: Commands,
-) {
-    let mut despawned: HashSet<ArrowMeta> = HashSet::new();
-
-    for event in redraw_arrow.iter() {
-        for (entity, arrow) in &mut arrow_query.iter_mut() {
-            if despawned.contains(arrow) {
-                continue;
-            }
-            if arrow.start.id == event.id || arrow.end.id == event.id {
-                if let Some(entity) = commands.get_entity(entity) {
-                    despawned.insert(*arrow);
-                    entity.despawn_recursive();
-                }
-            }
-        }
-    }
-
-    for arrow_meta in despawned {
-        create_arrow.send(CreateArrow {
-            start: arrow_meta.start,
-            end: arrow_meta.end,
-        });
     }
 }
 
@@ -113,9 +84,41 @@ pub fn create_arrow_end(
                     ArrowMeta {
                         start: event.start,
                         end: event.end,
+                        arrow_type: event.arrow_type,
                     },
                 );
             }
         }
+    }
+}
+
+pub fn redraw_arrows(
+    mut redraw_arrow: EventReader<RedrawArrow>,
+    mut create_arrow: EventWriter<CreateArrow>,
+    mut arrow_query: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
+    mut commands: Commands,
+) {
+    let mut despawned: HashSet<ArrowMeta> = HashSet::new();
+
+    for event in redraw_arrow.iter() {
+        for (entity, arrow) in &mut arrow_query.iter_mut() {
+            if despawned.contains(arrow) {
+                continue;
+            }
+            if arrow.start.id == event.id || arrow.end.id == event.id {
+                if let Some(entity) = commands.get_entity(entity) {
+                    despawned.insert(*arrow);
+                    entity.despawn_recursive();
+                }
+            }
+        }
+    }
+
+    for arrow_meta in despawned {
+        create_arrow.send(CreateArrow {
+            start: arrow_meta.start,
+            end: arrow_meta.end,
+            arrow_type: arrow_meta.arrow_type,
+        });
     }
 }

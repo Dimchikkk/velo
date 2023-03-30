@@ -95,6 +95,7 @@ pub struct AppState {
     pub arrow_to_draw_start: Option<ArrowConnect>,
     pub checkpoints: VecDeque<String>,
     pub main_panel: Option<Entity>,
+    pub arrow_type: ArrowType,
 }
 
 impl Plugin for ChartPlugin {

@@ -1,5 +1,5 @@
 * Rusticify
-[[file:./assets/icon.png]]
+[[file:icon.png]]
 
 ** Screenshot
 [[file:rusticify.png]]
