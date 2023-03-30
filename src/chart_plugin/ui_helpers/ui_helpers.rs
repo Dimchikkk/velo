@@ -39,6 +39,11 @@ pub struct ArrowMode {
 }
 
 #[derive(Component)]
+pub struct TextPodMode {
+    pub text_pos: TextPos,
+}
+
+#[derive(Component)]
 pub struct SaveState;
 
 #[derive(Component)]
@@ -181,13 +186,35 @@ pub fn add_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
     })
 }
 
+pub fn pos_to_style(text_pos: TextPos) -> (JustifyContent, AlignItems) {
+    match text_pos {
+        TextPos::TopRight => (JustifyContent::FlexEnd, AlignItems::FlexStart),
+        TextPos::TopLeft => (JustifyContent::FlexStart, AlignItems::FlexStart),
+        TextPos::BottomRight => (JustifyContent::FlexEnd, AlignItems::FlexEnd),
+        TextPos::BottomLeft => (JustifyContent::FlexStart, AlignItems::FlexEnd),
+        TextPos::Center => (JustifyContent::Center, AlignItems::Center),
+    }
+}
+pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
+    match style {
+        (JustifyContent::FlexEnd, AlignItems::FlexStart) => TextPos::TopRight,
+        (JustifyContent::FlexStart, AlignItems::FlexStart) => TextPos::TopLeft,
+        (JustifyContent::FlexEnd, AlignItems::FlexEnd) => TextPos::BottomRight,
+        (JustifyContent::FlexStart, AlignItems::FlexEnd) => TextPos::BottomLeft,
+        (JustifyContent::Center, AlignItems::Center) => TextPos::Center,
+        _ => TextPos::Center
+    }
+}
+
 fn create_rectangle_btn(
     size: (Val, Val),
     position: (Val, Val),
     bg_color: Color,
     image: Option<UiImage>,
     z_index: i32,
+    text_pos: TextPos,
 ) -> ButtonBundle {
+    let (justify_content, align_items) = pos_to_style(text_pos);
     let mut button = ButtonBundle {
         background_color: bg_color.into(),
         z_index: ZIndex::Local(z_index),
@@ -199,8 +226,8 @@ fn create_rectangle_btn(
                 ..Default::default()
             },
             size: Size::new(size.0, size.1),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
+            justify_content,
+            align_items,
             // overflow: Overflow::Hidden,
             ..default()
         },
@@ -416,6 +443,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                 item_meta.bg_color,
                 item_meta.image,
                 item_meta.z_index,
+                item_meta.text_pos,
             ),
             Rectangle { id: item_meta.id },
             Outline::all(Color::BLACK, Val::Px(1.)),
