@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{AddRect, AppState, JsonNode, NodeType, JsonNodeText};
 
-use super::ui_helpers::{ArrowMeta, ArrowMode, ButtonAction, ChangeColor, Rectangle};
+use super::ui_helpers::{ArrowMeta, ArrowMode, ButtonAction, ChangeColor, Rectangle, TextPodMode, pos_to_style};
 
 pub fn button_handler(
     mut commands: Commands,
@@ -100,14 +100,14 @@ pub fn button_handler(
 }
 
 pub fn change_color_pallete(
-    interaction_query: Query<
-        (&Interaction, &ChangeColor),
-        (Changed<Interaction>, With<ChangeColor>),
+    mut interaction_query: Query<
+        (&Interaction, &ChangeColor,  &mut BackgroundColor),
+        (Changed<Interaction>, With<ChangeColor>, Without<Rectangle>),
     >,
     mut nodes: Query<(&mut BackgroundColor, &Rectangle), With<Rectangle>>,
     state: Res<AppState>,
 ) {
-    for (interaction, change_color) in &interaction_query {
+    for (interaction, change_color, mut bg_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let color = change_color.color;
@@ -119,8 +119,44 @@ pub fn change_color_pallete(
                     }
                 }
             }
-            Interaction::Hovered => {}
-            Interaction::None => {}
+            Interaction::Hovered => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+            }
+            Interaction::None => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
+            }
+        }
+    }
+}
+
+
+pub fn change_text_pos(
+    mut interaction_query: Query<
+        (&Interaction, &TextPodMode,  &mut BackgroundColor),
+        (Changed<Interaction>, With<TextPodMode>),
+    >,
+    mut nodes: Query<(&mut Style, &Rectangle), With<Rectangle>>,
+    state: Res<AppState>,
+) {
+    for (interaction, text_pos_mode , mut bg_color) in &mut interaction_query {
+        match *interaction {
+            Interaction::Clicked => {
+                if state.entity_to_edit.is_some() {
+                    for (mut style, node) in nodes.iter_mut() {
+                        if node.id == state.entity_to_edit.unwrap() {
+                            let (justify_content, align_items) = pos_to_style(text_pos_mode.text_pos.clone());
+                            style.justify_content = justify_content;
+                            style.align_items = align_items;
+                        }
+                    }
+                }
+            }
+            Interaction::Hovered => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+            }
+            Interaction::None => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+            }
         }
     }
 }

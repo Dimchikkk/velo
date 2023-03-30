@@ -69,6 +69,9 @@ pub enum NodeType {
 pub enum TextPos {
     Center,
     BottomRight,
+    BottomLeft,
+    TopRight,
+    TopLeft
 }
 
 #[derive(Serialize, Deserialize)]
@@ -157,6 +160,7 @@ impl Plugin for ChartPlugin {
 
         app.add_system(change_color_pallete);
         app.add_system(change_arrow_type);
+        app.add_system(change_text_pos);
     }
 }
 

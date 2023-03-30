@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
-use crate::{AppState, MainCamera, SaveRequest};
+use crate::{AppState, MainCamera, SaveRequest, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, ArrowMode, ArrowType, ButtonAction, ChangeColor,
-    LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState,
+    LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel, Menu, Root, SaveState, TextPodMode,
 };
 
 pub fn init_layout(
@@ -342,11 +342,60 @@ pub fn init_layout(
     // commands.entity(arrow_modes).add_child(arrow5);
     // commands.entity(arrow_modes).add_child(arrow6);
 
+    let text_modes = commands
+        .spawn((NodeBundle {
+            style: Style {
+                align_items: AlignItems::Center,
+                size: Size::new(Val::Percent(100.), Val::Percent(20.)),
+                margin: UiRect {
+                    left: Val::Px(5.),
+                    right: Val::Px(5.),
+                    top: Val::Px(5.),
+                    bottom: Val::Px(5.),
+                },
+                justify_content: JustifyContent::Center,
+                ..default()
+            },
+            ..default()
+        },))
+        .id();
+    let text_pos1 = add_text_pos(
+        &mut commands,
+        &asset_server,
+        TextPodMode { text_pos: TextPos::Center },
+    );
+    let text_pos2 = add_text_pos(
+        &mut commands,
+        &asset_server,
+        TextPodMode { text_pos: TextPos::BottomRight },
+    );
+    let text_pos3 = add_text_pos(
+        &mut commands,
+        &asset_server,
+        TextPodMode { text_pos: TextPos::BottomLeft },
+    );
+    let text_pos4 = add_text_pos(
+        &mut commands,
+        &asset_server,
+        TextPodMode { text_pos: TextPos::TopLeft },
+    );
+    let text_pos5 = add_text_pos(
+        &mut commands,
+        &asset_server,
+        TextPodMode { text_pos: TextPos::TopRight },
+    );
+    commands.entity(text_modes).add_child(text_pos1);
+    commands.entity(text_modes).add_child(text_pos2);
+    commands.entity(text_modes).add_child(text_pos3);
+    commands.entity(text_modes).add_child(text_pos4);
+    commands.entity(text_modes).add_child(text_pos5);
+
     commands.entity(left_panel_controls).add_child(creation);
     commands.entity(left_panel_controls).add_child(z_index);
     // commands.entity(left_panel_controls).add_child(tagging);
     commands.entity(left_panel_controls).add_child(color_picker);
     commands.entity(left_panel_controls).add_child(arrow_modes);
+    commands.entity(left_panel_controls).add_child(text_modes);
 
     commands.entity(main_bottom).add_child(left_panel);
     commands.entity(main_bottom).add_child(main_panel);
@@ -423,6 +472,51 @@ fn add_arrow(
             },
             BorderColor(Color::BLACK),
             arrow_mode,
+        ))
+        .id()
+}
+
+
+fn add_text_pos(
+    commands: &mut Commands,
+    arrow_server: &Res<AssetServer>,
+    text_pos_mode: TextPodMode,
+) -> Entity {
+    let image = match text_pos_mode.text_pos {
+        crate::TextPos::Center => arrow_server.load("text-center.png"),
+        crate::TextPos::BottomRight => arrow_server.load("text-right-bottom.png"),
+        crate::TextPos::BottomLeft => arrow_server.load("text-left-bottom.png"),
+        crate::TextPos::TopRight => arrow_server.load("text-right-top.png"),
+        crate::TextPos::TopLeft => arrow_server.load("text-left-top.png"),
+    };
+    commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::Rgba {
+                    red: 1.,
+                    green: 1.,
+                    blue: 1.,
+                    alpha: 0.5,
+                }
+                .into(),
+                image: image.into(),
+                style: Style {
+                    size: Size::new(Val::Percent(12.), Val::Percent(100.)),
+                    align_items: AlignItems::Center,
+                    margin: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    border: UiRect::all(Val::Px(1.)),
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            BorderColor(Color::BLACK),
+            text_pos_mode,
         ))
         .id()
 }
