@@ -92,11 +92,11 @@ pub fn load_json(
                 size: (json_node.width, json_node.height),
                 id: ReflectableUuid(json_node.id),
                 image: image.clone(),
-                text: json_node.text.clone(),
+                text: json_node.text.text.clone(),
                 bg_color: json_node.bg_color,
                 position: (json_node.left, json_node.bottom),
                 tags: json_node.tags,
-                text_pos: json_node.text_pos,
+                text_pos: json_node.text.pos,
                 z_index: json_node.z_index,
             },
         );

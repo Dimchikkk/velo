@@ -72,6 +72,12 @@ pub enum TextPos {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct JsonNodeText {
+    pub text: String,
+    pub pos: TextPos,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct JsonNode {
     pub id: Uuid,
     pub node_type: NodeType,
@@ -79,10 +85,9 @@ pub struct JsonNode {
     pub bottom: Val,
     pub width: Val,
     pub height: Val,
-    pub text: String,
+    pub text: JsonNodeText,
     pub bg_color: Color,
     pub tags: Vec<String>,
-    pub text_pos: TextPos,
     pub z_index: i32,
 }
 
@@ -230,10 +235,10 @@ fn create_new_rectangle(
                 size: (event.node.width, event.node.height),
                 id: ReflectableUuid(event.node.id),
                 image: event.image.clone(),
-                text: event.node.text.clone(),
+                text: event.node.text.text.clone(),
                 bg_color: event.node.bg_color,
                 position: (event.node.left, event.node.bottom),
-                text_pos: event.node.text_pos.clone(),
+                text_pos: event.node.text.pos.clone(),
                 tags: event.node.tags.clone(),
                 z_index: event.node.z_index,
             },
