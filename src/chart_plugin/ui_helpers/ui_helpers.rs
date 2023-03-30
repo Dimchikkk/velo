@@ -167,7 +167,8 @@ fn get_marker_style(position: UiRect) -> Style {
     Style {
         position_type: PositionType::Absolute,
         position,
-        size: Size::new(Val::Px(5.), Val::Px(5.)),
+        border: UiRect::all(Val::Px(1.)),
+        size: Size::new(Val::Px(3.), Val::Px(3.)),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         ..default()
@@ -247,7 +248,6 @@ fn create_arrow_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonBu
             top: Val::Percent(top),
             bottom: Val::Percent(bottom),
         }),
-        background_color: Color::rgb(0.9, 0.9, 1.0).into(),
         ..default()
     }
 }
@@ -260,7 +260,7 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
             top: Val::Percent(top),
             bottom: Val::Percent(bottom),
         }),
-        background_color: Color::rgb(0.8, 0.8, 1.0).into(),
+        background_color: Color::rgba(0., 0., 0., 0.).into(),
         ..default()
     }
 }
@@ -451,6 +451,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
         .with_children(|builder| {
             builder.spawn((
                 create_arrow_marker(50.0, 0., 0., 0.),
+                BorderColor(Color::BLACK),
                 ArrowConnect {
                     pos: ArrowConnectPos::Top,
                     id: item_meta.id,
@@ -458,6 +459,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
             ));
             builder.spawn((
                 create_arrow_marker(0., 0., 50., 0.),
+                BorderColor(Color::BLACK),
                 ArrowConnect {
                     pos: ArrowConnectPos::Left,
                     id: item_meta.id,
@@ -465,6 +467,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
             ));
             builder.spawn((
                 create_arrow_marker(50., 0., 100., 0.),
+                BorderColor(Color::BLACK),
                 ArrowConnect {
                     pos: ArrowConnectPos::Bottom,
                     id: item_meta.id,
@@ -472,6 +475,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
             ));
             builder.spawn((
                 create_arrow_marker(100., 0., 50., 0.),
+                BorderColor(Color::BLACK),
                 ArrowConnect {
                     pos: ArrowConnectPos::Right,
                     id: item_meta.id,
