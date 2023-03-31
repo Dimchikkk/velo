@@ -55,7 +55,6 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 - Multiple nodes selection
 - Improve text inside rectangle:
     + text position
-    + smart wrapping (see https://github.com/bevyengine/bevy/pull/7761 and https://github.com/bevyengine/bevy/pull/7779)
     + text selection
     + links support
     + exectuble code inside rectangle
