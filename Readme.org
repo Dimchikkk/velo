@@ -26,13 +26,13 @@ Just simple rectangles, arrows, why not build something similiar in rust, for th
 
 ** Run
 
-Tested only on MacOS, should work on Linux and Windows as well
+Tested only on MacOS, should work on Linux and Windows as well (keyboard shortcuts should be adjusted)
 
 #+BEGIN_SRC sh
 cargo r 
 #+END_SRC
 
-It runs on wasm as well, but it's not very useful, since it doesn't have access to clipboard and file system, also only landscape mode is supported.
+It runs on wasm as well, but it's not very useful, since it doesn't have clipboard/file system features, also only landscape mode is supported.
 
 #+BEGIN_SRC sh
 cargo r --target wasm32-unknown-unknown --release
