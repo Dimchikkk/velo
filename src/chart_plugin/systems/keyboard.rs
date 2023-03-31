@@ -45,7 +45,10 @@ pub fn keyboard_input_system(
     } else if command && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveRequest { path: None });
     } else if command && input.just_pressed(KeyCode::L) {
-        commands.insert_resource(LoadRequest { path: None });
+        commands.insert_resource(LoadRequest {
+            path: None,
+            drop_last: true,
+        });
     } else {
         for (mut text, editable_text) in &mut query.iter_mut() {
             if Some(editable_text.id) == state.entity_to_edit {

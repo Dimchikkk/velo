@@ -9,7 +9,10 @@ use serde_json::Value;
 
 use crate::{AppState, JsonNode, LoadRequest, Tab};
 
-use super::ui_helpers::{spawn_node, ArrowMeta, CreateArrow, NodeMeta, Rectangle, ReflectableUuid};
+use super::ui_helpers::{
+    add_rectangle_txt, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle,
+    ReflectableUuid, SelectedTab,
+};
 
 pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
     request.is_some()
@@ -28,6 +31,8 @@ pub fn load_json(
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrow>,
     asset_server: Res<AssetServer>,
+    mut selected_tabs_query: Query<Entity, With<SelectedTab>>,
+    mut bottom_panel: Query<Entity, With<BottomPanel>>,
 ) {
     state.entity_to_edit = None;
     state.hold_entity = None;
@@ -42,6 +47,9 @@ pub fn load_json(
     for entity in old_nodes.iter() {
         commands.entity(entity).despawn_recursive();
     }
+    for entity in selected_tabs_query.iter_mut() {
+        commands.entity(entity).despawn_recursive();
+    }
 
     if let Some(path) = &request.path {
         let json = std::fs::read_to_string(path).expect("Error reading state from file");
@@ -50,12 +58,47 @@ pub fn load_json(
         state.tabs = tabs;
     }
 
+    let bottom_panel = bottom_panel.single_mut();
+    for tab in state.tabs.iter() {
+        let color = if tab.is_active {
+            Color::rgba(0.8, 0.8, 0.8, 0.5)
+        } else {
+            Color::rgba(0.8, 0.8, 0.8, 0.8)
+        };
+        let tab_view = commands
+            .spawn((
+                ButtonBundle {
+                    background_color: color.into(),
+                    style: Style {
+                        size: Size::new(Val::Px(60.), Val::Px(30.)),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        margin: UiRect {
+                            left: Val::Px(10.),
+                            right: Val::Px(10.),
+                            top: Val::Px(0.),
+                            bottom: Val::Px(0.),
+                        },
+                        ..default()
+                    },
+
+                    ..default()
+                },
+                SelectedTab { id: tab.id },
+            ))
+            .with_children(|builder| {
+                builder.spawn(add_rectangle_txt(font.clone(), tab.name.clone()));
+            })
+            .id();
+        commands.entity(bottom_panel).add_child(tab_view);
+    }
+
     for tab in state.tabs.iter_mut() {
         if tab.is_active {
-            let json = if tab.checkpoints.len() == 1 {
-                tab.checkpoints.back().unwrap().clone()
-            } else {
+            let json = if request.drop_last {
                 tab.checkpoints.pop_back().unwrap()
+            } else {
+                tab.checkpoints.back().unwrap().clone()
             };
             let mut json: Value = serde_json::from_str(&json).unwrap();
             let images = json["images"].as_object().unwrap();

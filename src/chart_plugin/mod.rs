@@ -31,6 +31,9 @@ use arrows::*;
 #[path = "systems/button_handlers.rs"]
 mod button_handlers;
 use button_handlers::*;
+#[path = "systems/tabs.rs"]
+mod tabs;
+use tabs::*;
 
 pub struct ChartPlugin;
 
@@ -58,6 +61,7 @@ pub struct SaveRequest {
 #[derive(Resource, Debug)]
 pub struct LoadRequest {
     pub path: Option<PathBuf>,
+    pub drop_last: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -169,6 +173,8 @@ impl Plugin for ChartPlugin {
         app.add_system(change_color_pallete);
         app.add_system(change_arrow_type);
         app.add_system(change_text_pos);
+        app.add_system(add_tab_handler);
+        app.add_system(selected_tab_handler);
     }
 }
 
