@@ -8,8 +8,9 @@ use crate::{AppState, MainCamera, SaveRequest, Tab, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel,
-    ButtonAction, ChangeColor, LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState,
-    MainPanel, Menu, ReflectableUuid, Root, SaveState, SelectedTab, TextPodMode, DeleteTab,
+    ButtonAction, ChangeColor, DeleteTab, LeftPanel, LeftPanelControls, LeftPanelExplorer,
+    LoadState, MainPanel, Menu, ReflectableUuid, RenameTab, Root, SaveState, SelectedTab,
+    SelectedTabTextInput, TextPodMode,
 };
 
 pub fn init_layout(
@@ -240,6 +241,31 @@ pub fn init_layout(
             builder.spawn(add_rectangle_txt(font.clone(), "New".to_string()));
         })
         .id();
+    let rename_tab = commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
+                style: Style {
+                    size: Size::new(Val::Px(60.), Val::Px(30.)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    margin: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(10.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(0.),
+                    },
+                    ..default()
+                },
+
+                ..default()
+            },
+            RenameTab,
+        ))
+        .with_children(|builder| {
+            builder.spawn(add_rectangle_txt(font.clone(), "Rename".to_string()));
+        })
+        .id();
     let del_tab = commands
         .spawn((
             ButtonBundle {
@@ -262,7 +288,7 @@ pub fn init_layout(
             DeleteTab,
         ))
         .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), "Del".to_string()));
+            builder.spawn(add_rectangle_txt(font.clone(), "Delete".to_string()));
         })
         .id();
     let tab1 = commands
@@ -287,13 +313,14 @@ pub fn init_layout(
             SelectedTab { id: tab_id },
         ))
         .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(
-                font.clone(),
-                state.tabs.last().unwrap().name.clone(),
+            builder.spawn((
+                add_rectangle_txt(font.clone(), state.tabs.last().unwrap().name.clone()),
+                SelectedTabTextInput { id: tab_id },
             ));
         })
         .id();
     commands.entity(bottom_panel).add_child(add_tab);
+    commands.entity(bottom_panel).add_child(rename_tab);
     commands.entity(bottom_panel).add_child(del_tab);
     commands.entity(bottom_panel).add_child(tab1);
 
