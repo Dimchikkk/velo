@@ -96,7 +96,15 @@ pub fn save_json(
     }
 
     for tab in &mut state.tabs {
-        if tab.is_active {
+        if request.tab_id.is_some() {
+            if tab.id == request.tab_id.unwrap() {
+                if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
+                    tab.checkpoints.pop_front();
+                }
+                tab.checkpoints.push_back(json.to_string());
+                break;
+            }
+        } else if tab.is_active {
             if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
                 tab.checkpoints.pop_front();
             }
