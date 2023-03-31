@@ -170,11 +170,13 @@ impl Plugin for ChartPlugin {
                 .distributive_run_if(should_load),
         );
 
-        app.add_system(change_color_pallete);
-        app.add_system(change_arrow_type);
-        app.add_system(change_text_pos);
-        app.add_system(add_tab_handler);
-        app.add_system(selected_tab_handler);
+        app.add_systems((
+            change_color_pallete,
+            change_arrow_type,
+            change_text_pos,
+            add_tab_handler,
+            selected_tab_handler,
+        ));
     }
 }
 
