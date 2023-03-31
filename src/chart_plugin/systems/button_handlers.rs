@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::{AddRect, AppState, JsonNode, JsonNodeText, NodeType};
 
 use super::ui_helpers::{
-    pos_to_style, ArrowMeta, ArrowMode, ButtonAction, ChangeColor, Rectangle, TextPodMode,
+    pos_to_style, ArrowMeta, ArrowMode, ButtonAction, ChangeColor, Rectangle, TextPosMode,
 };
 
 pub fn button_handler(
@@ -84,12 +84,6 @@ pub fn button_handler(
                         }
                     }
                 }
-                super::ui_helpers::ButtonTypes::Tag => {
-                    eprintln!("Tagging is not implemented yet");
-                }
-                super::ui_helpers::ButtonTypes::Untag => {
-                    eprintln!("Untagging is not implemented yet");
-                }
             },
             Interaction::Hovered => {
                 color.0 = Color::GRAY;
@@ -133,8 +127,8 @@ pub fn change_color_pallete(
 
 pub fn change_text_pos(
     mut interaction_query: Query<
-        (&Interaction, &TextPodMode, &mut BackgroundColor),
-        (Changed<Interaction>, With<TextPodMode>),
+        (&Interaction, &TextPosMode, &mut BackgroundColor),
+        (Changed<Interaction>, With<TextPosMode>),
     >,
     mut nodes: Query<(&mut Style, &Rectangle), With<Rectangle>>,
     state: Res<AppState>,
