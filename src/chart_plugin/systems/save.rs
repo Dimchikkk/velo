@@ -41,7 +41,6 @@ pub fn save_json(
     mut state: ResMut<AppState>,
     text_query: Query<&mut Text, With<EditableText>>,
 ) {
-    eprintln!("save json: {:?}", request);
     let mut json = json!({
         "images": {},
         "nodes": [],
