@@ -21,7 +21,7 @@ Just simple rectangles, arrows, why not build rust analog of it for the sake of 
 - ✅ change background color of rectangle  
 - ✅ move rectangle to front/back  
 - ✅ positioning text in rectangle
-- [ ] introduce tabs 
+- ✅ introduce tabs 
 - [ ] arrow parallel-lines drawing mode
 - [ ] text wrapping
 - [ ] links inside text
