@@ -250,7 +250,7 @@ pub fn init_layout(
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     margin: UiRect {
-                        left: Val::Px(10.),
+                        left: Val::Px(0.),
                         right: Val::Px(10.),
                         top: Val::Px(0.),
                         bottom: Val::Px(0.),
@@ -275,8 +275,8 @@ pub fn init_layout(
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     margin: UiRect {
-                        left: Val::Px(10.),
-                        right: Val::Px(10.),
+                        left: Val::Px(0.),
+                        right: Val::Px(20.),
                         top: Val::Px(0.),
                         bottom: Val::Px(0.),
                     },
