@@ -2,7 +2,7 @@ use bevy_ui_borders::{BorderColor, Outline};
 use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, text::BreakLineOn};
 use bevy_prototype_lyon::{
     prelude::{GeometryBuilder, ShapeBundle, Stroke},
     shapes,
@@ -299,14 +299,15 @@ pub fn create_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
         font_size: 18.0,
         color: Color::BLACK,
     };
-    TextBundle {
-        text: Text::from_section(text, text_style),
-        style: Style {
-            position_type: PositionType::Relative,
-            ..default()
-        },
-        ..default()
-    }
+    let text = Text {
+        sections: vec![TextSection {
+            value: text,
+            style: text_style,
+        }],
+        alignment: TextAlignment::Left,
+        linebreak_behaviour: BreakLineOn::WordBoundary,
+    };
+    TextBundle { text, ..default() }
 }
 
 pub fn spawn_path_modal(
