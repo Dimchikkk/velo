@@ -36,7 +36,6 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 style: Style {
-                    position_type: PositionType::Absolute,
                     position: UiRect {
                         left: Val::Px(0.0),
                         bottom: Val::Px(0.0),
