@@ -97,7 +97,7 @@ pub fn init_layout(
             SaveState,
         ))
         .with_children(|builder| {
-            builder.spawn(create_rectangle_txt(font.clone(), "Save".to_string()));
+            builder.spawn(create_rectangle_txt(font.clone(), "Save".to_string(), None));
         })
         .id();
     let load = commands
@@ -127,7 +127,7 @@ pub fn init_layout(
             LoadState,
         ))
         .with_children(|builder| {
-            builder.spawn(create_rectangle_txt(font.clone(), "Load".to_string()));
+            builder.spawn(create_rectangle_txt(font.clone(), "Load".to_string(), None));
         })
         .id();
     commands.entity(menu).add_child(save);

@@ -1,9 +1,11 @@
-use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
+use bevy::{
+    input::mouse::MouseMotion, prelude::*, window::PrimaryWindow,
+};
 
 use crate::AppState;
 
 use super::{
-    ui_helpers::{Rectangle, ResizeMarker},
+    ui_helpers::{EditableText, Rectangle, ResizeMarker},
     RedrawArrow,
 };
 
@@ -48,6 +50,10 @@ pub fn resize_entity_end(
     mut mouse_motion_events: EventReader<MouseMotion>,
     state: Res<AppState>,
     mut rectangle_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
+    mut text_input_query: Query<
+        (&EditableText, &mut Style),
+        (With<EditableText>, Without<Rectangle>),
+    >,
     mut events: EventWriter<RedrawArrow>,
 ) {
     for event in mouse_motion_events.iter() {
@@ -108,6 +114,12 @@ pub fn resize_entity_end(
                             if let Val::Px(y) = button_style.position.bottom {
                                 button_style.position.bottom = Val::Px(y - delta.y);
                             }
+                        }
+                    }
+                    for (text, mut text_style) in &mut text_input_query {
+                        if text.id == id {
+                            text_style.max_size.width = button_style.size.width;
+                            text_style.max_size.height = button_style.size.height;
                         }
                     }
                 }
