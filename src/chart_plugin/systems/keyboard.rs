@@ -43,11 +43,14 @@ pub fn keyboard_input_system(
         let entity = spawn_path_modal(&mut commands, font, id, false);
         commands.entity(state.main_panel.unwrap()).add_child(entity);
     } else if command && input.just_pressed(KeyCode::S) {
-        commands.insert_resource(SaveRequest { path: None });
+        commands.insert_resource(SaveRequest {
+            path: None,
+            tab_id: None,
+        });
     } else if command && input.just_pressed(KeyCode::L) {
         commands.insert_resource(LoadRequest {
             path: None,
-            drop_last: true,
+            drop_last_checkpoint: true,
         });
     } else {
         for (mut text, editable_text) in &mut query.iter_mut() {
