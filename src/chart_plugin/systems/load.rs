@@ -7,7 +7,7 @@ use bevy::{
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
-use crate::{AppState, JsonNode, LoadRequest, Tab};
+use crate::{chart_plugin::ui_helpers::SelectedTabTextInput, AppState, JsonNode, LoadRequest, Tab};
 
 use super::ui_helpers::{
     add_rectangle_txt, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle,
@@ -36,6 +36,7 @@ pub fn load_json(
 ) {
     eprintln!("load json: {:?}", request);
     state.entity_to_edit = None;
+    state.tab_to_edit = None;
     state.hold_entity = None;
     state.entity_to_resize = None;
     state.arrow_to_draw_start = None;
@@ -83,7 +84,10 @@ pub fn load_json(
                 SelectedTab { id: tab.id },
             ))
             .with_children(|builder| {
-                builder.spawn(add_rectangle_txt(font.clone(), tab.name.clone()));
+                builder.spawn((
+                    add_rectangle_txt(font.clone(), tab.name.clone()),
+                    SelectedTabTextInput { id: tab.id },
+                ));
             })
             .id();
         commands.entity(bottom_panel).add_child(tab_view);

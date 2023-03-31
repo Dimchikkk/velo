@@ -24,7 +24,15 @@ pub struct AddTab;
 pub struct DeleteTab;
 
 #[derive(Component)]
+pub struct RenameTab;
+
+#[derive(Component)]
 pub struct SelectedTab {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component)]
+pub struct SelectedTabTextInput {
     pub id: ReflectableUuid,
 }
 

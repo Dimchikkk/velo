@@ -113,6 +113,7 @@ pub struct AppState {
     pub main_panel: Option<Entity>,
     pub arrow_type: ArrowType,
     pub entity_to_edit: Option<ReflectableUuid>,
+    pub tab_to_edit: Option<ReflectableUuid>,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
@@ -178,6 +179,8 @@ impl Plugin for ChartPlugin {
             add_tab_handler,
             delete_tab_handler,
             selected_tab_handler,
+            rename_tab_handler,
+            tab_keyboard_input_system,
         ));
     }
 }
