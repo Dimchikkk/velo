@@ -176,6 +176,7 @@ impl Plugin for ChartPlugin {
             change_arrow_type,
             change_text_pos,
             add_tab_handler,
+            delete_tab_handler,
             selected_tab_handler,
         ));
     }

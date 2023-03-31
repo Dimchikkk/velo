@@ -34,6 +34,7 @@ pub fn load_json(
     mut selected_tabs_query: Query<Entity, With<SelectedTab>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
 ) {
+    eprintln!("load json: {:?}", request);
     state.entity_to_edit = None;
     state.hold_entity = None;
     state.entity_to_resize = None;
