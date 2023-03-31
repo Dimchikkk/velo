@@ -305,6 +305,7 @@ pub fn init_layout(
                         top: Val::Px(0.),
                         bottom: Val::Px(0.),
                     },
+                    overflow: Overflow::Hidden,
                     ..default()
                 },
 
