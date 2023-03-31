@@ -272,7 +272,7 @@ fn create_arrow_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonBu
                 top: Val::Percent(top),
                 bottom: Val::Percent(bottom),
             },
-            3.,
+            4.,
         ),
         ..default()
     }
