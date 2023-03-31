@@ -59,8 +59,16 @@ pub struct ArrowMode {
 }
 
 #[derive(Component)]
-pub struct TextPodMode {
+pub struct TextPosMode {
     pub text_pos: TextPos,
+}
+
+#[derive(Component)]
+pub enum TextManipulation {
+    Cut,
+    Paste,
+    Copy,
+    OpenAllLinks
 }
 
 #[derive(Component)]
@@ -101,13 +109,12 @@ pub struct Rectangle {
     pub id: ReflectableUuid,
 }
 
+#[derive(PartialEq, Eq)]
 pub enum ButtonTypes {
     Add,
     Del,
     Front,
     Back,
-    Tag,
-    Untag,
 }
 #[derive(Component)]
 pub struct ButtonAction {
@@ -309,10 +316,12 @@ pub fn get_sections(text: String, font: Handle<Font>) -> Vec<TextSection> {
     finder.kinds(&[LinkKind::Url]);
     let links: Vec<_> = finder.links(&text).collect();
     if links.len() == 0 {
-        return vec![(TextSection {
-            value: text,
-            style: text_style,
-        })];
+        return vec![
+            (TextSection {
+                value: text,
+                style: text_style,
+            }),
+        ];
     }
     let mut sections = vec![];
     let mut idx = 0;
