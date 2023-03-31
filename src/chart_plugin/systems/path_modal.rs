@@ -52,7 +52,10 @@ pub fn confirm_path_modal(
                     } else if let Ok(path) =
                         canonicalize(PathBuf::from(text.sections[0].value.trim()))
                     {
-                        commands.insert_resource(LoadRequest { path: Some(path) });
+                        commands.insert_resource(LoadRequest {
+                            path: Some(path),
+                            drop_last: false,
+                        });
                     } else {
                         eprintln!("File not found: {}", text.sections[0].value);
                     }
@@ -98,7 +101,10 @@ pub fn path_modal_keyboard_input_system(
                     });
                 } else if let Ok(path) = canonicalize(PathBuf::from(text.sections[0].value.trim()))
                 {
-                    commands.insert_resource(LoadRequest { path: Some(path) });
+                    commands.insert_resource(LoadRequest {
+                        path: Some(path),
+                        drop_last: false,
+                    });
                 } else {
                     eprintln!("File not found: {}", text.sections[0].value);
                 }
