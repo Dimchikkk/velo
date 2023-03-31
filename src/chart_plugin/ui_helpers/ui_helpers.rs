@@ -293,7 +293,11 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
     }
 }
 
-pub fn create_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
+pub fn create_rectangle_txt(
+    font: Handle<Font>,
+    text: String,
+    max_size: Option<(Val, Val)>,
+) -> TextBundle {
     let text_style = TextStyle {
         font,
         font_size: 18.0,
@@ -307,7 +311,23 @@ pub fn create_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
         alignment: TextAlignment::Left,
         linebreak_behaviour: BreakLineOn::WordBoundary,
     };
-    TextBundle { text, ..default() }
+    let mut text_bundle_style = Style { 
+        padding: UiRect {
+            left: Val::Px(5.),
+            right: Val::Px(5.),
+            top: Val::Px(5.),
+            bottom: Val::Px(5.),
+        },
+        ..default() 
+    };
+    if max_size.is_some() {
+        text_bundle_style.max_size = Size::new(max_size.unwrap().0, max_size.unwrap().1);
+    }
+    TextBundle {
+        text,
+        style: text_bundle_style,
+        ..default()
+    }
 }
 
 pub fn spawn_path_modal(
@@ -388,6 +408,7 @@ pub fn spawn_path_modal(
                                 create_rectangle_txt(
                                     font.clone(),
                                     "./data/rusticify.json".to_string(),
+                                    None,
                                 ),
                                 PathModalTextInput { id, save },
                             ));
@@ -530,7 +551,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                 ResizeMarker::BottomLeft,
             ));
             builder.spawn((
-                create_rectangle_txt(item_meta.font, item_meta.text),
+                create_rectangle_txt(item_meta.font, item_meta.text, Some(item_meta.size)),
                 EditableText { id: item_meta.id },
             ));
         })
