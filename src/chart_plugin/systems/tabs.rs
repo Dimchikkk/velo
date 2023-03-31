@@ -29,10 +29,26 @@ pub fn selected_tab_handler(
                 });
             }
             Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+                for tab in state.tabs.iter() {
+                    if selected_tab.id == tab.id  {
+                        if tab.is_active {
+                            bg_color.0= Color::ALICE_BLUE;
+                        } else {
+                            bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+                        }
+                    }
+                }
             }
             Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+                for tab in state.tabs.iter() {
+                    if selected_tab.id == tab.id  {
+                        if tab.is_active {
+                            bg_color.0= Color::ALICE_BLUE;
+                        } else {
+                            bg_color.0= Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+                        }
+                    }
+                }
             }
         }
     }

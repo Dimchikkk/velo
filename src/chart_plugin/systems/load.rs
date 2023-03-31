@@ -60,15 +60,10 @@ pub fn load_json(
 
     let bottom_panel = bottom_panel.single_mut();
     for tab in state.tabs.iter() {
-        let color = if tab.is_active {
-            Color::rgba(0.8, 0.8, 0.8, 0.5)
-        } else {
-            Color::rgba(0.8, 0.8, 0.8, 0.8)
-        };
         let tab_view = commands
             .spawn((
                 ButtonBundle {
-                    background_color: color.into(),
+                    background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
                     style: Style {
                         size: Size::new(Val::Px(60.), Val::Px(30.)),
                         align_items: AlignItems::Center,
