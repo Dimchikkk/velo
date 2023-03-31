@@ -1,4 +1,5 @@
 use bevy_ui_borders::{BorderColor, Outline};
+use linkify::{LinkFinder, LinkKind};
 use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
 
@@ -293,6 +294,52 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
     }
 }
 
+pub fn get_sections(text: String, font: Handle<Font>) -> Vec<TextSection> {
+    let text_style = TextStyle {
+        font: font.clone(),
+        font_size: 18.0,
+        color: Color::BLACK,
+    };
+    let link_style = TextStyle {
+        font: font.clone(),
+        font_size: 18.0,
+        color: Color::BLUE,
+    };
+    let mut finder = LinkFinder::new();
+    finder.kinds(&[LinkKind::Url]);
+    let links: Vec<_> = finder.links(&text).collect();
+    if links.len() == 0 {
+        return vec![(TextSection {
+            value: text,
+            style: text_style,
+        })];
+    }
+    let mut sections = vec![];
+    let mut idx = 0;
+    for link in links {
+        let start = link.start();
+        let end = link.end();
+        if start > idx {
+            sections.push(TextSection {
+                value: text[idx..start].to_string(),
+                style: text_style.clone(),
+            });
+        }
+        sections.push(TextSection {
+            value: text[start..end].to_string(),
+            style: link_style.clone(),
+        });
+        idx = end;
+    }
+    if idx < text.len() {
+        sections.push(TextSection {
+            value: text[idx..text.len()].to_string(),
+            style: text_style.clone(),
+        });
+    }
+    sections
+}
+
 pub fn create_rectangle_txt(
     font: Handle<Font>,
     text: String,
@@ -311,14 +358,14 @@ pub fn create_rectangle_txt(
         alignment: TextAlignment::Left,
         linebreak_behaviour: BreakLineOn::WordBoundary,
     };
-    let mut text_bundle_style = Style { 
+    let mut text_bundle_style = Style {
         padding: UiRect {
             left: Val::Px(5.),
             right: Val::Px(5.),
             top: Val::Px(5.),
             bottom: Val::Px(5.),
         },
-        ..default() 
+        ..default()
     };
     if max_size.is_some() {
         text_bundle_style.max_size = Size::new(max_size.unwrap().0, max_size.unwrap().1);
@@ -395,6 +442,12 @@ pub fn spawn_path_modal(
                                     justify_content: JustifyContent::Center,
                                     align_items: AlignItems::Center,
                                     border: UiRect::all(Val::Px(1.)),
+                                    padding: UiRect {
+                                        left: Val::Px(5.),
+                                        right: Val::Px(5.),
+                                        top: Val::Px(5.),
+                                        bottom: Val::Px(5.),
+                                    },
                                     // overflow: Overflow::Hidden,
                                     ..default()
                                 },
@@ -436,6 +489,12 @@ pub fn spawn_path_modal(
                                     justify_content: JustifyContent::Center,
                                     border: UiRect::all(Val::Px(1.)),
                                     align_items: AlignItems::Center,
+                                    padding: UiRect {
+                                        left: Val::Px(5.),
+                                        right: Val::Px(5.),
+                                        top: Val::Px(5.),
+                                        bottom: Val::Px(5.),
+                                    },
                                     // overflow: Overflow::Hidden,
                                     ..default()
                                 },
@@ -461,6 +520,12 @@ pub fn spawn_path_modal(
                                     justify_content: JustifyContent::Center,
                                     align_items: AlignItems::Center,
                                     border: UiRect::all(Val::Px(1.)),
+                                    padding: UiRect {
+                                        left: Val::Px(5.),
+                                        right: Val::Px(5.),
+                                        top: Val::Px(5.),
+                                        bottom: Val::Px(5.),
+                                    },
                                     ..default()
                                 },
                                 ..default()

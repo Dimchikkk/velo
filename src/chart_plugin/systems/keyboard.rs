@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::{AddRect, AppState, LoadRequest, SaveRequest};
 
-use super::ui_helpers::{spawn_path_modal, EditableText, ReflectableUuid};
+use super::ui_helpers::{get_sections, spawn_path_modal, EditableText, ReflectableUuid};
 
 pub fn keyboard_input_system(
     mut commands: Commands,
@@ -55,15 +55,19 @@ pub fn keyboard_input_system(
     } else {
         for (mut text, editable_text) in &mut query.iter_mut() {
             if Some(editable_text.id) == state.entity_to_edit {
+                let mut str = "".to_string();
+                for section in text.sections.iter_mut() {
+                    str = format!("{}{}", str, section.value.clone());
+                }
+
                 if input.just_pressed(KeyCode::Back) {
-                    let mut str = text.sections[0].value.clone();
                     str.pop();
-                    text.sections[0].value = str;
                 } else {
                     for ev in char_evr.iter() {
-                        text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
+                        str = format!("{}{}", str, ev.char);
                     }
                 }
+                text.sections = get_sections(str, font.clone());
             }
         }
     }
