@@ -70,6 +70,7 @@ pub fn load_json(
                         size: Size::new(Val::Px(60.), Val::Px(30.)),
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
+                        overflow: Overflow::Hidden,
                         margin: UiRect {
                             left: Val::Px(10.),
                             right: Val::Px(10.),

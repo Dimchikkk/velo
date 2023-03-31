@@ -179,6 +179,9 @@ pub fn delete_tab_handler(
     for (interaction, mut bg_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
+                if state.tab_to_edit.is_some() {
+                    return;
+                }
                 if state.tabs.len() > 1 {
                     let index = state.tabs.iter().position(|x| x.is_active).unwrap();
                     state.tabs.remove(index);
