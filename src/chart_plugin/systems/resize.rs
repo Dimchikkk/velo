@@ -1,6 +1,4 @@
-use bevy::{
-    input::mouse::MouseMotion, prelude::*, window::PrimaryWindow,
-};
+use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 
 use crate::AppState;
 
