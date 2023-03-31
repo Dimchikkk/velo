@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{AppState, LoadRequest, Tab, SaveRequest};
 
-use super::ui_helpers::{AddTab, ReflectableUuid, SelectedTab};
+use super::ui_helpers::{AddTab, ReflectableUuid, SelectedTab, DeleteTab};
 
 pub fn selected_tab_handler(
     mut commands: Commands,
@@ -21,8 +21,15 @@ pub fn selected_tab_handler(
         match *interaction {
             Interaction::Clicked => {
                 for tab in state.tabs.iter_mut() {
+                    if tab.is_active {
+                        commands.insert_resource(SaveRequest {
+                            path: None,
+                            tab_id: Some(tab.id),
+                        });
+                    }
                     tab.is_active = tab.id == selected_tab.id;
                 }
+
                 commands.insert_resource(LoadRequest {
                     path: None,
                     drop_last_checkpoint: false,
@@ -97,6 +104,38 @@ pub fn add_tab_handler(
                     path: None,
                     drop_last_checkpoint: false,
                 });
+            }
+            Interaction::Hovered => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+            }
+            Interaction::None => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+            }
+        }
+    }
+}
+
+pub fn delete_tab_handler(
+    mut commands: Commands,
+    mut interaction_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<DeleteTab>),
+    >,
+    mut state: ResMut<AppState>,
+) {
+    for (interaction, mut bg_color) in &mut interaction_query {
+        match *interaction {
+            Interaction::Clicked => {
+                if state.tabs.len() > 1 {
+                    let index = state.tabs.iter().position(|x| x.is_active == true).unwrap();
+                    state.tabs.remove(index);
+                    let mut last_tab = state.tabs.last_mut().unwrap();
+                    last_tab.is_active = true;               
+                    commands.insert_resource(LoadRequest {
+                        path: None,
+                        drop_last_checkpoint: false,
+                    });
+                }
             }
             Interaction::Hovered => {
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
