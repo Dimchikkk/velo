@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::{AppState, LoadRequest, Tab};
+use crate::{AppState, LoadRequest, Tab, SaveRequest};
 
 use super::ui_helpers::{AddTab, ReflectableUuid, SelectedTab};
 
@@ -25,7 +25,7 @@ pub fn selected_tab_handler(
                 }
                 commands.insert_resource(LoadRequest {
                     path: None,
-                    drop_last: false,
+                    drop_last_checkpoint: false,
                 });
             }
             Interaction::Hovered => {
@@ -70,6 +70,12 @@ pub fn add_tab_handler(
                 let tab_id = ReflectableUuid(Uuid::new_v4());
                 let tabs_len = state.tabs.len();
                 for tab in state.tabs.iter_mut() {
+                    if tab.is_active {
+                        commands.insert_resource(SaveRequest {
+                            path: None,
+                            tab_id: Some(tab.id),
+                        });
+                    }
                     tab.is_active = false;
                 }
                 let mut checkpoints = VecDeque::new();
@@ -89,7 +95,7 @@ pub fn add_tab_handler(
                 });
                 commands.insert_resource(LoadRequest {
                     path: None,
-                    drop_last: false,
+                    drop_last_checkpoint: false,
                 });
             }
             Interaction::Hovered => {

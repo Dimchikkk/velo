@@ -26,7 +26,10 @@ pub fn init_layout(
         checkpoints: VecDeque::new(),
         is_active: true,
     });
-    commands.insert_resource(SaveRequest { path: None });
+    commands.insert_resource(SaveRequest {
+        path: None,
+        tab_id: Some(tab_id),
+    });
 
     let root_ui = commands
         .spawn((

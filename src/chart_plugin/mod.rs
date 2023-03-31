@@ -56,12 +56,13 @@ pub struct MainCamera;
 #[derive(Resource, Debug)]
 pub struct SaveRequest {
     pub path: Option<PathBuf>,
+    pub tab_id: Option<ReflectableUuid>, // None means save to active tab
 }
 
 #[derive(Resource, Debug)]
 pub struct LoadRequest {
     pub path: Option<PathBuf>,
-    pub drop_last: bool,
+    pub drop_last_checkpoint: bool, // Useful for undo functionality
 }
 
 #[derive(Serialize, Deserialize)]

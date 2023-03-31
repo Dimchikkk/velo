@@ -90,7 +90,7 @@ pub fn load_json(
 
     for tab in state.tabs.iter_mut() {
         if tab.is_active {
-            let json = if request.drop_last {
+            let json = if request.drop_last_checkpoint && tab.checkpoints.len() > 1 {
                 tab.checkpoints.pop_back().unwrap()
             } else {
                 tab.checkpoints.back().unwrap().clone()

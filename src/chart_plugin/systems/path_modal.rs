@@ -48,13 +48,14 @@ pub fn confirm_path_modal(
                     if modal.save {
                         commands.insert_resource(SaveRequest {
                             path: Some(PathBuf::from(text.sections[0].value.trim())),
+                            tab_id: None,
                         });
                     } else if let Ok(path) =
                         canonicalize(PathBuf::from(text.sections[0].value.trim()))
                     {
                         commands.insert_resource(LoadRequest {
                             path: Some(path),
-                            drop_last: false,
+                            drop_last_checkpoint: false,
                         });
                     } else {
                         eprintln!("File not found: {}", text.sections[0].value);
@@ -98,12 +99,13 @@ pub fn path_modal_keyboard_input_system(
                 if modal.save {
                     commands.insert_resource(SaveRequest {
                         path: Some(PathBuf::from(text.sections[0].value.trim())),
+                        tab_id: None,
                     });
                 } else if let Ok(path) = canonicalize(PathBuf::from(text.sections[0].value.trim()))
                 {
                     commands.insert_resource(LoadRequest {
                         path: Some(path),
-                        drop_last: false,
+                        drop_last_checkpoint: false,
                     });
                 } else {
                     eprintln!("File not found: {}", text.sections[0].value);
