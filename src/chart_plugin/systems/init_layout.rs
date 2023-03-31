@@ -8,9 +8,9 @@ use crate::{AppState, MainCamera, SaveRequest, Tab, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel,
-    ButtonAction, ChangeColor, DeleteTab, LeftPanel, LeftPanelControls, LeftPanelExplorer,
-    LoadState, MainPanel, Menu, ReflectableUuid, RenameTab, Root, SaveState, SelectedTab,
-    SelectedTabTextInput, TextPodMode,
+    ButtonAction, ButtonTypes, ChangeColor, DeleteTab, LeftPanel, LeftPanelControls,
+    LeftPanelExplorer, LoadState, MainPanel, Menu, ReflectableUuid, RenameTab, Root, SaveState,
+    SelectedTab, SelectedTabTextInput, TextPosMode, TextManipulation,
 };
 
 pub fn init_layout(
@@ -97,7 +97,11 @@ pub fn init_layout(
             SaveState,
         ))
         .with_children(|builder| {
-            builder.spawn(create_rectangle_txt(font.clone(), "Save".to_string(), None));
+            builder.spawn(create_rectangle_txt(
+                font.clone(),
+                "Save As".to_string(),
+                None,
+            ));
         })
         .id();
     let load = commands
@@ -127,7 +131,11 @@ pub fn init_layout(
             LoadState,
         ))
         .with_children(|builder| {
-            builder.spawn(create_rectangle_txt(font.clone(), "Load".to_string(), None));
+            builder.spawn(create_rectangle_txt(
+                font.clone(),
+                "Load File".to_string(),
+                None,
+            ));
         })
         .id();
     commands.entity(menu).add_child(save);
@@ -237,7 +245,7 @@ pub fn init_layout(
             AddTab,
         ))
         .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), "New".to_string()));
+            builder.spawn(add_rectangle_txt(font.clone(), "New Tab".to_string()));
         })
         .id();
     let rename_tab = commands
@@ -337,7 +345,7 @@ pub fn init_layout(
                         top: Val::Px(10.),
                         bottom: Val::Px(10.),
                     },
-                    size: Size::new(Val::Percent(100.), Val::Percent(30.)),
+                    size: Size::new(Val::Percent(100.), Val::Percent(40.)),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
@@ -352,7 +360,7 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(70.)),
+                    size: Size::new(Val::Percent(100.), Val::Percent(60.)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()
@@ -378,36 +386,45 @@ pub fn init_layout(
             button_type: ui_helpers::ButtonTypes::Del,
         },
     );
-    let z_index = add_two_buttons(
+    let fron_back = commands
+        .spawn((NodeBundle {
+            style: Style {
+                align_items: AlignItems::Center,
+                size: Size::new(Val::Percent(100.), Val::Percent(10.)),
+                margin: UiRect {
+                    left: Val::Px(5.),
+                    right: Val::Px(5.),
+                    top: Val::Px(5.),
+                    bottom: Val::Px(5.),
+                },
+                justify_content: JustifyContent::Center,
+                ..default()
+            },
+            ..default()
+        },))
+        .id();
+    let front = add_front_back(
         &mut commands,
-        font,
-        "Front".to_string(),
-        "Back".to_string(),
+        &asset_server,
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Front,
         },
+    );
+    let back = add_front_back(
+        &mut commands,
+        &asset_server,
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Back,
         },
     );
-    // let tagging = add_two_buttons(
-    //     &mut commands,
-    //     font,
-    //     "TAG".to_string(),
-    //     "UNTAG".to_string(),
-    //     ButtonAction {
-    //         button_type: ui_helpers::ButtonTypes::Tag,
-    //     },
-    //     ButtonAction {
-    //         button_type: ui_helpers::ButtonTypes::Untag,
-    //     },
-    // );
+    commands.entity(fron_back).add_child(front);
+    commands.entity(fron_back).add_child(back);
 
     let color_picker = commands
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(80.), Val::Percent(12.)),
+                size: Size::new(Val::Percent(80.), Val::Percent(10.)),
                 margin: UiRect {
                     left: Val::Px(5.),
                     right: Val::Px(5.),
@@ -439,7 +456,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(100.), Val::Percent(12.)),
+                size: Size::new(Val::Percent(100.), Val::Percent(10.)),
                 margin: UiRect {
                     left: Val::Px(5.),
                     right: Val::Px(5.),
@@ -473,40 +490,16 @@ pub fn init_layout(
             arrow_type: ArrowType::DoubleArrow,
         },
     );
-    // let arrow4 = add_arrow(
-    //     &mut commands,
-    //     &asset_server,
-    //     ArrowMode {
-    //         arrow_type: ArrowType::ParallelLine,
-    //     },
-    // );
-    // let arrow5 = add_arrow(
-    //     &mut commands,
-    //     &asset_server,
-    //     ArrowMode {
-    //         arrow_type: ArrowType::ParallelArrow,
-    //     },
-    // );
-    // let arrow6 = add_arrow(
-    //     &mut commands,
-    //     &asset_server,
-    //     ArrowMode {
-    //         arrow_type: ArrowType::ParallelDoubleArrow,
-    //     },
-    // );
 
     commands.entity(arrow_modes).add_child(arrow1);
     commands.entity(arrow_modes).add_child(arrow2);
     commands.entity(arrow_modes).add_child(arrow3);
-    // commands.entity(arrow_modes).add_child(arrow4);
-    // commands.entity(arrow_modes).add_child(arrow5);
-    // commands.entity(arrow_modes).add_child(arrow6);
 
     let text_modes = commands
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(100.), Val::Percent(12.)),
+                size: Size::new(Val::Percent(100.), Val::Percent(10.)),
                 margin: UiRect {
                     left: Val::Px(5.),
                     right: Val::Px(5.),
@@ -522,35 +515,35 @@ pub fn init_layout(
     let text_pos1 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode {
+        TextPosMode {
             text_pos: TextPos::Center,
         },
     );
     let text_pos2 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode {
+        TextPosMode {
             text_pos: TextPos::BottomRight,
         },
     );
     let text_pos3 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode {
+        TextPosMode {
             text_pos: TextPos::BottomLeft,
         },
     );
     let text_pos4 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode {
+        TextPosMode {
             text_pos: TextPos::TopLeft,
         },
     );
     let text_pos5 = add_text_pos(
         &mut commands,
         &asset_server,
-        TextPodMode {
+        TextPosMode {
             text_pos: TextPos::TopRight,
         },
     );
@@ -559,13 +552,55 @@ pub fn init_layout(
     commands.entity(text_modes).add_child(text_pos3);
     commands.entity(text_modes).add_child(text_pos4);
     commands.entity(text_modes).add_child(text_pos5);
+    
+    let text_manipulation = commands
+        .spawn((NodeBundle {
+            style: Style {
+                align_items: AlignItems::Center,
+                size: Size::new(Val::Percent(100.), Val::Percent(10.)),
+                margin: UiRect {
+                    left: Val::Px(5.),
+                    right: Val::Px(5.),
+                    top: Val::Px(5.),
+                    bottom: Val::Px(5.),
+                },
+                justify_content: JustifyContent::Center,
+                ..default()
+            },
+            ..default()
+        },))
+        .id();
+    let cut = add_text_manipulation(
+        &mut commands,
+        &asset_server,
+        TextManipulation::Cut
+    );
+    let copy = add_text_manipulation(
+        &mut commands,
+        &asset_server,
+        TextManipulation::Copy
+    );
+    let paste = add_text_manipulation(
+        &mut commands,
+        &asset_server,
+        TextManipulation::Paste
+    );
+    let open_all_links = add_text_manipulation(
+        &mut commands,
+        &asset_server,
+        TextManipulation::OpenAllLinks
+    );
+    commands.entity(text_manipulation).add_child(cut);
+    commands.entity(text_manipulation).add_child(copy);
+    commands.entity(text_manipulation).add_child(paste);
+    commands.entity(text_manipulation).add_child(open_all_links);
 
     commands.entity(left_panel_controls).add_child(creation);
-    commands.entity(left_panel_controls).add_child(z_index);
-    // commands.entity(left_panel_controls).add_child(tagging);
     commands.entity(left_panel_controls).add_child(color_picker);
-    commands.entity(left_panel_controls).add_child(arrow_modes);
     commands.entity(left_panel_controls).add_child(text_modes);
+    commands.entity(left_panel_controls).add_child(text_manipulation);
+    commands.entity(left_panel_controls).add_child(arrow_modes);
+    commands.entity(left_panel_controls).add_child(fron_back);
 
     commands.entity(main_bottom).add_child(left_panel);
     commands.entity(main_bottom).add_child(right_panel);
@@ -575,13 +610,55 @@ pub fn init_layout(
     state.main_panel = Some(main_panel);
 }
 
+fn add_front_back(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+    button_action: ButtonAction,
+) -> Entity {
+    let image = if button_action.button_type == ButtonTypes::Front {
+        asset_server.load("front.png")
+    } else {
+        asset_server.load("back.png")
+    };
+    commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::Rgba {
+                    red: 1.,
+                    green: 1.,
+                    blue: 1.,
+                    alpha: 0.5,
+                }
+                .into(),
+                image: image.into(),
+                style: Style {
+                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                    align_items: AlignItems::Center,
+                    border: UiRect::all(Val::Px(1.)),
+                    margin: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            BorderColor(Color::BLACK),
+            button_action,
+        ))
+        .id()
+}
+
 fn add_color(commands: &mut Commands, color: Color) -> Entity {
     commands
         .spawn((
             ButtonBundle {
                 background_color: color.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                    size: Size::new(Val::Percent(20.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     margin: UiRect {
                         left: Val::Px(5.),
@@ -626,7 +703,7 @@ fn add_arrow(
                 .into(),
                 image: image.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(12.), Val::Percent(100.)),
+                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     margin: UiRect {
                         left: Val::Px(5.),
@@ -649,7 +726,7 @@ fn add_arrow(
 fn add_text_pos(
     commands: &mut Commands,
     arrow_server: &Res<AssetServer>,
-    text_pos_mode: TextPodMode,
+    text_pos_mode: TextPosMode,
 ) -> Entity {
     let image = match text_pos_mode.text_pos {
         crate::TextPos::Center => arrow_server.load("text-center.png"),
@@ -670,7 +747,7 @@ fn add_text_pos(
                 .into(),
                 image: image.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(12.), Val::Percent(100.)),
+                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     margin: UiRect {
                         left: Val::Px(5.),
@@ -690,6 +767,49 @@ fn add_text_pos(
         .id()
 }
 
+fn add_text_manipulation(
+    commands: &mut Commands,
+    arrow_server: &Res<AssetServer>,
+    text_manipulation: TextManipulation,
+) -> Entity {
+    let image = match text_manipulation {
+        TextManipulation::Cut => arrow_server.load("cut-text.png"),
+        TextManipulation::Paste => arrow_server.load("paste-text.png"),
+        TextManipulation::Copy => arrow_server.load("copy-text.png"),
+        TextManipulation::OpenAllLinks => arrow_server.load("open-all-links.png"),
+    };
+    commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::Rgba {
+                    red: 1.,
+                    green: 1.,
+                    blue: 1.,
+                    alpha: 0.5,
+                }
+                .into(),
+                image: image.into(),
+                style: Style {
+                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                    align_items: AlignItems::Center,
+                    margin: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    border: UiRect::all(Val::Px(1.)),
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            BorderColor(Color::BLACK),
+            text_manipulation,
+        ))
+        .id()
+}
+
 fn add_two_buttons(
     commands: &mut Commands,
     font: Handle<Font>,
@@ -702,7 +822,7 @@ fn add_two_buttons(
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(85.), Val::Percent(12.)),
+                size: Size::new(Val::Percent(85.), Val::Percent(15.)),
                 margin: UiRect {
                     left: Val::Px(5.),
                     right: Val::Px(5.),
@@ -723,11 +843,13 @@ fn add_two_buttons(
                     size: Size::new(Val::Percent(40.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
+                    border: UiRect::all(Val::Px(1.)),
                     ..default()
                 },
                 ..default()
             },
             component_do,
+            BorderColor(Color::BLACK),
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), label_do));
@@ -742,11 +864,13 @@ fn add_two_buttons(
                     align_items: AlignItems::Center,
                     size: Size::new(Val::Percent(40.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
+                    border: UiRect::all(Val::Px(1.)),
                     ..default()
                 },
                 ..default()
             },
             component_undo,
+            BorderColor(Color::BLACK),
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), label_undo));
