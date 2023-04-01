@@ -1,4 +1,4 @@
-use bevy::{prelude::*, window::PresentMode, winit::WinitSettings};
+use bevy::{prelude::*, window::PresentMode};
 mod chart_plugin;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_prototype_lyon::prelude::ShapePlugin;
@@ -28,8 +28,6 @@ fn main() {
         .add_plugin(ChartPlugin)
         .add_plugin(ShapePlugin)
         .add_plugin(BordersPlugin)
-        // Only run the app when there is user input. This will significantly reduce CPU/GPU use.
-        .insert_resource(WinitSettings::desktop_app())
         .run();
 }
 
