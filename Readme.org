@@ -27,8 +27,7 @@ Just simple rectangles, arrows, why not build something similiar in rust, for th
 
 ** Run
 
-Tested only on MacOS, should work on Linux and Windows as well (keyboard shortcuts should be adjusted)
-
+Tested only on MacOS, should work on Linux and Windows as well
 #+BEGIN_SRC sh
 cargo r 
 #+END_SRC
