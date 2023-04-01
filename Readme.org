@@ -1,5 +1,7 @@
 * Rusticify
 
+[[file:rusticify.gif]]
+
 ** Screenshot
 [[file:rusticify.png]]
 
