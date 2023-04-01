@@ -1,4 +1,4 @@
-use bevy::{prelude::*, text::BreakLineOn, utils::Instant, window::PrimaryWindow};
+use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
 use serde::{Deserialize, Serialize};
 
 use std::{
@@ -230,7 +230,11 @@ fn set_focused_entity(
     }
 
     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-    if now - holding_time.0 > Duration::new(0, 250000000) && holding_time.1.is_some() {
+    // 250ms delay before re-positioning the rectangle
+    if state.hold_entity.is_none()
+        && now - holding_time.0 > Duration::new(0, 250000000)
+        && holding_time.1.is_some()
+    {
         state.hold_entity = holding_time.1;
     }
 
