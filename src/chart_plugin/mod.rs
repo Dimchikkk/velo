@@ -198,6 +198,7 @@ fn set_focused_entity(
     mut state: ResMut<AppState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
+    #[cfg(not(target_arch = "wasm32"))]
     mut holding_time: Local<(Duration, Option<ReflectableUuid>)>,
 ) {
     let mut window = windows.single_mut();
@@ -206,10 +207,17 @@ fn set_focused_entity(
             Interaction::Clicked => {
                 window.cursor.icon = CursorIcon::Text;
                 state.entity_to_edit = Some(rectangle.id);
-                *holding_time = (
-                    SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
-                    Some(rectangle.id),
-                );
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    *holding_time = (
+                        SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
+                        Some(rectangle.id),
+                    );
+                }
+                #[cfg(target_arch = "wasm32")]
+                {
+                    state.hold_entity = Some(rectangle.id);
+                }
             }
             Interaction::Hovered => {
                 if state.hold_entity.is_none() && state.entity_to_edit.is_none() {
@@ -229,17 +237,23 @@ fn set_focused_entity(
         window.cursor.icon = CursorIcon::Move;
     }
 
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-    // 250ms delay before re-positioning the rectangle
-    if state.hold_entity.is_none()
-        && now - holding_time.0 > Duration::new(0, 250000000)
-        && holding_time.1.is_some()
+    #[cfg(not(target_arch = "wasm32"))]
     {
-        state.hold_entity = holding_time.1;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        // 250ms delay before re-positioning the rectangle
+        if state.hold_entity.is_none()
+            && now - holding_time.0 > Duration::new(0, 250000000)
+            && holding_time.1.is_some()
+        {
+            state.hold_entity = holding_time.1;
+        }
     }
 
     if buttons.just_released(MouseButton::Left) {
-        *holding_time = (Duration::new(0, 0), None);
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            *holding_time = (Duration::new(0, 0), None);
+        }
         state.hold_entity = None;
         state.entity_to_resize = None;
     }
