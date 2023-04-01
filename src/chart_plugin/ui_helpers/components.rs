@@ -57,12 +57,16 @@ pub struct TextPosMode {
     pub text_pos: TextPos,
 }
 
-#[derive(Component)]
 pub enum TextManipulation {
     Cut,
     Paste,
     Copy,
     OpenAllLinks,
+}
+
+#[derive(Component)]
+pub struct TextManipulationAction {
+    pub action_type: TextManipulation,
 }
 
 #[derive(Component)]

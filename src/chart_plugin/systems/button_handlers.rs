@@ -5,7 +5,8 @@ use uuid::Uuid;
 use crate::{AddRect, AppState, JsonNode, JsonNodeText, NodeType};
 
 use super::ui_helpers::{
-    pos_to_style, ArrowMeta, ArrowMode, ButtonAction, ChangeColor, Rectangle, TextPosMode,
+    get_sections, pos_to_style, ArrowMeta, ArrowMode, ButtonAction, ChangeColor, EditableText,
+    Rectangle, TextManipulation, TextManipulationAction, TextPosMode,
 };
 
 pub fn button_handler(
@@ -168,6 +169,83 @@ pub fn change_arrow_type(
         match *interaction {
             Interaction::Clicked => {
                 state.arrow_type = arrow_mode.arrow_type;
+            }
+            Interaction::Hovered => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+            }
+            Interaction::None => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+            }
+        }
+    }
+}
+
+pub fn text_manipulation(
+    mut interaction_query: Query<
+        (&Interaction, &TextManipulationAction, &mut BackgroundColor),
+        (Changed<Interaction>, With<TextManipulationAction>),
+    >,
+    mut editable_text: Query<(&mut Text, &EditableText), With<EditableText>>,
+    state: Res<AppState>,
+    asset_server: Res<AssetServer>,
+) {
+    let font = asset_server.load("fonts/iosevka-regular.ttf");
+    for (interaction, text_manipulation, mut bg_color) in &mut interaction_query {
+        match *interaction {
+            Interaction::Clicked => {
+                let mut clipboard = arboard::Clipboard::new().unwrap();
+
+                match text_manipulation.action_type {
+                    TextManipulation::Cut => {
+                        if let Some(id) = state.entity_to_edit {
+                            for (mut text, node) in editable_text.iter_mut() {
+                                if node.id == id {
+                                    let mut str = "".to_string();
+                                    for section in text.sections.iter_mut() {
+                                        str = format!("{}{}", str, section.value.clone());
+                                    }
+                                    text.sections = vec![TextSection {
+                                        value: "".to_string(),
+                                        style: TextStyle {
+                                            font: font.clone(),
+                                            font_size: 20.0,
+                                            color: Color::BLACK,
+                                        },
+                                    }];
+                                    clipboard.set_text(str).unwrap()
+                                }
+                            }
+                        }
+                    }
+                    TextManipulation::Paste => {
+                        if let Ok(clipboard_text) = clipboard.get_text() {
+                            for (mut text, editable_text) in editable_text.iter_mut() {
+                                if Some(editable_text.id) == state.entity_to_edit {
+                                    let mut str = "".to_string();
+                                    for section in text.sections.iter_mut() {
+                                        str = format!("{}{}", str, section.value.clone());
+                                    }
+                                    str = format!("{}{}", str, clipboard_text);
+                                    text.sections = get_sections(str, font.clone());
+                                }
+                            }
+                        }
+                    }
+                    TextManipulation::Copy => {
+                        if let Some(id) = state.entity_to_edit {
+                            for (mut text, node) in editable_text.iter_mut() {
+                                if node.id == id {
+                                    let mut str = "".to_string();
+                                    for section in text.sections.iter_mut() {
+                                        str = format!("{}{}", str, section.value.clone());
+                                    }
+                                    clipboard.set_text(str).unwrap()
+                                }
+                            }
+                        }
+                    }
+                    TextManipulation::OpenAllLinks => todo!(),
+                }
             }
             Interaction::Hovered => {
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
