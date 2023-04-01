@@ -10,7 +10,7 @@ use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel,
     ButtonAction, ButtonTypes, ChangeColor, DeleteTab, LeftPanel, LeftPanelControls,
     LeftPanelExplorer, LoadState, MainPanel, Menu, ReflectableUuid, RenameTab, Root, SaveState,
-    SelectedTab, SelectedTabTextInput, TextPosMode, TextManipulation,
+    SelectedTab, SelectedTabTextInput, TextManipulation, TextPosMode,
 };
 
 pub fn init_layout(
@@ -376,7 +376,7 @@ pub fn init_layout(
 
     let creation = add_two_buttons(
         &mut commands,
-        font.clone(),
+        font,
         "New Rec".to_string(),
         "Delete".to_string(),
         ButtonAction {
@@ -552,7 +552,7 @@ pub fn init_layout(
     commands.entity(text_modes).add_child(text_pos3);
     commands.entity(text_modes).add_child(text_pos4);
     commands.entity(text_modes).add_child(text_pos5);
-    
+
     let text_manipulation = commands
         .spawn((NodeBundle {
             style: Style {
@@ -570,26 +570,11 @@ pub fn init_layout(
             ..default()
         },))
         .id();
-    let cut = add_text_manipulation(
-        &mut commands,
-        &asset_server,
-        TextManipulation::Cut
-    );
-    let copy = add_text_manipulation(
-        &mut commands,
-        &asset_server,
-        TextManipulation::Copy
-    );
-    let paste = add_text_manipulation(
-        &mut commands,
-        &asset_server,
-        TextManipulation::Paste
-    );
-    let open_all_links = add_text_manipulation(
-        &mut commands,
-        &asset_server,
-        TextManipulation::OpenAllLinks
-    );
+    let cut = add_text_manipulation(&mut commands, &asset_server, TextManipulation::Cut);
+    let copy = add_text_manipulation(&mut commands, &asset_server, TextManipulation::Copy);
+    let paste = add_text_manipulation(&mut commands, &asset_server, TextManipulation::Paste);
+    let open_all_links =
+        add_text_manipulation(&mut commands, &asset_server, TextManipulation::OpenAllLinks);
     commands.entity(text_manipulation).add_child(cut);
     commands.entity(text_manipulation).add_child(copy);
     commands.entity(text_manipulation).add_child(paste);
@@ -598,7 +583,9 @@ pub fn init_layout(
     commands.entity(left_panel_controls).add_child(creation);
     commands.entity(left_panel_controls).add_child(color_picker);
     commands.entity(left_panel_controls).add_child(text_modes);
-    commands.entity(left_panel_controls).add_child(text_manipulation);
+    commands
+        .entity(left_panel_controls)
+        .add_child(text_manipulation);
     commands.entity(left_panel_controls).add_child(arrow_modes);
     commands.entity(left_panel_controls).add_child(fron_back);
 
