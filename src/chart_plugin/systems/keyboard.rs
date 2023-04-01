@@ -29,7 +29,7 @@ pub fn keyboard_input_system(
 
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
-        insert_from_clipboard(&mut images, &mut state, &mut query, &mut events);
+        insert_from_clipboard(&mut images, &mut state, &mut query, &mut events, font);
     } else if command && shift && input.just_pressed(KeyCode::S) {
         let id = ReflectableUuid(Uuid::new_v4());
         state.path_modal_id = Some(id);
@@ -67,7 +67,7 @@ pub fn keyboard_input_system(
                         str = format!("{}{}", str, ev.char);
                     }
                 }
-                text.sections = get_sections(str, font.clone());
+                text.sections = get_sections(str, font.clone()).0;
             }
         }
     }
@@ -79,6 +79,7 @@ pub fn insert_from_clipboard(
     state: &mut ResMut<AppState>,
     query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
     events: &mut EventWriter<AddRect>,
+    font: Handle<Font>,
 ) {
     use crate::JsonNode;
 
@@ -125,8 +126,11 @@ pub fn insert_from_clipboard(
     if let Ok(clipboard_text) = clipboard.get_text() {
         for (mut text, editable_text) in &mut query.iter_mut() {
             if Some(editable_text.id) == state.entity_to_edit {
-                text.sections[0].value =
-                    format!("{}{}", text.sections[0].value, clipboard_text.clone());
+                let mut str = "".to_string();
+                for section in text.sections.iter_mut() {
+                    str = format!("{}{}", str, section.value.clone());
+                }
+                text.sections = get_sections(format!("{}{}", str, clipboard_text), font.clone()).0;
             }
         }
     }
