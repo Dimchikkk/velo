@@ -260,6 +260,7 @@ pub fn text_manipulation(
                                     let (sections, is_link) = get_sections(str, font.clone());
                                     for (i, section) in sections.iter().enumerate() {
                                         if is_link[i] {
+                                            #[cfg(not(target_arch = "wasm32"))]
                                             open::that(section.value.clone()).unwrap();
                                         }
                                     }
