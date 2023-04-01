@@ -198,8 +198,10 @@ fn set_focused_entity(
     mut state: ResMut<AppState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
-    #[cfg(not(target_arch = "wasm32"))]
-    mut holding_time: Local<(Duration, Option<ReflectableUuid>)>,
+    #[cfg(not(target_arch = "wasm32"))] mut holding_time: Local<(
+        Duration,
+        Option<ReflectableUuid>,
+    )>,
 ) {
     let mut window = windows.single_mut();
     for (interaction, rectangle) in &mut interaction_query {
