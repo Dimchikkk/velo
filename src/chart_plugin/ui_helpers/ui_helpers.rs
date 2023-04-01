@@ -176,16 +176,8 @@ pub fn create_rectangle_txt(
     text: String,
     max_size: Option<(Val, Val)>,
 ) -> TextBundle {
-    let text_style = TextStyle {
-        font,
-        font_size: 18.0,
-        color: Color::BLACK,
-    };
     let text = Text {
-        sections: vec![TextSection {
-            value: text,
-            style: text_style,
-        }],
+        sections: get_sections(text, font),
         alignment: TextAlignment::Left,
         linebreak_behaviour: BreakLineOn::WordBoundary,
     };

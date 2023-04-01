@@ -47,8 +47,11 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 
 * Possible improvements
 - Publish crate
+- Add buttong to make a screenshot of main area and copy it to clipboard (see https://github.com/bevyengine/bevy/pull/7163) 
 - Add app icon (make sure that it's embedded in release binary)
 - Arrows parallel mode (see lucid.app)
+- Create global button label instead of changing color in every system (refactoring)
+- Refactor passing "font" to every text field via asset_server, to have global handle perhaps (refactoring)
 - Improve popup window layout
 - Add tagging/untagging of nodes
 - Search by text / tags

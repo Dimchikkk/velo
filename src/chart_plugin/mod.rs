@@ -1,7 +1,11 @@
-use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
+use bevy::{prelude::*, text::BreakLineOn, utils::Instant, window::PrimaryWindow};
 use serde::{Deserialize, Serialize};
 
-use std::{collections::VecDeque, path::PathBuf};
+use std::{
+    collections::VecDeque,
+    path::PathBuf,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 use uuid::Uuid;
 
 #[path = "ui_helpers/ui_helpers.rs"]
@@ -181,6 +185,7 @@ impl Plugin for ChartPlugin {
             selected_tab_handler,
             rename_tab_handler,
             tab_keyboard_input_system,
+            text_manipulation,
         ));
     }
 }
@@ -193,18 +198,25 @@ fn set_focused_entity(
     mut state: ResMut<AppState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
+    mut holding_time: Local<(Duration, Option<ReflectableUuid>)>,
 ) {
     let mut window = windows.single_mut();
     for (interaction, rectangle) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 window.cursor.icon = CursorIcon::Text;
-                state.hold_entity = Some(rectangle.id);
                 state.entity_to_edit = Some(rectangle.id);
+                *holding_time = (
+                    SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
+                    Some(rectangle.id),
+                );
             }
             Interaction::Hovered => {
-                if state.hold_entity.is_none() {
-                    window.cursor.icon = CursorIcon::Move;
+                if state.hold_entity.is_none() && state.entity_to_edit.is_none() {
+                    window.cursor.icon = CursorIcon::Default;
+                }
+                if state.entity_to_edit.is_some() {
+                    window.cursor.icon = CursorIcon::Text;
                 }
             }
             Interaction::None => {
@@ -212,7 +224,18 @@ fn set_focused_entity(
             }
         }
     }
+
+    if state.hold_entity.is_some() {
+        window.cursor.icon = CursorIcon::Move;
+    }
+
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    if now - holding_time.0 > Duration::new(0, 250000000) && holding_time.1.is_some() {
+        state.hold_entity = holding_time.1;
+    }
+
     if buttons.just_released(MouseButton::Left) {
+        *holding_time = (Duration::new(0, 0), None);
         state.hold_entity = None;
         state.entity_to_resize = None;
     }
