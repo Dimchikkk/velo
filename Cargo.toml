@@ -1,5 +1,9 @@
 [package]
 name = "rusticify"
+license = "MIT OR Apache-2.0"
+description = "App for brainstorming & sharing ideas 🦀 Learning Project"
+repository = "https://github.com/StaffEngineer/rusticify.git"
+readme = "Readme.org"
 version = "0.1.0"
 edition = "2021"
 
