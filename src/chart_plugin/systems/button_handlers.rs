@@ -219,7 +219,8 @@ pub fn text_manipulation(
                             }
                         }
                     }
-                    TextManipulation::Paste => {
+                    TextManipulation::Paste =>
+                    {
                         #[cfg(not(target_arch = "wasm32"))]
                         if let Ok(clipboard_text) = clipboard.get_text() {
                             for (mut text, editable_text) in editable_text.iter_mut() {
@@ -229,7 +230,7 @@ pub fn text_manipulation(
                                         str = format!("{}{}", str, section.value.clone());
                                     }
                                     str = format!("{}{}", str, clipboard_text);
-                                    text.sections = get_sections(str, font.clone());
+                                    text.sections = get_sections(str, font.clone()).0;
                                 }
                             }
                         }
@@ -248,7 +249,24 @@ pub fn text_manipulation(
                             }
                         }
                     }
-                    TextManipulation::OpenAllLinks => todo!(),
+                    TextManipulation::OpenAllLinks => {
+                        if let Some(id) = state.entity_to_edit {
+                            for (mut text, node) in editable_text.iter_mut() {
+                                if node.id == id {
+                                    let mut str = "".to_string();
+                                    for section in text.sections.iter_mut() {
+                                        str = format!("{}{}", str, section.value.clone());
+                                    }
+                                    let (sections, is_link) = get_sections(str, font.clone());
+                                    for (i, section) in sections.iter().enumerate() {
+                                        if is_link[i] {
+                                            open::that(section.value.clone()).unwrap();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             Interaction::Hovered => {

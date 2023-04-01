@@ -123,7 +123,7 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
     }
 }
 
-pub fn get_sections(text: String, font: Handle<Font>) -> Vec<TextSection> {
+pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<bool>) {
     let text_style = TextStyle {
         font: font.clone(),
         font_size: 18.0,
@@ -138,14 +138,16 @@ pub fn get_sections(text: String, font: Handle<Font>) -> Vec<TextSection> {
     finder.kinds(&[LinkKind::Url]);
     let links: Vec<_> = finder.links(&text).collect();
     if links.is_empty() {
-        return vec![
-            (TextSection {
+        return (
+            vec![TextSection {
                 value: text,
                 style: text_style,
-            }),
-        ];
+            }],
+            vec![false],
+        );
     }
     let mut sections = vec![];
+    let mut is_link = vec![];
     let mut idx = 0;
     for link in links {
         let start = link.start();
@@ -155,11 +157,13 @@ pub fn get_sections(text: String, font: Handle<Font>) -> Vec<TextSection> {
                 value: text[idx..start].to_string(),
                 style: text_style.clone(),
             });
+            is_link.push(false);
         }
         sections.push(TextSection {
             value: text[start..end].to_string(),
             style: link_style.clone(),
         });
+        is_link.push(true);
         idx = end;
     }
     if idx < text.len() {
@@ -167,8 +171,9 @@ pub fn get_sections(text: String, font: Handle<Font>) -> Vec<TextSection> {
             value: text[idx..text.len()].to_string(),
             style: text_style,
         });
+        is_link.push(false);
     }
-    sections
+    (sections, is_link)
 }
 
 pub fn create_rectangle_txt(
@@ -177,7 +182,7 @@ pub fn create_rectangle_txt(
     max_size: Option<(Val, Val)>,
 ) -> TextBundle {
     let text = Text {
-        sections: get_sections(text, font),
+        sections: get_sections(text, font).0,
         alignment: TextAlignment::Left,
         linebreak_behaviour: BreakLineOn::WordBoundary,
     };
