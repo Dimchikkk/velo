@@ -8,7 +8,7 @@ version = "0.1.0"
 edition = "2021"
 
 exclude = [
-    "assets/font/*",
+    "assets/fonts/*",
 ]
 
 # Enable max optimizations for dependencies, but not for our code:
