@@ -193,6 +193,7 @@ pub fn text_manipulation(
     for (interaction, text_manipulation, mut bg_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
+                #[cfg(not(target_arch = "wasm32"))]
                 let mut clipboard = arboard::Clipboard::new().unwrap();
 
                 match text_manipulation.action_type {
@@ -212,12 +213,14 @@ pub fn text_manipulation(
                                             color: Color::BLACK,
                                         },
                                     }];
+                                    #[cfg(not(target_arch = "wasm32"))]
                                     clipboard.set_text(str).unwrap()
                                 }
                             }
                         }
                     }
                     TextManipulation::Paste => {
+                        #[cfg(not(target_arch = "wasm32"))]
                         if let Ok(clipboard_text) = clipboard.get_text() {
                             for (mut text, editable_text) in editable_text.iter_mut() {
                                 if Some(editable_text.id) == state.entity_to_edit {
@@ -239,6 +242,7 @@ pub fn text_manipulation(
                                     for section in text.sections.iter_mut() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
+                                    #[cfg(not(target_arch = "wasm32"))]
                                     clipboard.set_text(str).unwrap()
                                 }
                             }
