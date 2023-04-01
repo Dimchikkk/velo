@@ -10,7 +10,7 @@ use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel,
     ButtonAction, ButtonTypes, ChangeColor, DeleteTab, LeftPanel, LeftPanelControls,
     LeftPanelExplorer, LoadState, MainPanel, Menu, ReflectableUuid, RenameTab, Root, SaveState,
-    SelectedTab, SelectedTabTextInput, TextManipulation, TextPosMode,
+    SelectedTab, SelectedTabTextInput, TextManipulation, TextManipulationAction, TextPosMode,
 };
 
 pub fn init_layout(
@@ -570,11 +570,34 @@ pub fn init_layout(
             ..default()
         },))
         .id();
-    let cut = add_text_manipulation(&mut commands, &asset_server, TextManipulation::Cut);
-    let copy = add_text_manipulation(&mut commands, &asset_server, TextManipulation::Copy);
-    let paste = add_text_manipulation(&mut commands, &asset_server, TextManipulation::Paste);
-    let open_all_links =
-        add_text_manipulation(&mut commands, &asset_server, TextManipulation::OpenAllLinks);
+    let cut = add_text_manipulation(
+        &mut commands,
+        &asset_server,
+        TextManipulationAction {
+            action_type: TextManipulation::Cut,
+        },
+    );
+    let copy = add_text_manipulation(
+        &mut commands,
+        &asset_server,
+        TextManipulationAction {
+            action_type: TextManipulation::Copy,
+        },
+    );
+    let paste = add_text_manipulation(
+        &mut commands,
+        &asset_server,
+        TextManipulationAction {
+            action_type: TextManipulation::Paste,
+        },
+    );
+    let open_all_links = add_text_manipulation(
+        &mut commands,
+        &asset_server,
+        TextManipulationAction {
+            action_type: TextManipulation::OpenAllLinks,
+        },
+    );
     commands.entity(text_manipulation).add_child(cut);
     commands.entity(text_manipulation).add_child(copy);
     commands.entity(text_manipulation).add_child(paste);
@@ -757,9 +780,9 @@ fn add_text_pos(
 fn add_text_manipulation(
     commands: &mut Commands,
     arrow_server: &Res<AssetServer>,
-    text_manipulation: TextManipulation,
+    text_manipulation: TextManipulationAction,
 ) -> Entity {
-    let image = match text_manipulation {
+    let image = match text_manipulation.action_type {
         TextManipulation::Cut => arrow_server.load("cut-text.png"),
         TextManipulation::Paste => arrow_server.load("paste-text.png"),
         TextManipulation::Copy => arrow_server.load("copy-text.png"),
