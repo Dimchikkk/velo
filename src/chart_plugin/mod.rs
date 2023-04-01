@@ -242,9 +242,9 @@ fn set_focused_entity(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-        // 100ms delay before re-positioning the rectangle
+        // 150ms delay before re-positioning the rectangle
         if state.hold_entity.is_none()
-            && now - holding_time.0 > Duration::new(0, 100000000)
+            && now - holding_time.0 > Duration::new(0, 150000000)
             && holding_time.1.is_some()
         {
             state.hold_entity = holding_time.1;
