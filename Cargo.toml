@@ -9,6 +9,8 @@ edition = "2021"
 
 exclude = [
     "assets/fonts/*",
+    "rusticify.gif",
+    "rusticify.png",
 ]
 
 # Enable max optimizations for dependencies, but not for our code:
