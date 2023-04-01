@@ -2,9 +2,6 @@
 
 [[file:rusticify.gif]]
 
-** Screenshot
-[[file:rusticify.png]]
-
 ** Inspiration
 I use lucid.app at work quite often to brainstorm ideas with colleagues or even solo.
 I often share the ideas via sharing lucid.app diagrams or just screenshot of it. I don't use banch of features there. 
@@ -45,6 +42,9 @@ wasm-server-runner  target/wasm32-unknown-unknown/release/rusticify.wasm
 cargo fmt
 cargo clippy --fix --allow-staged -- -A clippy::type_complexity
 #+END_SRC
+
+** Screenshot
+[[file:rusticify.png]]
 
 * Contributing
 
