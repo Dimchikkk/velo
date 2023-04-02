@@ -1,4 +1,4 @@
-* /Rust/icify
+* _Rust_icify
 
 [[file:rusticify.gif]]
 
