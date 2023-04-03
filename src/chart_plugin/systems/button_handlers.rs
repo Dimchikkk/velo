@@ -6,23 +6,24 @@ use crate::{AddRect, AppState, JsonNode, JsonNodeText, NodeType};
 
 use super::ui_helpers::{
     get_sections, pos_to_style, ArrowMeta, ArrowMode, ButtonAction, ChangeColor, EditableText,
-    Rectangle, TextManipulation, TextManipulationAction, TextPosMode,
+    Rectangle, TextManipulation, TextManipulationAction, TextPosMode, Tooltip,
 };
 
 pub fn button_handler(
     mut commands: Commands,
     mut events: EventWriter<AddRect>,
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &ButtonAction),
+        (&Interaction, &mut BackgroundColor, &ButtonAction, &Children),
         (Changed<Interaction>, With<ButtonAction>),
     >,
+    mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
     mut nodes: Query<(Entity, &Rectangle, &mut ZIndex), With<Rectangle>>,
     arrows: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
     mut state: ResMut<AppState>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = windows.single();
-    for (interaction, mut color, button_action) in &mut interaction_query {
+    for (interaction, mut color, button_action, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => match button_action.button_type {
                 super::ui_helpers::ButtonTypes::Add => {
@@ -88,9 +89,37 @@ pub fn button_handler(
             },
             Interaction::Hovered => {
                 color.0 = Color::GRAY;
+                match button_action.button_type {
+                    super::ui_helpers::ButtonTypes::Add => {}
+                    super::ui_helpers::ButtonTypes::Del => {}
+                    super::ui_helpers::ButtonTypes::Front => {
+                        let child = children.iter().next().unwrap();
+                        let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                        *visibility = Visibility::Visible;
+                    }
+                    super::ui_helpers::ButtonTypes::Back => {
+                        let child = children.iter().next().unwrap();
+                        let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                        *visibility = Visibility::Visible;
+                    }
+                }
             }
             Interaction::None => {
                 color.0 = Color::rgb(0.8, 0.8, 0.8);
+                match button_action.button_type {
+                    super::ui_helpers::ButtonTypes::Add => {}
+                    super::ui_helpers::ButtonTypes::Del => {}
+                    super::ui_helpers::ButtonTypes::Front => {
+                        let child = children.iter().next().unwrap();
+                        let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                        *visibility = Visibility::Hidden;
+                    }
+                    super::ui_helpers::ButtonTypes::Back => {
+                        let child = children.iter().next().unwrap();
+                        let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                        *visibility = Visibility::Hidden;
+                    }
+                }
             }
         }
     }
@@ -160,21 +189,28 @@ pub fn change_text_pos(
 
 pub fn change_arrow_type(
     mut interaction_query: Query<
-        (&Interaction, &ArrowMode, &mut BackgroundColor),
+        (&Interaction, &ArrowMode, &mut BackgroundColor, &Children),
         (Changed<Interaction>, With<ArrowMode>),
     >,
     mut state: ResMut<AppState>,
+    mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
 ) {
-    for (interaction, arrow_mode, mut bg_color) in &mut interaction_query {
+    for (interaction, arrow_mode, mut bg_color, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 state.arrow_type = arrow_mode.arrow_type;
             }
             Interaction::Hovered => {
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+                let child = children.iter().next().unwrap();
+                let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                *visibility = Visibility::Visible;
             }
             Interaction::None => {
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+                let child = children.iter().next().unwrap();
+                let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                *visibility = Visibility::Hidden;
             }
         }
     }
@@ -182,15 +218,21 @@ pub fn change_arrow_type(
 
 pub fn text_manipulation(
     mut interaction_query: Query<
-        (&Interaction, &TextManipulationAction, &mut BackgroundColor),
+        (
+            &Interaction,
+            &TextManipulationAction,
+            &mut BackgroundColor,
+            &Children,
+        ),
         (Changed<Interaction>, With<TextManipulationAction>),
     >,
     mut editable_text: Query<(&mut Text, &EditableText), With<EditableText>>,
+    mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
     state: Res<AppState>,
     asset_server: Res<AssetServer>,
 ) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
-    for (interaction, text_manipulation, mut bg_color) in &mut interaction_query {
+    for (interaction, text_manipulation, mut bg_color, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 #[cfg(not(target_arch = "wasm32"))]
@@ -272,9 +314,15 @@ pub fn text_manipulation(
             }
             Interaction::Hovered => {
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+                let child = children.iter().next().unwrap();
+                let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                *visibility = Visibility::Visible;
             }
             Interaction::None => {
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+                let child = children.iter().next().unwrap();
+                let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                *visibility = Visibility::Hidden;
             }
         }
     }
