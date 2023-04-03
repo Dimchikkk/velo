@@ -7,10 +7,11 @@ use uuid::Uuid;
 use crate::{AppState, MainCamera, SaveRequest, Tab, TextPos};
 
 use super::ui_helpers::{
-    self, add_rectangle_txt, create_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel,
-    ButtonAction, ButtonTypes, ChangeColor, DeleteTab, LeftPanel, LeftPanelControls,
+    self, add_rectangle_txt, create_rectangle_txt, get_tooltip, AddTab, ArrowMode, ArrowType,
+    BottomPanel, ButtonAction, ButtonTypes, ChangeColor, DeleteTab, LeftPanel, LeftPanelControls,
     LeftPanelExplorer, LoadState, MainPanel, Menu, ReflectableUuid, RenameTab, Root, SaveState,
     SelectedTab, SelectedTabTextInput, TextManipulation, TextManipulationAction, TextPosMode,
+    Tooltip,
 };
 
 pub fn init_layout(
@@ -625,10 +626,11 @@ fn add_front_back(
     asset_server: &Res<AssetServer>,
     button_action: ButtonAction,
 ) -> Entity {
-    let image = if button_action.button_type == ButtonTypes::Front {
-        asset_server.load("front.png")
+    let font = asset_server.load("fonts/iosevka-regular.ttf");
+    let (image, text) = if button_action.button_type == ButtonTypes::Front {
+        (asset_server.load("front.png"), "Move to front")
     } else {
-        asset_server.load("back.png")
+        (asset_server.load("back.png"), "Move to back")
     };
     commands
         .spawn((
@@ -659,6 +661,9 @@ fn add_front_back(
             BorderColor(Color::BLACK),
             button_action,
         ))
+        .with_children(|builder| {
+            builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
+        })
         .id()
 }
 
@@ -693,13 +698,26 @@ fn add_arrow(
     arrow_server: &Res<AssetServer>,
     arrow_mode: ArrowMode,
 ) -> Entity {
-    let image = match arrow_mode.arrow_type {
-        ArrowType::Line => arrow_server.load("line.png"),
-        ArrowType::Arrow => arrow_server.load("arrow.png"),
-        ArrowType::DoubleArrow => arrow_server.load("double-arrow.png"),
-        ArrowType::ParallelLine => arrow_server.load("parallel-line.png"),
-        ArrowType::ParallelArrow => arrow_server.load("parallel-arrow.png"),
-        ArrowType::ParallelDoubleArrow => arrow_server.load("parallel-double-arrow.png"),
+    let font = arrow_server.load("fonts/iosevka-regular.ttf");
+    let (image, text) = match arrow_mode.arrow_type {
+        ArrowType::Line => (arrow_server.load("line.png"), "Enable line mode"),
+        ArrowType::Arrow => (arrow_server.load("arrow.png"), "Enable single arrow mode"),
+        ArrowType::DoubleArrow => (
+            arrow_server.load("double-arrow.png"),
+            "Enable double arrow mode",
+        ),
+        ArrowType::ParallelLine => (
+            arrow_server.load("parallel-line.png"),
+            "Enable parallel line mode",
+        ),
+        ArrowType::ParallelArrow => (
+            arrow_server.load("parallel-arrow.png"),
+            "Enable parallel arrow mode",
+        ),
+        ArrowType::ParallelDoubleArrow => (
+            arrow_server.load("parallel-double-arrow.png"),
+            "Enable parallel double arrow mode",
+        ),
     };
     commands
         .spawn((
@@ -730,6 +748,9 @@ fn add_arrow(
             BorderColor(Color::BLACK),
             arrow_mode,
         ))
+        .with_children(|builder| {
+            builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
+        })
         .id()
 }
 
@@ -782,11 +803,18 @@ fn add_text_manipulation(
     arrow_server: &Res<AssetServer>,
     text_manipulation: TextManipulationAction,
 ) -> Entity {
-    let image = match text_manipulation.action_type {
-        TextManipulation::Cut => arrow_server.load("cut-text.png"),
-        TextManipulation::Paste => arrow_server.load("paste-text.png"),
-        TextManipulation::Copy => arrow_server.load("copy-text.png"),
-        TextManipulation::OpenAllLinks => arrow_server.load("open-all-links.png"),
+    let font = arrow_server.load("fonts/iosevka-regular.ttf");
+    let (image, text) = match text_manipulation.action_type {
+        TextManipulation::Cut => (arrow_server.load("cut-text.png"), "Cut text"),
+        TextManipulation::Paste => (
+            arrow_server.load("paste-text.png"),
+            "Paste text from clipboard",
+        ),
+        TextManipulation::Copy => (arrow_server.load("copy-text.png"), "Copy text to clipboard"),
+        TextManipulation::OpenAllLinks => (
+            arrow_server.load("open-all-links.png"),
+            "Open all links in text",
+        ),
     };
     commands
         .spawn((
@@ -817,6 +845,9 @@ fn add_text_manipulation(
             BorderColor(Color::BLACK),
             text_manipulation,
         ))
+        .with_children(|builder| {
+            builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
+        })
         .id()
 }
 
