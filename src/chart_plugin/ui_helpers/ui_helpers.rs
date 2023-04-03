@@ -195,8 +195,8 @@ pub fn create_rectangle_txt(
         },
         ..default()
     };
-    if max_size.is_some() {
-        text_bundle_style.max_size = Size::new(max_size.unwrap().0, max_size.unwrap().1);
+    if let Some((x, y)) = max_size {
+        text_bundle_style.max_size = Size::new(x, y);
     }
     TextBundle {
         text,
@@ -593,5 +593,43 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
         ArrowType::ParallelDoubleArrow => {
             eprintln!("Parallel Double Arrow is not implemented yet")
         }
+    }
+}
+
+pub fn get_tooltip(font: Handle<Font>, text: String, size: f32) -> TextBundle {
+    let text = Text {
+        sections: vec![TextSection {
+            value: text,
+            style: TextStyle {
+                font,
+                font_size: size,
+                color: Color::BLACK,
+            },
+        }],
+        alignment: TextAlignment::Left,
+        linebreak_behaviour: BreakLineOn::WordBoundary,
+    };
+    let text_bundle_style = Style {
+        position: UiRect {
+            left: Val::Px(0.),
+            right: Val::Px(0.),
+            top: Val::Px(30.),
+            bottom: Val::Px(0.),
+        },
+        padding: UiRect {
+            left: Val::Px(5.),
+            right: Val::Px(5.),
+            top: Val::Px(5.),
+            bottom: Val::Px(5.),
+        },
+        ..default()
+    };
+    TextBundle {
+        z_index: ZIndex::Global(1),
+        visibility: Visibility::Hidden,
+        background_color: Color::WHITE.into(),
+        text,
+        style: text_bundle_style,
+        ..default()
     }
 }

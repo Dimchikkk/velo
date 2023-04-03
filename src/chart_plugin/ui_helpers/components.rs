@@ -22,6 +22,9 @@ pub struct DeleteTab;
 pub struct RenameTab;
 
 #[derive(Component)]
+pub struct Tooltip;
+
+#[derive(Component)]
 pub struct SelectedTab {
     pub id: ReflectableUuid,
 }

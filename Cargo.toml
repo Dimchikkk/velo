@@ -21,7 +21,7 @@ opt-level = 3
 opt-level = 'z'
 
 [dependencies]
-bevy = "0.10.0"
+bevy = "0.10.1"
 image = "0.24.5"
 bevy_prototype_lyon = "0.8.0"
 base64 = "0.21.0"
