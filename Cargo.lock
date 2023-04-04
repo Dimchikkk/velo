@@ -2973,6 +2973,7 @@ dependencies = [
  "bevy_embedded_assets",
  "bevy_prototype_lyon",
  "bevy_ui_borders",
+ "console_error_panic_hook",
  "image",
  "linkify",
  "open",

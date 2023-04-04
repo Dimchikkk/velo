@@ -60,6 +60,11 @@ pub fn resize_entity_end(
                 if id == rectangle.id {
                     events.send(RedrawArrow { id });
                     let delta = event.delta;
+                    #[cfg(target_arch = "wasm32")]
+                    {
+                        // MouseMotion returns different values depending on platform
+                        let delta = Vec2::new(delta.x / 2., delta.y / 2.);
+                    }
                     match resize_marker {
                         ResizeMarker::TopLeft => {
                             if let Val::Px(width) = button_style.size.width {

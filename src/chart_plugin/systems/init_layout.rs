@@ -70,77 +70,80 @@ pub fn init_layout(
             Menu,
         ))
         .id();
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let save = commands
+            .spawn((
+                ButtonBundle {
+                    background_color: Color::rgb(0.8, 0.8, 0.8).into(),
+                    style: Style {
+                        justify_content: JustifyContent::Center,
+                        margin: UiRect {
+                            left: Val::Px(10.),
+                            right: Val::Px(0.),
+                            top: Val::Px(0.),
+                            bottom: Val::Px(0.),
+                        },
+                        padding: UiRect {
+                            left: Val::Px(5.),
+                            right: Val::Px(5.),
+                            top: Val::Px(5.),
+                            bottom: Val::Px(5.),
+                        },
+                        align_items: AlignItems::Center,
+                        // overflow: Overflow::Hidden,
+                        ..default()
+                    },
+                    ..default()
+                },
+                SaveState,
+            ))
+            .with_children(|builder| {
+                builder.spawn(create_rectangle_txt(
+                    font.clone(),
+                    "Save As".to_string(),
+                    None,
+                ));
+            })
+            .id();
+        let load = commands
+            .spawn((
+                ButtonBundle {
+                    background_color: Color::rgb(0.8, 0.8, 0.8).into(),
+                    style: Style {
+                        justify_content: JustifyContent::Center,
+                        margin: UiRect {
+                            left: Val::Px(10.),
+                            right: Val::Px(0.),
+                            top: Val::Px(0.),
+                            bottom: Val::Px(0.),
+                        },
+                        padding: UiRect {
+                            left: Val::Px(5.),
+                            right: Val::Px(5.),
+                            top: Val::Px(5.),
+                            bottom: Val::Px(5.),
+                        },
+                        align_items: AlignItems::Center,
+                        // overflow: Overflow::Hidden,
+                        ..default()
+                    },
+                    ..default()
+                },
+                LoadState,
+            ))
+            .with_children(|builder| {
+                builder.spawn(create_rectangle_txt(
+                    font.clone(),
+                    "Load File".to_string(),
+                    None,
+                ));
+            })
+            .id();
 
-    let save = commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
-                style: Style {
-                    justify_content: JustifyContent::Center,
-                    margin: UiRect {
-                        left: Val::Px(10.),
-                        right: Val::Px(0.),
-                        top: Val::Px(0.),
-                        bottom: Val::Px(0.),
-                    },
-                    padding: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(5.),
-                        bottom: Val::Px(5.),
-                    },
-                    align_items: AlignItems::Center,
-                    // overflow: Overflow::Hidden,
-                    ..default()
-                },
-                ..default()
-            },
-            SaveState,
-        ))
-        .with_children(|builder| {
-            builder.spawn(create_rectangle_txt(
-                font.clone(),
-                "Save As".to_string(),
-                None,
-            ));
-        })
-        .id();
-    let load = commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
-                style: Style {
-                    justify_content: JustifyContent::Center,
-                    margin: UiRect {
-                        left: Val::Px(10.),
-                        right: Val::Px(0.),
-                        top: Val::Px(0.),
-                        bottom: Val::Px(0.),
-                    },
-                    padding: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(5.),
-                        bottom: Val::Px(5.),
-                    },
-                    align_items: AlignItems::Center,
-                    // overflow: Overflow::Hidden,
-                    ..default()
-                },
-                ..default()
-            },
-            LoadState,
-        ))
-        .with_children(|builder| {
-            builder.spawn(create_rectangle_txt(
-                font.clone(),
-                "Load File".to_string(),
-                None,
-            ));
-        })
-        .id();
-    commands.entity(menu).add_child(save);
-    commands.entity(menu).add_child(load);
+        commands.entity(menu).add_child(save);
+        commands.entity(menu).add_child(load);
+    }
 
     let main_bottom = commands
         .spawn(NodeBundle {
@@ -578,31 +581,35 @@ pub fn init_layout(
             action_type: TextManipulation::Cut,
         },
     );
-    let copy = add_text_manipulation(
-        &mut commands,
-        &asset_server,
-        TextManipulationAction {
-            action_type: TextManipulation::Copy,
-        },
-    );
-    let paste = add_text_manipulation(
-        &mut commands,
-        &asset_server,
-        TextManipulationAction {
-            action_type: TextManipulation::Paste,
-        },
-    );
-    let open_all_links = add_text_manipulation(
-        &mut commands,
-        &asset_server,
-        TextManipulationAction {
-            action_type: TextManipulation::OpenAllLinks,
-        },
-    );
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let copy = add_text_manipulation(
+            &mut commands,
+            &asset_server,
+            TextManipulationAction {
+                action_type: TextManipulation::Copy,
+            },
+        );
+        let paste = add_text_manipulation(
+            &mut commands,
+            &asset_server,
+            TextManipulationAction {
+                action_type: TextManipulation::Paste,
+            },
+        );
+        let open_all_links = add_text_manipulation(
+            &mut commands,
+            &asset_server,
+            TextManipulationAction {
+                action_type: TextManipulation::OpenAllLinks,
+            },
+        );
+        commands.entity(text_manipulation).add_child(copy);
+        commands.entity(text_manipulation).add_child(paste);
+        commands.entity(text_manipulation).add_child(open_all_links);
+    }
     commands.entity(text_manipulation).add_child(cut);
-    commands.entity(text_manipulation).add_child(copy);
-    commands.entity(text_manipulation).add_child(paste);
-    commands.entity(text_manipulation).add_child(open_all_links);
 
     commands.entity(left_panel_controls).add_child(creation);
     commands.entity(left_panel_controls).add_child(color_picker);
