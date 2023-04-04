@@ -29,6 +29,8 @@ fn main() {
         .add_plugin(ShapePlugin)
         .add_plugin(BordersPlugin)
         .run();
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
 }
 
 fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
