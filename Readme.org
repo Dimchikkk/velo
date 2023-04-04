@@ -29,11 +29,12 @@ Tested only on MacOS, should work on Linux and Windows as well
 cargo r 
 #+END_SRC
 
-It runs on wasm as well, but it's not very useful, since it doesn't have clipboard/file system features, also only landscape mode is supported.
+It runs on wasm as well, but it doesn't have clipboard/file system features, also only desktop webview is supported.
+
+https://github.com/jakobhellermann/wasm-server-runner#step-2
 
 #+BEGIN_SRC sh
-cargo r --target wasm32-unknown-unknown --release
-wasm-server-runner  target/wasm32-unknown-unknown/release/rusticify.wasm
+cargo r --target wasm32-unknown-unknown
 #+END_SRC
 
 ** Pre-commit actions
