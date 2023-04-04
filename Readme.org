@@ -43,6 +43,8 @@ Build wasm static files:
 cargo build --release --target wasm32-unknown-unknown
 wasm-bindgen --target web --out-dir out target/wasm32-unknown-unknown/release
 cp index.html out/
+cd out
+wasm-opt -Os rusticify_bg.wasm -o rusticify_bg.wasm
 #+END_SRC
 
 ** Pre-commit actions
