@@ -1,5 +1,3 @@
-use std::{fs::canonicalize, path::PathBuf};
-
 use bevy::{prelude::*, window::PrimaryWindow};
 use uuid::Uuid;
 
@@ -47,18 +45,14 @@ pub fn confirm_path_modal(
                 if Some(modal.id) == state.path_modal_id {
                     if modal.save {
                         commands.insert_resource(SaveRequest {
-                            path: Some(PathBuf::from(text.sections[0].value.trim())),
+                            path: state.current_document,
                             tab_id: None,
                         });
-                    } else if let Ok(path) =
-                        canonicalize(PathBuf::from(text.sections[0].value.trim()))
-                    {
+                    } else {
                         commands.insert_resource(LoadRequest {
-                            path: Some(path),
+                            path: state.current_document,
                             drop_last_checkpoint: false,
                         });
-                    } else {
-                        eprintln!("File not found: {}", text.sections[0].value);
                     }
                 }
             }
@@ -98,17 +92,14 @@ pub fn path_modal_keyboard_input_system(
             if Some(modal.id) == state.path_modal_id {
                 if modal.save {
                     commands.insert_resource(SaveRequest {
-                        path: Some(PathBuf::from(text.sections[0].value.trim())),
+                        path: state.current_document,
                         tab_id: None,
                     });
-                } else if let Ok(path) = canonicalize(PathBuf::from(text.sections[0].value.trim()))
-                {
+                } else {
                     commands.insert_resource(LoadRequest {
-                        path: Some(path),
+                        path: state.current_document,
                         drop_last_checkpoint: false,
                     });
-                } else {
-                    eprintln!("File not found: {}", text.sections[0].value);
                 }
             }
         }

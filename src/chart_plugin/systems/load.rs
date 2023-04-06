@@ -1,13 +1,16 @@
+use std::collections::HashMap;
+
 use base64::{engine::general_purpose, Engine};
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
 
+use bevy_pkv::PkvStore;
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
-use crate::{chart_plugin::ui_helpers::SelectedTabTextInput, AppState, JsonNode, LoadRequest, Tab};
+use crate::{chart_plugin::ui_helpers::SelectedTabTextInput, AppState, Doc, JsonNode, LoadRequest};
 
 use super::ui_helpers::{
     add_rectangle_txt, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle,
@@ -33,6 +36,7 @@ pub fn load_json(
     asset_server: Res<AssetServer>,
     mut selected_tabs_query: Query<Entity, With<SelectedTab>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
+    pkv: ResMut<PkvStore>,
 ) {
     state.entity_to_edit = None;
     state.tab_to_edit = None;
@@ -52,15 +56,17 @@ pub fn load_json(
         commands.entity(entity).despawn_recursive();
     }
 
-    if let Some(path) = &request.path {
-        let json = std::fs::read_to_string(path).expect("Error reading state from file");
-        let json: Value = serde_json::from_str(&json).unwrap();
-        let tabs: Vec<Tab> = serde_json::from_value(json["tabs"].clone()).unwrap();
-        state.tabs = tabs;
+    if let Some(_path) = &request.path {
+        if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+            state.docs = docs.clone();
+            state.current_document = Some(docs.keys().next().cloned().unwrap());
+        }
     }
 
     let bottom_panel = bottom_panel.single_mut();
-    for tab in state.tabs.iter() {
+    let current_document = state.current_document.unwrap();
+    let mut tabs = state.docs.get_mut(&current_document).unwrap().tabs.clone();
+    for tab in tabs.iter() {
         let tab_view = commands
             .spawn((
                 ButtonBundle {
@@ -93,7 +99,7 @@ pub fn load_json(
         commands.entity(bottom_panel).add_child(tab_view);
     }
 
-    for tab in state.tabs.iter_mut() {
+    for tab in tabs.iter_mut() {
         if tab.is_active {
             let json = if request.drop_last_checkpoint && tab.checkpoints.len() > 1 {
                 tab.checkpoints.pop_back().unwrap()
