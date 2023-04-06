@@ -115,7 +115,7 @@ pub fn save_json(
         }
     }
 
-    if let Some(_path) = request.path.clone() {
+    if let Some(_path) = request.path {
         if let Ok(mut docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
             docs.insert(
                 state.current_document.unwrap(),

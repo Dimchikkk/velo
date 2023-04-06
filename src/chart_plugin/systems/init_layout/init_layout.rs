@@ -1,18 +1,45 @@
 use std::collections::{HashMap, VecDeque};
 
 use bevy::prelude::*;
-use bevy_ui_borders::BorderColor;
+
 use uuid::Uuid;
 
 use crate::{AppState, Doc, MainCamera, SaveRequest, Tab, TextPos};
 
 use super::ui_helpers::{
-    self, add_rectangle_txt, create_rectangle_txt, get_tooltip, AddTab, ArrowMode, ArrowType,
-    BottomPanel, ButtonAction, ButtonTypes, ChangeColor, DeleteTab, LeftPanel, LeftPanelControls,
-    LeftPanelExplorer, LoadState, MainPanel, Menu, ReflectableUuid, RenameTab, Root, SaveState,
-    SelectedTab, SelectedTabTextInput, TextManipulation, TextManipulationAction, TextPosMode,
-    Tooltip,
+    self, add_rectangle_txt, create_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel,
+    ButtonAction, DeleteTab, LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel,
+    Menu, ReflectableUuid, RenameTab, Root, SaveState, SelectedTab, SelectedTabTextInput,
+    TextManipulation, TextManipulationAction, TextPosMode,
 };
+
+#[path = "add_arrow.rs"]
+mod add_arrow;
+use add_arrow::*;
+
+#[path = "add_color.rs"]
+mod add_color;
+use add_color::*;
+
+#[path = "add_front_back.rs"]
+mod add_front_back;
+use add_front_back::*;
+
+#[path = "add_list.rs"]
+mod add_list;
+pub use add_list::*;
+
+#[path = "add_text_manipulation.rs"]
+mod add_text_manipulation;
+use add_text_manipulation::*;
+
+#[path = "add_text_pos.rs"]
+mod add_text_pos;
+use add_text_pos::*;
+
+#[path = "add_two_buttons.rs"]
+mod add_two_buttons;
+use add_two_buttons::*;
 
 pub fn init_layout(
     mut commands: Commands,
@@ -394,6 +421,8 @@ pub fn init_layout(
             LeftPanelExplorer,
         ))
         .id();
+    let docs = add_list(&mut commands, font.clone());
+    commands.entity(left_panel_explorer).add_child(docs);
 
     commands.entity(left_panel).add_child(left_panel_controls);
     commands.entity(left_panel).add_child(left_panel_explorer);
@@ -646,305 +675,4 @@ pub fn init_layout(
     commands.entity(root_ui).add_child(main_bottom);
 
     state.main_panel = Some(main_panel);
-}
-
-fn add_front_back(
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    button_action: ButtonAction,
-) -> Entity {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
-    let (image, text) = if button_action.button_type == ButtonTypes::Front {
-        (asset_server.load("front.png"), "Move to front")
-    } else {
-        (asset_server.load("back.png"), "Move to back")
-    };
-    commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::Rgba {
-                    red: 1.,
-                    green: 1.,
-                    blue: 1.,
-                    alpha: 0.5,
-                }
-                .into(),
-                image: image.into(),
-                style: Style {
-                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
-                    align_items: AlignItems::Center,
-                    border: UiRect::all(Val::Px(1.)),
-                    margin: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(5.),
-                        bottom: Val::Px(5.),
-                    },
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                ..default()
-            },
-            BorderColor(Color::BLACK),
-            button_action,
-        ))
-        .with_children(|builder| {
-            builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
-        })
-        .id()
-}
-
-fn add_color(commands: &mut Commands, color: Color) -> Entity {
-    commands
-        .spawn((
-            ButtonBundle {
-                background_color: color.into(),
-                style: Style {
-                    size: Size::new(Val::Percent(20.), Val::Percent(100.)),
-                    align_items: AlignItems::Center,
-                    margin: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(5.),
-                        bottom: Val::Px(5.),
-                    },
-                    border: UiRect::all(Val::Px(1.)),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                ..default()
-            },
-            BorderColor(Color::BLACK),
-            ChangeColor { color },
-        ))
-        .id()
-}
-
-fn add_arrow(
-    commands: &mut Commands,
-    arrow_server: &Res<AssetServer>,
-    arrow_mode: ArrowMode,
-) -> Entity {
-    let font = arrow_server.load("fonts/iosevka-regular.ttf");
-    let (image, text) = match arrow_mode.arrow_type {
-        ArrowType::Line => (arrow_server.load("line.png"), "Enable line mode"),
-        ArrowType::Arrow => (arrow_server.load("arrow.png"), "Enable single arrow mode"),
-        ArrowType::DoubleArrow => (
-            arrow_server.load("double-arrow.png"),
-            "Enable double arrow mode",
-        ),
-        ArrowType::ParallelLine => (
-            arrow_server.load("parallel-line.png"),
-            "Enable parallel line mode",
-        ),
-        ArrowType::ParallelArrow => (
-            arrow_server.load("parallel-arrow.png"),
-            "Enable parallel arrow mode",
-        ),
-        ArrowType::ParallelDoubleArrow => (
-            arrow_server.load("parallel-double-arrow.png"),
-            "Enable parallel double arrow mode",
-        ),
-    };
-    commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::Rgba {
-                    red: 1.,
-                    green: 1.,
-                    blue: 1.,
-                    alpha: 0.5,
-                }
-                .into(),
-                image: image.into(),
-                style: Style {
-                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
-                    align_items: AlignItems::Center,
-                    margin: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(5.),
-                        bottom: Val::Px(5.),
-                    },
-                    border: UiRect::all(Val::Px(1.)),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                ..default()
-            },
-            BorderColor(Color::BLACK),
-            arrow_mode,
-        ))
-        .with_children(|builder| {
-            builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
-        })
-        .id()
-}
-
-fn add_text_pos(
-    commands: &mut Commands,
-    arrow_server: &Res<AssetServer>,
-    text_pos_mode: TextPosMode,
-) -> Entity {
-    let image = match text_pos_mode.text_pos {
-        crate::TextPos::Center => arrow_server.load("text-center.png"),
-        crate::TextPos::BottomRight => arrow_server.load("text-right-bottom.png"),
-        crate::TextPos::BottomLeft => arrow_server.load("text-left-bottom.png"),
-        crate::TextPos::TopRight => arrow_server.load("text-right-top.png"),
-        crate::TextPos::TopLeft => arrow_server.load("text-left-top.png"),
-    };
-    commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::Rgba {
-                    red: 1.,
-                    green: 1.,
-                    blue: 1.,
-                    alpha: 0.5,
-                }
-                .into(),
-                image: image.into(),
-                style: Style {
-                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
-                    align_items: AlignItems::Center,
-                    margin: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(5.),
-                        bottom: Val::Px(5.),
-                    },
-                    border: UiRect::all(Val::Px(1.)),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                ..default()
-            },
-            BorderColor(Color::BLACK),
-            text_pos_mode,
-        ))
-        .id()
-}
-
-fn add_text_manipulation(
-    commands: &mut Commands,
-    arrow_server: &Res<AssetServer>,
-    text_manipulation: TextManipulationAction,
-) -> Entity {
-    let font = arrow_server.load("fonts/iosevka-regular.ttf");
-    let (image, text) = match text_manipulation.action_type {
-        TextManipulation::Cut => (arrow_server.load("cut-text.png"), "Cut text"),
-        TextManipulation::Paste => (
-            arrow_server.load("paste-text.png"),
-            "Paste text from clipboard",
-        ),
-        TextManipulation::Copy => (arrow_server.load("copy-text.png"), "Copy text to clipboard"),
-        TextManipulation::OpenAllLinks => (
-            arrow_server.load("open-all-links.png"),
-            "Open all links in text",
-        ),
-    };
-    commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::Rgba {
-                    red: 1.,
-                    green: 1.,
-                    blue: 1.,
-                    alpha: 0.5,
-                }
-                .into(),
-                image: image.into(),
-                style: Style {
-                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
-                    align_items: AlignItems::Center,
-                    margin: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(5.),
-                        bottom: Val::Px(5.),
-                    },
-                    border: UiRect::all(Val::Px(1.)),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                ..default()
-            },
-            BorderColor(Color::BLACK),
-            text_manipulation,
-        ))
-        .with_children(|builder| {
-            builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
-        })
-        .id()
-}
-
-fn add_two_buttons(
-    commands: &mut Commands,
-    font: Handle<Font>,
-    label_do: String,
-    label_undo: String,
-    component_do: impl Component,
-    component_undo: impl Component,
-) -> Entity {
-    let node = commands
-        .spawn(NodeBundle {
-            style: Style {
-                align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(85.), Val::Percent(15.)),
-                margin: UiRect {
-                    left: Val::Px(5.),
-                    right: Val::Px(5.),
-                    top: Val::Px(5.),
-                    bottom: Val::Px(5.),
-                },
-                justify_content: JustifyContent::SpaceBetween,
-                ..default()
-            },
-            ..default()
-        })
-        .id();
-    let do_button = commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
-                style: Style {
-                    size: Size::new(Val::Percent(40.), Val::Percent(100.)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    border: UiRect::all(Val::Px(1.)),
-                    ..default()
-                },
-                ..default()
-            },
-            component_do,
-            BorderColor(Color::BLACK),
-        ))
-        .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), label_do));
-        })
-        .id();
-
-    let undo_button = commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
-                style: Style {
-                    align_items: AlignItems::Center,
-                    size: Size::new(Val::Percent(40.), Val::Percent(100.)),
-                    justify_content: JustifyContent::Center,
-                    border: UiRect::all(Val::Px(1.)),
-                    ..default()
-                },
-                ..default()
-            },
-            component_undo,
-            BorderColor(Color::BLACK),
-        ))
-        .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), label_undo));
-        })
-        .id();
-    commands.entity(node).add_child(do_button);
-    commands.entity(node).add_child(undo_button);
-    node
 }
