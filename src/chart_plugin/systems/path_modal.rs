@@ -41,7 +41,7 @@ pub fn confirm_path_modal(
 ) {
     for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
-            for (text, modal) in &mut query_path.iter_mut() {
+            for (_text, modal) in &mut query_path.iter_mut() {
                 if Some(modal.id) == state.path_modal_id {
                     if modal.save {
                         commands.insert_resource(SaveRequest {
@@ -88,7 +88,7 @@ pub fn path_modal_keyboard_input_system(
         }
     }
     if input.just_pressed(KeyCode::Return) {
-        for (text, modal) in &mut query.iter_mut() {
+        for (_text, modal) in &mut query.iter_mut() {
             if Some(modal.id) == state.path_modal_id {
                 if modal.save {
                     commands.insert_resource(SaveRequest {

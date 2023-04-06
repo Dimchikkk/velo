@@ -22,7 +22,7 @@ use keyboard_systems::*;
 #[path = "systems/path_modal.rs"]
 mod path_modal_systems;
 use path_modal_systems::*;
-#[path = "systems/init_layout.rs"]
+#[path = "systems/init_layout/init_layout.rs"]
 mod init_layout;
 use init_layout::*;
 #[path = "systems/resize.rs"]
@@ -194,6 +194,7 @@ impl Plugin for ChartPlugin {
             rename_tab_handler,
             tab_keyboard_input_system,
             text_manipulation,
+            mouse_scroll_list,
         ));
     }
 }
