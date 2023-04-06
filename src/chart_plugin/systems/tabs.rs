@@ -22,7 +22,14 @@ pub fn selected_tab_handler(
     for (interaction, mut bg_color, selected_tab) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                for tab in state.tabs.iter_mut() {
+                let current_document = state.current_document.unwrap();
+                let tabs = state
+                    .docs
+                    .get_mut(&current_document)
+                    .unwrap()
+                    .tabs
+                    .iter_mut();
+                for tab in tabs {
                     if tab.is_active {
                         commands.insert_resource(SaveRequest {
                             path: None,
@@ -38,7 +45,8 @@ pub fn selected_tab_handler(
                 });
             }
             Interaction::Hovered => {
-                for tab in state.tabs.iter() {
+                let current_document = state.current_document.unwrap();
+                for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
                     if selected_tab.id == tab.id {
                         if tab.is_active {
                             bg_color.0 = Color::ALICE_BLUE;
@@ -50,7 +58,8 @@ pub fn selected_tab_handler(
                 }
             }
             Interaction::None => {
-                for tab in state.tabs.iter() {
+                let current_document = state.current_document.unwrap();
+                for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
                     if selected_tab.id == tab.id {
                         if tab.is_active {
                             bg_color.0 = Color::ALICE_BLUE;
@@ -77,8 +86,9 @@ pub fn add_tab_handler(
         match *interaction {
             Interaction::Clicked => {
                 let tab_id = ReflectableUuid(Uuid::new_v4());
-                let tabs_len = state.tabs.len();
-                for tab in state.tabs.iter_mut() {
+                let current_document = state.current_document.unwrap();
+                let tabs = &mut state.docs.get_mut(&current_document).unwrap().tabs;
+                for tab in tabs.iter_mut() {
                     if tab.is_active {
                         commands.insert_resource(SaveRequest {
                             path: None,
@@ -96,7 +106,8 @@ pub fn add_tab_handler(
                     })
                     .to_string(),
                 );
-                state.tabs.push(Tab {
+                let tabs_len = tabs.len();
+                tabs.push(Tab {
                     id: tab_id,
                     name: "Tab ".to_string() + &(tabs_len + 1).to_string(),
                     checkpoints,
@@ -134,7 +145,11 @@ pub fn tab_keyboard_input_system(
                     text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
                 }
             }
+            let current_document = state.current_document.unwrap();
             let tab = state
+                .docs
+                .get_mut(&current_document)
+                .unwrap()
                 .tabs
                 .iter_mut()
                 .find(|x| x.id == tab_input.id)
@@ -155,7 +170,15 @@ pub fn rename_tab_handler(
         match *interaction {
             Interaction::Clicked => {
                 state.entity_to_edit = None;
-                let tab = state.tabs.iter().find(|x| x.is_active).unwrap();
+                let current_document = state.current_document.unwrap();
+                let tab = state
+                    .docs
+                    .get_mut(&current_document)
+                    .unwrap()
+                    .tabs
+                    .iter()
+                    .find(|x| x.is_active)
+                    .unwrap();
                 state.tab_to_edit = Some(tab.id);
             }
             Interaction::Hovered => {
@@ -179,18 +202,36 @@ pub fn delete_tab_handler(
     for (interaction, mut bg_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                if state.tab_to_edit.is_some() {
-                    return;
-                }
-                if state.tabs.len() > 1 {
-                    let index = state.tabs.iter().position(|x| x.is_active).unwrap();
-                    state.tabs.remove(index);
-                    let mut last_tab = state.tabs.last_mut().unwrap();
-                    last_tab.is_active = true;
-                    commands.insert_resource(LoadRequest {
-                        path: None,
-                        drop_last_checkpoint: false,
-                    });
+                if state.current_document.is_some() {
+                    let current_document = state.current_document.unwrap();
+                    if state.docs.get_mut(&current_document).unwrap().tabs.len() > 1 {
+                        let index = state
+                            .docs
+                            .get_mut(&current_document)
+                            .unwrap()
+                            .tabs
+                            .iter()
+                            .position(|x| x.is_active)
+                            .unwrap();
+                        state
+                            .docs
+                            .get_mut(&current_document)
+                            .unwrap()
+                            .tabs
+                            .remove(index);
+                        let mut last_tab = state
+                            .docs
+                            .get_mut(&current_document)
+                            .unwrap()
+                            .tabs
+                            .last_mut()
+                            .unwrap();
+                        last_tab.is_active = true;
+                        commands.insert_resource(LoadRequest {
+                            path: None,
+                            drop_last_checkpoint: false,
+                        });
+                    }
                 }
             }
             Interaction::Hovered => {

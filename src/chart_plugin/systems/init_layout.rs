@@ -1,10 +1,10 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 use uuid::Uuid;
 
-use crate::{AppState, MainCamera, SaveRequest, Tab, TextPos};
+use crate::{AppState, Doc, MainCamera, SaveRequest, Tab, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, get_tooltip, AddTab, ArrowMode, ArrowType,
@@ -22,12 +22,25 @@ pub fn init_layout(
     let font = asset_server.load("fonts/iosevka-regular.ttf");
     commands.spawn((Camera2dBundle::default(), MainCamera));
     let tab_id = ReflectableUuid(Uuid::new_v4());
-    state.tabs.push(Tab {
+    let tabs = vec![Tab {
         id: tab_id,
         name: "Tab 1".to_string(),
         checkpoints: VecDeque::new(),
         is_active: true,
-    });
+    }];
+    let doc_id = ReflectableUuid(Uuid::new_v4());
+    let mut docs = HashMap::new();
+    docs.insert(
+        doc_id,
+        Doc {
+            id: doc_id,
+            name: "Untitled".to_string(),
+            tabs,
+            tags: vec![],
+        },
+    );
+    state.docs = docs;
+    state.current_document = Some(doc_id);
     commands.insert_resource(SaveRequest {
         path: None,
         tab_id: Some(tab_id),
@@ -99,11 +112,7 @@ pub fn init_layout(
                 SaveState,
             ))
             .with_children(|builder| {
-                builder.spawn(create_rectangle_txt(
-                    font.clone(),
-                    "Save As".to_string(),
-                    None,
-                ));
+                builder.spawn(create_rectangle_txt(font.clone(), "Save".to_string(), None));
             })
             .id();
         let load = commands
@@ -326,7 +335,18 @@ pub fn init_layout(
         ))
         .with_children(|builder| {
             builder.spawn((
-                add_rectangle_txt(font.clone(), state.tabs.last().unwrap().name.clone()),
+                add_rectangle_txt(
+                    font.clone(),
+                    state
+                        .docs
+                        .get(&state.current_document.unwrap())
+                        .unwrap()
+                        .tabs
+                        .last()
+                        .unwrap()
+                        .name
+                        .clone(),
+                ),
                 SelectedTabTextInput { id: tab_id },
             ));
         })
