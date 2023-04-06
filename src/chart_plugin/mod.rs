@@ -2,8 +2,7 @@ use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
 use serde::{Deserialize, Serialize};
 
 use std::{
-    collections::VecDeque,
-    path::PathBuf,
+    collections::{HashMap, VecDeque},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use uuid::Uuid;
@@ -59,13 +58,13 @@ pub struct MainCamera;
 
 #[derive(Resource, Debug)]
 pub struct SaveRequest {
-    pub path: Option<PathBuf>,
+    pub path: Option<ReflectableUuid>,
     pub tab_id: Option<ReflectableUuid>, // None means save to active tab
 }
 
 #[derive(Resource, Debug)]
 pub struct LoadRequest {
-    pub path: Option<PathBuf>,
+    pub path: Option<ReflectableUuid>,
     pub drop_last_checkpoint: bool, // Useful for undo functionality
 }
 
@@ -103,12 +102,20 @@ pub struct JsonNode {
     pub z_index: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Tab {
     pub is_active: bool,
     pub id: ReflectableUuid,
     pub name: String,
     pub checkpoints: VecDeque<String>,
+}
+
+#[derive(Default, Serialize, Deserialize, Clone, Debug)]
+pub struct Doc {
+    tabs: Vec<Tab>,
+    id: ReflectableUuid,
+    name: String,
+    tags: Vec<String>,
 }
 
 #[derive(Resource, Default)]
@@ -121,7 +128,8 @@ pub struct AppState {
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
-    pub tabs: Vec<Tab>,
+    pub current_document: Option<ReflectableUuid>,
+    pub docs: HashMap<ReflectableUuid, Doc>,
 }
 
 impl Plugin for ChartPlugin {

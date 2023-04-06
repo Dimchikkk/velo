@@ -1,17 +1,18 @@
 use base64::{engine::general_purpose, Engine};
 use bevy::prelude::*;
 
+use bevy_pkv::PkvStore;
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 
 use serde_json::json;
-use std::io::Cursor;
+use std::{collections::HashMap, io::Cursor};
 
 use crate::{
-    chart_plugin::ui_helpers::style_to_pos, AppState, JsonNode, JsonNodeText, SaveRequest,
+    chart_plugin::ui_helpers::style_to_pos, AppState, Doc, JsonNode, JsonNodeText, SaveRequest,
 };
 
-use super::ui_helpers::{ArrowMeta, EditableText, Rectangle};
+use super::ui_helpers::{ArrowMeta, EditableText, Rectangle, ReflectableUuid};
 
 pub fn should_save(request: Option<Res<SaveRequest>>) -> bool {
     request.is_some()
@@ -40,6 +41,7 @@ pub fn save_json(
     request: Res<SaveRequest>,
     mut state: ResMut<AppState>,
     text_query: Query<&mut Text, With<EditableText>>,
+    mut pkv: ResMut<PkvStore>,
 ) {
     let mut json = json!({
         "images": {},
@@ -94,7 +96,8 @@ pub fn save_json(
         json_arrows.push(json!(arrow_meta));
     }
 
-    for tab in &mut state.tabs {
+    let current_document = state.current_document.unwrap();
+    for tab in &mut state.docs.get_mut(&current_document).unwrap().tabs {
         if request.tab_id.is_some() {
             if tab.id == request.tab_id.unwrap() {
                 if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
@@ -112,12 +115,48 @@ pub fn save_json(
         }
     }
 
-    if let Some(path) = request.path.clone() {
-        let json = json!({
-            "version": "0.1.0",
-            "tabs": json!(state.tabs),
-        });
-        std::fs::write(path, serde_json::to_string_pretty(&json).unwrap())
-            .expect("Error saving state to file")
+    if let Some(_path) = request.path.clone() {
+        if let Ok(mut docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+            docs.insert(
+                state.current_document.unwrap(),
+                state
+                    .docs
+                    .get(&state.current_document.unwrap())
+                    .unwrap()
+                    .clone(),
+            );
+            pkv.set("docs", &docs).unwrap();
+        } else {
+            let mut docs = HashMap::new();
+            docs.insert(
+                state.current_document.unwrap(),
+                state
+                    .docs
+                    .get(&state.current_document.unwrap())
+                    .unwrap()
+                    .clone(),
+            );
+            pkv.set("docs", &docs).unwrap();
+        }
+        if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, Vec<String>>>("tags") {
+            let current_doc = state.docs.get(&state.current_document.unwrap()).unwrap();
+            let tags = tags.get_mut(&current_doc.id).unwrap();
+            tags.append(&mut current_doc.tags.clone());
+            pkv.set("tags", &tags).unwrap();
+        } else {
+            let current_doc = state.docs.get(&state.current_document.unwrap()).unwrap();
+            pkv.set("tags", &current_doc.tags).unwrap();
+        }
+        if let Ok(mut names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
+            let current_doc = state.docs.get(&state.current_document.unwrap()).unwrap();
+            names.insert(current_doc.id, current_doc.name.clone());
+            pkv.set("names", &names).unwrap();
+        } else {
+            let current_doc = state.docs.get(&state.current_document.unwrap()).unwrap();
+            let mut names = HashMap::new();
+            names.insert(current_doc.id, current_doc.name.clone());
+            pkv.set("names", &names).unwrap();
+        }
+        pkv.set("last_opened", &state.current_document).unwrap();
     }
 }
