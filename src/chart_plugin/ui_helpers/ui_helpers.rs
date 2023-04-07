@@ -1,9 +1,6 @@
-
 use linkify::{LinkFinder, LinkKind};
 
-
 use bevy::{prelude::*, text::BreakLineOn};
-
 
 use crate::TextPos;
 
@@ -213,7 +210,6 @@ pub fn create_rectangle_txt(
         ..default()
     }
 }
-
 
 pub fn get_tooltip(font: Handle<Font>, text: String, size: f32) -> TextBundle {
     let text = Text {

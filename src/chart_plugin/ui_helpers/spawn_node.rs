@@ -1,16 +1,13 @@
 use bevy_ui_borders::{BorderColor, Outline};
 
-
-
-
-use bevy::{prelude::*};
-
-
-
+use bevy::prelude::*;
 
 use crate::TextPos;
 
-use super::{create_rectangle_btn, Rectangle, create_arrow_marker, ArrowConnect, ArrowConnectPos, create_resize_marker, ResizeMarker, create_rectangle_txt, EditableText, ReflectableUuid};
+use super::{
+    create_arrow_marker, create_rectangle_btn, create_rectangle_txt, create_resize_marker,
+    ArrowConnect, ArrowConnectPos, EditableText, Rectangle, ReflectableUuid, ResizeMarker,
+};
 
 #[derive(Clone)]
 pub struct NodeMeta {
