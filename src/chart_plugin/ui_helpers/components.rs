@@ -40,6 +40,11 @@ pub struct SelectedTabTextInput {
 }
 
 #[derive(Component)]
+pub struct DocListItem {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component)]
 pub struct ChangeColor {
     pub color: Color,
 }
