@@ -1,16 +1,13 @@
-use std::collections::{HashMap, VecDeque};
-
 use bevy::prelude::*;
 
-use uuid::Uuid;
+use bevy_pkv::PkvStore;
 
-use crate::{AppState, Doc, MainCamera, SaveRequest, Tab, TextPos};
+use crate::{AppState, MainCamera, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, create_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel,
     ButtonAction, DeleteTab, LeftPanel, LeftPanelControls, LeftPanelExplorer, LoadState, MainPanel,
-    Menu, ReflectableUuid, RenameTab, Root, SaveState, SelectedTab, SelectedTabTextInput,
-    TextManipulation, TextManipulationAction, TextPosMode,
+    Menu, RenameTab, Root, SaveState, TextManipulation, TextManipulationAction, TextPosMode,
 };
 
 #[path = "add_arrow.rs"]
@@ -45,33 +42,12 @@ pub fn init_layout(
     mut commands: Commands,
     mut state: ResMut<AppState>,
     asset_server: Res<AssetServer>,
+    mut pkv: ResMut<PkvStore>,
 ) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
     commands.spawn((Camera2dBundle::default(), MainCamera));
-    let tab_id = ReflectableUuid(Uuid::new_v4());
-    let tabs = vec![Tab {
-        id: tab_id,
-        name: "Tab 1".to_string(),
-        checkpoints: VecDeque::new(),
-        is_active: true,
-    }];
-    let doc_id = ReflectableUuid(Uuid::new_v4());
-    let mut docs = HashMap::new();
-    docs.insert(
-        doc_id,
-        Doc {
-            id: doc_id,
-            name: "Untitled".to_string(),
-            tabs,
-            tags: vec![],
-        },
-    );
-    state.docs = docs;
-    state.current_document = Some(doc_id);
-    commands.insert_resource(SaveRequest {
-        path: None,
-        tab_id: Some(tab_id),
-    });
+
+    let docs = add_list(&mut commands, &mut state, &mut pkv, font.clone());
 
     let root_ui = commands
         .spawn((
@@ -338,50 +314,9 @@ pub fn init_layout(
             builder.spawn(add_rectangle_txt(font.clone(), "Delete".to_string()));
         })
         .id();
-    let tab1 = commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
-                style: Style {
-                    size: Size::new(Val::Px(60.), Val::Px(30.)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    margin: UiRect {
-                        left: Val::Px(10.),
-                        right: Val::Px(10.),
-                        top: Val::Px(0.),
-                        bottom: Val::Px(0.),
-                    },
-                    overflow: Overflow::Hidden,
-                    ..default()
-                },
-
-                ..default()
-            },
-            SelectedTab { id: tab_id },
-        ))
-        .with_children(|builder| {
-            builder.spawn((
-                add_rectangle_txt(
-                    font.clone(),
-                    state
-                        .docs
-                        .get(&state.current_document.unwrap())
-                        .unwrap()
-                        .tabs
-                        .last()
-                        .unwrap()
-                        .name
-                        .clone(),
-                ),
-                SelectedTabTextInput { id: tab_id },
-            ));
-        })
-        .id();
     commands.entity(bottom_panel).add_child(add_tab);
     commands.entity(bottom_panel).add_child(rename_tab);
     commands.entity(bottom_panel).add_child(del_tab);
-    commands.entity(bottom_panel).add_child(tab1);
 
     commands.entity(right_panel).add_child(main_panel);
     commands.entity(right_panel).add_child(bottom_panel);
@@ -421,7 +356,6 @@ pub fn init_layout(
             LeftPanelExplorer,
         ))
         .id();
-    let docs = add_list(&mut commands, font.clone());
     commands.entity(left_panel_explorer).add_child(docs);
 
     commands.entity(left_panel).add_child(left_panel_controls);

@@ -195,6 +195,7 @@ impl Plugin for ChartPlugin {
             tab_keyboard_input_system,
             text_manipulation,
             mouse_scroll_list,
+            list_item_click,
         ));
     }
 }
