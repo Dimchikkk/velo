@@ -1,6 +1,13 @@
 use linkify::{LinkFinder, LinkKind};
 
-use bevy::{prelude::*, text::BreakLineOn};
+use bevy::{
+    a11y::{
+        accesskit::{NodeBuilder, Role},
+        AccessibilityNode,
+    },
+    prelude::*,
+    text::BreakLineOn,
+};
 
 use crate::TextPos;
 
@@ -16,9 +23,9 @@ pub use create_arrow::*;
 mod spawn_node;
 pub use spawn_node::*;
 
-#[path = "spawn_path_modal.rs"]
-mod spawn_path_modal;
-pub use spawn_path_modal::*;
+#[path = "spawn_modal.rs"]
+mod spawn_modal;
+pub use spawn_modal::*;
 
 fn get_marker_style(position: UiRect, size: f32) -> Style {
     Style {
@@ -247,4 +254,95 @@ pub fn get_tooltip(font: Handle<Font>, text: String, size: f32) -> TextBundle {
         style: text_bundle_style,
         ..default()
     }
+}
+
+pub fn add_tab(
+    commands: &mut Commands,
+    font: Handle<Font>,
+    name: String,
+    id: ReflectableUuid,
+) -> Entity {
+    commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
+                style: Style {
+                    size: Size::new(Val::Px(60.), Val::Px(30.)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    overflow: Overflow::Hidden,
+                    margin: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(10.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(0.),
+                    },
+                    ..default()
+                },
+
+                ..default()
+            },
+            SelectedTab { id },
+        ))
+        .with_children(|builder| {
+            builder.spawn((
+                add_rectangle_txt(font.clone(), name),
+                SelectedTabTextInput { id },
+            ));
+        })
+        .id()
+}
+
+pub fn add_list_item(
+    commands: &mut Commands,
+    font: Handle<Font>,
+    id: ReflectableUuid,
+    name: String,
+) -> Entity {
+    let button = commands
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    justify_content: JustifyContent::Center,
+                    padding: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    ..default()
+                },
+                ..default()
+            },
+            DocListItemButton { id },
+            AccessibilityNode(NodeBuilder::new(Role::ListItem)),
+        ))
+        .id();
+    let text_bundle = commands
+        .spawn((
+            TextBundle {
+                text: Text {
+                    sections: vec![TextSection {
+                        value: name,
+                        style: TextStyle {
+                            font,
+                            font_size: 18.,
+                            color: Color::BLACK,
+                        },
+                    }],
+                    ..default()
+                },
+                style: Style {
+                    margin: UiRect::all(Val::Px(5.)),
+                    ..default()
+                },
+                ..default()
+            },
+            DocListItemText { id },
+            Label,
+        ))
+        .id();
+    commands.entity(button).add_child(text_bundle);
+    button
 }

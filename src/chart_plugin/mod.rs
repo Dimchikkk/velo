@@ -45,9 +45,7 @@ pub struct AddRect {
     pub image: Option<UiImage>,
 }
 
-pub struct SetWindowIcon {
-    pub image: Handle<Image>,
-}
+pub struct UpdateListHighlight;
 
 pub struct RedrawArrow {
     pub id: ReflectableUuid,
@@ -58,13 +56,13 @@ pub struct MainCamera;
 
 #[derive(Resource, Debug)]
 pub struct SaveRequest {
-    pub path: Option<ReflectableUuid>,
+    pub doc_id: Option<ReflectableUuid>,
     pub tab_id: Option<ReflectableUuid>, // None means save to active tab
 }
 
 #[derive(Resource, Debug)]
 pub struct LoadRequest {
-    pub path: Option<ReflectableUuid>,
+    pub doc_id: Option<ReflectableUuid>,
     pub drop_last_checkpoint: bool, // Useful for undo functionality
 }
 
@@ -125,6 +123,7 @@ pub struct AppState {
     pub arrow_type: ArrowType,
     pub entity_to_edit: Option<ReflectableUuid>,
     pub tab_to_edit: Option<ReflectableUuid>,
+    pub doc_to_edit: Option<ReflectableUuid>,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
@@ -148,14 +147,14 @@ impl Plugin for ChartPlugin {
         app.register_type::<BreakLineOn>();
 
         app.add_event::<AddRect>();
-        app.add_event::<SetWindowIcon>();
         app.add_event::<CreateArrow>();
         app.add_event::<RedrawArrow>();
+        app.add_event::<UpdateListHighlight>();
 
         app.add_startup_system(init_layout);
 
         app.add_systems((
-            button_handler,
+            rec_button_handlers,
             update_rectangle_position,
             create_new_rectangle,
             resize_entity_start,
@@ -165,11 +164,9 @@ impl Plugin for ChartPlugin {
             set_focused_entity,
             redraw_arrows,
             keyboard_input_system,
-            cancel_path_modal,
-            path_modal_keyboard_input_system,
-            set_focused_modal,
-            confirm_path_modal,
-            open_path_modal,
+            cancel_modal,
+            modal_keyboard_input_system,
+            confirm_modal,
         ));
 
         app.add_systems(
@@ -196,7 +193,13 @@ impl Plugin for ChartPlugin {
             text_manipulation,
             mouse_scroll_list,
             list_item_click,
+            new_doc_handler,
+            rename_doc_handler,
+            delete_doc_handler,
+            save_doc_handler,
         ));
+
+        app.add_systems((doc_keyboard_input_system, list_selected_highlight));
     }
 }
 
