@@ -1,12 +1,11 @@
-use bevy_ui_borders::{BorderColor};
+use bevy_ui_borders::BorderColor;
 
+use bevy::prelude::*;
 
-use bevy::{prelude::*};
-
-
-
-
-use super::{ReflectableUuid, PathModalConfirm, add_rectangle_txt, PathModalTop, PathModalText, create_rectangle_txt, PathModalTextInput, PathModalCancel};
+use super::{
+    add_rectangle_txt, create_rectangle_txt, PathModalCancel, PathModalConfirm, PathModalText,
+    PathModalTextInput, PathModalTop, ReflectableUuid,
+};
 
 pub fn spawn_path_modal(
     commands: &mut Commands,

@@ -1,17 +1,12 @@
-
-
-
 use std::f32::consts::PI;
 
-use bevy::{prelude::*};
+use bevy::prelude::*;
 use bevy_prototype_lyon::{
     prelude::{GeometryBuilder, ShapeBundle, Stroke},
     shapes,
 };
 
-
-
-use super::{ArrowType, ArrowMeta};
+use super::{ArrowMeta, ArrowType};
 
 pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta: ArrowMeta) {
     match arrow_meta.arrow_type {
