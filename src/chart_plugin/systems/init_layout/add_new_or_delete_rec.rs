@@ -3,7 +3,7 @@ use bevy_ui_borders::BorderColor;
 
 use super::ui_helpers::add_rectangle_txt;
 
-pub fn add_two_buttons(
+pub fn add_new_delete_rec(
     commands: &mut Commands,
     font: Handle<Font>,
     label_do: String,

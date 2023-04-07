@@ -1,15 +1,23 @@
+use std::collections::VecDeque;
+
 use bevy::{prelude::*, window::PrimaryWindow};
 
+use serde_json::json;
 use uuid::Uuid;
 
-use crate::{AddRect, AppState, JsonNode, JsonNodeText, NodeType};
-
-use super::ui_helpers::{
-    get_sections, pos_to_style, ArrowMeta, ArrowMode, ButtonAction, ChangeColor, EditableText,
-    Rectangle, TextManipulation, TextManipulationAction, TextPosMode, Tooltip,
+use crate::{
+    AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType, SaveRequest, Tab,
+    UpdateListHighlight,
 };
 
-pub fn button_handler(
+use super::ui_helpers::{
+    add_list_item, get_sections, pos_to_style, spawn_modal, ArrowMeta, ArrowMode, ButtonAction,
+    ChangeColor, DeleteDoc, DocList, DocListItemText, EditableText, ModalEntity, NewDoc, Rectangle,
+    ReflectableUuid, RenameDoc, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
+    Tooltip,
+};
+
+pub fn rec_button_handlers(
     mut commands: Commands,
     mut events: EventWriter<AddRect>,
     mut interaction_query: Query<
@@ -323,6 +331,177 @@ pub fn text_manipulation(
                 let child = children.iter().next().unwrap();
                 let mut visibility = tooltips_query.get_mut(*child).unwrap();
                 *visibility = Visibility::Hidden;
+            }
+        }
+    }
+}
+
+pub fn new_doc_handler(
+    mut commands: Commands,
+    mut new_doc_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<NewDoc>),
+    >,
+    mut doc_list_query: Query<Entity, With<DocList>>,
+    mut state: ResMut<AppState>,
+    mut events: EventWriter<UpdateListHighlight>,
+    asset_server: Res<AssetServer>,
+) {
+    for (interaction, mut bg_color) in &mut new_doc_query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                let font = asset_server.load("fonts/iosevka-regular.ttf");
+                let doc_list = doc_list_query.single_mut();
+                let doc_id = ReflectableUuid(Uuid::new_v4());
+                let name = "Untitled".to_string();
+                let tab_id = ReflectableUuid(Uuid::new_v4());
+                let mut checkpoints = VecDeque::new();
+                checkpoints.push_back(
+                    json!({
+                        "nodes": [],
+                        "arrows": [],
+                        "images": {},
+                    })
+                    .to_string(),
+                );
+                let tabs = vec![Tab {
+                    id: tab_id,
+                    name: "Tab 1".to_string(),
+                    checkpoints,
+                    is_active: true,
+                }];
+                state.docs.insert(
+                    doc_id,
+                    Doc {
+                        id: doc_id,
+                        name: name.clone(),
+                        tabs,
+                        tags: vec![],
+                    },
+                );
+                state.current_document = Some(doc_id);
+
+                let button = add_list_item(&mut commands, font.clone(), doc_id, name);
+                commands.entity(doc_list).add_child(button);
+                commands.insert_resource(LoadRequest {
+                    doc_id: None,
+                    drop_last_checkpoint: false,
+                });
+                events.send(UpdateListHighlight);
+            }
+            Interaction::Hovered => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+            }
+            Interaction::None => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+            }
+        }
+    }
+}
+
+pub fn rename_doc_handler(
+    mut rename_doc_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<RenameDoc>),
+    >,
+    mut state: ResMut<AppState>,
+) {
+    for (interaction, mut bg_color) in &mut rename_doc_query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                state.entity_to_edit = None;
+                state.tab_to_edit = None;
+                let current_document = state.current_document.unwrap();
+                state.doc_to_edit = Some(current_document);
+            }
+            Interaction::Hovered => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+            }
+            Interaction::None => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+            }
+        }
+    }
+}
+
+pub fn doc_keyboard_input_system(
+    mut query: Query<(&mut Text, &DocListItemText), With<DocListItemText>>,
+    mut state: ResMut<AppState>,
+    input: Res<Input<KeyCode>>,
+    mut char_evr: EventReader<ReceivedCharacter>,
+) {
+    for (mut text, doc_list_item) in &mut query.iter_mut() {
+        if Some(doc_list_item.id) == state.doc_to_edit {
+            if input.just_pressed(KeyCode::Return) {
+                state.doc_to_edit = None;
+            }
+            if input.just_pressed(KeyCode::Back) {
+                let mut str = text.sections[0].value.clone();
+                str.pop();
+                text.sections[0].value = str;
+            } else {
+                for ev in char_evr.iter() {
+                    text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
+                }
+            }
+            let doc = state.docs.get_mut(&doc_list_item.id).unwrap();
+            doc.name = text.sections[0].value.clone();
+        }
+    }
+}
+
+pub fn delete_doc_handler(
+    mut commands: Commands,
+    mut delete_doc_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<DeleteDoc>),
+    >,
+    mut state: ResMut<AppState>,
+    asset_server: Res<AssetServer>,
+) {
+    for (interaction, mut bg_color) in &mut delete_doc_query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                let font = asset_server.load("fonts/iosevka-regular.ttf");
+                let id = ReflectableUuid(Uuid::new_v4());
+                state.entity_to_edit = None;
+                state.tab_to_edit = None;
+                state.doc_to_edit = None;
+                state.path_modal_id = Some(id);
+                let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Document);
+                commands.entity(state.main_panel.unwrap()).add_child(entity);
+            }
+            Interaction::Hovered => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+            }
+            Interaction::None => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+            }
+        }
+    }
+}
+
+pub fn save_doc_handler(
+    mut commands: Commands,
+    mut save_doc_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<SaveDoc>),
+    >,
+    state: Res<AppState>,
+) {
+    for (interaction, mut bg_color) in &mut save_doc_query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                commands.insert_resource(SaveRequest {
+                    doc_id: Some(state.current_document.unwrap()),
+                    tab_id: None,
+                });
+            }
+            Interaction::Hovered => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+            }
+            Interaction::None => {
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
             }
         }
     }

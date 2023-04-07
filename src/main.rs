@@ -32,7 +32,7 @@ fn main() {
         .add_plugin(ChartPlugin)
         .add_plugin(ShapePlugin)
         .add_plugin(BordersPlugin)
-        .insert_resource(PkvStore::new("rust", "rusticify"))
+        .insert_resource(PkvStore::new("", "rusticify"))
         .run();
 }
 
