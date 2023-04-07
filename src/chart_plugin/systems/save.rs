@@ -115,48 +115,34 @@ pub fn save_json(
         }
     }
 
-    if let Some(_path) = request.path {
+    if let Some(doc_id) = request.doc_id {
         if let Ok(mut docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
-            docs.insert(
-                state.current_document.unwrap(),
-                state
-                    .docs
-                    .get(&state.current_document.unwrap())
-                    .unwrap()
-                    .clone(),
-            );
+            docs.insert(doc_id, state.docs.get(&doc_id).unwrap().clone());
             pkv.set("docs", &docs).unwrap();
         } else {
             let mut docs = HashMap::new();
-            docs.insert(
-                state.current_document.unwrap(),
-                state
-                    .docs
-                    .get(&state.current_document.unwrap())
-                    .unwrap()
-                    .clone(),
-            );
+            docs.insert(doc_id, state.docs.get(&doc_id).unwrap().clone());
             pkv.set("docs", &docs).unwrap();
         }
         if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, Vec<String>>>("tags") {
-            let current_doc = state.docs.get(&state.current_document.unwrap()).unwrap();
-            let tags = tags.get_mut(&current_doc.id).unwrap();
-            tags.append(&mut current_doc.tags.clone());
+            let doc = state.docs.get(&doc_id).unwrap();
+            let tags = tags.get_mut(&doc_id).unwrap();
+            tags.append(&mut doc.tags.clone());
             pkv.set("tags", &tags).unwrap();
         } else {
-            let current_doc = state.docs.get(&state.current_document.unwrap()).unwrap();
-            pkv.set("tags", &current_doc.tags).unwrap();
+            let doc = state.docs.get(&doc_id).unwrap();
+            pkv.set("tags", &doc.tags).unwrap();
         }
         if let Ok(mut names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-            let current_doc = state.docs.get(&state.current_document.unwrap()).unwrap();
-            names.insert(current_doc.id, current_doc.name.clone());
+            let doc = state.docs.get(&doc_id).unwrap();
+            names.insert(doc.id, doc.name.clone());
             pkv.set("names", &names).unwrap();
         } else {
-            let current_doc = state.docs.get(&state.current_document.unwrap()).unwrap();
+            let doc = state.docs.get(&doc_id).unwrap();
             let mut names = HashMap::new();
-            names.insert(current_doc.id, current_doc.name.clone());
+            names.insert(doc.id, doc.name.clone());
             pkv.set("names", &names).unwrap();
         }
-        pkv.set("last_opened", &state.current_document).unwrap();
+        pkv.set("last_saved", &doc_id).unwrap();
     }
 }

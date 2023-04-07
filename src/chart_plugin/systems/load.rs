@@ -10,11 +10,11 @@ use bevy_pkv::PkvStore;
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
-use crate::{chart_plugin::ui_helpers::SelectedTabTextInput, AppState, Doc, JsonNode, LoadRequest};
+use crate::{AppState, Doc, JsonNode, LoadRequest};
 
 use super::ui_helpers::{
-    add_rectangle_txt, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle,
-    ReflectableUuid, SelectedTab,
+    add_tab, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle, ReflectableUuid,
+    SelectedTab,
 };
 
 pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
@@ -40,6 +40,7 @@ pub fn load_json(
 ) {
     state.entity_to_edit = None;
     state.tab_to_edit = None;
+    state.doc_to_edit = None;
     state.hold_entity = None;
     state.entity_to_resize = None;
     state.arrow_to_draw_start = None;
@@ -56,10 +57,10 @@ pub fn load_json(
         commands.entity(entity).despawn_recursive();
     }
 
-    if let Some(_path) = &request.path {
+    if let Some(doc_id) = &request.doc_id {
         if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
             state.docs = docs.clone();
-            state.current_document = Some(docs.keys().next().cloned().unwrap());
+            state.current_document = Some(docs.get(doc_id).unwrap().id);
         }
     }
 
@@ -67,40 +68,16 @@ pub fn load_json(
     let current_document = state.current_document.unwrap();
     let mut tabs = state.docs.get_mut(&current_document).unwrap().tabs.clone();
     for tab in tabs.iter() {
-        let tab_view = commands
-            .spawn((
-                ButtonBundle {
-                    background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
-                    style: Style {
-                        size: Size::new(Val::Px(60.), Val::Px(30.)),
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        overflow: Overflow::Hidden,
-                        margin: UiRect {
-                            left: Val::Px(10.),
-                            right: Val::Px(10.),
-                            top: Val::Px(0.),
-                            bottom: Val::Px(0.),
-                        },
-                        ..default()
-                    },
-
-                    ..default()
-                },
-                SelectedTab { id: tab.id },
-            ))
-            .with_children(|builder| {
-                builder.spawn((
-                    add_rectangle_txt(font.clone(), tab.name.clone()),
-                    SelectedTabTextInput { id: tab.id },
-                ));
-            })
-            .id();
+        let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
         commands.entity(bottom_panel).add_child(tab_view);
     }
 
     for tab in tabs.iter_mut() {
         if tab.is_active {
+            if tab.checkpoints.is_empty() {
+                break;
+            }
+
             let json = if request.drop_last_checkpoint && tab.checkpoints.len() > 1 {
                 tab.checkpoints.pop_back().unwrap()
             } else {

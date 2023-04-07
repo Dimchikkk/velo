@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::{AddRect, AppState, LoadRequest, SaveRequest};
 
-use super::ui_helpers::{get_sections, spawn_path_modal, EditableText, ReflectableUuid};
+use super::ui_helpers::{get_sections, EditableText};
 
 pub fn keyboard_input_system(
     mut commands: Commands,
@@ -31,25 +31,18 @@ pub fn keyboard_input_system(
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(&mut images, &mut state, &mut query, &mut events, font);
     } else if command && shift && input.just_pressed(KeyCode::S) {
-        let id = ReflectableUuid(Uuid::new_v4());
-        state.path_modal_id = Some(id);
-        state.entity_to_edit = None;
-        let entity = spawn_path_modal(&mut commands, font, id, true);
-        commands.entity(state.main_panel.unwrap()).add_child(entity);
-    } else if command && shift && input.just_pressed(KeyCode::L) {
-        let id = ReflectableUuid(Uuid::new_v4());
-        state.path_modal_id = Some(id);
-        state.entity_to_edit = None;
-        let entity = spawn_path_modal(&mut commands, font, id, false);
-        commands.entity(state.main_panel.unwrap()).add_child(entity);
+        commands.insert_resource(SaveRequest {
+            doc_id: Some(state.current_document.unwrap()),
+            tab_id: None,
+        });
     } else if command && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveRequest {
-            path: None,
+            doc_id: None,
             tab_id: None,
         });
     } else if command && input.just_pressed(KeyCode::L) {
         commands.insert_resource(LoadRequest {
-            path: None,
+            doc_id: None,
             drop_last_checkpoint: true,
         });
     } else {

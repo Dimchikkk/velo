@@ -2,16 +2,13 @@ use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
 
-use super::{
-    add_rectangle_txt, create_rectangle_txt, PathModalCancel, PathModalConfirm, PathModalText,
-    PathModalTextInput, PathModalTop, ReflectableUuid,
-};
+use super::{add_rectangle_txt, ModalCancel, ModalConfirm, ModalEntity, ModalTop, ReflectableUuid};
 
-pub fn spawn_path_modal(
+pub fn spawn_modal(
     commands: &mut Commands,
     font: Handle<Font>,
     id: ReflectableUuid,
-    save: bool,
+    modal_entity: ModalEntity,
 ) -> Entity {
     let width = 300.;
     let height = 200.;
@@ -32,7 +29,10 @@ pub fn spawn_path_modal(
                 ..default()
             },
             BorderColor(Color::BLACK),
-            PathModalTop { id },
+            ModalTop {
+                id,
+                delete: modal_entity.clone(),
+            },
         ))
         .with_children(|builder| {
             builder
@@ -62,38 +62,7 @@ pub fn spawn_path_modal(
                         .with_children(|builder| {
                             builder.spawn(add_rectangle_txt(
                                 font.clone(),
-                                "Enter file name:".to_string(),
-                            ));
-                        });
-                    builder
-                        .spawn((
-                            ButtonBundle {
-                                style: Style {
-                                    justify_content: JustifyContent::Center,
-                                    align_items: AlignItems::Center,
-                                    border: UiRect::all(Val::Px(1.)),
-                                    padding: UiRect {
-                                        left: Val::Px(5.),
-                                        right: Val::Px(5.),
-                                        top: Val::Px(5.),
-                                        bottom: Val::Px(5.),
-                                    },
-                                    // overflow: Overflow::Hidden,
-                                    ..default()
-                                },
-                                ..default()
-                            },
-                            BorderColor(Color::BLACK),
-                            PathModalText { id, save },
-                        ))
-                        .with_children(|builder| {
-                            builder.spawn((
-                                create_rectangle_txt(
-                                    font.clone(),
-                                    "./data/rusticify.json".to_string(),
-                                    None,
-                                ),
-                                PathModalTextInput { id, save },
+                                format!("Are you sure you want to delete {}?", modal_entity),
                             ));
                         });
                 });
@@ -131,17 +100,13 @@ pub fn spawn_path_modal(
                                 ..default()
                             },
                             BorderColor(Color::BLACK),
-                            PathModalConfirm { id, save },
+                            ModalConfirm {
+                                id,
+                                delete: modal_entity.clone(),
+                            },
                         ))
                         .with_children(|builder| {
-                            builder.spawn(add_rectangle_txt(
-                                font.clone(),
-                                if save {
-                                    "Save".to_string()
-                                } else {
-                                    "Load".to_string()
-                                },
-                            ));
+                            builder.spawn(add_rectangle_txt(font.clone(), "Yes".to_string()));
                         });
                     builder
                         .spawn((
@@ -161,7 +126,7 @@ pub fn spawn_path_modal(
                                 ..default()
                             },
                             BorderColor(Color::BLACK),
-                            PathModalCancel { id },
+                            ModalCancel { id },
                         ))
                         .with_children(|builder| {
                             builder.spawn(add_rectangle_txt(font.clone(), "Cancel".to_string()));
