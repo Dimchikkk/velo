@@ -116,6 +116,8 @@ pub struct Doc {
     tags: Vec<String>,
 }
 
+pub const MAX_DOCS_IN_MEMORY: i32 = 10;
+
 #[derive(Resource, Default)]
 pub struct AppState {
     pub path_modal_id: Option<ReflectableUuid>,
