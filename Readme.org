@@ -56,4 +56,6 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity -A clippy::too_m
 
 * Contributing
 
-Contributions are always welcome! Please adhere to this project's code of conduct. ❤️
+Contributions are always welcome! Please adhere to this project's code of conduct. 
+
+❤️
