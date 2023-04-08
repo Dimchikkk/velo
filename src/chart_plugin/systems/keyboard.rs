@@ -1,6 +1,7 @@
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+    window::PrimaryWindow,
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -22,14 +23,24 @@ pub fn keyboard_input_system(
     mut events: EventWriter<AddRect>,
     input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
+    let primary_window = windows.single();
+    let scale_factor = primary_window.scale_factor();
     let font = asset_server.load("fonts/iosevka-regular.ttf");
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
 
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
-        insert_from_clipboard(&mut images, &mut state, &mut query, &mut events, font);
+        insert_from_clipboard(
+            &mut images,
+            &mut state,
+            &mut query,
+            &mut events,
+            font,
+            scale_factor,
+        );
     } else if command && shift && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveRequest {
             doc_id: Some(state.current_document.unwrap()),
@@ -73,6 +84,7 @@ pub fn insert_from_clipboard(
     query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
     events: &mut EventWriter<AddRect>,
     font: Handle<Font>,
+    scale_factor: f64,
 ) {
     use crate::JsonNode;
 
@@ -89,21 +101,42 @@ pub fn insert_from_clipboard(
             height: image.height(),
             ..Default::default()
         };
+        let resize_width = image.width() / scale_factor as u32;
+        let resize_height = image.height() / scale_factor as u32;
+
         let image = Image::new(
             size,
             TextureDimension::D2,
             image.to_vec(),
             TextureFormat::Rgba8UnormSrgb,
         );
-        let image = images.add(image);
+        let image_buffer = imageops::resize(
+            &image.try_into_dynamic().unwrap(),
+            resize_width,
+            resize_height,
+            imageops::FilterType::Lanczos3,
+        );
+        let data = image_buffer.to_vec();
+        let resize_size: Extent3d = Extent3d {
+            width: resize_width,
+            height: resize_height,
+            ..Default::default()
+        };
+        let resized_image = Image::new(
+            resize_size,
+            TextureDimension::D2,
+            data,
+            TextureFormat::Rgba8UnormSrgb,
+        );
+        let image = images.add(resized_image);
         events.send(AddRect {
             node: JsonNode {
                 id: Uuid::new_v4(),
                 node_type: crate::NodeType::Rect,
                 left: Val::Px(0.0),
                 bottom: Val::Px(0.0),
-                width: Val::Px(size.width as f32),
-                height: Val::Px(size.height as f32),
+                width: Val::Px(resize_width as f32),
+                height: Val::Px(resize_height as f32),
                 text: crate::JsonNodeText {
                     text: "".to_string(),
                     pos: crate::TextPos::Center,
