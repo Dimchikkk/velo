@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType, SaveRequest, Tab,
-    UpdateListHighlight,
+    UpdateListHighlight, MAX_DOCS_IN_MEMORY,
 };
 
 use super::ui_helpers::{
@@ -351,7 +351,6 @@ pub fn new_doc_handler(
         match *interaction {
             Interaction::Clicked => {
                 let font = asset_server.load("fonts/iosevka-regular.ttf");
-                let doc_list = doc_list_query.single_mut();
                 let doc_id = ReflectableUuid(Uuid::new_v4());
                 let name = "Untitled".to_string();
                 let tab_id = ReflectableUuid(Uuid::new_v4());
@@ -370,6 +369,10 @@ pub fn new_doc_handler(
                     checkpoints,
                     is_active: true,
                 }];
+                if (state.docs.len() as i32) >= MAX_DOCS_IN_MEMORY {
+                    let keys = state.docs.keys().cloned().collect::<Vec<_>>();
+                    state.docs.remove(&keys[0]);
+                }
                 state.docs.insert(
                     doc_id,
                     Doc {
@@ -382,6 +385,7 @@ pub fn new_doc_handler(
                 state.current_document = Some(doc_id);
 
                 let button = add_list_item(&mut commands, font.clone(), doc_id, name);
+                let doc_list = doc_list_query.single_mut();
                 commands.entity(doc_list).add_child(button);
                 commands.insert_resource(LoadRequest {
                     doc_id: None,
