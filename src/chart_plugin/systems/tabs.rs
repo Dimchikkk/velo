@@ -2,13 +2,13 @@ use std::collections::VecDeque;
 
 use bevy::prelude::*;
 
-use serde_json::json;
 use uuid::Uuid;
 
 use crate::{AppState, LoadRequest, SaveRequest, Tab};
 
 use super::ui_helpers::{
-    AddTab, DeleteTab, ReflectableUuid, RenameTab, SelectedTab, SelectedTabTextInput,
+    spawn_modal, AddTab, DeleteTab, ModalEntity, ReflectableUuid, RenameTab, SelectedTab,
+    SelectedTabTextInput,
 };
 
 pub fn selected_tab_handler(
@@ -22,10 +22,17 @@ pub fn selected_tab_handler(
     for (interaction, mut bg_color, selected_tab) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                for tab in state.tabs.iter_mut() {
+                let current_document = state.current_document.unwrap();
+                let tabs = state
+                    .docs
+                    .get_mut(&current_document)
+                    .unwrap()
+                    .tabs
+                    .iter_mut();
+                for tab in tabs {
                     if tab.is_active {
                         commands.insert_resource(SaveRequest {
-                            path: None,
+                            doc_id: None,
                             tab_id: Some(tab.id),
                         });
                     }
@@ -33,12 +40,13 @@ pub fn selected_tab_handler(
                 }
 
                 commands.insert_resource(LoadRequest {
-                    path: None,
+                    doc_id: None,
                     drop_last_checkpoint: false,
                 });
             }
             Interaction::Hovered => {
-                for tab in state.tabs.iter() {
+                let current_document = state.current_document.unwrap();
+                for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
                     if selected_tab.id == tab.id {
                         if tab.is_active {
                             bg_color.0 = Color::ALICE_BLUE;
@@ -50,7 +58,8 @@ pub fn selected_tab_handler(
                 }
             }
             Interaction::None => {
-                for tab in state.tabs.iter() {
+                let current_document = state.current_document.unwrap();
+                for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
                     if selected_tab.id == tab.id {
                         if tab.is_active {
                             bg_color.0 = Color::ALICE_BLUE;
@@ -77,33 +86,26 @@ pub fn add_tab_handler(
         match *interaction {
             Interaction::Clicked => {
                 let tab_id = ReflectableUuid(Uuid::new_v4());
-                let tabs_len = state.tabs.len();
-                for tab in state.tabs.iter_mut() {
+                let current_document = state.current_document.unwrap();
+                let tabs = &mut state.docs.get_mut(&current_document).unwrap().tabs;
+                for tab in tabs.iter_mut() {
                     if tab.is_active {
                         commands.insert_resource(SaveRequest {
-                            path: None,
+                            doc_id: None,
                             tab_id: Some(tab.id),
                         });
                     }
                     tab.is_active = false;
                 }
-                let mut checkpoints = VecDeque::new();
-                checkpoints.push_back(
-                    json!({
-                        "nodes": [],
-                        "arrows": [],
-                        "images": {},
-                    })
-                    .to_string(),
-                );
-                state.tabs.push(Tab {
+                let tabs_len = tabs.len();
+                tabs.push(Tab {
                     id: tab_id,
                     name: "Tab ".to_string() + &(tabs_len + 1).to_string(),
-                    checkpoints,
+                    checkpoints: VecDeque::new(),
                     is_active: true,
                 });
                 commands.insert_resource(LoadRequest {
-                    path: None,
+                    doc_id: None,
                     drop_last_checkpoint: false,
                 });
             }
@@ -125,6 +127,9 @@ pub fn tab_keyboard_input_system(
 ) {
     for (mut text, tab_input) in &mut query.iter_mut() {
         if Some(tab_input.id) == state.tab_to_edit {
+            if input.just_pressed(KeyCode::Return) {
+                state.tab_to_edit = None;
+            }
             if input.just_pressed(KeyCode::Back) {
                 let mut str = text.sections[0].value.clone();
                 str.pop();
@@ -134,7 +139,11 @@ pub fn tab_keyboard_input_system(
                     text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
                 }
             }
+            let current_document = state.current_document.unwrap();
             let tab = state
+                .docs
+                .get_mut(&current_document)
+                .unwrap()
                 .tabs
                 .iter_mut()
                 .find(|x| x.id == tab_input.id)
@@ -155,7 +164,16 @@ pub fn rename_tab_handler(
         match *interaction {
             Interaction::Clicked => {
                 state.entity_to_edit = None;
-                let tab = state.tabs.iter().find(|x| x.is_active).unwrap();
+                state.doc_to_edit = None;
+                let current_document = state.current_document.unwrap();
+                let tab = state
+                    .docs
+                    .get_mut(&current_document)
+                    .unwrap()
+                    .tabs
+                    .iter()
+                    .find(|x| x.is_active)
+                    .unwrap();
                 state.tab_to_edit = Some(tab.id);
             }
             Interaction::Hovered => {
@@ -175,23 +193,17 @@ pub fn delete_tab_handler(
         (Changed<Interaction>, With<DeleteTab>),
     >,
     mut state: ResMut<AppState>,
+    asset_server: Res<AssetServer>,
 ) {
+    let font = asset_server.load("fonts/iosevka-regular.ttf");
     for (interaction, mut bg_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                if state.tab_to_edit.is_some() {
-                    return;
-                }
-                if state.tabs.len() > 1 {
-                    let index = state.tabs.iter().position(|x| x.is_active).unwrap();
-                    state.tabs.remove(index);
-                    let mut last_tab = state.tabs.last_mut().unwrap();
-                    last_tab.is_active = true;
-                    commands.insert_resource(LoadRequest {
-                        path: None,
-                        drop_last_checkpoint: false,
-                    });
-                }
+                let id = ReflectableUuid(Uuid::new_v4());
+                state.path_modal_id = Some(id);
+                state.entity_to_edit = None;
+                let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Tab);
+                commands.entity(state.main_panel.unwrap()).add_child(entity);
             }
             Interaction::Hovered => {
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
