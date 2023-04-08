@@ -56,14 +56,14 @@ pub struct MainCamera;
 
 #[derive(Resource, Debug)]
 pub struct SaveRequest {
-    pub doc_id: Option<ReflectableUuid>,
+    pub doc_id: Option<ReflectableUuid>, // None means current doc
     pub tab_id: Option<ReflectableUuid>, // None means save to active tab
 }
 
 #[derive(Resource, Debug)]
 pub struct LoadRequest {
-    pub doc_id: Option<ReflectableUuid>,
-    pub drop_last_checkpoint: bool, // Useful for undo functionality
+    pub doc_id: Option<ReflectableUuid>, // None means current doc
+    pub drop_last_checkpoint: bool,      // Useful for undo functionality
 }
 
 #[derive(Serialize, Deserialize)]

@@ -432,6 +432,9 @@ pub fn doc_keyboard_input_system(
 ) {
     for (mut text, doc_list_item) in &mut query.iter_mut() {
         if Some(doc_list_item.id) == state.doc_to_edit {
+            if text.sections[0].value == *"Untitled" {
+                text.sections[0].value = "".to_string();
+            }
             if input.just_pressed(KeyCode::Return) {
                 state.doc_to_edit = None;
             }
