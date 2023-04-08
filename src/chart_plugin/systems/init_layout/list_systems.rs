@@ -15,7 +15,7 @@ use crate::{
     chart_plugin::ui_helpers::{
         add_list_item, add_tab, DocList, DocListItemButton, ReflectableUuid,
     },
-    AppState, Doc, LoadRequest, Tab, UpdateListHighlight,
+    AppState, Doc, LoadRequest, Tab, UpdateListHighlight, SaveRequest,
 };
 
 use super::ui_helpers::ScrollingList;
@@ -93,7 +93,6 @@ pub fn add_list(
         let button = add_list_item(commands, font.clone(), doc_id, name);
         state.current_document = Some(doc_id);
         let tab_view = add_tab(commands, font, tab_name, tab_id);
-
         commands.entity(bottom_panel).add_child(tab_view);
         commands.entity(node).add_child(button);
     }
@@ -129,6 +128,10 @@ pub fn list_item_click(
     for (interaction, doc_list_item, mut bg_color) in &mut interaction_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
+                commands.insert_resource(SaveRequest {
+                    doc_id: Some(state.current_document.unwrap()),
+                    tab_id: None,
+                });
                 state.current_document = Some(doc_list_item.id);
                 commands.insert_resource(LoadRequest {
                     doc_id: Some(doc_list_item.id),
