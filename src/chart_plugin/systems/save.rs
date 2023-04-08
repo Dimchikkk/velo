@@ -10,6 +10,7 @@ use std::{collections::HashMap, io::Cursor};
 
 use crate::{
     chart_plugin::ui_helpers::style_to_pos, AppState, Doc, JsonNode, JsonNodeText, SaveRequest,
+    MAX_CHECKPOINTS, MAX_SAVED_DOCS_IN_MEMORY,
 };
 
 use super::ui_helpers::{ArrowMeta, EditableText, Rectangle, ReflectableUuid};
@@ -21,8 +22,6 @@ pub fn should_save(request: Option<Res<SaveRequest>>) -> bool {
 pub fn remove_save_request(world: &mut World) {
     world.remove_resource::<SaveRequest>().unwrap();
 }
-
-const MAX_CHECKPOINTS: i32 = 7;
 
 pub fn save_json(
     images: Res<Assets<Image>>,
@@ -97,10 +96,25 @@ pub fn save_json(
     }
 
     let doc = if request.doc_id.is_some() {
+        let doc = request.doc_id.unwrap();
+        if !state.docs.contains_key(&doc) {
+            if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+                if docs.contains_key(&doc) {
+                    if (state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                        let keys = state.docs.keys().cloned().collect::<Vec<_>>();
+                        state.docs.remove(&keys[0]);
+                    }
+                    state.docs.insert(doc, docs.get(&doc).unwrap().clone());
+                } else {
+                    panic!("Document not found in pkv");
+                }
+            }
+        }
         request.doc_id.unwrap()
     } else {
         state.current_document.unwrap()
     };
+
     for tab in &mut state.docs.get_mut(&doc).unwrap().tabs {
         if request.tab_id.is_some() {
             if tab.id == request.tab_id.unwrap() {

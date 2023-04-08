@@ -10,7 +10,7 @@ use bevy_pkv::PkvStore;
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
-use crate::{AppState, Doc, JsonNode, LoadRequest, MAX_DOCS_IN_MEMORY};
+use crate::{AppState, Doc, JsonNode, LoadRequest, MAX_SAVED_DOCS_IN_MEMORY};
 
 use super::ui_helpers::{
     add_tab, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle, ReflectableUuid,
@@ -45,6 +45,8 @@ pub fn load_json(
     state.entity_to_resize = None;
     state.arrow_to_draw_start = None;
 
+    let bottom_panel = bottom_panel.single_mut();
+
     let font = asset_server.load("fonts/iosevka-regular.ttf");
 
     for entity in old_arrows.iter() {
@@ -62,7 +64,7 @@ pub fn load_json(
             state.current_document = Some(*doc_id);
         } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
             if docs.contains_key(doc_id) {
-                if (state.docs.len() as i32) >= MAX_DOCS_IN_MEMORY {
+                while (state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
                     let keys = state.docs.keys().cloned().collect::<Vec<_>>();
                     state.docs.remove(&keys[0]);
                 }
@@ -70,16 +72,32 @@ pub fn load_json(
                     .docs
                     .insert(*doc_id, docs.get(doc_id).unwrap().clone());
                 state.current_document = Some(*doc_id);
+            } else {
+                panic!("Document not found in pkv");
             }
         }
     }
 
-    let bottom_panel = bottom_panel.single_mut();
     let doc = if request.doc_id.is_some() {
+        let doc = request.doc_id.unwrap();
+        if !state.docs.contains_key(&doc) {
+            if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+                if docs.contains_key(&doc) {
+                    if (state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                        let keys = state.docs.keys().cloned().collect::<Vec<_>>();
+                        state.docs.remove(&keys[0]);
+                    }
+                    state.docs.insert(doc, docs.get(&doc).unwrap().clone());
+                } else {
+                    panic!("Document not found in pkv");
+                }
+            }
+        }
         request.doc_id.unwrap()
     } else {
         state.current_document.unwrap()
     };
+
     for tab in state.docs.get_mut(&doc).unwrap().tabs.iter() {
         let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
         commands.entity(bottom_panel).add_child(tab_view);

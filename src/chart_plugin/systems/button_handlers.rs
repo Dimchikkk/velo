@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType, SaveRequest, Tab,
-    UpdateListHighlight, MAX_DOCS_IN_MEMORY,
+    UpdateListHighlight,
 };
 
 use super::ui_helpers::{
@@ -369,10 +369,6 @@ pub fn new_doc_handler(
                     checkpoints,
                     is_active: true,
                 }];
-                if (state.docs.len() as i32) >= MAX_DOCS_IN_MEMORY {
-                    let keys = state.docs.keys().cloned().collect::<Vec<_>>();
-                    state.docs.remove(&keys[0]);
-                }
                 state.docs.insert(
                     doc_id,
                     Doc {
@@ -382,15 +378,18 @@ pub fn new_doc_handler(
                         tags: vec![],
                     },
                 );
+                commands.insert_resource(SaveRequest {
+                    doc_id: Some(state.current_document.unwrap()),
+                    tab_id: None,
+                });
                 state.current_document = Some(doc_id);
-
-                let button = add_list_item(&mut commands, font.clone(), doc_id, name);
-                let doc_list = doc_list_query.single_mut();
-                commands.entity(doc_list).add_child(button);
                 commands.insert_resource(LoadRequest {
                     doc_id: None,
                     drop_last_checkpoint: false,
                 });
+                let button = add_list_item(&mut commands, font.clone(), doc_id, name);
+                let doc_list = doc_list_query.single_mut();
+                commands.entity(doc_list).add_child(button);
                 events.send(UpdateListHighlight);
             }
             Interaction::Hovered => {
