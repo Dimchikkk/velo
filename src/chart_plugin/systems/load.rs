@@ -80,13 +80,12 @@ pub fn load_json(
     } else {
         state.current_document.unwrap()
     };
-    let mut tabs = state.docs.get_mut(&doc).unwrap().tabs.clone();
-    for tab in tabs.iter() {
+    for tab in state.docs.get_mut(&doc).unwrap().tabs.iter() {
         let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
         commands.entity(bottom_panel).add_child(tab_view);
     }
 
-    for tab in tabs.iter_mut() {
+    for tab in state.docs.get_mut(&doc).unwrap().tabs.iter_mut() {
         if tab.is_active {
             if tab.checkpoints.is_empty() {
                 break;

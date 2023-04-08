@@ -22,7 +22,7 @@ pub fn remove_save_request(world: &mut World) {
     world.remove_resource::<SaveRequest>().unwrap();
 }
 
-const MAX_CHECKPOINTS: i32 = 10;
+const MAX_CHECKPOINTS: i32 = 7;
 
 pub fn save_json(
     images: Res<Assets<Image>>,
@@ -129,7 +129,6 @@ pub fn save_json(
             pkv.set("docs", &docs).unwrap();
         }
         if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, Vec<String>>>("tags") {
-            eprintln!("tags: {:?}", tags);
             let doc = state.docs.get(&doc_id).unwrap();
             let tags = tags.get_mut(&doc_id).unwrap();
             tags.append(&mut doc.tags.clone());
@@ -139,7 +138,6 @@ pub fn save_json(
             pkv.set("tags", &doc.tags).unwrap();
         }
         if let Ok(mut names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-            eprintln!("names: {:?}", names);
             let doc = state.docs.get(&doc_id).unwrap();
             names.insert(doc.id, doc.name.clone());
             pkv.set("names", &names).unwrap();

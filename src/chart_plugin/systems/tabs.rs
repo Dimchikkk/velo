@@ -2,7 +2,6 @@ use std::collections::VecDeque;
 
 use bevy::prelude::*;
 
-use serde_json::json;
 use uuid::Uuid;
 
 use crate::{AppState, LoadRequest, SaveRequest, Tab};
@@ -98,20 +97,11 @@ pub fn add_tab_handler(
                     }
                     tab.is_active = false;
                 }
-                let mut checkpoints = VecDeque::new();
-                checkpoints.push_back(
-                    json!({
-                        "nodes": [],
-                        "arrows": [],
-                        "images": {},
-                    })
-                    .to_string(),
-                );
                 let tabs_len = tabs.len();
                 tabs.push(Tab {
                     id: tab_id,
                     name: "Tab ".to_string() + &(tabs_len + 1).to_string(),
-                    checkpoints,
+                    checkpoints: VecDeque::new(),
                     is_active: true,
                 });
                 commands.insert_resource(LoadRequest {
