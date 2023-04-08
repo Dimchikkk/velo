@@ -15,7 +15,7 @@ use crate::{
     chart_plugin::ui_helpers::{
         add_list_item, add_tab, DocList, DocListItemButton, ReflectableUuid,
     },
-    AppState, Doc, LoadRequest, Tab, UpdateListHighlight, SaveRequest,
+    AppState, Doc, LoadRequest, SaveRequest, Tab, UpdateListHighlight,
 };
 
 use super::ui_helpers::ScrollingList;

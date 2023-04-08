@@ -60,6 +60,7 @@ pub fn resize_entity_end(
                 if id == rectangle.id {
                     events.send(RedrawArrow { id });
                     let mut delta = event.delta;
+                    delta = delta; // just to get rid of the warning
                     #[cfg(target_arch = "wasm32")]
                     {
                         // MouseMotion returns different values depending on platform
