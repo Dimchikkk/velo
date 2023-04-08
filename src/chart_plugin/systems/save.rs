@@ -87,7 +87,7 @@ pub fn save_json(
                 pos: style_to_pos((style.justify_content, style.align_items)),
             },
             z_index,
-            tags: vec![], // TODO
+            tags: vec![],
         }));
     }
 
@@ -96,8 +96,12 @@ pub fn save_json(
         json_arrows.push(json!(arrow_meta));
     }
 
-    let current_document = state.current_document.unwrap();
-    for tab in &mut state.docs.get_mut(&current_document).unwrap().tabs {
+    let doc = if request.doc_id.is_some() {
+        request.doc_id.unwrap()
+    } else {
+        state.current_document.unwrap()
+    };
+    for tab in &mut state.docs.get_mut(&doc).unwrap().tabs {
         if request.tab_id.is_some() {
             if tab.id == request.tab_id.unwrap() {
                 if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {

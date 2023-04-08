@@ -25,6 +25,8 @@ pub fn remove_load_request(world: &mut World) {
     world.remove_resource::<LoadRequest>().unwrap();
 }
 
+const MAX_DOCS_IN_MEMORY: i32 = 10;
+
 pub fn load_json(
     old_nodes: Query<Entity, With<Rectangle>>,
     old_arrows: Query<Entity, With<ArrowMeta>>,
@@ -58,15 +60,29 @@ pub fn load_json(
     }
 
     if let Some(doc_id) = &request.doc_id {
-        if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
-            state.docs = docs.clone();
-            state.current_document = Some(docs.get(doc_id).unwrap().id);
+        if state.docs.contains_key(doc_id) {
+            state.current_document = Some(*doc_id);
+        } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+            if docs.contains_key(doc_id) {
+                if (state.docs.len() as i32) >= MAX_DOCS_IN_MEMORY {
+                    let keys = state.docs.keys().cloned().collect::<Vec<_>>();
+                    state.docs.remove(&keys[0]);
+                }
+                state
+                    .docs
+                    .insert(*doc_id, docs.get(doc_id).unwrap().clone());
+                state.current_document = Some(*doc_id);
+            }
         }
     }
 
     let bottom_panel = bottom_panel.single_mut();
-    let current_document = state.current_document.unwrap();
-    let mut tabs = state.docs.get_mut(&current_document).unwrap().tabs.clone();
+    let doc = if request.doc_id.is_some() {
+        request.doc_id.unwrap()
+    } else {
+        state.current_document.unwrap()
+    };
+    let mut tabs = state.docs.get_mut(&doc).unwrap().tabs.clone();
     for tab in tabs.iter() {
         let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
         commands.entity(bottom_panel).add_child(tab_view);

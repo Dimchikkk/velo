@@ -1,8 +1,13 @@
+use std::collections::HashMap;
+
 use bevy::prelude::*;
+use bevy_pkv::PkvStore;
 
-use crate::{AppState, LoadRequest, UpdateListHighlight};
+use crate::{AppState, Doc, LoadRequest, UpdateListHighlight};
 
-use super::ui_helpers::{DocListItemButton, ModalCancel, ModalConfirm, ModalEntity, ModalTop};
+use super::ui_helpers::{
+    DocListItemButton, ModalCancel, ModalConfirm, ModalEntity, ModalTop, ReflectableUuid,
+};
 
 pub fn cancel_modal(
     mut commands: Commands,
@@ -35,6 +40,7 @@ pub fn confirm_modal(
     query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
     mut query_button: Query<(Entity, &DocListItemButton), With<DocListItemButton>>,
     mut events: EventWriter<UpdateListHighlight>,
+    mut pkv: ResMut<PkvStore>,
 ) {
     for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
@@ -90,6 +96,7 @@ pub fn confirm_modal(
                             drop_last_checkpoint: false,
                         });
                         events.send(UpdateListHighlight);
+                        remove_from_pkv(&mut pkv, id_to_remove, state.current_document.unwrap());
                     }
                     commands.entity(entity).despawn_recursive();
                     state.path_modal_id = None;
@@ -106,6 +113,7 @@ pub fn modal_keyboard_input_system(
     mut commands: Commands,
     mut query_button: Query<(Entity, &DocListItemButton), With<DocListItemButton>>,
     mut events: EventWriter<UpdateListHighlight>,
+    mut pkv: ResMut<PkvStore>,
 ) {
     if input.just_pressed(KeyCode::Return) {
         for (entity, path_modal_top) in query_top.iter() {
@@ -160,10 +168,38 @@ pub fn modal_keyboard_input_system(
                         drop_last_checkpoint: false,
                     });
                     events.send(UpdateListHighlight);
+                    remove_from_pkv(&mut pkv, id_to_remove, state.current_document.unwrap());
                 }
                 commands.entity(entity).despawn_recursive();
                 state.path_modal_id = None;
             }
+        }
+    }
+}
+
+fn remove_from_pkv(
+    pkv: &mut ResMut<PkvStore>,
+    id_to_remove: ReflectableUuid,
+    new_id: ReflectableUuid,
+) {
+    if let Ok(mut docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+        if docs.remove(&id_to_remove).is_some() {
+            pkv.set("docs", &docs).unwrap();
+        }
+    }
+    if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, Vec<String>>>("tags") {
+        if tags.remove(&id_to_remove).is_some() {
+            pkv.set("tags", &tags).unwrap();
+        }
+    }
+    if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
+        if tags.remove(&id_to_remove).is_some() {
+            pkv.set("names", &tags).unwrap();
+        }
+    }
+    if let Ok(last_saved) = pkv.get::<ReflectableUuid>("last_saved") {
+        if last_saved == id_to_remove {
+            pkv.set("last_saved", &new_id).unwrap();
         }
     }
 }
