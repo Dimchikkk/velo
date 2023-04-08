@@ -10,7 +10,7 @@ use bevy_pkv::PkvStore;
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
-use crate::{AppState, Doc, JsonNode, LoadRequest};
+use crate::{AppState, Doc, JsonNode, LoadRequest, MAX_DOCS_IN_MEMORY};
 
 use super::ui_helpers::{
     add_tab, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle, ReflectableUuid,
@@ -24,8 +24,6 @@ pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
 pub fn remove_load_request(world: &mut World) {
     world.remove_resource::<LoadRequest>().unwrap();
 }
-
-const MAX_DOCS_IN_MEMORY: i32 = 10;
 
 pub fn load_json(
     old_nodes: Query<Entity, With<Rectangle>>,

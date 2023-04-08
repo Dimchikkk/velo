@@ -59,7 +59,7 @@ pub fn resize_entity_end(
             for (rectangle, mut button_style) in &mut rectangle_query {
                 if id == rectangle.id {
                     events.send(RedrawArrow { id });
-                    let delta = event.delta;
+                    let mut delta = event.delta;
                     #[cfg(target_arch = "wasm32")]
                     {
                         // MouseMotion returns different values depending on platform

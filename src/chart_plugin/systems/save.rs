@@ -129,6 +129,7 @@ pub fn save_json(
             pkv.set("docs", &docs).unwrap();
         }
         if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, Vec<String>>>("tags") {
+            eprintln!("tags: {:?}", tags);
             let doc = state.docs.get(&doc_id).unwrap();
             let tags = tags.get_mut(&doc_id).unwrap();
             tags.append(&mut doc.tags.clone());
@@ -138,6 +139,7 @@ pub fn save_json(
             pkv.set("tags", &doc.tags).unwrap();
         }
         if let Ok(mut names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
+            eprintln!("names: {:?}", names);
             let doc = state.docs.get(&doc_id).unwrap();
             names.insert(doc.id, doc.name.clone());
             pkv.set("names", &names).unwrap();
