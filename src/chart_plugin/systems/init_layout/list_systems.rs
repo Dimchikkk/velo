@@ -66,10 +66,14 @@ pub fn add_list(
         .id();
 
     if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-        names.into_iter().for_each(|(id, name)| {
-            let button = add_list_item(commands, font.clone(), id, name);
+        let mut keys: Vec<_> = names.keys().collect();
+        keys.sort_by_key(|k| names.get(k).unwrap().to_lowercase());
+
+        for key in keys {
+            let name = names.get(key).unwrap();
+            let button = add_list_item(commands, font.clone(), *key, name.clone());
             commands.entity(node).add_child(button);
-        });
+        }
     } else {
         let tab_id = ReflectableUuid(Uuid::new_v4());
         let tab_name: String = "Tab 1".to_string();
