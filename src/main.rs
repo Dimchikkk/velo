@@ -1,11 +1,15 @@
 use bevy::{prelude::*, window::PresentMode};
 mod chart_plugin;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
+use bevy_pkv::PkvStore;
 use bevy_prototype_lyon::prelude::ShapePlugin;
 use bevy_ui_borders::BordersPlugin;
 pub use chart_plugin::*;
 
 fn main() {
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
+
     App::new()
         .add_startup_system(setup_background)
         .add_plugins(
@@ -28,9 +32,8 @@ fn main() {
         .add_plugin(ChartPlugin)
         .add_plugin(ShapePlugin)
         .add_plugin(BordersPlugin)
+        .insert_resource(PkvStore::new("", "rusticify"))
         .run();
-    #[cfg(target_arch = "wasm32")]
-    console_error_panic_hook::set_once();
 }
 
 fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
