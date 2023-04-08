@@ -2,8 +2,7 @@ use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
 use serde::{Deserialize, Serialize};
 
 use std::{
-    collections::VecDeque,
-    path::PathBuf,
+    collections::{HashMap, VecDeque},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use uuid::Uuid;
@@ -23,7 +22,7 @@ use keyboard_systems::*;
 #[path = "systems/path_modal.rs"]
 mod path_modal_systems;
 use path_modal_systems::*;
-#[path = "systems/init_layout.rs"]
+#[path = "systems/init_layout/init_layout.rs"]
 mod init_layout;
 use init_layout::*;
 #[path = "systems/resize.rs"]
@@ -46,9 +45,7 @@ pub struct AddRect {
     pub image: Option<UiImage>,
 }
 
-pub struct SetWindowIcon {
-    pub image: Handle<Image>,
-}
+pub struct UpdateListHighlight;
 
 pub struct RedrawArrow {
     pub id: ReflectableUuid,
@@ -59,14 +56,14 @@ pub struct MainCamera;
 
 #[derive(Resource, Debug)]
 pub struct SaveRequest {
-    pub path: Option<PathBuf>,
+    pub doc_id: Option<ReflectableUuid>, // None means current doc
     pub tab_id: Option<ReflectableUuid>, // None means save to active tab
 }
 
 #[derive(Resource, Debug)]
 pub struct LoadRequest {
-    pub path: Option<PathBuf>,
-    pub drop_last_checkpoint: bool, // Useful for undo functionality
+    pub doc_id: Option<ReflectableUuid>, // None means current doc
+    pub drop_last_checkpoint: bool,      // Useful for undo functionality
 }
 
 #[derive(Serialize, Deserialize)]
@@ -103,13 +100,24 @@ pub struct JsonNode {
     pub z_index: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Tab {
     pub is_active: bool,
     pub id: ReflectableUuid,
     pub name: String,
     pub checkpoints: VecDeque<String>,
 }
+
+#[derive(Default, Serialize, Deserialize, Clone, Debug)]
+pub struct Doc {
+    tabs: Vec<Tab>,
+    id: ReflectableUuid,
+    name: String,
+    tags: Vec<String>,
+}
+
+pub const MAX_CHECKPOINTS: i32 = 7;
+pub const MAX_SAVED_DOCS_IN_MEMORY: i32 = 7;
 
 #[derive(Resource, Default)]
 pub struct AppState {
@@ -118,10 +126,12 @@ pub struct AppState {
     pub arrow_type: ArrowType,
     pub entity_to_edit: Option<ReflectableUuid>,
     pub tab_to_edit: Option<ReflectableUuid>,
+    pub doc_to_edit: Option<ReflectableUuid>,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
-    pub tabs: Vec<Tab>,
+    pub current_document: Option<ReflectableUuid>,
+    pub docs: HashMap<ReflectableUuid, Doc>,
 }
 
 impl Plugin for ChartPlugin {
@@ -140,14 +150,14 @@ impl Plugin for ChartPlugin {
         app.register_type::<BreakLineOn>();
 
         app.add_event::<AddRect>();
-        app.add_event::<SetWindowIcon>();
         app.add_event::<CreateArrow>();
         app.add_event::<RedrawArrow>();
+        app.add_event::<UpdateListHighlight>();
 
         app.add_startup_system(init_layout);
 
         app.add_systems((
-            button_handler,
+            rec_button_handlers,
             update_rectangle_position,
             create_new_rectangle,
             resize_entity_start,
@@ -157,11 +167,9 @@ impl Plugin for ChartPlugin {
             set_focused_entity,
             redraw_arrows,
             keyboard_input_system,
-            cancel_path_modal,
-            path_modal_keyboard_input_system,
-            set_focused_modal,
-            confirm_path_modal,
-            open_path_modal,
+            cancel_modal,
+            modal_keyboard_input_system,
+            confirm_modal,
         ));
 
         app.add_systems(
@@ -186,7 +194,15 @@ impl Plugin for ChartPlugin {
             rename_tab_handler,
             tab_keyboard_input_system,
             text_manipulation,
+            mouse_scroll_list,
+            list_item_click,
+            new_doc_handler,
+            rename_doc_handler,
+            delete_doc_handler,
+            save_doc_handler,
         ));
+
+        app.add_systems((doc_keyboard_input_system, list_selected_highlight));
     }
 }
 

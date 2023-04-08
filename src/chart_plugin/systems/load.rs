@@ -1,17 +1,20 @@
+use std::collections::HashMap;
+
 use base64::{engine::general_purpose, Engine};
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
 
+use bevy_pkv::PkvStore;
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
-use crate::{chart_plugin::ui_helpers::SelectedTabTextInput, AppState, JsonNode, LoadRequest, Tab};
+use crate::{AppState, Doc, JsonNode, LoadRequest, MAX_SAVED_DOCS_IN_MEMORY};
 
 use super::ui_helpers::{
-    add_rectangle_txt, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle,
-    ReflectableUuid, SelectedTab,
+    add_tab, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle, ReflectableUuid,
+    SelectedTab,
 };
 
 pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
@@ -33,12 +36,16 @@ pub fn load_json(
     asset_server: Res<AssetServer>,
     mut selected_tabs_query: Query<Entity, With<SelectedTab>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
+    pkv: ResMut<PkvStore>,
 ) {
     state.entity_to_edit = None;
     state.tab_to_edit = None;
+    state.doc_to_edit = None;
     state.hold_entity = None;
     state.entity_to_resize = None;
     state.arrow_to_draw_start = None;
+
+    let bottom_panel = bottom_panel.single_mut();
 
     let font = asset_server.load("fonts/iosevka-regular.ttf");
 
@@ -52,49 +59,56 @@ pub fn load_json(
         commands.entity(entity).despawn_recursive();
     }
 
-    if let Some(path) = &request.path {
-        let json = std::fs::read_to_string(path).expect("Error reading state from file");
-        let json: Value = serde_json::from_str(&json).unwrap();
-        let tabs: Vec<Tab> = serde_json::from_value(json["tabs"].clone()).unwrap();
-        state.tabs = tabs;
+    if let Some(doc_id) = &request.doc_id {
+        if state.docs.contains_key(doc_id) {
+            state.current_document = Some(*doc_id);
+        } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+            if docs.contains_key(doc_id) {
+                while (state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                    let keys = state.docs.keys().cloned().collect::<Vec<_>>();
+                    state.docs.remove(&keys[0]);
+                }
+                state
+                    .docs
+                    .insert(*doc_id, docs.get(doc_id).unwrap().clone());
+                state.current_document = Some(*doc_id);
+            } else {
+                panic!("Document not found in pkv");
+            }
+        }
     }
 
-    let bottom_panel = bottom_panel.single_mut();
-    for tab in state.tabs.iter() {
-        let tab_view = commands
-            .spawn((
-                ButtonBundle {
-                    background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
-                    style: Style {
-                        size: Size::new(Val::Px(60.), Val::Px(30.)),
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        overflow: Overflow::Hidden,
-                        margin: UiRect {
-                            left: Val::Px(10.),
-                            right: Val::Px(10.),
-                            top: Val::Px(0.),
-                            bottom: Val::Px(0.),
-                        },
-                        ..default()
-                    },
+    let doc = if request.doc_id.is_some() {
+        let doc = request.doc_id.unwrap();
+        if !state.docs.contains_key(&doc) {
+            if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+                if docs.contains_key(&doc) {
+                    if (state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                        let keys = state.docs.keys().cloned().collect::<Vec<_>>();
+                        state.docs.remove(&keys[0]);
+                    }
+                    state.docs.insert(doc, docs.get(&doc).unwrap().clone());
+                } else {
+                    panic!("Document not found in pkv");
+                }
+            }
+        }
+        request.doc_id.unwrap()
+    } else {
+        state.current_document.unwrap()
+    };
 
-                    ..default()
-                },
-                SelectedTab { id: tab.id },
-            ))
-            .with_children(|builder| {
-                builder.spawn((
-                    add_rectangle_txt(font.clone(), tab.name.clone()),
-                    SelectedTabTextInput { id: tab.id },
-                ));
-            })
-            .id();
+    for tab in state.docs.get_mut(&doc).unwrap().tabs.iter() {
+        let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
         commands.entity(bottom_panel).add_child(tab_view);
     }
 
-    for tab in state.tabs.iter_mut() {
+    for tab in state.docs.get_mut(&doc).unwrap().tabs.iter_mut() {
         if tab.is_active {
+            if tab.checkpoints.is_empty() {
+                break;
+            }
+
             let json = if request.drop_last_checkpoint && tab.checkpoints.len() > 1 {
                 tab.checkpoints.pop_back().unwrap()
             } else {

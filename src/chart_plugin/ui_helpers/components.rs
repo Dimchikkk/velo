@@ -25,12 +25,42 @@ pub struct RenameTab;
 pub struct Tooltip;
 
 #[derive(Component)]
+pub struct NewDoc;
+
+#[derive(Component)]
+pub struct DocList;
+
+#[derive(Component)]
+pub struct RenameDoc;
+
+#[derive(Component)]
+pub struct SaveDoc;
+
+#[derive(Component)]
+pub struct DeleteDoc;
+
+#[derive(Component)]
 pub struct SelectedTab {
     pub id: ReflectableUuid,
 }
 
+#[derive(Component, Default)]
+pub struct ScrollingList {
+    pub position: f32,
+}
+
 #[derive(Component)]
 pub struct SelectedTabTextInput {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component)]
+pub struct DocListItemButton {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component)]
+pub struct DocListItemText {
     pub id: ReflectableUuid,
 }
 
@@ -71,12 +101,6 @@ pub enum TextManipulation {
 pub struct TextManipulationAction {
     pub action_type: TextManipulation,
 }
-
-#[derive(Component)]
-pub struct SaveState;
-
-#[derive(Component)]
-pub struct LoadState;
 
 #[derive(Component)]
 pub struct MainPanel;
@@ -166,30 +190,34 @@ pub struct ArrowMeta {
     pub end: ArrowConnect,
 }
 
-#[derive(Component, Default)]
-pub struct PathModalTop {
+#[derive(Component)]
+pub struct ModalTop {
     pub id: ReflectableUuid,
+    pub delete: ModalEntity,
+}
+
+#[derive(Eq, PartialEq, Clone)]
+pub enum ModalEntity {
+    Document,
+    Tab,
+}
+
+impl std::fmt::Display for ModalEntity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ModalEntity::Document => write!(f, "document"),
+            ModalEntity::Tab => write!(f, "tab"),
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct ModalConfirm {
+    pub id: ReflectableUuid,
+    pub delete: ModalEntity,
 }
 
 #[derive(Component, Default)]
-pub struct PathModalText {
-    pub id: ReflectableUuid,
-    pub save: bool,
-}
-
-#[derive(Component, Default)]
-pub struct PathModalTextInput {
-    pub id: ReflectableUuid,
-    pub save: bool,
-}
-
-#[derive(Component, Default)]
-pub struct PathModalConfirm {
-    pub id: ReflectableUuid,
-    pub save: bool,
-}
-
-#[derive(Component, Default)]
-pub struct PathModalCancel {
+pub struct ModalCancel {
     pub id: ReflectableUuid,
 }

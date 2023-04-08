@@ -1,23 +1,22 @@
-use std::{fs::canonicalize, path::PathBuf};
+use std::collections::HashMap;
 
-use bevy::{prelude::*, window::PrimaryWindow};
-use uuid::Uuid;
+use bevy::prelude::*;
+use bevy_pkv::PkvStore;
 
-use crate::{AppState, LoadRequest, SaveRequest};
+use crate::{AppState, Doc, LoadRequest, UpdateListHighlight};
 
 use super::ui_helpers::{
-    spawn_path_modal, LoadState, PathModalCancel, PathModalConfirm, PathModalText,
-    PathModalTextInput, PathModalTop, ReflectableUuid, SaveState,
+    DocListItemButton, ModalCancel, ModalConfirm, ModalEntity, ModalTop, ReflectableUuid,
 };
 
-pub fn cancel_path_modal(
+pub fn cancel_modal(
     mut commands: Commands,
     mut interaction_query: Query<
-        (&Interaction, &PathModalCancel),
-        (Changed<Interaction>, With<PathModalCancel>),
+        (&Interaction, &ModalCancel),
+        (Changed<Interaction>, With<ModalCancel>),
     >,
     mut state: ResMut<AppState>,
-    query: Query<(Entity, &PathModalTop), With<PathModalTop>>,
+    query: Query<(Entity, &ModalTop), With<ModalTop>>,
 ) {
     for (interaction, path_modal_cancel) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
@@ -31,39 +30,74 @@ pub fn cancel_path_modal(
     }
 }
 
-pub fn confirm_path_modal(
+pub fn confirm_modal(
     mut commands: Commands,
     mut interaction_query: Query<
-        (&Interaction, &PathModalConfirm),
-        (Changed<Interaction>, With<PathModalConfirm>),
+        (&Interaction, &ModalConfirm),
+        (Changed<Interaction>, With<ModalConfirm>),
     >,
     mut state: ResMut<AppState>,
-    mut query_path: Query<(&Text, &PathModalTextInput), With<PathModalTextInput>>,
-    query_top: Query<(Entity, &PathModalTop), With<PathModalTop>>,
+    query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
+    mut query_button: Query<(Entity, &DocListItemButton), With<DocListItemButton>>,
+    mut events: EventWriter<UpdateListHighlight>,
+    mut pkv: ResMut<PkvStore>,
 ) {
     for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
-            for (text, modal) in &mut query_path.iter_mut() {
-                if Some(modal.id) == state.path_modal_id {
-                    if modal.save {
-                        commands.insert_resource(SaveRequest {
-                            path: Some(PathBuf::from(text.sections[0].value.trim())),
-                            tab_id: None,
-                        });
-                    } else if let Ok(path) =
-                        canonicalize(PathBuf::from(text.sections[0].value.trim()))
-                    {
-                        commands.insert_resource(LoadRequest {
-                            path: Some(path),
-                            drop_last_checkpoint: false,
-                        });
-                    } else {
-                        eprintln!("File not found: {}", text.sections[0].value);
-                    }
-                }
-            }
             for (entity, path_modal_top) in query_top.iter() {
                 if path_modal_confirm.id == path_modal_top.id {
+                    let current_document = state.current_document.unwrap();
+                    if path_modal_confirm.delete == ModalEntity::Tab
+                        && state.docs.get_mut(&current_document).unwrap().tabs.len() > 1
+                    {
+                        let index = state
+                            .docs
+                            .get_mut(&current_document)
+                            .unwrap()
+                            .tabs
+                            .iter()
+                            .position(|x| x.is_active)
+                            .unwrap();
+                        state
+                            .docs
+                            .get_mut(&current_document)
+                            .unwrap()
+                            .tabs
+                            .remove(index);
+                        let mut last_tab = state
+                            .docs
+                            .get_mut(&current_document)
+                            .unwrap()
+                            .tabs
+                            .last_mut()
+                            .unwrap();
+                        last_tab.is_active = true;
+                        commands.insert_resource(LoadRequest {
+                            doc_id: None,
+                            drop_last_checkpoint: false,
+                        });
+                    }
+                    if path_modal_confirm.delete == ModalEntity::Document && state.docs.len() > 1 {
+                        let id_to_remove = current_document;
+                        for (entity, button) in query_button.iter_mut() {
+                            if button.id == id_to_remove {
+                                commands.entity(entity).despawn_recursive();
+                            }
+                        }
+                        state.docs.remove(&current_document);
+                        for (_, button) in query_button.iter_mut() {
+                            if button.id != id_to_remove {
+                                state.current_document = Some(button.id);
+                                break;
+                            }
+                        }
+                        commands.insert_resource(LoadRequest {
+                            doc_id: None,
+                            drop_last_checkpoint: false,
+                        });
+                        events.send(UpdateListHighlight);
+                        remove_from_pkv(&mut pkv, id_to_remove, state.current_document.unwrap());
+                    }
                     commands.entity(entity).despawn_recursive();
                     state.path_modal_id = None;
                 }
@@ -72,48 +106,70 @@ pub fn confirm_path_modal(
     }
 }
 
-pub fn path_modal_keyboard_input_system(
-    mut query: Query<(&mut Text, &PathModalTextInput), With<PathModalTextInput>>,
+pub fn modal_keyboard_input_system(
     mut state: ResMut<AppState>,
     input: Res<Input<KeyCode>>,
-    mut char_evr: EventReader<ReceivedCharacter>,
-    query_top: Query<(Entity, &PathModalTop), With<PathModalTop>>,
+    query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
     mut commands: Commands,
+    mut query_button: Query<(Entity, &DocListItemButton), With<DocListItemButton>>,
+    mut events: EventWriter<UpdateListHighlight>,
+    mut pkv: ResMut<PkvStore>,
 ) {
-    for (mut text, modal) in &mut query.iter_mut() {
-        if Some(modal.id) == state.path_modal_id {
-            if input.just_pressed(KeyCode::Back) {
-                let mut str = text.sections[0].value.clone();
-                str.pop();
-                text.sections[0].value = str;
-            } else {
-                for ev in char_evr.iter() {
-                    text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
-                }
-            }
-        }
-    }
     if input.just_pressed(KeyCode::Return) {
-        for (text, modal) in &mut query.iter_mut() {
-            if Some(modal.id) == state.path_modal_id {
-                if modal.save {
-                    commands.insert_resource(SaveRequest {
-                        path: Some(PathBuf::from(text.sections[0].value.trim())),
-                        tab_id: None,
-                    });
-                } else if let Ok(path) = canonicalize(PathBuf::from(text.sections[0].value.trim()))
-                {
-                    commands.insert_resource(LoadRequest {
-                        path: Some(path),
-                        drop_last_checkpoint: false,
-                    });
-                } else {
-                    eprintln!("File not found: {}", text.sections[0].value);
-                }
-            }
-        }
         for (entity, path_modal_top) in query_top.iter() {
             if Some(path_modal_top.id) == state.path_modal_id {
+                let current_document = state.current_document.unwrap();
+                if path_modal_top.delete == ModalEntity::Tab
+                    && state.docs.get_mut(&current_document).unwrap().tabs.len() > 1
+                {
+                    let index = state
+                        .docs
+                        .get_mut(&current_document)
+                        .unwrap()
+                        .tabs
+                        .iter()
+                        .position(|x| x.is_active)
+                        .unwrap();
+                    state
+                        .docs
+                        .get_mut(&current_document)
+                        .unwrap()
+                        .tabs
+                        .remove(index);
+                    let mut last_tab = state
+                        .docs
+                        .get_mut(&current_document)
+                        .unwrap()
+                        .tabs
+                        .last_mut()
+                        .unwrap();
+                    last_tab.is_active = true;
+                    commands.insert_resource(LoadRequest {
+                        doc_id: None,
+                        drop_last_checkpoint: false,
+                    });
+                }
+                if path_modal_top.delete == ModalEntity::Document && state.docs.len() > 1 {
+                    let id_to_remove = current_document;
+                    for (entity, button) in query_button.iter_mut() {
+                        if button.id == id_to_remove {
+                            commands.entity(entity).despawn_recursive();
+                        }
+                    }
+                    state.docs.remove(&current_document);
+                    for (_, button) in query_button.iter_mut() {
+                        if button.id != id_to_remove {
+                            state.current_document = Some(button.id);
+                            break;
+                        }
+                    }
+                    commands.insert_resource(LoadRequest {
+                        doc_id: None,
+                        drop_last_checkpoint: false,
+                    });
+                    events.send(UpdateListHighlight);
+                    remove_from_pkv(&mut pkv, id_to_remove, state.current_document.unwrap());
+                }
                 commands.entity(entity).despawn_recursive();
                 state.path_modal_id = None;
             }
@@ -121,48 +177,29 @@ pub fn path_modal_keyboard_input_system(
     }
 }
 
-pub fn set_focused_modal(
-    mut interaction_query: Query<
-        (&Interaction, &PathModalText),
-        (Changed<Interaction>, With<PathModalText>),
-    >,
-    mut state: ResMut<AppState>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+fn remove_from_pkv(
+    pkv: &mut ResMut<PkvStore>,
+    id_to_remove: ReflectableUuid,
+    new_id: ReflectableUuid,
 ) {
-    let mut window = windows.single_mut();
-    for (interaction, modal) in &mut interaction_query {
-        if *interaction == Interaction::Clicked {
-            window.cursor.icon = CursorIcon::Text;
-            state.path_modal_id = Some(modal.id);
-            state.entity_to_edit = None;
+    if let Ok(mut docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+        if docs.remove(&id_to_remove).is_some() {
+            pkv.set("docs", &docs).unwrap();
         }
     }
-}
-
-pub fn open_path_modal(
-    mut save_query: Query<&Interaction, (Changed<Interaction>, With<SaveState>)>,
-    mut load_query: Query<&Interaction, (Changed<Interaction>, With<LoadState>)>,
-    asset_server: Res<AssetServer>,
-    mut commands: Commands,
-    mut state: ResMut<AppState>,
-) {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
-    for interaction in &mut save_query {
-        if *interaction == Interaction::Clicked {
-            let id = ReflectableUuid(Uuid::new_v4());
-            state.path_modal_id = Some(id);
-            state.entity_to_edit = None;
-            let entity = spawn_path_modal(&mut commands, font.clone(), id, true);
-            commands.entity(state.main_panel.unwrap()).add_child(entity);
+    if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, Vec<String>>>("tags") {
+        if tags.remove(&id_to_remove).is_some() {
+            pkv.set("tags", &tags).unwrap();
         }
     }
-    for interaction in &mut load_query {
-        if *interaction == Interaction::Clicked {
-            let id = ReflectableUuid(Uuid::new_v4());
-            state.path_modal_id = Some(id);
-            state.entity_to_edit = None;
-            let entity = spawn_path_modal(&mut commands, font.clone(), id, false);
-            commands.entity(state.main_panel.unwrap()).add_child(entity);
+    if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
+        if tags.remove(&id_to_remove).is_some() {
+            pkv.set("names", &tags).unwrap();
+        }
+    }
+    if let Ok(last_saved) = pkv.get::<ReflectableUuid>("last_saved") {
+        if last_saved == id_to_remove {
+            pkv.set("last_saved", &new_id).unwrap();
         }
     }
 }
