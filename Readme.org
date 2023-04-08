@@ -2,10 +2,9 @@
 
 [[file:rusticify.gif]]
 
-** Inspiration
-I use lucid.app at work quite often to brainstorm ideas with colleagues or even solo.
-I often share the ideas via sharing lucid.app diagrams or just screenshot of it. I don't use banch of features there. 
-Just simple rectangles, arrows, why not build something similiar in rust, for the sake of learning rust and having some *fun*?
+** Inspiration  
+At work, I frequently rely on lucid.app to brainstorm ideas with my colleagues or by myself. Typically, I share my ideas by sending either the diagrams themselves or screenshots of them. While I tend to stick with simple features like rectangles and arrows, I've been contemplating the idea of creating a similar tool in Rust. Not only would it allow me to learn the language, but it would also be an enjoyable project to work on.
+
 
 ** What's implemented:
 - add/remove rectangle  
