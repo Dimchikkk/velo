@@ -116,7 +116,7 @@ pub struct Doc {
     tags: Vec<String>,
 }
 
-pub const MAX_DOCS_IN_MEMORY: i32 = 10;
+pub const MAX_DOCS_IN_MEMORY: i32 = 7;
 
 #[derive(Resource, Default)]
 pub struct AppState {
