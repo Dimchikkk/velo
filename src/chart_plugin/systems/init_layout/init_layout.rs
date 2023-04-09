@@ -426,10 +426,33 @@ pub fn init_layout(
             arrow_type: ArrowType::DoubleArrow,
         },
     );
-
+    let arrow4 = add_arrow(
+        &mut commands,
+        &asset_server,
+        ArrowMode {
+            arrow_type: ArrowType::ParallelLine,
+        },
+    );
+    let arrow5 = add_arrow(
+        &mut commands,
+        &asset_server,
+        ArrowMode {
+            arrow_type: ArrowType::ParallelArrow,
+        },
+    );
+    let arrow6 = add_arrow(
+        &mut commands,
+        &asset_server,
+        ArrowMode {
+            arrow_type: ArrowType::ParallelDoubleArrow,
+        },
+    );
     commands.entity(arrow_modes).add_child(arrow1);
     commands.entity(arrow_modes).add_child(arrow2);
     commands.entity(arrow_modes).add_child(arrow3);
+    commands.entity(arrow_modes).add_child(arrow4);
+    commands.entity(arrow_modes).add_child(arrow5);
+    commands.entity(arrow_modes).add_child(arrow6);
 
     let text_modes = commands
         .spawn((NodeBundle {
