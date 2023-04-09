@@ -142,13 +142,195 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                 });
         }
         ArrowType::ParallelLine => {
-            eprintln!("Parallel line is not implemented yet")
+            let main = shapes::Line(start, Vec2::new((start.y + end.y) / 2.0, start.y));
+            let mid = shapes::Line(
+                Vec2::new((start.y + end.y) / 2.0, start.y),
+                Vec2::new((start.y + end.y) / 2.0, end.y),
+            );
+            let main2 = shapes::Line(Vec2::new((start.y + end.y) / 2.0, end.y), end);
+            commands
+                .spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&main),
+                        ..default()
+                    },
+                    arrow_meta,
+                    Stroke::new(Color::BLACK, 2.0),
+                ))
+                .with_children(|builder| {
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&mid),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&main2),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                });
         }
         ArrowType::ParallelArrow => {
-            eprintln!("Parallel line is not implemented yet")
+            let headlen = 10.0;
+            let main = shapes::Line(start, Vec2::new((start.y + end.y) / 2.0, start.y));
+            let mid = shapes::Line(
+                Vec2::new((start.y + end.y) / 2.0, start.y),
+                Vec2::new((start.y + end.y) / 2.0, end.y),
+            );
+            let main2 = shapes::Line(Vec2::new((start.y + end.y) / 2.0, end.y), end);
+            let dt = end.x - start.x;
+            let dy = end.y - start.y;
+            let angle = dy.atan2(dt);
+            let part_one = shapes::Line(
+                end,
+                Vec2::new(
+                    end.x - headlen * (angle - PI / 6.).cos(),
+                    end.y - headlen * (angle - PI / 6.).sin(),
+                ),
+            );
+            let part_two = shapes::Line(
+                end,
+                Vec2::new(
+                    end.x - headlen * (angle + PI / 6.).cos(),
+                    end.y - headlen * (angle + PI / 6.).sin(),
+                ),
+            );
+            commands
+                .spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&main),
+                        ..default()
+                    },
+                    arrow_meta,
+                    Stroke::new(Color::BLACK, 2.0),
+                ))
+                .with_children(|builder| {
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&part_one),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&mid),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&main2),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&part_two),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                });
         }
         ArrowType::ParallelDoubleArrow => {
-            eprintln!("Parallel Double Arrow is not implemented yet")
+            let headlen = 10.0;
+            let main = shapes::Line(start, Vec2::new((start.y + end.y) / 2.0, start.y));
+            let mid = shapes::Line(
+                Vec2::new((start.y + end.y) / 2.0, start.y),
+                Vec2::new((start.y + end.y) / 2.0, end.y),
+            );
+            let main2 = shapes::Line(Vec2::new((start.y + end.y) / 2.0, end.y), end);
+            let dt = end.x - start.x;
+            let dy = end.y - start.y;
+            let angle = dy.atan2(dt);
+            let part_one = shapes::Line(
+                end,
+                Vec2::new(
+                    end.x - headlen * (angle - PI / 6.).cos(),
+                    end.y - headlen * (angle - PI / 6.).sin(),
+                ),
+            );
+            let part_two = shapes::Line(
+                end,
+                Vec2::new(
+                    end.x - headlen * (angle + PI / 6.).cos(),
+                    end.y - headlen * (angle + PI / 6.).sin(),
+                ),
+            );
+            let part_three = shapes::Line(
+                start,
+                Vec2::new(
+                    start.x + headlen * (angle - PI / 6.).cos(),
+                    start.y + headlen * (angle - PI / 6.).sin(),
+                ),
+            );
+            let part_four = shapes::Line(
+                start,
+                Vec2::new(
+                    start.x + headlen * (angle + PI / 6.).cos(),
+                    start.y + headlen * (angle + PI / 6.).sin(),
+                ),
+            );
+            commands
+                .spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&main),
+                        ..default()
+                    },
+                    arrow_meta,
+                    Stroke::new(Color::BLACK, 2.0),
+                ))
+                .with_children(|builder| {
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&part_one),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&part_two),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&mid),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&main2),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&part_three),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                    builder.spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&part_four),
+                            ..default()
+                        },
+                        Stroke::new(Color::BLACK, 2.0),
+                    ));
+                });
         }
     }
 }
