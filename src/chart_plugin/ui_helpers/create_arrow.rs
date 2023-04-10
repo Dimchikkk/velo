@@ -135,7 +135,7 @@ fn parallel_arrow_mid(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> (Vec2, V
     }
 }
 fn arrow_head(point: Vec2, angle: f32, tail: bool) -> shapes::Polygon {
-    let headlen: f32 = if tail { -10.0 } else { 10.0 };
+    let headlen: f32 = if tail { 10.0 } else { -10.0 };
     let points = vec![
         point + Vec2::from_angle(angle - PI / 6.) * headlen,
         point,
