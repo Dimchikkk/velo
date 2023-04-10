@@ -6,6 +6,8 @@ use bevy_prototype_lyon::{
     shapes,
 };
 
+use crate::chart_plugin::ui_helpers::ArrowConnectPos;
+
 use super::{ArrowMeta, ArrowType};
 
 pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta: ArrowMeta) {
@@ -142,12 +144,10 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                 });
         }
         ArrowType::ParallelLine => {
-            let main = shapes::Line(start, Vec2::new((start.y + end.y) / 2.0, start.y));
-            let mid = shapes::Line(
-                Vec2::new((start.y + end.y) / 2.0, start.y),
-                Vec2::new((start.y + end.y) / 2.0, end.y),
-            );
-            let main2 = shapes::Line(Vec2::new((start.y + end.y) / 2.0, end.y), end);
+            let mid_point=parallel_arrow_mid(start,end,arrow_meta);
+            let main = shapes::Line(start, mid_point.0);
+            let main2 = shapes::Line(mid_point.1, end);
+            let mid=shapes::Line(mid_point.0,mid_point.1);
             commands
                 .spawn((
                     ShapeBundle {
@@ -176,12 +176,10 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
         }
         ArrowType::ParallelArrow => {
             let headlen = 10.0;
-            let main = shapes::Line(start, Vec2::new((start.y + end.y) / 2.0, start.y));
-            let mid = shapes::Line(
-                Vec2::new((start.y + end.y) / 2.0, start.y),
-                Vec2::new((start.y + end.y) / 2.0, end.y),
-            );
-            let main2 = shapes::Line(Vec2::new((start.y + end.y) / 2.0, end.y), end);
+            let mid_point=parallel_arrow_mid(start,end,arrow_meta);
+            let main = shapes::Line(start, mid_point.0);
+            let main2 = shapes::Line(mid_point.1, end);
+            let mid=shapes::Line(mid_point.0,mid_point.1);
             let dt = end.x - start.x;
             let dy = end.y - start.y;
             let angle = dy.atan2(dt);
@@ -241,12 +239,10 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
         }
         ArrowType::ParallelDoubleArrow => {
             let headlen = 10.0;
-            let main = shapes::Line(start, Vec2::new((start.y + end.y) / 2.0, start.y));
-            let mid = shapes::Line(
-                Vec2::new((start.y + end.y) / 2.0, start.y),
-                Vec2::new((start.y + end.y) / 2.0, end.y),
-            );
-            let main2 = shapes::Line(Vec2::new((start.y + end.y) / 2.0, end.y), end);
+            let mid_point=parallel_arrow_mid(start,end,arrow_meta);
+            let main = shapes::Line(start, mid_point.0);
+            let main2 = shapes::Line(mid_point.1, end);
+            let mid=shapes::Line(mid_point.0,mid_point.1);
             let dt = end.x - start.x;
             let dy = end.y - start.y;
             let angle = dy.atan2(dt);
@@ -333,4 +329,18 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                 });
         }
     }
+}
+fn parallel_arrow_mid(start:Vec2,end:Vec2,arrow_meta: ArrowMeta)->(Vec2,Vec2){
+    let midx=(start.x + end.x) / 2.0;
+    let midy=(start.y + end.y) / 2.0;
+    use ArrowConnectPos::*;
+    let mid_point=match (arrow_meta.start.pos,arrow_meta.end.pos){
+        (Top,Bottom)|(Bottom,Top)=>{(Vec2::new(start.x,midy),Vec2::new(end.x,midy))},
+        (Left,Right)|(Right,Left)=>{(Vec2::new(midx, start.y),Vec2::new(midx, end.y))},
+        //TODO 
+        (Bottom,Left)|(Top,Right)|(Top,Left)|(Bottom,Right)=>{(Vec2::new(start.x,end.y),Vec2::new(start.x,end.y))},
+        (Left,Bottom)|(Right,Top)|(Left,Top)|(Right,Bottom)=>{(Vec2::new(end.x,start.y),Vec2::new(end.x,start.y))},
+        (_,_)=>{(Vec2::new(midx, midy),Vec2::new(midx, midy))}
+    };
+    return mid_point;
 }
