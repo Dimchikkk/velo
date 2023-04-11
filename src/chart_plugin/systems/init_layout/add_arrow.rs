@@ -41,7 +41,7 @@ pub fn add_arrow(
                 .into(),
                 image: image.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                    size: Size::new(Val::Percent(12.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     margin: UiRect {
                         left: Val::Px(5.),
