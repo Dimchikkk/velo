@@ -20,7 +20,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 arrow_meta,
-                Stroke::new(Color::BLACK, 2.0),
+                Stroke::new(Color::BLACK, 1.0),
             ));
         }
         ArrowType::Arrow => {
@@ -45,7 +45,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 arrow_meta,
-                Stroke::new(Color::BLACK, 2.0),
+                Stroke::new(Color::BLACK, 1.0),
             ));
         }
         ArrowType::DoubleArrow => {
@@ -78,7 +78,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 arrow_meta,
-                Stroke::new(Color::BLACK, 2.0),
+                Stroke::new(Color::BLACK, 1.0),
             ));
         }
         ArrowType::ParallelLine => {
@@ -94,7 +94,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 arrow_meta,
-                Stroke::new(Color::BLACK, 2.0),
+                Stroke::new(Color::BLACK, 1.0),
             ));
         }
         ArrowType::ParallelArrow => {
@@ -112,7 +112,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 arrow_meta,
-                Stroke::new(Color::BLACK, 2.0),
+                Stroke::new(Color::BLACK, 1.0),
             ));
         }
         ArrowType::ParallelDoubleArrow => {
@@ -132,7 +132,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                     ..default()
                 },
                 arrow_meta,
-                Stroke::new(Color::BLACK, 2.0),
+                Stroke::new(Color::BLACK, 1.0),
             ));
         }
     }
@@ -143,7 +143,6 @@ fn parallel_arrow_mid(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> (Vec2, V
     match (arrow_meta.start.pos, arrow_meta.end.pos) {
         (Top, Bottom) | (Bottom, Top) => (Vec2::new(start.x, mid.y), Vec2::new(end.x, mid.y)),
         (Left, Right) | (Right, Left) => (Vec2::new(mid.x, start.y), Vec2::new(mid.x, end.y)),
-        //TODO
         (Bottom, Left) | (Top, Right) | (Top, Left) | (Bottom, Right) => {
             (Vec2::new(start.x, end.y), Vec2::new(start.x, end.y))
         }
