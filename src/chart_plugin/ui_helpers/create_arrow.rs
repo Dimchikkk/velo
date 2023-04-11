@@ -27,9 +27,17 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             let dt = end.x - start.x;
             let dy = end.y - start.y;
             let angle = dy.atan2(dt);
+            let headlen = 10.0;
             let arrow_path = GeometryBuilder::new()
                 .add(&shapes::Line(start, end))
-                .add(&arrow_head(end, angle))
+                .add(&shapes::Line(
+                    end,
+                    end - headlen * Vec2::from_angle(angle + PI / 6.),
+                ))
+                .add(&shapes::Line(
+                    end,
+                    end - headlen * Vec2::from_angle(angle - PI / 6.),
+                ))
                 .build();
             commands.spawn((
                 ShapeBundle {
@@ -41,13 +49,28 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             ));
         }
         ArrowType::DoubleArrow => {
+            let headlen = 10.0;
             let dt = end.x - start.x;
             let dy = end.y - start.y;
             let angle = dy.atan2(dt);
             let arrow_path = GeometryBuilder::new()
-                .add(&arrow_head(start, angle))
+                .add(&shapes::Line(
+                    start,
+                    start + headlen * Vec2::from_angle(angle + PI / 6.),
+                ))
+                .add(&shapes::Line(
+                    start,
+                    start + headlen * Vec2::from_angle(angle - PI / 6.),
+                ))
                 .add(&shapes::Line(start, end))
-                .add(&arrow_head(end, angle))
+                .add(&shapes::Line(
+                    end,
+                    end - headlen * Vec2::from_angle(angle + PI / 6.),
+                ))
+                .add(&shapes::Line(
+                    end,
+                    end - headlen * Vec2::from_angle(angle - PI / 6.),
+                ))
                 .build();
             commands.spawn((
                 ShapeBundle {
@@ -75,13 +98,13 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             ));
         }
         ArrowType::ParallelArrow => {
-            let head_angle = get_angle(arrow_meta.end.pos);
+            let head_pos = arrow_meta.end.pos;
             let mid_point = parallel_arrow_mid(start, end, arrow_meta);
             let arrow_path = GeometryBuilder::new()
                 .add(&shapes::Line(start, mid_point.0))
                 .add(&shapes::Line(mid_point.0, mid_point.1))
                 .add(&shapes::Line(mid_point.1, end))
-                .add(&arrow_head(end, head_angle))
+                .add(&arrow_head(end, head_pos))
                 .build();
             commands.spawn((
                 ShapeBundle {
@@ -93,15 +116,15 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             ));
         }
         ArrowType::ParallelDoubleArrow => {
-            let head_angle = get_angle(arrow_meta.end.pos);
-            let tail_angle = get_angle(arrow_meta.start.pos);
+            let head_pos = arrow_meta.end.pos;
+            let tail_pos = arrow_meta.start.pos;
             let mid_point = parallel_arrow_mid(start, end, arrow_meta);
             let arrow_path = GeometryBuilder::new()
-                .add(&arrow_head(start, tail_angle))
+                .add(&arrow_head(start, tail_pos))
                 .add(&shapes::Line(start, mid_point.0))
                 .add(&shapes::Line(mid_point.0, mid_point.1))
                 .add(&shapes::Line(mid_point.1, end))
-                .add(&arrow_head(end, head_angle))
+                .add(&arrow_head(end, head_pos))
                 .build();
             commands.spawn((
                 ShapeBundle {
@@ -130,8 +153,15 @@ fn parallel_arrow_mid(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> (Vec2, V
         (_, _) => (mid, mid),
     }
 }
-fn arrow_head(point: Vec2, angle: f32) -> shapes::Polygon {
+fn arrow_head(point: Vec2, pos: ArrowConnectPos) -> shapes::Polygon {
     let headlen: f32 = 10.0;
+    use ArrowConnectPos::*;
+    let angle = match pos {
+        Top => PI / 2.,
+        Bottom => -PI / 2.,
+        Right => 0.,
+        Left => PI,
+    };
     let points = vec![
         point + Vec2::from_angle(angle - PI / 6.) * headlen,
         point,
@@ -140,14 +170,5 @@ fn arrow_head(point: Vec2, angle: f32) -> shapes::Polygon {
     shapes::Polygon {
         points,
         closed: false,
-    }
-}
-fn get_angle(pos: ArrowConnectPos) -> f32 {
-    use ArrowConnectPos::*;
-    match pos {
-        Top => PI / 2.,
-        Bottom => -PI / 2.,
-        Right => 0.,
-        Left => PI,
     }
 }
