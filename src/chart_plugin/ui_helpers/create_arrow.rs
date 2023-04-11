@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use bevy::prelude::*;
 use bevy_prototype_lyon::{
-    prelude::{Geometry, GeometryBuilder, ShapeBundle, Stroke},
+    prelude::{GeometryBuilder, ShapeBundle, Stroke},
     shapes,
 };
 
@@ -29,7 +29,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             let angle = dy.atan2(dt);
             let arrow_path = GeometryBuilder::new()
                 .add(&shapes::Line(start, end))
-                .add(&arrow_head(end, angle, false))
+                .add(&arrow_head(end, angle))
                 .build();
             commands.spawn((
                 ShapeBundle {
@@ -44,11 +44,10 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             let dt = end.x - start.x;
             let dy = end.y - start.y;
             let angle = dy.atan2(dt);
-            let mid_point = parallel_arrow_mid(start, end, arrow_meta);
             let arrow_path = GeometryBuilder::new()
-                .add(&arrow_head(start, angle, true))
+                .add(&arrow_head(start, angle))
                 .add(&shapes::Line(start, end))
-                .add(&arrow_head(end, angle, false))
+                .add(&arrow_head(end, angle))
                 .build();
             commands.spawn((
                 ShapeBundle {
@@ -82,7 +81,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
                 .add(&shapes::Line(start, mid_point.0))
                 .add(&shapes::Line(mid_point.0, mid_point.1))
                 .add(&shapes::Line(mid_point.1, end))
-                .add(&arrow_head(end, head_angle, false))
+                .add(&arrow_head(end, head_angle))
                 .build();
             commands.spawn((
                 ShapeBundle {
@@ -98,11 +97,11 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             let tail_angle = get_angle(arrow_meta.start.pos);
             let mid_point = parallel_arrow_mid(start, end, arrow_meta);
             let arrow_path = GeometryBuilder::new()
-                .add(&arrow_head(start, tail_angle, true))
+                .add(&arrow_head(start, tail_angle))
                 .add(&shapes::Line(start, mid_point.0))
                 .add(&shapes::Line(mid_point.0, mid_point.1))
                 .add(&shapes::Line(mid_point.1, end))
-                .add(&arrow_head(end, head_angle, false))
+                .add(&arrow_head(end, head_angle))
                 .build();
             commands.spawn((
                 ShapeBundle {
@@ -131,8 +130,8 @@ fn parallel_arrow_mid(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> (Vec2, V
         (_, _) => (mid, mid),
     }
 }
-fn arrow_head(point: Vec2, angle: f32, tail: bool) -> shapes::Polygon {
-    let headlen: f32 = if tail { 10.0 } else { -10.0 };
+fn arrow_head(point: Vec2, angle: f32) -> shapes::Polygon {
+    let headlen: f32 = 10.0;
     let points = vec![
         point + Vec2::from_angle(angle - PI / 6.) * headlen,
         point,
@@ -145,10 +144,10 @@ fn arrow_head(point: Vec2, angle: f32, tail: bool) -> shapes::Polygon {
 }
 fn get_angle(pos: ArrowConnectPos) -> f32 {
     use ArrowConnectPos::*;
-    info!("{:?}", pos);
-    if pos == Top || pos == Bottom {
-        PI / 2.0
-    } else {
-        0.0
+    match pos {
+        Top => PI / 2.,
+        Bottom => -PI / 2.,
+        Right => 0.,
+        Left => PI,
     }
 }
