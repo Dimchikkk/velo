@@ -98,18 +98,27 @@ pub fn redraw_arrows(
     mut arrow_query: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
     mut commands: Commands,
 ) {
+    let mut despawned: HashSet<ArrowMeta> = HashSet::new();
+
     for event in redraw_arrow.iter() {
         for (entity, arrow) in &mut arrow_query.iter_mut() {
+            if despawned.contains(arrow) {
+                continue;
+            }
             if arrow.start.id == event.id || arrow.end.id == event.id {
-                if let Some(mut entity) = commands.get_entity(entity) {
-                    entity.despawn();
-                    create_arrow.send(CreateArrow {
-                        start: arrow.start,
-                        end: arrow.end,
-                        arrow_type: arrow.arrow_type,
-                    });
+                if let Some(entity) = commands.get_entity(entity) {
+                    despawned.insert(*arrow);
+                    entity.despawn_recursive();
                 }
             }
         }
+    }
+
+    for arrow_meta in despawned {
+        create_arrow.send(CreateArrow {
+            start: arrow_meta.start,
+            end: arrow_meta.end,
+            arrow_type: arrow_meta.arrow_type,
+        });
     }
 }
