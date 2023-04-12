@@ -314,7 +314,7 @@ pub fn init_layout(
         &mut commands,
         font,
         "New Rec".to_string(),
-        "Delete".to_string(),
+        "Del Rec".to_string(),
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Add,
         },
@@ -568,11 +568,11 @@ pub fn init_layout(
 
     commands.entity(left_panel_controls).add_child(creation);
     commands.entity(left_panel_controls).add_child(color_picker);
+    commands.entity(left_panel_controls).add_child(arrow_modes);
     commands.entity(left_panel_controls).add_child(text_modes);
     commands
         .entity(left_panel_controls)
         .add_child(text_manipulation);
-    commands.entity(left_panel_controls).add_child(arrow_modes);
     commands.entity(left_panel_controls).add_child(fron_back);
 
     commands.entity(main_bottom).add_child(left_panel);
