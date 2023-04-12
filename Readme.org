@@ -55,6 +55,6 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity -A clippy::too_m
 
 * Contributing
 
-Contributions are always welcome! Please adhere to this project's code of conduct. 
+Contributions are always welcome! Please adhere to this project's code of conduct. If you have questions or suggestions, feel free to make an [[https://github.com/StaffEngineer/rusticify/issues][issue]].  
 
 ❤️
