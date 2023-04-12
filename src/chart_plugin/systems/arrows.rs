@@ -2,8 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use std::collections::HashSet;
 
-use super::ui_helpers::{create_arrow, ArrowConnect, ArrowConnectPos, ArrowMeta, CreateArrow};
-use crate::chart_plugin::Rectangle;
+use super::ui_helpers::{create_arrow, ArrowConnect, ArrowMeta, CreateArrow};
 use crate::{AppState, MainCamera, RedrawArrow};
 
 pub fn create_arrow_start(
@@ -48,10 +47,8 @@ pub fn create_arrow_end(
     mut commands: Commands,
     mut events: EventReader<CreateArrow>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    mut arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    node_position: Query<(&Style, &Rectangle), With<Rectangle>>,
-    state: Res<AppState>,
+    arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let primary_window = windows.single();
     let (camera, camera_transform) = camera_q.single();
@@ -61,26 +58,14 @@ pub fn create_arrow_end(
             .filter(|(x, _)| x.id == event.end.id || x.id == event.start.id)
             .map(|(ac, gt)| Some((ac, get_pos(gt, primary_window, camera, camera_transform)?)))
             .flatten()
-            .partition(|(x, _)| Some(x.id) == state.hold_entity);
-        info!("{:?} {:?} ", arrow_hold_vec, arrow_move_vec);
-        let mut min_distance: u32 = 0;
-        let mut arrow_move: Option<_> = None;
-        let mut arrow_hold: Option<_> = None;
-        for i in arrow_hold_vec {
-            for j in &arrow_move_vec {
-                let dist = j.1.distance(i.1) as u32;
-                info!("{} {} {}", dist, min_distance, dist < min_distance);
-                if dist < min_distance {
-                    info!("inside");
-                    arrow_hold = Some(i.1);
-                    arrow_move = Some(j.1);
-                    min_distance = dist;
-                }
-            }
-        }
-        info!("{:?}", min_distance);
-        info!("{:?} {:?} ", arrow_hold, arrow_move);
-        if let (Some(start), Some(end)) = (arrow_hold, arrow_move) {
+            .partition(|(x, _)| x.id == event.end.id);
+        let arrow_pos = arrow_hold_vec
+            .iter()
+            .flat_map(move |x| std::iter::repeat(x).zip(arrow_move_vec.clone()))
+            .map(|(arrow_hold, arrow_move)| (arrow_hold.1, arrow_move.1))
+            .min_by_key(|(arrow_hold, arrow_move)| arrow_hold.distance(*arrow_move) as u32);
+
+        if let Some((start, end)) = arrow_pos {
             create_arrow(
                 &mut commands,
                 start,
