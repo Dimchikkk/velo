@@ -72,10 +72,10 @@ pub struct ChangeColor {
 #[derive(Serialize, Deserialize, Default, Copy, Clone, Reflect, Debug, Eq, PartialEq, Hash)]
 pub enum ArrowType {
     Line,
-    #[default]
     Arrow,
     DoubleArrow,
     ParallelLine,
+    #[default]
     ParallelArrow,
     ParallelDoubleArrow,
 }
