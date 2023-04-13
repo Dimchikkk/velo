@@ -56,23 +56,28 @@ pub fn create_arrow_end(
         let (arrow_hold_vec, arrow_move_vec): (Vec<_>, Vec<_>) = arrow_markers
             .iter()
             .filter(|(x, _)| x.id == event.end.id || x.id == event.start.id)
-            .map(|(ac, gt)| Some((ac, get_pos(gt, primary_window, camera, camera_transform)?)))
-            .flatten()
+            .filter_map(|(ac, gt)| {
+                Some((ac, get_pos(gt, primary_window, camera, camera_transform)?))
+            })
             .partition(|(x, _)| x.id == event.end.id);
         let arrow_pos = arrow_hold_vec
             .iter()
-            .flat_map(move |x| std::iter::repeat(x).zip(arrow_move_vec.clone()))
-            .map(|(arrow_hold, arrow_move)| (arrow_hold.1, arrow_move.1))
-            .min_by_key(|(arrow_hold, arrow_move)| arrow_hold.distance(*arrow_move) as u32);
+            .flat_map(move |x| std::iter::repeat(*x).zip(arrow_move_vec.clone()))
+            .min_by_key(|(arrow_hold, arrow_move)| arrow_hold.1.distance(arrow_move.1) as u32);
 
-        if let Some((start, end)) = arrow_pos {
+        if let Some((start_pos, end_pos)) = arrow_pos {
+            let ((start_pos, start), (end_pos, end)) = if start_pos.0.id == event.start.id {
+                (start_pos, end_pos)
+            } else {
+                (end_pos, start_pos)
+            };
             create_arrow(
                 &mut commands,
                 start,
                 end,
                 ArrowMeta {
-                    start: event.start,
-                    end: event.end,
+                    start: *start_pos,
+                    end: *end_pos,
                     arrow_type: event.arrow_type,
                 },
             );
