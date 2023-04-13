@@ -16,7 +16,7 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: "Rusticify".into(),
+                        title: "Velo".into(),
                         present_mode: PresentMode::AutoVsync,
                         // Tells wasm to resize the window according to the available canvas
                         fit_canvas_to_parent: true,
@@ -32,7 +32,7 @@ fn main() {
         .add_plugin(ChartPlugin)
         .add_plugin(ShapePlugin)
         .add_plugin(BordersPlugin)
-        .insert_resource(PkvStore::new("", "rusticify"))
+        .insert_resource(PkvStore::new("", "velo"))
         .run();
 }
 
