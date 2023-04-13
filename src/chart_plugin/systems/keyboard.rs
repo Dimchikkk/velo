@@ -24,6 +24,7 @@ pub fn keyboard_input_system(
     input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut deleting: Local<bool>,
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
@@ -63,16 +64,20 @@ pub fn keyboard_input_system(
                 for section in text.sections.iter_mut() {
                     str = format!("{}{}", str, section.value.clone());
                 }
-
-                for ev in char_evr.iter() {
-                    // Delete key check
-                    if ev.char as u32 == 127 {
-                        str.pop();
-                    } else {
-                        str = format!("{}{}", str, ev.char);
+                if input.just_pressed(KeyCode::Back) {
+                    *deleting = true;
+                    str.pop();
+                } else if input.just_released(KeyCode::Back) {
+                    *deleting = false;
+                } else {
+                    for ev in char_evr.iter() {
+                        if *deleting {
+                            str.pop();
+                        } else {
+                            str = format!("{}{}", str, ev.char);
+                        }
                     }
                 }
-
                 text.sections = get_sections(str, font.clone()).0;
             }
         }
