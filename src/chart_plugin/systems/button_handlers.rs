@@ -441,12 +441,13 @@ pub fn doc_keyboard_input_system(
             if input.just_pressed(KeyCode::Return) {
                 state.doc_to_edit = None;
             }
-            if input.just_pressed(KeyCode::Back) {
-                let mut str = text.sections[0].value.clone();
-                str.pop();
-                text.sections[0].value = str;
-            } else {
-                for ev in char_evr.iter() {
+            for ev in char_evr.iter() {
+                // Delete key check
+                if ev.char as u32 == 127 {
+                    let mut str = text.sections[0].value.clone();
+                    str.pop();
+                    text.sections[0].value = str;
+                } else {
                     text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
                 }
             }
