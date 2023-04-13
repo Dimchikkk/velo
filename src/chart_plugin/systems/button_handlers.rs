@@ -26,7 +26,7 @@ pub fn rec_button_handlers(
     >,
     mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
     mut nodes: Query<(Entity, &Rectangle, &mut ZIndex), With<Rectangle>>,
-    arrows: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
+    mut arrows: Query<(Entity, &ArrowMeta, &mut Visibility), (With<ArrowMeta>, Without<Tooltip>)>,
     mut state: ResMut<AppState>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
@@ -65,9 +65,17 @@ pub fn rec_button_handlers(
                                 commands.entity(entity).despawn_recursive();
                             }
                         }
-                        for (entity, arrow) in arrows.iter() {
+                        for (entity, arrow, mut visibility) in &mut arrows.iter_mut() {
                             if arrow.start.id == id || arrow.end.id == id {
-                                commands.entity(entity).despawn_recursive();
+                                #[cfg(not(target_arch = "wasm32"))]
+                                {
+                                    commands.entity(entity).despawn_recursive();
+                                }
+                                visibility = visibility; // just to get rid of clippy rewrite
+                                #[cfg(target_arch = "wasm32")]
+                                {
+                                    *visibility = Visibility::Hidden;
+                                }
                             }
                         }
                     }
