@@ -124,22 +124,30 @@ pub fn tab_keyboard_input_system(
     mut state: ResMut<AppState>,
     input: Res<Input<KeyCode>>,
     mut char_evr: EventReader<ReceivedCharacter>,
+    mut deleting: Local<bool>,
 ) {
     for (mut text, tab_input) in &mut query.iter_mut() {
         if Some(tab_input.id) == state.tab_to_edit {
             if input.just_pressed(KeyCode::Return) {
                 state.tab_to_edit = None;
+                continue;
             }
-            for ev in char_evr.iter() {
-                // Delete key check
-                if ev.char as u32 == 127 {
-                    let mut str = text.sections[0].value.clone();
-                    str.pop();
-                    text.sections[0].value = str;
-                } else {
-                    text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
+            let mut str = text.sections[0].value.clone();
+            if input.just_pressed(KeyCode::Back) {
+                *deleting = true;
+                str.pop();
+            } else if input.just_released(KeyCode::Back) {
+                *deleting = false;
+            } else {
+                for ev in char_evr.iter() {
+                    if *deleting {
+                        str.pop();
+                    } else {
+                        str = format!("{}{}", text.sections[0].value, ev.char);
+                    }
                 }
             }
+            text.sections[0].value = str;
             let current_document = state.current_document.unwrap();
             let tab = state
                 .docs
