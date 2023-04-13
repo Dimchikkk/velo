@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use bevy::prelude::*;
 use bevy_prototype_lyon::{
-    prelude::{GeometryBuilder, ShapeBundle, Stroke},
+    prelude::{GeometryBuilder, Path, ShapeBundle, Stroke},
     shapes,
 };
 
@@ -11,131 +11,15 @@ use crate::chart_plugin::ui_helpers::ArrowConnectPos;
 use super::{ArrowMeta, ArrowType};
 
 pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta: ArrowMeta) {
-    match arrow_meta.arrow_type {
-        ArrowType::Line => {
-            let main = shapes::Line(start, end);
-            commands.spawn((
-                ShapeBundle {
-                    path: GeometryBuilder::build_as(&main),
-                    ..default()
-                },
-                arrow_meta,
-                Stroke::new(Color::BLACK, 1.0),
-            ));
-        }
-        ArrowType::Arrow => {
-            let dt = end.x - start.x;
-            let dy = end.y - start.y;
-            let angle = dy.atan2(dt);
-            let headlen = 10.0;
-            let arrow_path = GeometryBuilder::new()
-                .add(&shapes::Line(start, end))
-                .add(&shapes::Line(
-                    end,
-                    end - headlen * Vec2::from_angle(angle + PI / 6.),
-                ))
-                .add(&shapes::Line(
-                    end,
-                    end - headlen * Vec2::from_angle(angle - PI / 6.),
-                ))
-                .build();
-            commands.spawn((
-                ShapeBundle {
-                    path: arrow_path,
-                    ..default()
-                },
-                arrow_meta,
-                Stroke::new(Color::BLACK, 1.0),
-            ));
-        }
-        ArrowType::DoubleArrow => {
-            let headlen = 10.0;
-            let dt = end.x - start.x;
-            let dy = end.y - start.y;
-            let angle = dy.atan2(dt);
-            let arrow_path = GeometryBuilder::new()
-                .add(&shapes::Line(
-                    start,
-                    start + headlen * Vec2::from_angle(angle + PI / 6.),
-                ))
-                .add(&shapes::Line(
-                    start,
-                    start + headlen * Vec2::from_angle(angle - PI / 6.),
-                ))
-                .add(&shapes::Line(start, end))
-                .add(&shapes::Line(
-                    end,
-                    end - headlen * Vec2::from_angle(angle + PI / 6.),
-                ))
-                .add(&shapes::Line(
-                    end,
-                    end - headlen * Vec2::from_angle(angle - PI / 6.),
-                ))
-                .build();
-            commands.spawn((
-                ShapeBundle {
-                    path: arrow_path,
-                    ..default()
-                },
-                arrow_meta,
-                Stroke::new(Color::BLACK, 1.0),
-            ));
-        }
-        ArrowType::ParallelLine => {
-            let mid_point = parallel_arrow_mid(start, end, arrow_meta);
-            let arrow_path = GeometryBuilder::new()
-                .add(&shapes::Line(start, mid_point.0))
-                .add(&shapes::Line(mid_point.0, mid_point.1))
-                .add(&shapes::Line(mid_point.1, end))
-                .build();
-            commands.spawn((
-                ShapeBundle {
-                    path: arrow_path,
-                    ..default()
-                },
-                arrow_meta,
-                Stroke::new(Color::BLACK, 1.0),
-            ));
-        }
-        ArrowType::ParallelArrow => {
-            let head_pos = arrow_meta.end.pos;
-            let mid_point = parallel_arrow_mid(start, end, arrow_meta);
-            let arrow_path = GeometryBuilder::new()
-                .add(&shapes::Line(start, mid_point.0))
-                .add(&shapes::Line(mid_point.0, mid_point.1))
-                .add(&shapes::Line(mid_point.1, end))
-                .add(&arrow_head(end, head_pos))
-                .build();
-            commands.spawn((
-                ShapeBundle {
-                    path: arrow_path,
-                    ..default()
-                },
-                arrow_meta,
-                Stroke::new(Color::BLACK, 1.0),
-            ));
-        }
-        ArrowType::ParallelDoubleArrow => {
-            let head_pos = arrow_meta.end.pos;
-            let tail_pos = arrow_meta.start.pos;
-            let mid_point = parallel_arrow_mid(start, end, arrow_meta);
-            let arrow_path = GeometryBuilder::new()
-                .add(&arrow_head(start, tail_pos))
-                .add(&shapes::Line(start, mid_point.0))
-                .add(&shapes::Line(mid_point.0, mid_point.1))
-                .add(&shapes::Line(mid_point.1, end))
-                .add(&arrow_head(end, head_pos))
-                .build();
-            commands.spawn((
-                ShapeBundle {
-                    path: arrow_path,
-                    ..default()
-                },
-                arrow_meta,
-                Stroke::new(Color::BLACK, 1.0),
-            ));
-        }
-    }
+    let arrow_path = build_arrow(start, end, arrow_meta);
+    commands.spawn((
+        ShapeBundle {
+            path: arrow_path,
+            ..default()
+        },
+        arrow_meta,
+        Stroke::new(Color::BLACK, 1.0),
+    ));
 }
 fn parallel_arrow_mid(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> (Vec2, Vec2) {
     let mid = (start + end) / 2.0;
@@ -169,5 +53,85 @@ fn arrow_head(point: Vec2, pos: ArrowConnectPos) -> shapes::Polygon {
     shapes::Polygon {
         points,
         closed: false,
+    }
+}
+pub fn build_arrow(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> Path {
+    match arrow_meta.arrow_type {
+        ArrowType::Line => {
+            let main = shapes::Line(start, end);
+            GeometryBuilder::build_as(&main)
+        }
+        ArrowType::Arrow => {
+            let dt = end.x - start.x;
+            let dy = end.y - start.y;
+            let angle = dy.atan2(dt);
+            let headlen = 10.0;
+            GeometryBuilder::new()
+                .add(&shapes::Line(start, end))
+                .add(&shapes::Line(
+                    end,
+                    end - headlen * Vec2::from_angle(angle + PI / 6.),
+                ))
+                .add(&shapes::Line(
+                    end,
+                    end - headlen * Vec2::from_angle(angle - PI / 6.),
+                ))
+                .build()
+        }
+        ArrowType::DoubleArrow => {
+            let headlen = 10.0;
+            let dt = end.x - start.x;
+            let dy = end.y - start.y;
+            let angle = dy.atan2(dt);
+            GeometryBuilder::new()
+                .add(&shapes::Line(
+                    start,
+                    start + headlen * Vec2::from_angle(angle + PI / 6.),
+                ))
+                .add(&shapes::Line(
+                    start,
+                    start + headlen * Vec2::from_angle(angle - PI / 6.),
+                ))
+                .add(&shapes::Line(start, end))
+                .add(&shapes::Line(
+                    end,
+                    end - headlen * Vec2::from_angle(angle + PI / 6.),
+                ))
+                .add(&shapes::Line(
+                    end,
+                    end - headlen * Vec2::from_angle(angle - PI / 6.),
+                ))
+                .build()
+        }
+        ArrowType::ParallelLine => {
+            let mid_point = parallel_arrow_mid(start, end, arrow_meta);
+            GeometryBuilder::new()
+                .add(&shapes::Line(start, mid_point.0))
+                .add(&shapes::Line(mid_point.0, mid_point.1))
+                .add(&shapes::Line(mid_point.1, end))
+                .build()
+        }
+        ArrowType::ParallelArrow => {
+            let head_pos = arrow_meta.end.pos;
+            let mid_point = parallel_arrow_mid(start, end, arrow_meta);
+            GeometryBuilder::new()
+                .add(&shapes::Line(start, mid_point.0))
+                .add(&shapes::Line(mid_point.0, mid_point.1))
+                .add(&shapes::Line(mid_point.1, end))
+                .add(&arrow_head(end, head_pos))
+                .build()
+        }
+        ArrowType::ParallelDoubleArrow => {
+            let head_pos = arrow_meta.end.pos;
+            let tail_pos = arrow_meta.start.pos;
+            let mid_point = parallel_arrow_mid(start, end, arrow_meta);
+            GeometryBuilder::new()
+                .add(&arrow_head(start, tail_pos))
+                .add(&shapes::Line(start, mid_point.0))
+                .add(&shapes::Line(mid_point.0, mid_point.1))
+                .add(&shapes::Line(mid_point.1, end))
+                .add(&arrow_head(end, head_pos))
+                .build()
+        }
     }
 }
