@@ -2,9 +2,8 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use std::collections::HashSet;
 
-use crate::{AppState, MainCamera, RedrawArrow};
-
 use super::ui_helpers::{create_arrow, ArrowConnect, ArrowMeta, CreateArrow};
+use crate::{AppState, MainCamera, RedrawArrow};
 
 pub fn create_arrow_start(
     mut interaction_query: Query<
@@ -48,46 +47,40 @@ pub fn create_arrow_end(
     mut commands: Commands,
     mut events: EventReader<CreateArrow>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    mut arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let primary_window = windows.single_mut();
+    let primary_window = windows.single();
     let (camera, camera_transform) = camera_q.single();
     for event in events.iter() {
-        let mut start = None;
-        let mut end = None;
-        for (arrow_connect, global_transform) in &mut arrow_markers.iter_mut() {
-            if *arrow_connect == event.start {
-                let world_position = global_transform.affine().translation;
-                start = Some(Vec2::new(
-                    world_position.x,
-                    primary_window.height() - world_position.y,
-                ));
-            }
-            if *arrow_connect == event.end {
-                let world_position = global_transform.affine().translation;
-                end = Some(Vec2::new(
-                    world_position.x,
-                    primary_window.height() - world_position.y,
-                ));
-            }
-        }
+        let (arrow_hold_vec, arrow_move_vec): (Vec<_>, Vec<_>) = arrow_markers
+            .iter()
+            .filter(|(x, _)| x.id == event.end.id || x.id == event.start.id)
+            .filter_map(|(ac, gt)| {
+                Some((ac, get_pos(gt, primary_window, camera, camera_transform)?))
+            })
+            .partition(|(x, _)| x.id == event.end.id);
+        let arrow_pos = arrow_hold_vec
+            .iter()
+            .flat_map(move |x| std::iter::repeat(*x).zip(arrow_move_vec.clone()))
+            .min_by_key(|(arrow_hold, arrow_move)| arrow_hold.1.distance(arrow_move.1) as u32);
 
-        if let (Some(start), Some(end)) = (start, end) {
-            let start = camera.viewport_to_world_2d(camera_transform, start);
-            let end = camera.viewport_to_world_2d(camera_transform, end);
-            if let (Some(start), Some(end)) = (start, end) {
-                create_arrow(
-                    &mut commands,
-                    start,
-                    end,
-                    ArrowMeta {
-                        start: event.start,
-                        end: event.end,
-                        arrow_type: event.arrow_type,
-                    },
-                );
-            }
+        if let Some((start_pos, end_pos)) = arrow_pos {
+            let ((start_pos, start), (end_pos, end)) = if start_pos.0.id == event.start.id {
+                (start_pos, end_pos)
+            } else {
+                (end_pos, start_pos)
+            };
+            create_arrow(
+                &mut commands,
+                start,
+                end,
+                ArrowMeta {
+                    start: *start_pos,
+                    end: *end_pos,
+                    arrow_type: event.arrow_type,
+                },
+            );
         }
     }
 }
@@ -121,4 +114,15 @@ pub fn redraw_arrows(
             arrow_type: arrow_meta.arrow_type,
         });
     }
+}
+
+fn get_pos(
+    global_transform: &GlobalTransform,
+    primary_window: &Window,
+    camera: &Camera,
+    camera_transform: &GlobalTransform,
+) -> Option<Vec2> {
+    let world_position = global_transform.affine().translation;
+    let point = Vec2::new(world_position.x, primary_window.height() - world_position.y);
+    camera.viewport_to_world_2d(camera_transform, point)
 }
