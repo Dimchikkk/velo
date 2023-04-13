@@ -14,6 +14,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
     match arrow_meta.arrow_type {
         ArrowType::Line => {
             let main = shapes::Line(start, end);
+            info!("in create_arrow {:?} {:?}", start, end);
             commands.spawn((
                 ShapeBundle {
                     path: GeometryBuilder::build_as(&main),
