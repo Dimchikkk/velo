@@ -1,16 +1,16 @@
 [package]
-name = "rusticify"
+name = "velo"
 license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
-repository = "https://github.com/StaffEngineer/rusticify.git"
+repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.org"
 version = "0.1.1"
 edition = "2021"
 
 exclude = [
     "assets/fonts/*",
-    "rusticify.gif",
-    "rusticify.png",
+    "velo.gif",
+    "velo.png",
 ]
 
 # Enable max optimizations for dependencies, but not for our code:

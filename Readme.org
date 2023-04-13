@@ -1,6 +1,6 @@
-* /Rust/ icify
+* Velo 🚵
 
-[[file:rusticify.gif]]
+[[file:velo.gif]]
 
 ** Inspiration  
 At work, I frequently rely on lucid.app to brainstorm ideas with my colleagues or by myself. Typically, I share my ideas by sending either the diagrams themselves or screenshots of them. While I tend to stick with simple features like rectangles and arrows, I've been contemplating the idea of creating a similar tool in Rust. Not only would it allow me to learn the language, but it would also be an enjoyable project to work on.
@@ -39,8 +39,8 @@ Build wasm static files:
 
 #+BEGIN_SRC sh
 cargo build --release --target wasm32-unknown-unknown
-wasm-bindgen --target web --out-dir out target/wasm32-unknown-unknown/release/rusticify.wasm
-wasm-opt -Os rusticify_bg.wasm -o rusticify_bg.wasm
+wasm-bindgen --target web --out-dir out target/wasm32-unknown-unknown/release/velo.wasm
+wasm-opt -Os velo_bg.wasm -o velo_bg.wasm
 #+END_SRC
 
 ** Pre-commit actions
@@ -51,10 +51,10 @@ cargo clippy --fix --allow-staged -- -A clippy::type_complexity -A clippy::too_m
 #+END_SRC
 
 ** Screenshot
-[[file:rusticify.png]]
+[[file:velo.png]]
 
 * Contributing
 
-Contributions are always welcome! Please adhere to this project's code of conduct. If you have questions or suggestions, feel free to make an [[https://github.com/StaffEngineer/rusticify/issues][issue]].  
+Contributions are always welcome! Please adhere to this project's code of conduct. If you have questions or suggestions, feel free to make an [[https://github.com/StaffEngineer/velo/issues][issue]].  
 
 ❤️
