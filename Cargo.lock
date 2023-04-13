@@ -3092,26 +3092,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
-name = "rusticify"
-version = "0.1.1"
-dependencies = [
- "arboard",
- "base64 0.21.0",
- "bevy",
- "bevy_embedded_assets",
- "bevy_pkv",
- "bevy_prototype_lyon",
- "bevy_ui_borders",
- "console_error_panic_hook",
- "image",
- "linkify",
- "open",
- "serde",
- "serde_json",
- "uuid",
-]
-
-[[package]]
 name = "ruzstd"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3542,6 +3522,26 @@ name = "vec_map"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
+
+[[package]]
+name = "velo"
+version = "0.1.1"
+dependencies = [
+ "arboard",
+ "base64 0.21.0",
+ "bevy",
+ "bevy_embedded_assets",
+ "bevy_pkv",
+ "bevy_prototype_lyon",
+ "bevy_ui_borders",
+ "console_error_panic_hook",
+ "image",
+ "linkify",
+ "open",
+ "serde",
+ "serde_json",
+ "uuid",
+]
 
 [[package]]
 name = "version_check"

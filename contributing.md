@@ -1,4 +1,4 @@
-# Contributing to the Rusticify
+# Contributing to the Velo
 
 We welcome contributions from the community to help improve this project. Whether you're interested in fixing bugs, adding new features, or improving documentation, there are many ways to get involved.
 
