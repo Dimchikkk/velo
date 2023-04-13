@@ -64,13 +64,15 @@ pub fn keyboard_input_system(
                     str = format!("{}{}", str, section.value.clone());
                 }
 
-                if input.just_pressed(KeyCode::Back) {
-                    str.pop();
-                } else {
-                    for ev in char_evr.iter() {
+                for ev in char_evr.iter() {
+                    // Delete key check
+                    if ev.char as u32 == 127 {
+                        str.pop();
+                    } else {
                         str = format!("{}{}", str, ev.char);
                     }
                 }
+
                 text.sections = get_sections(str, font.clone()).0;
             }
         }
