@@ -13,6 +13,9 @@ exclude = [
     "velo.png",
 ]
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 # Enable max optimizations for dependencies, but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
