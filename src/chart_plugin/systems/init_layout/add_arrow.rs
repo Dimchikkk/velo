@@ -5,27 +5,27 @@ use super::ui_helpers::{get_tooltip, ArrowMode, ArrowType, Tooltip};
 
 pub fn add_arrow(
     commands: &mut Commands,
-    arrow_server: &Res<AssetServer>,
+    asset_server: &Res<AssetServer>,
     arrow_mode: ArrowMode,
+    font: Handle<Font>,
 ) -> Entity {
-    let font = arrow_server.load("fonts/iosevka-regular.ttf");
     let (image, text) = match arrow_mode.arrow_type {
-        ArrowType::Line => (arrow_server.load("line.png"), "Enable line mode"),
-        ArrowType::Arrow => (arrow_server.load("arrow.png"), "Enable single arrow mode"),
+        ArrowType::Line => (asset_server.load("line.png"), "Enable line mode"),
+        ArrowType::Arrow => (asset_server.load("arrow.png"), "Enable single arrow mode"),
         ArrowType::DoubleArrow => (
-            arrow_server.load("double-arrow.png"),
+            asset_server.load("double-arrow.png"),
             "Enable double arrow mode",
         ),
         ArrowType::ParallelLine => (
-            arrow_server.load("parallel-line.png"),
+            asset_server.load("parallel-line.png"),
             "Enable parallel line mode",
         ),
         ArrowType::ParallelArrow => (
-            arrow_server.load("parallel-arrow.png"),
+            asset_server.load("parallel-arrow.png"),
             "Enable parallel arrow mode",
         ),
         ArrowType::ParallelDoubleArrow => (
-            arrow_server.load("parallel-double-arrow.png"),
+            asset_server.load("parallel-double-arrow.png"),
             "Enable parallel double arrow mode",
         ),
     };

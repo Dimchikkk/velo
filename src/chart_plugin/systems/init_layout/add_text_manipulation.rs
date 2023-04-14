@@ -1,23 +1,25 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
+
+
 use super::ui_helpers::{get_tooltip, TextManipulation, TextManipulationAction, Tooltip};
 
 pub fn add_text_manipulation(
     commands: &mut Commands,
-    arrow_server: &Res<AssetServer>,
+    asset_server: &Res<AssetServer>,
     text_manipulation: TextManipulationAction,
+    font: Handle<Font>,
 ) -> Entity {
-    let font = arrow_server.load("fonts/iosevka-regular.ttf");
     let (image, text) = match text_manipulation.action_type {
-        TextManipulation::Cut => (arrow_server.load("cut-text.png"), "Cut text"),
+        TextManipulation::Cut => (asset_server.load("cut-text.png"), "Cut text"),
         TextManipulation::Paste => (
-            arrow_server.load("paste-text.png"),
+            asset_server.load("paste-text.png"),
             "Paste text from clipboard",
         ),
-        TextManipulation::Copy => (arrow_server.load("copy-text.png"), "Copy text to clipboard"),
+        TextManipulation::Copy => (asset_server.load("copy-text.png"), "Copy text to clipboard"),
         TextManipulation::OpenAllLinks => (
-            arrow_server.load("open-all-links.png"),
+            asset_server.load("open-all-links.png"),
             "Open all links in text",
         ),
     };
