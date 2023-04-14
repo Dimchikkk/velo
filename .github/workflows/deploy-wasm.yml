@@ -17,17 +17,12 @@ jobs:
           toolchain: stable
           target: wasm32-unknown-unknown
 
-      - name: Install wasm-bindgen
-        run: |
-          cargo install wasm-bindgen-cli wasm-opt
-          cargo build --release --target wasm32-unknown-unknown
-
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        
       - name: Generate JavaScript bindings
-        run: wasm-bindgen --target web  --no-typescript --out-dir out target/wasm32-unknown-unknown/release/velo.wasm
-
-      - name: Optimize WebAssembly file
-        run: wasm-opt -Os out/velo_bg.wasm -o out/velo_bg.wasm
-
+        run: wasm-pack build --target web --out-dir out 
+        
       - name: Copy WebAssembly files to web branch
         run: |
           git config --global user.email ""
