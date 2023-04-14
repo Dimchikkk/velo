@@ -1,9 +1,8 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use std::collections::HashSet;
-
-use super::ui_helpers::{create_arrow, ArrowConnect, ArrowMeta, CreateArrow};
+use super::ui_helpers::{build_arrow, create_arrow, ArrowConnect, ArrowMeta, CreateArrow};
 use crate::{AppState, MainCamera, RedrawArrow};
+use bevy_prototype_lyon::prelude::Path;
 
 pub fn create_arrow_start(
     mut interaction_query: Query<
@@ -53,69 +52,70 @@ pub fn create_arrow_end(
     let primary_window = windows.single();
     let (camera, camera_transform) = camera_q.single();
     for event in events.iter() {
-        let (arrow_hold_vec, arrow_move_vec): (Vec<_>, Vec<_>) = arrow_markers
-            .iter()
-            .filter(|(x, _)| x.id == event.end.id || x.id == event.start.id)
-            .filter_map(|(ac, gt)| {
-                Some((ac, get_pos(gt, primary_window, camera, camera_transform)?))
-            })
-            .partition(|(x, _)| x.id == event.end.id);
-        let arrow_pos = arrow_hold_vec
-            .iter()
-            .flat_map(move |x| std::iter::repeat(*x).zip(arrow_move_vec.clone()))
-            .min_by_key(|(arrow_hold, arrow_move)| arrow_hold.1.distance(arrow_move.1) as u32);
-
-        if let Some((start_pos, end_pos)) = arrow_pos {
-            let ((start_pos, start), (end_pos, end)) = if start_pos.0.id == event.start.id {
-                (start_pos, end_pos)
-            } else {
-                (end_pos, start_pos)
-            };
-            create_arrow(
-                &mut commands,
-                start,
-                end,
-                ArrowMeta {
-                    start: *start_pos,
-                    end: *end_pos,
-                    arrow_type: event.arrow_type,
-                },
-            );
+        let mut start = None;
+        let mut end = None;
+        for (arrow_connect, global_transform) in &mut arrow_markers.iter() {
+            if *arrow_connect == event.start {
+                start = get_pos(global_transform, primary_window, camera, camera_transform);
+            }
+            if *arrow_connect == event.end {
+                end = get_pos(global_transform, primary_window, camera, camera_transform);
+            }
+            if let (Some(start), Some(end)) = (start, end) {
+                create_arrow(
+                    &mut commands,
+                    start,
+                    end,
+                    ArrowMeta {
+                        start: event.start,
+                        end: event.end,
+                        arrow_type: event.arrow_type,
+                    },
+                );
+            }
         }
     }
 }
-
 pub fn redraw_arrows(
     mut redraw_arrow: EventReader<RedrawArrow>,
-    mut create_arrow: EventWriter<CreateArrow>,
-    mut arrow_query: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
-    mut commands: Commands,
+    mut arrow_query: Query<(&mut Path, &mut ArrowMeta), With<ArrowMeta>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let mut despawned: HashSet<ArrowMeta> = HashSet::new();
-
+    let primary_window = windows.single();
+    let (camera, camera_transform) = camera_q.single();
     for event in redraw_arrow.iter() {
-        for (entity, arrow) in &mut arrow_query.iter_mut() {
-            if despawned.contains(arrow) {
-                continue;
-            }
+        for (mut path, mut arrow) in arrow_query.iter_mut() {
             if arrow.start.id == event.id || arrow.end.id == event.id {
-                if let Some(entity) = commands.get_entity(entity) {
-                    despawned.insert(*arrow);
-                    entity.despawn_recursive();
+                let (arrow_hold_vec, arrow_move_vec): (Vec<_>, Vec<_>) = arrow_markers
+                    .iter()
+                    .filter(|(x, _)| x.id == arrow.end.id || x.id == arrow.start.id)
+                    .map(|(ac, gt)| {
+                        Some((ac, get_pos(gt, primary_window, camera, camera_transform)?))
+                    })
+                    .flatten()
+                    .partition(|(x, _)| x.id == arrow.end.id);
+                let arrow_pos = arrow_hold_vec
+                    .iter()
+                    .flat_map(move |x| std::iter::repeat(*x).zip(arrow_move_vec.clone()))
+                    .min_by_key(|(arrow_hold, arrow_move)| {
+                        arrow_hold.1.distance(arrow_move.1) as u32
+                    });
+                if let Some((start_pos, end_pos)) = arrow_pos {
+                    let ((start_pos, start), (end_pos, end)) = if start_pos.0.id == arrow.start.id {
+                        (start_pos, end_pos)
+                    } else {
+                        (end_pos, start_pos)
+                    };
+                    arrow.start = *start_pos;
+                    arrow.end = *end_pos;
+                    *path = build_arrow(start, end, *arrow);
                 }
             }
         }
     }
-
-    for arrow_meta in despawned {
-        create_arrow.send(CreateArrow {
-            start: arrow_meta.start,
-            end: arrow_meta.end,
-            arrow_type: arrow_meta.arrow_type,
-        });
-    }
 }
-
 fn get_pos(
     global_transform: &GlobalTransform,
     primary_window: &Window,
