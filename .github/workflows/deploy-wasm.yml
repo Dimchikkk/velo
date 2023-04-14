@@ -16,12 +16,13 @@ jobs:
           profile: minimal
           toolchain: stable
           target: wasm32-unknown-unknown
-
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name : Build Wasm
+        run: cargo build --release --target wasm32-unknown-unknown
         
+      - uses: jetli/wasm-bindgen-action@v0.2.0
+      
       - name: Generate JavaScript bindings
-        run: wasm-pack build --target web --out-dir out 
+        run: wasm-bindgen --target web  --no-typescript --out-dir out target/wasm32-unknown-unknown/release/velo.wasm
         
       - name: Copy WebAssembly files to web branch
         run: |
