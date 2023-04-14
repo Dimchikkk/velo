@@ -42,5 +42,5 @@ jobs:
           git checkout -b web origin/web -f
           cp -r out/* .
           git add .
-          git commit -m "Build and Deploy WebAssembly to Web Branch"
+          if ! git diff-index --quiet HEAD --; then git commit -m "Build and Deploy WebAssembly to Web Branch" fi
           git push origin web
