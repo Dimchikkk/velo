@@ -35,7 +35,7 @@ Tested only on MacOS, should work on Linux and Windows as well
 cargo r 
 #+END_SRC
 
-It runs on wasm as well, but it doesn't have clipboard/limited file system features, also only landscape webview is supported.
+It runs on wasm as well, but it doesn't have clipboard/limited data storage features, also only landscape webview is supported.
 
 #+BEGIN_SRC sh
 cargo r --target wasm32-unknown-unknown
