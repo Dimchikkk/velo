@@ -27,7 +27,7 @@ pub fn remove_load_request(world: &mut World) {
 
 pub fn load_json(
     old_nodes: Query<Entity, With<Rectangle>>,
-    old_arrows: Query<Entity, With<ArrowMeta>>,
+    mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
     request: Res<LoadRequest>,
     mut state: ResMut<AppState>,
     mut commands: Commands,
@@ -49,8 +49,16 @@ pub fn load_json(
 
     let font = asset_server.load("fonts/iosevka-regular.ttf");
 
-    for entity in old_arrows.iter() {
-        commands.entity(entity).despawn_recursive();
+    for (entity, mut visibility) in &mut old_arrows.iter_mut() {
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            commands.entity(entity).despawn_recursive();
+        }
+        visibility = visibility; // just to get rid of clippy rewrite
+        #[cfg(target_arch = "wasm32")]
+        {
+            *visibility = Visibility::Hidden;
+        }
     }
     for entity in old_nodes.iter() {
         commands.entity(entity).despawn_recursive();

@@ -26,7 +26,7 @@ pub fn rec_button_handlers(
     >,
     mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
     mut nodes: Query<(Entity, &Rectangle, &mut ZIndex), With<Rectangle>>,
-    arrows: Query<(Entity, &ArrowMeta), With<ArrowMeta>>,
+    mut arrows: Query<(Entity, &ArrowMeta, &mut Visibility), (With<ArrowMeta>, Without<Tooltip>)>,
     mut state: ResMut<AppState>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
@@ -65,9 +65,17 @@ pub fn rec_button_handlers(
                                 commands.entity(entity).despawn_recursive();
                             }
                         }
-                        for (entity, arrow) in arrows.iter() {
+                        for (entity, arrow, mut visibility) in &mut arrows.iter_mut() {
                             if arrow.start.id == id || arrow.end.id == id {
-                                commands.entity(entity).despawn_recursive();
+                                #[cfg(not(target_arch = "wasm32"))]
+                                {
+                                    commands.entity(entity).despawn_recursive();
+                                }
+                                visibility = visibility; // just to get rid of clippy rewrite
+                                #[cfg(target_arch = "wasm32")]
+                                {
+                                    *visibility = Visibility::Hidden;
+                                }
                             }
                         }
                     }
@@ -432,6 +440,7 @@ pub fn doc_keyboard_input_system(
     mut state: ResMut<AppState>,
     input: Res<Input<KeyCode>>,
     mut char_evr: EventReader<ReceivedCharacter>,
+    mut deleting: Local<bool>,
 ) {
     for (mut text, doc_list_item) in &mut query.iter_mut() {
         if Some(doc_list_item.id) == state.doc_to_edit {
@@ -440,16 +449,24 @@ pub fn doc_keyboard_input_system(
             }
             if input.just_pressed(KeyCode::Return) {
                 state.doc_to_edit = None;
+                continue;
             }
+            let mut str = text.sections[0].value.clone();
             if input.just_pressed(KeyCode::Back) {
-                let mut str = text.sections[0].value.clone();
+                *deleting = true;
                 str.pop();
-                text.sections[0].value = str;
+            } else if input.just_released(KeyCode::Back) {
+                *deleting = false;
             } else {
                 for ev in char_evr.iter() {
-                    text.sections[0].value = format!("{}{}", text.sections[0].value, ev.char);
+                    if *deleting {
+                        str.pop();
+                    } else {
+                        str = format!("{}{}", text.sections[0].value, ev.char);
+                    }
                 }
             }
+            text.sections[0].value = str;
             let doc = state.docs.get_mut(&doc_list_item.id).unwrap();
             doc.name = text.sections[0].value.clone();
         }
