@@ -1,46 +1,40 @@
 name: Build and Deploy WebAssembly to Web Branch
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      
-      - name: Install Rust and wasm-bindgen
-        uses: actions-rs/toolchain@v1
+        uses: actions/checkout@v3
+
+      - name: Install Rust and wasm toolchain
+        uses: actions-rs/toolchain@v2
         with:
           profile: minimal
           toolchain: stable
-          
-      - name: Set up Node.js
-        uses: actions/setup-node@v2.5.1
-        with:
-          node-version: '14.x'
-          
-      - name: Build WebAssembly file
+          target: wasm32-unknown-unknown
+
+      - name: Install wasm-bindgen
         run: |
-          rustup target add wasm32-unknown-unknown
-          cargo install wasm-bindgen-cli
-          cargo install wasm-opt
+          cargo install wasm-bindgen-cli wasm-opt
           cargo build --release --target wasm32-unknown-unknown
-      
-      - name: Generate JavaScript and TypeScript bindings
-        run: wasm-bindgen --target web --out-dir out target/wasm32-unknown-unknown/release/velo.wasm
-      
+
+      - name: Generate JavaScript bindings
+        run: wasm-bindgen --target web  --no-typescript --out-dir out target/wasm32-unknown-unknown/release/velo.wasm
+
       - name: Optimize WebAssembly file
         run: wasm-opt -Os out/velo_bg.wasm -o out/velo_bg.wasm
-      
+
       - name: Copy WebAssembly files to web branch
         run: |
-          git config --global user.email "you@example.com"
-          git config --global user.name "GitHub Actions"
+          git config --global user.email ""
+          git config --global user.name "velo"
           git fetch --all
           git checkout -b web origin/web -f
           cp -r out/* .
           git add .
-          git commit -m "Build and Deploy WebAssembly to Web Branch"
+          git commit -m "Build and Deploy $GITHUB_SHA WebAssembly to Web Branch"
           git push origin web
