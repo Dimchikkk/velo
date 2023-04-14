@@ -22,13 +22,12 @@ pub fn keyboard_input_system(
     mut char_evr: EventReader<ReceivedCharacter>,
     mut events: EventWriter<AddRect>,
     input: Res<Input<KeyCode>>,
-    asset_server: Res<AssetServer>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut deleting: Local<bool>,
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
+    let font = state.font.as_ref().unwrap().clone();
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
 

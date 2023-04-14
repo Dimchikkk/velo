@@ -33,7 +33,6 @@ pub fn load_json(
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrow>,
-    asset_server: Res<AssetServer>,
     mut selected_tabs_query: Query<Entity, With<SelectedTab>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
@@ -47,7 +46,7 @@ pub fn load_json(
 
     let bottom_panel = bottom_panel.single_mut();
 
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
+    let font = state.font.as_ref().unwrap().clone();
 
     for (entity, mut visibility) in &mut old_arrows.iter_mut() {
         #[cfg(not(target_arch = "wasm32"))]

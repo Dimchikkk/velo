@@ -202,14 +202,14 @@ pub fn delete_tab_handler(
         (Changed<Interaction>, With<DeleteTab>),
     >,
     mut state: ResMut<AppState>,
-    asset_server: Res<AssetServer>,
+    _asset_server: Res<AssetServer>,
 ) {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
+    let font = state.font.as_ref().unwrap().clone();
     for (interaction, mut bg_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let id = ReflectableUuid(Uuid::new_v4());
-                state.path_modal_id = Some(id);
+                state.modal_id = Some(id);
                 state.entity_to_edit = None;
                 let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Tab);
                 commands.entity(state.main_panel.unwrap()).add_child(entity);

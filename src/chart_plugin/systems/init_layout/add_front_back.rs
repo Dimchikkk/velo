@@ -7,8 +7,8 @@ pub fn add_front_back(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     button_action: ButtonAction,
+    font: Handle<Font>,
 ) -> Entity {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
     let (image, text) = if button_action.button_type == ButtonTypes::Front {
         (asset_server.load("front.png"), "Move to front")
     } else {
