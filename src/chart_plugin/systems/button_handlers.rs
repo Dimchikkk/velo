@@ -245,9 +245,8 @@ pub fn text_manipulation(
     mut editable_text: Query<(&mut Text, &EditableText), With<EditableText>>,
     mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
     state: Res<AppState>,
-    asset_server: Res<AssetServer>,
 ) {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
+    let font = state.font.as_ref().unwrap().clone();
     for (interaction, text_manipulation, mut bg_color, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
@@ -353,12 +352,11 @@ pub fn new_doc_handler(
     mut doc_list_query: Query<Entity, With<DocList>>,
     mut state: ResMut<AppState>,
     mut events: EventWriter<UpdateListHighlight>,
-    asset_server: Res<AssetServer>,
 ) {
     for (interaction, mut bg_color) in &mut new_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let font = asset_server.load("fonts/iosevka-regular.ttf");
+                let font = state.font.as_ref().unwrap().clone();
                 let doc_id = ReflectableUuid(Uuid::new_v4());
                 let name = "Untitled".to_string();
                 let tab_id = ReflectableUuid(Uuid::new_v4());
@@ -480,17 +478,16 @@ pub fn delete_doc_handler(
         (Changed<Interaction>, With<DeleteDoc>),
     >,
     mut state: ResMut<AppState>,
-    asset_server: Res<AssetServer>,
 ) {
     for (interaction, mut bg_color) in &mut delete_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let font = asset_server.load("fonts/iosevka-regular.ttf");
+                let font = state.font.as_ref().unwrap().clone();
                 let id = ReflectableUuid(Uuid::new_v4());
                 state.entity_to_edit = None;
                 state.tab_to_edit = None;
                 state.doc_to_edit = None;
-                state.path_modal_id = Some(id);
+                state.modal_id = Some(id);
                 let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Document);
                 commands.entity(state.main_panel.unwrap()).add_child(entity);
             }

@@ -23,7 +23,7 @@ pub fn cancel_modal(
             for (entity, path_modal_top) in query.iter() {
                 if path_modal_cancel.id == path_modal_top.id {
                     commands.entity(entity).despawn_recursive();
-                    state.path_modal_id = None;
+                    state.modal_id = None;
                 }
             }
         }
@@ -99,7 +99,7 @@ pub fn confirm_modal(
                         remove_from_pkv(&mut pkv, id_to_remove, state.current_document.unwrap());
                     }
                     commands.entity(entity).despawn_recursive();
-                    state.path_modal_id = None;
+                    state.modal_id = None;
                 }
             }
         }
@@ -117,7 +117,7 @@ pub fn modal_keyboard_input_system(
 ) {
     if input.just_pressed(KeyCode::Return) {
         for (entity, path_modal_top) in query_top.iter() {
-            if Some(path_modal_top.id) == state.path_modal_id {
+            if Some(path_modal_top.id) == state.modal_id {
                 let current_document = state.current_document.unwrap();
                 if path_modal_top.delete == ModalEntity::Tab
                     && state.docs.get_mut(&current_document).unwrap().tabs.len() > 1
@@ -171,7 +171,7 @@ pub fn modal_keyboard_input_system(
                     remove_from_pkv(&mut pkv, id_to_remove, state.current_document.unwrap());
                 }
                 commands.entity(entity).despawn_recursive();
-                state.path_modal_id = None;
+                state.modal_id = None;
             }
         }
     }
