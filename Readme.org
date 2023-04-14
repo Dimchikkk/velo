@@ -6,7 +6,7 @@
 
 [[https://staffengineer.github.io/velo/][https://staffengineer.github.io/velo/]]
 
-(wasm target has limited feature-set, only landscape webview is supported and only Chrome)
+(wasm target has limited feature-set, only landscape webview is supported and only Chrome is tested)
 
 
 ** Inspiration  
