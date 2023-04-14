@@ -1,0 +1,42 @@
+name: Build and Deploy WebAssembly to Web Branch
+# on:
+#   push:
+#     branches: [ main ]
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Install Rust and wasm-bindgen
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo install wasm-bindgen-cli
+          cargo install wasm-opt
+      
+      - name: Build WebAssembly file
+        run: cargo build --release --target wasm32-unknown-unknown
+      
+      - name: Generate JavaScript and TypeScript bindings
+        run: wasm-bindgen --target web --out-dir out target/wasm32-unknown-unknown/release/velo.wasm
+      
+      - name: Optimize WebAssembly file
+        run: wasm-opt -Os out/velo_bg.wasm -o out/velo_bg.wasm
+      
+      - name: Commit and push changes to Web Branch
+        uses: EndBug/add-and-commit@v7
+        with:
+          author_name: GitHub Actions
+          author_email: actions@github.com
+          message: Build and Deploy WebAssembly to Web Branch
+          add: out/*
+          branch: web
+          force: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
