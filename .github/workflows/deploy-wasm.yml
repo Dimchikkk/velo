@@ -24,13 +24,8 @@ jobs:
       - name: Generate JavaScript bindings
         run: wasm-bindgen --target web  --no-typescript --out-dir out target/wasm32-unknown-unknown/release/velo.wasm
         
-      - name: Copy WebAssembly files to web branch
-        run: |
-          git config --global user.email ""
-          git config --global user.name "velo"
-          git fetch --all
-          git checkout -b web origin/web -f
-          cp -r out/* .
-          git add .
-          git commit -m "Build and Deploy $GITHUB_SHA WebAssembly to Web Branch"
-          git push origin web
+      - uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: $
+          publish_dir: ./out
