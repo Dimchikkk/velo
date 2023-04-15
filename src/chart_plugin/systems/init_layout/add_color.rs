@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
+use crate::chart_plugin::ui_helpers::GenericButton;
+
 use super::ui_helpers::ChangeColor;
 
 pub fn add_color(commands: &mut Commands, color: Color) -> Entity {
@@ -25,6 +27,7 @@ pub fn add_color(commands: &mut Commands, color: Color) -> Entity {
             },
             BorderColor(Color::BLACK),
             ChangeColor { color },
+            GenericButton,
         ))
         .id()
 }

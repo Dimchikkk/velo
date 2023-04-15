@@ -47,26 +47,16 @@ pub fn selected_tab_handler(
             Interaction::Hovered => {
                 let current_document = state.current_document.unwrap();
                 for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
-                    if selected_tab.id == tab.id {
-                        if tab.is_active {
-                            bg_color.0 = Color::ALICE_BLUE;
-                        } else {
-                            bg_color.0 =
-                                Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
-                        }
+                    if selected_tab.id == tab.id && tab.is_active {
+                        bg_color.0 = Color::ALICE_BLUE;
                     }
                 }
             }
             Interaction::None => {
                 let current_document = state.current_document.unwrap();
                 for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
-                    if selected_tab.id == tab.id {
-                        if tab.is_active {
-                            bg_color.0 = Color::ALICE_BLUE;
-                        } else {
-                            bg_color.0 =
-                                Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-                        }
+                    if selected_tab.id == tab.id && tab.is_active {
+                        bg_color.0 = Color::ALICE_BLUE;
                     }
                 }
             }
@@ -76,13 +66,10 @@ pub fn selected_tab_handler(
 
 pub fn add_tab_handler(
     mut commands: Commands,
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<AddTab>),
-    >,
+    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<AddTab>)>,
     mut state: ResMut<AppState>,
 ) {
-    for (interaction, mut bg_color) in &mut interaction_query {
+    for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let tab_id = ReflectableUuid(Uuid::new_v4());
@@ -109,12 +96,8 @@ pub fn add_tab_handler(
                     drop_last_checkpoint: false,
                 });
             }
-            Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
-            }
-            Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
@@ -163,13 +146,10 @@ pub fn tab_keyboard_input_system(
 }
 
 pub fn rename_tab_handler(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<RenameTab>),
-    >,
+    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<RenameTab>)>,
     mut state: ResMut<AppState>,
 ) {
-    for (interaction, mut bg_color) in &mut interaction_query {
+    for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 state.entity_to_edit = None;
@@ -185,41 +165,29 @@ pub fn rename_tab_handler(
                     .unwrap();
                 state.tab_to_edit = Some(tab.id);
             }
-            Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
-            }
-            Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
 
 pub fn delete_tab_handler(
     mut commands: Commands,
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<DeleteTab>),
-    >,
+    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<DeleteTab>)>,
     mut state: ResMut<AppState>,
-    asset_server: Res<AssetServer>,
 ) {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
-    for (interaction, mut bg_color) in &mut interaction_query {
+    let font = state.font.as_ref().unwrap().clone();
+    for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let id = ReflectableUuid(Uuid::new_v4());
-                state.path_modal_id = Some(id);
+                state.modal_id = Some(id);
                 state.entity_to_edit = None;
                 let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Tab);
                 commands.entity(state.main_panel.unwrap()).add_child(entity);
             }
-            Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
-            }
-            Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }

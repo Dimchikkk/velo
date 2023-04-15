@@ -12,16 +12,16 @@ use crate::{
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ArrowMeta, ArrowMode, ButtonAction,
-    ChangeColor, DeleteDoc, DocList, DocListItemText, EditableText, ModalEntity, NewDoc, Rectangle,
-    ReflectableUuid, RenameDoc, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
-    Tooltip,
+    ChangeColor, DeleteDoc, DocList, DocListItemText, EditableText, GenericButton, ModalEntity,
+    NewDoc, Rectangle, ReflectableUuid, RenameDoc, SaveDoc, TextManipulation,
+    TextManipulationAction, TextPosMode, Tooltip,
 };
 
 pub fn rec_button_handlers(
     mut commands: Commands,
     mut events: EventWriter<AddRect>,
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &ButtonAction, &Children),
+        (&Interaction, &ButtonAction, &Children),
         (Changed<Interaction>, With<ButtonAction>),
     >,
     mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
@@ -31,7 +31,7 @@ pub fn rec_button_handlers(
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = windows.single();
-    for (interaction, mut color, button_action, children) in &mut interaction_query {
+    for (interaction, button_action, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => match button_action.button_type {
                 super::ui_helpers::ButtonTypes::Add => {
@@ -65,13 +65,13 @@ pub fn rec_button_handlers(
                                 commands.entity(entity).despawn_recursive();
                             }
                         }
+                        #[allow(unused)]
                         for (entity, arrow, mut visibility) in &mut arrows.iter_mut() {
                             if arrow.start.id == id || arrow.end.id == id {
                                 #[cfg(not(target_arch = "wasm32"))]
                                 {
                                     commands.entity(entity).despawn_recursive();
                                 }
-                                visibility = visibility; // just to get rid of clippy rewrite
                                 #[cfg(target_arch = "wasm32")]
                                 {
                                     *visibility = Visibility::Hidden;
@@ -103,53 +103,47 @@ pub fn rec_button_handlers(
                     }
                 }
             },
-            Interaction::Hovered => {
-                color.0 = Color::GRAY;
-                match button_action.button_type {
-                    super::ui_helpers::ButtonTypes::Add => {}
-                    super::ui_helpers::ButtonTypes::Del => {}
-                    super::ui_helpers::ButtonTypes::Front => {
-                        let child = children.iter().next().unwrap();
-                        let mut visibility = tooltips_query.get_mut(*child).unwrap();
-                        *visibility = Visibility::Visible;
-                    }
-                    super::ui_helpers::ButtonTypes::Back => {
-                        let child = children.iter().next().unwrap();
-                        let mut visibility = tooltips_query.get_mut(*child).unwrap();
-                        *visibility = Visibility::Visible;
-                    }
+            Interaction::Hovered => match button_action.button_type {
+                super::ui_helpers::ButtonTypes::Add => {}
+                super::ui_helpers::ButtonTypes::Del => {}
+                super::ui_helpers::ButtonTypes::Front => {
+                    let child = children.iter().next().unwrap();
+                    let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                    *visibility = Visibility::Visible;
                 }
-            }
-            Interaction::None => {
-                color.0 = Color::rgb(0.8, 0.8, 0.8);
-                match button_action.button_type {
-                    super::ui_helpers::ButtonTypes::Add => {}
-                    super::ui_helpers::ButtonTypes::Del => {}
-                    super::ui_helpers::ButtonTypes::Front => {
-                        let child = children.iter().next().unwrap();
-                        let mut visibility = tooltips_query.get_mut(*child).unwrap();
-                        *visibility = Visibility::Hidden;
-                    }
-                    super::ui_helpers::ButtonTypes::Back => {
-                        let child = children.iter().next().unwrap();
-                        let mut visibility = tooltips_query.get_mut(*child).unwrap();
-                        *visibility = Visibility::Hidden;
-                    }
+                super::ui_helpers::ButtonTypes::Back => {
+                    let child = children.iter().next().unwrap();
+                    let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                    *visibility = Visibility::Visible;
                 }
-            }
+            },
+            Interaction::None => match button_action.button_type {
+                super::ui_helpers::ButtonTypes::Add => {}
+                super::ui_helpers::ButtonTypes::Del => {}
+                super::ui_helpers::ButtonTypes::Front => {
+                    let child = children.iter().next().unwrap();
+                    let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                    *visibility = Visibility::Hidden;
+                }
+                super::ui_helpers::ButtonTypes::Back => {
+                    let child = children.iter().next().unwrap();
+                    let mut visibility = tooltips_query.get_mut(*child).unwrap();
+                    *visibility = Visibility::Hidden;
+                }
+            },
         }
     }
 }
 
 pub fn change_color_pallete(
     mut interaction_query: Query<
-        (&Interaction, &ChangeColor, &mut BackgroundColor),
+        (&Interaction, &ChangeColor),
         (Changed<Interaction>, With<ChangeColor>, Without<Rectangle>),
     >,
     mut nodes: Query<(&mut BackgroundColor, &Rectangle), With<Rectangle>>,
     state: Res<AppState>,
 ) {
-    for (interaction, change_color, mut bg_color) in &mut interaction_query {
+    for (interaction, change_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let color = change_color.color;
@@ -161,25 +155,21 @@ pub fn change_color_pallete(
                     }
                 }
             }
-            Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-            }
-            Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
 
 pub fn change_text_pos(
     mut interaction_query: Query<
-        (&Interaction, &TextPosMode, &mut BackgroundColor),
+        (&Interaction, &TextPosMode),
         (Changed<Interaction>, With<TextPosMode>),
     >,
     mut nodes: Query<(&mut Style, &Rectangle), With<Rectangle>>,
     state: Res<AppState>,
 ) {
-    for (interaction, text_pos_mode, mut bg_color) in &mut interaction_query {
+    for (interaction, text_pos_mode) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 if state.entity_to_edit.is_some() {
@@ -193,37 +183,31 @@ pub fn change_text_pos(
                     }
                 }
             }
-            Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
-            }
-            Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
 
 pub fn change_arrow_type(
     mut interaction_query: Query<
-        (&Interaction, &ArrowMode, &mut BackgroundColor, &Children),
+        (&Interaction, &ArrowMode, &Children),
         (Changed<Interaction>, With<ArrowMode>),
     >,
     mut state: ResMut<AppState>,
     mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
 ) {
-    for (interaction, arrow_mode, mut bg_color, children) in &mut interaction_query {
+    for (interaction, arrow_mode, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 state.arrow_type = arrow_mode.arrow_type;
             }
             Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
                 let child = children.iter().next().unwrap();
                 let mut visibility = tooltips_query.get_mut(*child).unwrap();
                 *visibility = Visibility::Visible;
             }
             Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
                 let child = children.iter().next().unwrap();
                 let mut visibility = tooltips_query.get_mut(*child).unwrap();
                 *visibility = Visibility::Hidden;
@@ -234,21 +218,15 @@ pub fn change_arrow_type(
 
 pub fn text_manipulation(
     mut interaction_query: Query<
-        (
-            &Interaction,
-            &TextManipulationAction,
-            &mut BackgroundColor,
-            &Children,
-        ),
+        (&Interaction, &TextManipulationAction, &Children),
         (Changed<Interaction>, With<TextManipulationAction>),
     >,
     mut editable_text: Query<(&mut Text, &EditableText), With<EditableText>>,
     mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
     state: Res<AppState>,
-    asset_server: Res<AssetServer>,
 ) {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
-    for (interaction, text_manipulation, mut bg_color, children) in &mut interaction_query {
+    let font = state.font.as_ref().unwrap().clone();
+    for (interaction, text_manipulation, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 #[cfg(not(target_arch = "wasm32"))]
@@ -329,13 +307,11 @@ pub fn text_manipulation(
                 }
             }
             Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
                 let child = children.iter().next().unwrap();
                 let mut visibility = tooltips_query.get_mut(*child).unwrap();
                 *visibility = Visibility::Visible;
             }
             Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
                 let child = children.iter().next().unwrap();
                 let mut visibility = tooltips_query.get_mut(*child).unwrap();
                 *visibility = Visibility::Hidden;
@@ -346,19 +322,15 @@ pub fn text_manipulation(
 
 pub fn new_doc_handler(
     mut commands: Commands,
-    mut new_doc_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<NewDoc>),
-    >,
+    mut new_doc_query: Query<&Interaction, (Changed<Interaction>, With<NewDoc>)>,
     mut doc_list_query: Query<Entity, With<DocList>>,
     mut state: ResMut<AppState>,
     mut events: EventWriter<UpdateListHighlight>,
-    asset_server: Res<AssetServer>,
 ) {
-    for (interaction, mut bg_color) in &mut new_doc_query.iter_mut() {
+    for interaction in &mut new_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let font = asset_server.load("fonts/iosevka-regular.ttf");
+                let font = state.font.as_ref().unwrap().clone();
                 let doc_id = ReflectableUuid(Uuid::new_v4());
                 let name = "Untitled".to_string();
                 let tab_id = ReflectableUuid(Uuid::new_v4());
@@ -400,24 +372,17 @@ pub fn new_doc_handler(
                 commands.entity(doc_list).add_child(button);
                 events.send(UpdateListHighlight);
             }
-            Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
-            }
-            Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
 
 pub fn rename_doc_handler(
-    mut rename_doc_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<RenameDoc>),
-    >,
+    mut rename_doc_query: Query<&Interaction, (Changed<Interaction>, With<RenameDoc>)>,
     mut state: ResMut<AppState>,
 ) {
-    for (interaction, mut bg_color) in &mut rename_doc_query.iter_mut() {
+    for interaction in &mut rename_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
                 state.entity_to_edit = None;
@@ -425,12 +390,8 @@ pub fn rename_doc_handler(
                 let current_document = state.current_document.unwrap();
                 state.doc_to_edit = Some(current_document);
             }
-            Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
-            }
-            Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
@@ -475,44 +436,33 @@ pub fn doc_keyboard_input_system(
 
 pub fn delete_doc_handler(
     mut commands: Commands,
-    mut delete_doc_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<DeleteDoc>),
-    >,
+    mut delete_doc_query: Query<&Interaction, (Changed<Interaction>, With<DeleteDoc>)>,
     mut state: ResMut<AppState>,
-    asset_server: Res<AssetServer>,
 ) {
-    for (interaction, mut bg_color) in &mut delete_doc_query.iter_mut() {
+    for interaction in &mut delete_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let font = asset_server.load("fonts/iosevka-regular.ttf");
+                let font = state.font.as_ref().unwrap().clone();
                 let id = ReflectableUuid(Uuid::new_v4());
                 state.entity_to_edit = None;
                 state.tab_to_edit = None;
                 state.doc_to_edit = None;
-                state.path_modal_id = Some(id);
+                state.modal_id = Some(id);
                 let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Document);
                 commands.entity(state.main_panel.unwrap()).add_child(entity);
             }
-            Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
-            }
-            Interaction::None => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
 
 pub fn save_doc_handler(
     mut commands: Commands,
-    mut save_doc_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<SaveDoc>),
-    >,
+    mut save_doc_query: Query<&Interaction, (Changed<Interaction>, With<SaveDoc>)>,
     state: Res<AppState>,
 ) {
-    for (interaction, mut bg_color) in &mut save_doc_query.iter_mut() {
+    for interaction in &mut save_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
                 commands.insert_resource(SaveRequest {
@@ -520,10 +470,29 @@ pub fn save_doc_handler(
                     tab_id: None,
                 });
             }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+pub fn button_hover_change(
+    mut generic_button_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<GenericButton>),
+    >,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+) {
+    let mut primary_window = windows.single_mut();
+    for (interaction, mut bg_color) in &mut generic_button_query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {}
             Interaction::Hovered => {
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+                primary_window.cursor.icon = CursorIcon::Hand;
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
             }
             Interaction::None => {
+                primary_window.cursor.icon = CursorIcon::Default;
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
             }
         }

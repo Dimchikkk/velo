@@ -1,14 +1,16 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
+use crate::chart_plugin::ui_helpers::GenericButton;
+
 use super::ui_helpers::{get_tooltip, ButtonAction, ButtonTypes, Tooltip};
 
 pub fn add_front_back(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     button_action: ButtonAction,
+    font: Handle<Font>,
 ) -> Entity {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
     let (image, text) = if button_action.button_type == ButtonTypes::Front {
         (asset_server.load("front.png"), "Move to front")
     } else {
@@ -42,6 +44,7 @@ pub fn add_front_back(
             },
             BorderColor(Color::BLACK),
             button_action,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));

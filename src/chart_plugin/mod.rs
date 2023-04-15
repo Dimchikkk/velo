@@ -19,9 +19,9 @@ use load_systems::*;
 #[path = "systems/keyboard.rs"]
 mod keyboard_systems;
 use keyboard_systems::*;
-#[path = "systems/path_modal.rs"]
-mod path_modal_systems;
-use path_modal_systems::*;
+#[path = "systems/modal.rs"]
+mod modal;
+use modal::*;
 #[path = "systems/init_layout/init_layout.rs"]
 mod init_layout;
 use init_layout::*;
@@ -121,7 +121,8 @@ pub const MAX_SAVED_DOCS_IN_MEMORY: i32 = 7;
 
 #[derive(Resource, Default)]
 pub struct AppState {
-    pub path_modal_id: Option<ReflectableUuid>,
+    pub font: Option<Handle<Font>>,
+    pub modal_id: Option<ReflectableUuid>,
     pub main_panel: Option<Entity>,
     pub arrow_type: ArrowType,
     pub entity_to_edit: Option<ReflectableUuid>,
@@ -190,7 +191,6 @@ impl Plugin for ChartPlugin {
             change_text_pos,
             add_tab_handler,
             delete_tab_handler,
-            selected_tab_handler,
             rename_tab_handler,
             tab_keyboard_input_system,
             text_manipulation,
@@ -203,6 +203,7 @@ impl Plugin for ChartPlugin {
         ));
 
         app.add_systems((doc_keyboard_input_system, list_selected_highlight));
+        app.add_systems((button_hover_change, selected_tab_handler).chain());
     }
 }
 
@@ -305,12 +306,11 @@ fn update_rectangle_position(
 
 fn create_new_rectangle(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut events: EventReader<AddRect>,
     mut state: ResMut<AppState>,
 ) {
     for event in events.iter() {
-        let font = asset_server.load("fonts/iosevka-regular.ttf");
+        let font = state.font.as_ref().unwrap().clone();
         state.entity_to_edit = Some(ReflectableUuid(event.node.id));
         let entity = spawn_node(
             &mut commands,

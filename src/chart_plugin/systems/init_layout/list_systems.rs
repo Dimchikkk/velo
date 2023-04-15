@@ -122,14 +122,14 @@ pub fn list_selected_highlight(
 
 pub fn list_item_click(
     mut interaction_query: Query<
-        (&Interaction, &DocListItemButton, &mut BackgroundColor),
+        (&Interaction, &DocListItemButton),
         (Changed<Interaction>, With<DocListItemButton>),
     >,
     mut state: ResMut<AppState>,
     mut commands: Commands,
     mut events: EventWriter<UpdateListHighlight>,
 ) {
-    for (interaction, doc_list_item, mut bg_color) in &mut interaction_query.iter_mut() {
+    for (interaction, doc_list_item) in &mut interaction_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
                 commands.insert_resource(SaveRequest {
@@ -142,12 +142,8 @@ pub fn list_item_click(
                     drop_last_checkpoint: false,
                 });
             }
-            Interaction::Hovered => {
-                bg_color.0 = Color::rgba(1.0, 1.0, 1.0, 0.8);
-            }
-            Interaction::None => {
-                bg_color.0 = Color::rgba(1.0, 1.0, 1.0, 0.5);
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
         events.send(UpdateListHighlight);
     }
