@@ -6,8 +6,9 @@ use crate::{AppState, MainCamera, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, DeleteDoc,
-    DeleteTab, LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu, NewDoc, RenameDoc,
-    RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
+    DeleteTab, GenericButton, LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu,
+    NewDoc, RenameDoc, RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction,
+    TextPosMode,
 };
 
 #[path = "add_arrow.rs"]
@@ -95,6 +96,7 @@ pub fn init_layout(
                 ..default()
             },
             AddTab,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), "New Tab".to_string()));
@@ -120,6 +122,7 @@ pub fn init_layout(
                 ..default()
             },
             RenameTab,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), "Rename".to_string()));
@@ -145,6 +148,7 @@ pub fn init_layout(
                 ..default()
             },
             DeleteTab,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), "Delete".to_string()));
