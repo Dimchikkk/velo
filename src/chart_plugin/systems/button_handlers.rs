@@ -12,9 +12,9 @@ use crate::{
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ArrowMeta, ArrowMode, ButtonAction,
-    ChangeColor, DeleteDoc, DocList, DocListItemText, EditableText, GenericButton, ModalEntity,
-    NewDoc, Rectangle, ReflectableUuid, RenameDoc, SaveDoc, TextManipulation,
-    TextManipulationAction, TextPosMode, Tooltip,
+    ChangeColor, DeleteDoc, DocList, EditableText, GenericButton, ModalEntity, NewDoc, Rectangle,
+    ReflectableUuid, RenameDoc, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
+    Tooltip,
 };
 
 pub fn rec_button_handlers(
@@ -392,44 +392,6 @@ pub fn rename_doc_handler(
             }
             Interaction::Hovered => {}
             Interaction::None => {}
-        }
-    }
-}
-
-pub fn doc_keyboard_input_system(
-    mut query: Query<(&mut Text, &DocListItemText), With<DocListItemText>>,
-    mut state: ResMut<AppState>,
-    input: Res<Input<KeyCode>>,
-    mut char_evr: EventReader<ReceivedCharacter>,
-    mut deleting: Local<bool>,
-) {
-    for (mut text, doc_list_item) in &mut query.iter_mut() {
-        if Some(doc_list_item.id) == state.doc_to_edit {
-            if text.sections[0].value == *"Untitled" {
-                text.sections[0].value = "".to_string();
-            }
-            if input.just_pressed(KeyCode::Return) {
-                state.doc_to_edit = None;
-                continue;
-            }
-            let mut str = text.sections[0].value.clone();
-            if input.just_pressed(KeyCode::Back) {
-                *deleting = true;
-                str.pop();
-            } else if input.just_released(KeyCode::Back) {
-                *deleting = false;
-            } else {
-                for ev in char_evr.iter() {
-                    if *deleting {
-                        str.pop();
-                    } else {
-                        str = format!("{}{}", text.sections[0].value, ev.char);
-                    }
-                }
-            }
-            text.sections[0].value = str;
-            let doc = state.docs.get_mut(&doc_list_item.id).unwrap();
-            doc.name = text.sections[0].value.clone();
         }
     }
 }
