@@ -45,6 +45,7 @@ jobs:
           git fetch --all
           git checkout -b web origin/web -f
           cp -r out/* .
+          rm -rf binaryen wasm-bindgen target out
           git add .
           git commit -m "Build and Deploy WebAssembly to Web Branch" || true
           git push origin web
