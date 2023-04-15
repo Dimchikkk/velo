@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
+use crate::chart_plugin::ui_helpers::GenericButton;
+
 use super::ui_helpers::{get_tooltip, ButtonAction, ButtonTypes, Tooltip};
 
 pub fn add_front_back(
@@ -42,6 +44,7 @@ pub fn add_front_back(
             },
             BorderColor(Color::BLACK),
             button_action,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));

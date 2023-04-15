@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
+use crate::chart_plugin::ui_helpers::GenericButton;
+
 use super::ui_helpers::TextPosMode;
 
 pub fn add_text_pos(
@@ -43,6 +45,7 @@ pub fn add_text_pos(
             },
             BorderColor(Color::BLACK),
             text_pos_mode,
+            GenericButton,
         ))
         .id()
 }

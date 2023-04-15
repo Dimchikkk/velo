@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
+use crate::chart_plugin::ui_helpers::GenericButton;
+
 use super::ui_helpers::add_rectangle_txt;
 
 pub fn add_new_delete_rec(
@@ -42,6 +44,7 @@ pub fn add_new_delete_rec(
                 ..default()
             },
             component_do,
+            GenericButton,
             BorderColor(Color::BLACK),
         ))
         .with_children(|builder| {
@@ -63,6 +66,7 @@ pub fn add_new_delete_rec(
                 ..default()
             },
             component_undo,
+            GenericButton,
             BorderColor(Color::BLACK),
         ))
         .with_children(|builder| {
