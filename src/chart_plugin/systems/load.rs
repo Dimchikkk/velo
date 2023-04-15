@@ -7,6 +7,7 @@ use bevy::{
 };
 
 use bevy_pkv::PkvStore;
+#[cfg(not(target_arch = "wasm32"))]
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
