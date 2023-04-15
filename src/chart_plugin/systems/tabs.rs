@@ -47,20 +47,16 @@ pub fn selected_tab_handler(
             Interaction::Hovered => {
                 let current_document = state.current_document.unwrap();
                 for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
-                    if selected_tab.id == tab.id {
-                        if tab.is_active {
-                            bg_color.0 = Color::ALICE_BLUE;
-                        }
+                    if selected_tab.id == tab.id && tab.is_active {
+                        bg_color.0 = Color::ALICE_BLUE;
                     }
                 }
             }
             Interaction::None => {
                 let current_document = state.current_document.unwrap();
                 for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
-                    if selected_tab.id == tab.id {
-                        if tab.is_active {
-                            bg_color.0 = Color::ALICE_BLUE;
-                        }
+                    if selected_tab.id == tab.id && tab.is_active {
+                        bg_color.0 = Color::ALICE_BLUE;
                     }
                 }
             }
