@@ -33,7 +33,6 @@ pub fn load_json(
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrow>,
-    asset_server: Res<AssetServer>,
     mut selected_tabs_query: Query<Entity, With<SelectedTab>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
@@ -47,14 +46,14 @@ pub fn load_json(
 
     let bottom_panel = bottom_panel.single_mut();
 
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
+    let font = state.font.as_ref().unwrap().clone();
 
+    #[allow(unused)]
     for (entity, mut visibility) in &mut old_arrows.iter_mut() {
         #[cfg(not(target_arch = "wasm32"))]
         {
             commands.entity(entity).despawn_recursive();
         }
-        visibility = visibility; // just to get rid of clippy rewrite
         #[cfg(target_arch = "wasm32")]
         {
             *visibility = Visibility::Hidden;

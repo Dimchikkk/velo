@@ -283,6 +283,7 @@ pub fn add_tab(
                 ..default()
             },
             SelectedTab { id },
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn((
@@ -315,6 +316,7 @@ pub fn add_list_item(
                 },
                 ..default()
             },
+            GenericButton,
             DocListItemButton { id },
             AccessibilityNode(NodeBuilder::new(Role::ListItem)),
         ))

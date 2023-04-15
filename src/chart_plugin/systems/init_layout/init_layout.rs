@@ -6,8 +6,9 @@ use crate::{AppState, MainCamera, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, DeleteDoc,
-    DeleteTab, LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu, NewDoc, RenameDoc,
-    RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
+    DeleteTab, GenericButton, LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu,
+    NewDoc, RenameDoc, RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction,
+    TextPosMode,
 };
 
 #[path = "add_arrow.rs"]
@@ -49,6 +50,8 @@ pub fn init_layout(
     mut pkv: ResMut<PkvStore>,
 ) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
+
+    state.font = Some(font.clone());
     commands.spawn((Camera2dBundle::default(), MainCamera));
     let bottom_panel = commands
         .spawn((
@@ -93,6 +96,7 @@ pub fn init_layout(
                 ..default()
             },
             AddTab,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), "New Tab".to_string()));
@@ -118,6 +122,7 @@ pub fn init_layout(
                 ..default()
             },
             RenameTab,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), "Rename".to_string()));
@@ -143,6 +148,7 @@ pub fn init_layout(
                 ..default()
             },
             DeleteTab,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn(add_rectangle_txt(font.clone(), "Delete".to_string()));
@@ -312,7 +318,7 @@ pub fn init_layout(
 
     let creation = add_new_delete_rec(
         &mut commands,
-        font,
+        font.clone(),
         "New Rec".to_string(),
         "Del Rec".to_string(),
         ButtonAction {
@@ -345,6 +351,7 @@ pub fn init_layout(
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Front,
         },
+        font.clone(),
     );
     let back = add_front_back(
         &mut commands,
@@ -352,6 +359,7 @@ pub fn init_layout(
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Back,
         },
+        font.clone(),
     );
     commands.entity(fron_back).add_child(front);
     commands.entity(fron_back).add_child(back);
@@ -411,6 +419,7 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::Line,
         },
+        font.clone(),
     );
     let arrow2 = add_arrow(
         &mut commands,
@@ -418,6 +427,7 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::Arrow,
         },
+        font.clone(),
     );
     let arrow3 = add_arrow(
         &mut commands,
@@ -425,6 +435,7 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::DoubleArrow,
         },
+        font.clone(),
     );
     let arrow4 = add_arrow(
         &mut commands,
@@ -432,6 +443,7 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::ParallelLine,
         },
+        font.clone(),
     );
     let arrow5 = add_arrow(
         &mut commands,
@@ -439,6 +451,7 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::ParallelArrow,
         },
+        font.clone(),
     );
     let arrow6 = add_arrow(
         &mut commands,
@@ -446,6 +459,7 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::ParallelDoubleArrow,
         },
+        font.clone(),
     );
     commands.entity(arrow_modes).add_child(arrow1);
     commands.entity(arrow_modes).add_child(arrow2);
@@ -535,6 +549,7 @@ pub fn init_layout(
         TextManipulationAction {
             action_type: TextManipulation::Cut,
         },
+        font.clone(),
     );
 
     #[cfg(not(target_arch = "wasm32"))]
@@ -545,6 +560,7 @@ pub fn init_layout(
             TextManipulationAction {
                 action_type: TextManipulation::Copy,
             },
+            font.clone(),
         );
         let paste = add_text_manipulation(
             &mut commands,
@@ -552,6 +568,7 @@ pub fn init_layout(
             TextManipulationAction {
                 action_type: TextManipulation::Paste,
             },
+            font.clone(),
         );
         let open_all_links = add_text_manipulation(
             &mut commands,
@@ -559,6 +576,7 @@ pub fn init_layout(
             TextManipulationAction {
                 action_type: TextManipulation::OpenAllLinks,
             },
+            font,
         );
         commands.entity(text_manipulation).add_child(copy);
         commands.entity(text_manipulation).add_child(paste);
