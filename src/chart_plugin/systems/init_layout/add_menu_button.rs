@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::chart_plugin::ui_helpers::GenericButton;
+
 use super::ui_helpers::create_rectangle_txt;
 
 pub fn add_menu_button(
@@ -33,6 +35,7 @@ pub fn add_menu_button(
                 ..default()
             },
             component,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn(create_rectangle_txt(font.clone(), name, None));

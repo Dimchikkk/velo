@@ -48,12 +48,12 @@ pub fn load_json(
 
     let font = state.font.as_ref().unwrap().clone();
 
+    #[allow(unused)]
     for (entity, mut visibility) in &mut old_arrows.iter_mut() {
         #[cfg(not(target_arch = "wasm32"))]
         {
             commands.entity(entity).despawn_recursive();
         }
-        visibility = visibility; // just to get rid of clippy rewrite
         #[cfg(target_arch = "wasm32")]
         {
             *visibility = Visibility::Hidden;

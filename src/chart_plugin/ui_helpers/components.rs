@@ -7,6 +7,9 @@ use uuid::Uuid;
 use crate::TextPos;
 
 #[derive(Component)]
+pub struct GenericButton;
+
+#[derive(Component)]
 pub struct Root;
 
 #[derive(Component)]

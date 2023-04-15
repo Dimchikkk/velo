@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
+use crate::chart_plugin::ui_helpers::GenericButton;
+
 use super::ui_helpers::{get_tooltip, ArrowMode, ArrowType, Tooltip};
 
 pub fn add_arrow(
@@ -57,6 +59,7 @@ pub fn add_arrow(
             },
             BorderColor(Color::BLACK),
             arrow_mode,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));

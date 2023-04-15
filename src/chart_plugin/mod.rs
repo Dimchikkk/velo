@@ -191,7 +191,6 @@ impl Plugin for ChartPlugin {
             change_text_pos,
             add_tab_handler,
             delete_tab_handler,
-            selected_tab_handler,
             rename_tab_handler,
             tab_keyboard_input_system,
             text_manipulation,
@@ -204,6 +203,7 @@ impl Plugin for ChartPlugin {
         ));
 
         app.add_systems((doc_keyboard_input_system, list_selected_highlight));
+        app.add_systems((button_hover_change, selected_tab_handler).chain());
     }
 }
 

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
-
+use crate::chart_plugin::ui_helpers::GenericButton;
 
 use super::ui_helpers::{get_tooltip, TextManipulation, TextManipulationAction, Tooltip};
 
@@ -51,6 +51,7 @@ pub fn add_text_manipulation(
             },
             BorderColor(Color::BLACK),
             text_manipulation,
+            GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
