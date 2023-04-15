@@ -17,19 +17,34 @@ jobs:
           toolchain: stable
           target: wasm32-unknown-unknown
 
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Install wasm-bindgen
+        run: |
+          mkdir wasm-bindgen
+          curl -sSL "https://github.com/rustwasm/wasm-bindgen/releases/download/0.2.84/wasm-bindgen-0.2.84-x86_64-unknown-linux-musl.tar.gz" | tar xvz -C ./wasm-bindgen wasm-bindgen-0.2.84-x86_64-unknown-linux-musl --strip=1
+          echo `pwd`/wasm-bindgen >> $GITHUB_PATH
+          
+      - name: Install wasm-opt
+        run: |
+          mkdir binaryen
+          curl -sSL https://github.com/WebAssembly/binaryen/releases/download/version_111/binaryen-version_111-x86_64-linux.tar.gz  | tar xvz -C ./binaryen binaryen-version_111 --strip=1
+          echo `pwd`/binaryen/bin >> $GITHUB_PATH
+
+      - name : Build Wasm
+        run: cargo build --release --target wasm32-unknown-unknown
         
       - name: Generate JavaScript bindings
-        run: wasm-pack build --target web --out-dir out 
+        run: wasm-bindgen --target web  --no-typescript --out-dir out target/wasm32-unknown-unknown/release/velo.wasm
         
+      - name: Optimize Wasm
+        run : wasm-opt -Os out/velo_bg.wasm -o out/velo_bg.wasm
+
       - name: Copy WebAssembly files to web branch
         run: |
           git config --global user.email ""
-          git config --global user.name "velo"
+          git config --global user.name "GitHub Actions"
           git fetch --all
           git checkout -b web origin/web -f
           cp -r out/* .
           git add .
-          git commit -m "Build and Deploy $GITHUB_SHA WebAssembly to Web Branch"
+          git commit -m "Build and Deploy WebAssembly to Web Branch" || true
           git push origin web
