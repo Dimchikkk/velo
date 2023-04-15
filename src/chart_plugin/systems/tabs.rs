@@ -8,7 +8,6 @@ use crate::{AppState, LoadRequest, SaveRequest, Tab};
 
 use super::ui_helpers::{
     spawn_modal, AddTab, DeleteTab, ModalEntity, ReflectableUuid, RenameTab, SelectedTab,
-    SelectedTabTextInput,
 };
 
 pub fn selected_tab_handler(
@@ -98,49 +97,6 @@ pub fn add_tab_handler(
             }
             Interaction::Hovered => {}
             Interaction::None => {}
-        }
-    }
-}
-
-pub fn tab_keyboard_input_system(
-    mut query: Query<(&mut Text, &SelectedTabTextInput), With<SelectedTabTextInput>>,
-    mut state: ResMut<AppState>,
-    input: Res<Input<KeyCode>>,
-    mut char_evr: EventReader<ReceivedCharacter>,
-    mut deleting: Local<bool>,
-) {
-    for (mut text, tab_input) in &mut query.iter_mut() {
-        if Some(tab_input.id) == state.tab_to_edit {
-            if input.just_pressed(KeyCode::Return) {
-                state.tab_to_edit = None;
-                continue;
-            }
-            let mut str = text.sections[0].value.clone();
-            if input.just_pressed(KeyCode::Back) {
-                *deleting = true;
-                str.pop();
-            } else if input.just_released(KeyCode::Back) {
-                *deleting = false;
-            } else {
-                for ev in char_evr.iter() {
-                    if *deleting {
-                        str.pop();
-                    } else {
-                        str = format!("{}{}", text.sections[0].value, ev.char);
-                    }
-                }
-            }
-            text.sections[0].value = str;
-            let current_document = state.current_document.unwrap();
-            let tab = state
-                .docs
-                .get_mut(&current_document)
-                .unwrap()
-                .tabs
-                .iter_mut()
-                .find(|x| x.id == tab_input.id)
-                .unwrap();
-            tab.name = text.sections[0].value.clone();
         }
     }
 }
