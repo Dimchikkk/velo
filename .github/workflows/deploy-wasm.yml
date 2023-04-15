@@ -44,7 +44,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git fetch --all
           git checkout -b web origin/web -f
-          cp -r out/* .
+          cp -r out/* assets .
           rm -rf binaryen wasm-bindgen target out
           git add .
           git commit -m "Build and Deploy WebAssembly to Web Branch" || true
