@@ -1,15 +1,16 @@
 use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
 use serde::{Deserialize, Serialize};
 
-use std::{
-    collections::{HashMap, VecDeque},
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
+use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
+use crate::canvas::arrow::events::{CreateArrow, RedrawArrow};
+use crate::resources::AppState;
+use crate::utils::ReflectableUuid;
 #[path = "ui_helpers/ui_helpers.rs"]
-mod ui_helpers;
-use ui_helpers::*;
+pub mod ui_helpers;
+pub use ui_helpers::*;
 #[path = "systems/save.rs"]
 mod save_systems;
 use save_systems::*;
@@ -28,9 +29,6 @@ use init_layout::*;
 #[path = "systems/resize.rs"]
 mod resize;
 use resize::*;
-#[path = "systems/arrows.rs"]
-mod arrows;
-use arrows::*;
 #[path = "systems/button_handlers.rs"]
 mod button_handlers;
 use button_handlers::*;
@@ -46,25 +44,6 @@ pub struct AddRect {
 }
 
 pub struct UpdateListHighlight;
-
-pub struct RedrawArrow {
-    pub id: ReflectableUuid,
-}
-
-#[derive(Component)]
-pub struct MainCamera;
-
-#[derive(Resource, Debug)]
-pub struct SaveRequest {
-    pub doc_id: Option<ReflectableUuid>, // None means current doc
-    pub tab_id: Option<ReflectableUuid>, // None means save to active tab
-}
-
-#[derive(Resource, Debug)]
-pub struct LoadRequest {
-    pub doc_id: Option<ReflectableUuid>, // None means current doc
-    pub drop_last_checkpoint: bool,      // Useful for undo functionality
-}
 
 #[derive(Serialize, Deserialize)]
 pub enum NodeType {
@@ -100,40 +79,8 @@ pub struct JsonNode {
     pub z_index: i32,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Tab {
-    pub is_active: bool,
-    pub id: ReflectableUuid,
-    pub name: String,
-    pub checkpoints: VecDeque<String>,
-}
-
-#[derive(Default, Serialize, Deserialize, Clone, Debug)]
-pub struct Doc {
-    tabs: Vec<Tab>,
-    id: ReflectableUuid,
-    name: String,
-    tags: Vec<String>,
-}
-
 pub const MAX_CHECKPOINTS: i32 = 7;
 pub const MAX_SAVED_DOCS_IN_MEMORY: i32 = 7;
-
-#[derive(Resource, Default)]
-pub struct AppState {
-    pub font: Option<Handle<Font>>,
-    pub modal_id: Option<ReflectableUuid>,
-    pub main_panel: Option<Entity>,
-    pub arrow_type: ArrowType,
-    pub entity_to_edit: Option<ReflectableUuid>,
-    pub tab_to_edit: Option<ReflectableUuid>,
-    pub doc_to_edit: Option<ReflectableUuid>,
-    pub hold_entity: Option<ReflectableUuid>,
-    pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
-    pub arrow_to_draw_start: Option<ArrowConnect>,
-    pub current_document: Option<ReflectableUuid>,
-    pub docs: HashMap<ReflectableUuid, Doc>,
-}
 
 impl Plugin for ChartPlugin {
     fn build(&self, app: &mut App) {
@@ -163,10 +110,7 @@ impl Plugin for ChartPlugin {
             create_new_rectangle,
             resize_entity_start,
             resize_entity_end,
-            create_arrow_start,
-            create_arrow_end,
             set_focused_entity,
-            redraw_arrows,
             cancel_modal,
             modal_keyboard_input_system,
             confirm_modal,
@@ -201,7 +145,7 @@ impl Plugin for ChartPlugin {
             keyboard_input_system,
             list_selected_highlight,
         ));
-        
+
         app.add_systems((button_hover_change, selected_tab_handler).chain());
     }
 }

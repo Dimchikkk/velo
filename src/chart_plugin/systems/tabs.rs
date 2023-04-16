@@ -4,11 +4,10 @@ use bevy::prelude::*;
 
 use uuid::Uuid;
 
-use crate::{AppState, LoadRequest, SaveRequest, Tab};
-
-use super::ui_helpers::{
-    spawn_modal, AddTab, DeleteTab, ModalEntity, ReflectableUuid, RenameTab, SelectedTab,
-};
+use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, ModalEntity, RenameTab, SelectedTab};
+use crate::components::Tab;
+use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::utils::ReflectableUuid;
 
 pub fn selected_tab_handler(
     mut commands: Commands,

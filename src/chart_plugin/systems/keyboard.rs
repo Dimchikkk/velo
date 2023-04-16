@@ -10,9 +10,9 @@ use image::*;
 use std::convert::TryInto;
 use uuid::Uuid;
 
-use crate::{AddRect, AppState, LoadRequest, SaveRequest};
-
 use super::ui_helpers::{get_sections, DocListItemText, EditableText, SelectedTabTextInput};
+use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::AddRect;
 
 pub fn keyboard_input_system(
     mut commands: Commands,

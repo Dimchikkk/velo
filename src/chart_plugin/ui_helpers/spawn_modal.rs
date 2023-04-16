@@ -2,8 +2,8 @@ use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
 
-use super::{add_rectangle_txt, ModalCancel, ModalConfirm, ModalEntity, ModalTop, ReflectableUuid};
-
+use super::{add_rectangle_txt, ModalCancel, ModalConfirm, ModalEntity, ModalTop};
+use crate::utils::ReflectableUuid;
 pub fn spawn_modal(
     commands: &mut Commands,
     font: Handle<Font>,
