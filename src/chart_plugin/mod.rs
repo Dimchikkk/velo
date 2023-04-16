@@ -249,6 +249,7 @@ fn set_focused_entity(
         match *interaction {
             Interaction::Clicked => {
                 window.cursor.icon = CursorIcon::Text;
+                *state = UiState::default();
                 state.entity_to_edit = Some(rectangle.id);
                 let now_ms = get_timestamp();
                 *holding_time = (Duration::from_millis(now_ms as u64), Some(rectangle.id));
