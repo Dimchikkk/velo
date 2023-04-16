@@ -199,8 +199,9 @@ pub fn text_manipulation(
                             for (mut text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
-                                    text.sections.pop();
-                                    for section in text.sections.iter_mut() {
+                                    let mut text_sections = text.sections.clone();
+                                    text_sections.pop();
+                                    for section in text_sections.iter() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
                                     text.sections = vec![
@@ -234,8 +235,9 @@ pub fn text_manipulation(
                             for (mut text, editable_text) in editable_text.iter_mut() {
                                 if Some(editable_text.id) == ui_state.entity_to_edit {
                                     let mut str = "".to_string();
-                                    text.sections.pop();
-                                    for section in text.sections.iter_mut() {
+                                    let mut text_sections = text.sections.clone();
+                                    text_sections.pop();
+                                    for section in text_sections.iter() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
                                     str = format!("{}{}", str, clipboard_text);
@@ -246,11 +248,12 @@ pub fn text_manipulation(
                     }
                     TextManipulation::Copy => {
                         if let Some(id) = ui_state.entity_to_edit {
-                            for (mut text, node) in editable_text.iter_mut() {
+                            for (text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
-                                    text.sections.pop();
-                                    for section in text.sections.iter_mut() {
+                                    let mut text_sections = text.sections.clone();
+                                    text_sections.pop();
+                                    for section in text_sections.iter() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
                                     #[cfg(not(target_arch = "wasm32"))]
@@ -261,11 +264,12 @@ pub fn text_manipulation(
                     }
                     TextManipulation::OpenAllLinks => {
                         if let Some(id) = ui_state.entity_to_edit {
-                            for (mut text, node) in editable_text.iter_mut() {
+                            for (text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
-                                    text.sections.pop();
-                                    for section in text.sections.iter_mut() {
+                                    let mut text_sections = text.sections.clone();
+                                    text_sections.pop();
+                                    for section in text_sections.iter() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
                                     let (sections, is_link) = get_sections(str, font.clone());
