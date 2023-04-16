@@ -92,13 +92,14 @@ pub fn keyboard_input_system(
         for (mut text, editable_text) in &mut node_text_query.iter_mut() {
             if Some(editable_text.id) == ui_state.entity_to_edit {
                 let mut str = "".to_string();
-                for section in text.sections.iter_mut() {
+                let mut text_copy = text.clone();
+                text_copy.sections.pop();
+                for section in text_copy.sections.iter() {
                     str = format!("{}{}", str, section.value.clone());
                 }
-                str.pop();
                 let current_str = str.clone();
                 let (str, is_del_mode) = get_text_val(
-                    text.sections[0].value.clone(),
+                    str,
                     *deleting,
                     &input,
                     &mut char_evr,

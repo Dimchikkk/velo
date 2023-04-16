@@ -159,7 +159,7 @@ pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<
                 },
                 TextSection {
                     value: " ".to_string(),
-                    style: text_style,
+                    style: text_style.clone(),
                 },
             ],
             vec![false, false],
@@ -194,7 +194,7 @@ pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<
     }
     sections.push(TextSection {
         value: " ".to_string(),
-        style: text_style,
+        style: text_style.clone(),
     });
     is_link.push(false);
     (sections, is_link)
