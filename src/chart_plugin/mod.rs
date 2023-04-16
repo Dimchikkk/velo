@@ -135,6 +135,11 @@ pub struct AppState {
     pub docs: HashMap<ReflectableUuid, Doc>,
 }
 
+#[derive(Resource)]
+pub struct BlinkTimer {
+    timer: Timer,
+}
+
 impl Plugin for ChartPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AppState>();
@@ -167,7 +172,6 @@ impl Plugin for ChartPlugin {
             create_arrow_end,
             set_focused_entity,
             redraw_arrows,
-            keyboard_input_system,
             cancel_modal,
             modal_keyboard_input_system,
             confirm_modal,
@@ -192,7 +196,6 @@ impl Plugin for ChartPlugin {
             add_tab_handler,
             delete_tab_handler,
             rename_tab_handler,
-            tab_keyboard_input_system,
             text_manipulation,
             mouse_scroll_list,
             list_item_click,
@@ -200,9 +203,10 @@ impl Plugin for ChartPlugin {
             rename_doc_handler,
             delete_doc_handler,
             save_doc_handler,
+            keyboard_input_system,
+            list_selected_highlight,
         ));
 
-        app.add_systems((doc_keyboard_input_system, list_selected_highlight));
         app.add_systems((button_hover_change, selected_tab_handler).chain());
     }
 }
