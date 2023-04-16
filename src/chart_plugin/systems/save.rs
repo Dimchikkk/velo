@@ -9,7 +9,8 @@ use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
 use crate::{
-    chart_plugin::ui_helpers::style_to_pos, AppState, Doc, JsonNode, JsonNodeText, SaveRequest, MAX_CHECKPOINTS, MAX_SAVED_DOCS_IN_MEMORY,
+    chart_plugin::ui_helpers::style_to_pos, AppState, Doc, JsonNode, JsonNodeText, SaveRequest,
+    MAX_CHECKPOINTS, MAX_SAVED_DOCS_IN_MEMORY,
 };
 
 use super::ui_helpers::{ArrowMeta, EditableText, Rectangle, ReflectableUuid};
