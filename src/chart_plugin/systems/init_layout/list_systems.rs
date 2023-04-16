@@ -13,7 +13,7 @@ use uuid::Uuid;
 
 use crate::{
     chart_plugin::ui_helpers::{
-        add_list_item, add_tab, DocList, DocListItemButton, ReflectableUuid,
+        add_list_item, add_tab, DocList, DocListItemButton, DocListItemContainer, ReflectableUuid,
     },
     AppState, Doc, LoadRequest, SaveRequest, Tab, UpdateListHighlight,
 };
@@ -105,7 +105,7 @@ pub fn add_list(
 }
 
 pub fn list_selected_highlight(
-    mut query: Query<(&DocListItemButton, &mut BackgroundColor), With<DocListItemButton>>,
+    mut query: Query<(&DocListItemContainer, &mut BackgroundColor), With<DocListItemContainer>>,
     state: Res<AppState>,
     mut events: EventReader<UpdateListHighlight>,
 ) {
