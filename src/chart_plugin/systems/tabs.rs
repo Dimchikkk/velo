@@ -1,10 +1,10 @@
-use std::collections::VecDeque;
+use std::{collections::VecDeque, time::Duration};
 
 use bevy::prelude::*;
 
 use uuid::Uuid;
 
-use crate::{AppState, LoadRequest, SaveRequest, StaticState, Tab, UiState};
+use crate::{AppState, LoadRequest, SaveRequest, StaticState, Tab, UiState, get_timestamp};
 
 use super::ui_helpers::{
     spawn_modal, AddTab, DeleteTab, ModalEntity, ReflectableUuid, RenameTab, SelectedTab,
@@ -32,6 +32,9 @@ pub fn selected_tab_handler(
                     .iter_mut();
                 for tab in tabs {
                     if tab.is_active {
+                        if tab.id == selected_tab.id {
+                            return;
+                        }
                         commands.insert_resource(SaveRequest {
                             doc_id: None,
                             tab_id: Some(tab.id),
@@ -106,24 +109,31 @@ pub fn add_tab_handler(
 }
 
 pub fn rename_tab_handler(
-    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<RenameTab>)>,
+    mut interaction_query: Query<(&Interaction, &SelectedTab), (Changed<Interaction>, With<SelectedTab>)>,
     mut ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
+    mut double_click: Local<(Duration, Option<ReflectableUuid>)>,
 ) {
-    for interaction in &mut interaction_query {
+    for (interaction, item) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                *ui_state = UiState::default();
-                let current_document = app_state.current_document.unwrap();
-                let tab = app_state
-                    .docs
-                    .get_mut(&current_document)
-                    .unwrap()
-                    .tabs
-                    .iter()
-                    .find(|x| x.is_active)
-                    .unwrap();
-                ui_state.tab_to_edit = Some(tab.id);
+                let now_ms = get_timestamp();
+                if double_click.1 == Some(item.id) && Duration::from_millis(now_ms as u64) - double_click.0 < Duration::from_millis(500) {
+                    *ui_state = UiState::default();
+                    let current_document = app_state.current_document.unwrap();
+                    let tab = app_state
+                        .docs
+                        .get_mut(&current_document)
+                        .unwrap()
+                        .tabs
+                        .iter()
+                        .find(|x| x.is_active)
+                        .unwrap();
+                    ui_state.tab_to_edit = Some(tab.id);
+                    *double_click = (Duration::from_secs(0), None);
+                } else {
+                    *double_click = (Duration::from_millis(now_ms as u64), Some(item.id));
+                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
