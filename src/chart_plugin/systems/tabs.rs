@@ -8,17 +8,19 @@ use crate::{AppState, LoadRequest, SaveRequest, StaticState, Tab, UiState};
 
 use super::ui_helpers::{
     spawn_modal, AddTab, DeleteTab, ModalEntity, ReflectableUuid, RenameTab, SelectedTab,
+    SelectedTabContainer,
 };
 
 pub fn selected_tab_handler(
     mut commands: Commands,
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &SelectedTab),
+        (&Interaction, &SelectedTab, &Parent),
         (Changed<Interaction>, With<SelectedTab>),
     >,
+    mut selected_tab_query: Query<&mut BackgroundColor, With<SelectedTabContainer>>,
     mut state: ResMut<AppState>,
 ) {
-    for (interaction, mut bg_color, selected_tab) in &mut interaction_query {
+    for (interaction, selected_tab, parent) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let current_document = state.current_document.unwrap();
@@ -47,6 +49,7 @@ pub fn selected_tab_handler(
                 let current_document = state.current_document.unwrap();
                 for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
                     if selected_tab.id == tab.id && tab.is_active {
+                        let mut bg_color = selected_tab_query.get_mut(parent.get()).unwrap();
                         bg_color.0 = Color::ALICE_BLUE;
                     }
                 }
@@ -55,6 +58,7 @@ pub fn selected_tab_handler(
                 let current_document = state.current_document.unwrap();
                 for tab in state.docs.get_mut(&current_document).unwrap().tabs.iter() {
                     if selected_tab.id == tab.id && tab.is_active {
+                        let mut bg_color = selected_tab_query.get_mut(parent.get()).unwrap();
                         bg_color.0 = Color::ALICE_BLUE;
                     }
                 }
