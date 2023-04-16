@@ -10,14 +10,16 @@ use image::*;
 use std::convert::TryInto;
 use uuid::Uuid;
 
-use crate::{AddRect, AppState, BlinkTimer, LoadRequest, SaveRequest};
+use crate::{AddRect, AppState, BlinkTimer, LoadRequest, SaveRequest, StaticState, UiState};
 
 use super::ui_helpers::{get_sections, DocListItemText, EditableText, SelectedTabTextInput};
 
 pub fn keyboard_input_system(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
-    mut state: ResMut<AppState>,
+    static_state: ResMut<StaticState>,
+    mut app_state: ResMut<AppState>,
+    mut ui_state: ResMut<UiState>,
     mut char_evr: EventReader<ReceivedCharacter>,
     mut events: EventWriter<AddRect>,
     input: Res<Input<KeyCode>>,
@@ -52,7 +54,7 @@ pub fn keyboard_input_system(
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
-    let font = state.font.as_ref().unwrap().clone();
+    let font = static_state.font.as_ref().unwrap().clone();
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
     blink_timer.timer.tick(time.delta());
@@ -60,7 +62,7 @@ pub fn keyboard_input_system(
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(
             &mut images,
-            &mut state,
+            &mut ui_state,
             &mut node_text_query,
             &mut events,
             font,
@@ -68,7 +70,7 @@ pub fn keyboard_input_system(
         );
     } else if command && shift && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveRequest {
-            doc_id: Some(state.current_document.unwrap()),
+            doc_id: Some(app_state.current_document.unwrap()),
             tab_id: None,
         });
     } else if command && input.just_pressed(KeyCode::S) {
@@ -82,13 +84,13 @@ pub fn keyboard_input_system(
             drop_last_checkpoint: true,
         });
     } else {
-        if state.entity_to_edit.is_some() {
+        if ui_state.entity_to_edit.is_some() {
             blink_timer.timer.unpause();
         } else {
             blink_timer.timer.pause();
         }
         for (mut text, editable_text) in &mut node_text_query.iter_mut() {
-            if Some(editable_text.id) == state.entity_to_edit {
+            if Some(editable_text.id) == ui_state.entity_to_edit {
                 let mut str = "".to_string();
                 for section in text.sections.iter_mut() {
                     str = format!("{}{}", str, section.value.clone());
@@ -118,12 +120,12 @@ pub fn keyboard_input_system(
             }
         }
         for (mut text, doc_list_item) in &mut doc_name_query.iter_mut() {
-            if Some(doc_list_item.id) == state.doc_to_edit {
+            if Some(doc_list_item.id) == ui_state.doc_to_edit {
                 if text.sections[0].value == *"Untitled" {
                     text.sections[0].value = "".to_string();
                 }
                 if input.just_pressed(KeyCode::Return) {
-                    state.doc_to_edit = None;
+                    ui_state.doc_to_edit = None;
                     continue;
                 }
                 let (str, is_del_mode) = get_text_val(
@@ -134,14 +136,14 @@ pub fn keyboard_input_system(
                 );
                 *deleting = is_del_mode;
                 text.sections[0].value = str.clone();
-                let doc = state.docs.get_mut(&doc_list_item.id).unwrap();
+                let doc = app_state.docs.get_mut(&doc_list_item.id).unwrap();
                 doc.name = str.clone();
             }
         }
         for (mut text, tab_input) in &mut tab_name_query.iter_mut() {
-            if Some(tab_input.id) == state.tab_to_edit {
+            if Some(tab_input.id) == ui_state.tab_to_edit {
                 if input.just_pressed(KeyCode::Return) {
-                    state.tab_to_edit = None;
+                    ui_state.tab_to_edit = None;
                     continue;
                 }
                 let (str, is_del_mode) = get_text_val(
@@ -152,8 +154,8 @@ pub fn keyboard_input_system(
                 );
                 *deleting = is_del_mode;
                 text.sections[0].value = str.clone();
-                let current_document = state.current_document.unwrap();
-                let tab = state
+                let current_document = app_state.current_document.unwrap();
+                let tab = app_state
                     .docs
                     .get_mut(&current_document)
                     .unwrap()
@@ -193,7 +195,7 @@ fn get_text_val(
 #[cfg(not(target_arch = "wasm32"))]
 pub fn insert_from_clipboard(
     images: &mut ResMut<Assets<Image>>,
-    state: &mut ResMut<AppState>,
+    state: &mut ResMut<UiState>,
     query: &mut Query<
         (&mut Text, &EditableText),
         (
