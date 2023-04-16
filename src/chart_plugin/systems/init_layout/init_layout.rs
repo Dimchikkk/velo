@@ -208,10 +208,34 @@ pub fn init_layout(
             Menu,
         ))
         .id();
-    let new_doc = add_menu_button(&mut commands, font.clone(), "New Doc".to_string(), NewDoc);
-    let rename_doc = add_menu_button(&mut commands, font.clone(), "Rename".to_string(), RenameDoc);
-    let delete_doc = add_menu_button(&mut commands, font.clone(), "Delete".to_string(), DeleteDoc);
-    let save_doc = add_menu_button(&mut commands, font.clone(), "Save".to_string(), SaveDoc);
+    let new_doc = add_menu_button(
+        &mut commands,
+        &asset_server,
+        font.clone(),
+        "New Doc".to_string(),
+        NewDoc,
+    );
+    let rename_doc = add_menu_button(
+        &mut commands,
+        &asset_server,
+        font.clone(),
+        "Rename".to_string(),
+        RenameDoc,
+    );
+    let delete_doc = add_menu_button(
+        &mut commands,
+        &asset_server,
+        font.clone(),
+        "Delete".to_string(),
+        DeleteDoc,
+    );
+    let save_doc = add_menu_button(
+        &mut commands,
+        &asset_server,
+        font.clone(),
+        "Save".to_string(),
+        SaveDoc,
+    );
 
     commands.entity(menu).add_child(new_doc);
     commands.entity(menu).add_child(rename_doc);
