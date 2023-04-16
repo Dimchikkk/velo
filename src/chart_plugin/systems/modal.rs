@@ -3,12 +3,11 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_pkv::PkvStore;
 
-use crate::{AppState, Doc, LoadRequest, UpdateListHighlight};
-
-use super::ui_helpers::{
-    DocListItemButton, ModalCancel, ModalConfirm, ModalEntity, ModalTop, ReflectableUuid,
-};
-
+use super::ui_helpers::{DocListItemButton, ModalCancel, ModalConfirm, ModalEntity, ModalTop};
+use crate::chart_plugin::UpdateListHighlight;
+use crate::components::Doc;
+use crate::resources::{AppState, LoadRequest};
+use crate::utils::ReflectableUuid;
 pub fn cancel_modal(
     mut commands: Commands,
     mut interaction_query: Query<

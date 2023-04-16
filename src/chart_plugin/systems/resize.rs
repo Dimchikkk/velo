@@ -1,6 +1,6 @@
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 
-use crate::AppState;
+use crate::resources::AppState;
 
 use super::{
     ui_helpers::{EditableText, Rectangle, ResizeMarker},
