@@ -8,7 +8,8 @@ use super::ui_helpers::{
     RenameDoc, RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
 };
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
-use crate::resources::AppState;
+use crate::resources::{AppState,StaticState};
+use crate::components::MainCamera;
 use crate::TextPos;
 
 #[path = "add_arrow.rs"]
@@ -45,13 +46,15 @@ use add_menu_button::*;
 
 pub fn init_layout(
     mut commands: Commands,
-    mut state: ResMut<AppState>,
+    mut static_state: ResMut<StaticState>,
+    mut app_state: ResMut<AppState>,
     asset_server: Res<AssetServer>,
     mut pkv: ResMut<PkvStore>,
 ) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
 
-    state.font = Some(font.clone());
+    static_state.font = Some(font.clone());
+    commands.spawn((Camera2dBundle::default(), MainCamera));
     let bottom_panel = commands
         .spawn((
             NodeBundle {
@@ -160,7 +163,7 @@ pub fn init_layout(
     let docs = add_list(
         bottom_panel,
         &mut commands,
-        &mut state,
+        &mut app_state,
         &mut pkv,
         font.clone(),
     );
@@ -597,5 +600,5 @@ pub fn init_layout(
     commands.entity(root_ui).add_child(menu);
     commands.entity(root_ui).add_child(main_bottom);
 
-    state.main_panel = Some(main_panel);
+    static_state.main_panel = Some(main_panel);
 }

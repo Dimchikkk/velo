@@ -6,8 +6,11 @@ use uuid::Uuid;
 
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, ModalEntity, RenameTab, SelectedTab};
 use crate::components::Tab;
-use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::resources::{AppState, LoadRequest, SaveRequest, StaticState};
 use crate::utils::ReflectableUuid;
+use crate::UiState;
+
+
 
 pub fn selected_tab_handler(
     mut commands: Commands,
@@ -102,15 +105,15 @@ pub fn add_tab_handler(
 
 pub fn rename_tab_handler(
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<RenameTab>)>,
-    mut state: ResMut<AppState>,
+    mut ui_state: ResMut<UiState>,
+    mut app_state: ResMut<AppState>,
 ) {
     for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                state.entity_to_edit = None;
-                state.doc_to_edit = None;
-                let current_document = state.current_document.unwrap();
-                let tab = state
+                *ui_state = UiState::default();
+                let current_document = app_state.current_document.unwrap();
+                let tab = app_state
                     .docs
                     .get_mut(&current_document)
                     .unwrap()
@@ -118,7 +121,7 @@ pub fn rename_tab_handler(
                     .iter()
                     .find(|x| x.is_active)
                     .unwrap();
-                state.tab_to_edit = Some(tab.id);
+                ui_state.tab_to_edit = Some(tab.id);
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -129,17 +132,20 @@ pub fn rename_tab_handler(
 pub fn delete_tab_handler(
     mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<DeleteTab>)>,
-    mut state: ResMut<AppState>,
+    static_state: ResMut<StaticState>,
+    mut ui_state: ResMut<UiState>,
 ) {
-    let font = state.font.as_ref().unwrap().clone();
+    let font = static_state.font.as_ref().unwrap().clone();
     for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let id = ReflectableUuid(Uuid::new_v4());
-                state.modal_id = Some(id);
-                state.entity_to_edit = None;
+                *ui_state = UiState::default();
+                ui_state.modal_id = Some(id);
                 let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Tab);
-                commands.entity(state.main_panel.unwrap()).add_child(entity);
+                commands
+                    .entity(static_state.main_panel.unwrap())
+                    .add_child(entity);
             }
             Interaction::Hovered => {}
             Interaction::None => {}

@@ -1,7 +1,5 @@
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
-
-use crate::resources::AppState;
-
+use crate::UiState;
 use super::{
     ui_helpers::{EditableText, Rectangle, ResizeMarker},
     RedrawArrow,
@@ -13,7 +11,7 @@ pub fn resize_entity_start(
         (Changed<Interaction>, With<ResizeMarker>),
     >,
     mut button_query: Query<&Rectangle, With<Rectangle>>,
-    mut state: ResMut<AppState>,
+    mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let mut primary_window = windows.single_mut();
@@ -46,7 +44,7 @@ pub fn resize_entity_start(
 
 pub fn resize_entity_end(
     mut mouse_motion_events: EventReader<MouseMotion>,
-    state: Res<AppState>,
+    state: Res<UiState>,
     mut rectangle_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
     mut text_input_query: Query<
         (&EditableText, &mut Style),
@@ -59,8 +57,8 @@ pub fn resize_entity_end(
             for (rectangle, mut button_style) in &mut rectangle_query {
                 if id == rectangle.id {
                     events.send(RedrawArrow { id });
+                    #[allow(unused)]
                     let mut delta = event.delta;
-                    delta = delta; // just to get rid of the rust-analyzer warning
                     #[cfg(target_arch = "wasm32")]
                     {
                         // MouseMotion returns different values depending on platform
