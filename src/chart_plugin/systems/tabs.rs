@@ -10,8 +10,6 @@ use crate::resources::{AppState, LoadRequest, SaveRequest, StaticState};
 use crate::utils::ReflectableUuid;
 use crate::UiState;
 
-
-
 pub fn selected_tab_handler(
     mut commands: Commands,
     mut interaction_query: Query<

@@ -7,6 +7,7 @@ mod utils;
 use bevy::{prelude::*, window::PresentMode};
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_pkv::PkvStore;
+use bevy_ui_borders::BordersPlugin;
 use canvas::CanvasPlugin;
 use chart_plugin::*;
 use systems::*;
@@ -34,6 +35,7 @@ impl Plugin for VeloPlugin {
             )
             .add_plugin(ChartPlugin)
             .add_plugin(CanvasPlugin)
+            .add_plugin(BordersPlugin)
             .insert_resource(PkvStore::new("", "velo"));
     }
 }
