@@ -6,8 +6,8 @@ use serde_json::json;
 use uuid::Uuid;
 
 use crate::{
-    AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType, SaveRequest, Tab,
-    UpdateListHighlight,
+    AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType, SaveRequest,
+    StaticState, Tab, UiState, UpdateListHighlight,
 };
 
 use super::ui_helpers::{
@@ -27,7 +27,7 @@ pub fn rec_button_handlers(
     mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
     mut nodes: Query<(Entity, &Rectangle, &mut ZIndex), With<Rectangle>>,
     mut arrows: Query<(Entity, &ArrowMeta, &mut Visibility), (With<ArrowMeta>, Without<Tooltip>)>,
-    mut state: ResMut<AppState>,
+    mut state: ResMut<UiState>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = windows.single();
@@ -56,10 +56,7 @@ pub fn rec_button_handlers(
                 }
                 super::ui_helpers::ButtonTypes::Del => {
                     if let Some(id) = state.entity_to_edit {
-                        state.entity_to_edit = None;
-                        state.entity_to_resize = None;
-                        state.hold_entity = None;
-                        state.arrow_to_draw_start = None;
+                        *state = UiState::default();
                         for (entity, node, _) in nodes.iter() {
                             if node.id == id {
                                 commands.entity(entity).despawn_recursive();
@@ -141,7 +138,7 @@ pub fn change_color_pallete(
         (Changed<Interaction>, With<ChangeColor>, Without<Rectangle>),
     >,
     mut nodes: Query<(&mut BackgroundColor, &Rectangle), With<Rectangle>>,
-    state: Res<AppState>,
+    state: Res<UiState>,
 ) {
     for (interaction, change_color) in &mut interaction_query {
         match *interaction {
@@ -167,7 +164,7 @@ pub fn change_text_pos(
         (Changed<Interaction>, With<TextPosMode>),
     >,
     mut nodes: Query<(&mut Style, &Rectangle), With<Rectangle>>,
-    state: Res<AppState>,
+    state: Res<UiState>,
 ) {
     for (interaction, text_pos_mode) in &mut interaction_query {
         match *interaction {
@@ -194,7 +191,7 @@ pub fn change_arrow_type(
         (&Interaction, &ArrowMode, &Children),
         (Changed<Interaction>, With<ArrowMode>),
     >,
-    mut state: ResMut<AppState>,
+    mut state: ResMut<UiState>,
     mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
 ) {
     for (interaction, arrow_mode, children) in &mut interaction_query {
@@ -223,9 +220,10 @@ pub fn text_manipulation(
     >,
     mut editable_text: Query<(&mut Text, &EditableText), With<EditableText>>,
     mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
-    state: Res<AppState>,
+    static_state: Res<StaticState>,
+    ui_state: Res<UiState>,
 ) {
-    let font = state.font.as_ref().unwrap().clone();
+    let font = static_state.font.as_ref().unwrap().clone();
     for (interaction, text_manipulation, children) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
@@ -234,7 +232,7 @@ pub fn text_manipulation(
 
                 match text_manipulation.action_type {
                     TextManipulation::Cut => {
-                        if let Some(id) = state.entity_to_edit {
+                        if let Some(id) = ui_state.entity_to_edit {
                             for (mut text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
@@ -260,7 +258,7 @@ pub fn text_manipulation(
                         #[cfg(not(target_arch = "wasm32"))]
                         if let Ok(clipboard_text) = clipboard.get_text() {
                             for (mut text, editable_text) in editable_text.iter_mut() {
-                                if Some(editable_text.id) == state.entity_to_edit {
+                                if Some(editable_text.id) == ui_state.entity_to_edit {
                                     let mut str = "".to_string();
                                     for section in text.sections.iter_mut() {
                                         str = format!("{}{}", str, section.value.clone());
@@ -272,7 +270,7 @@ pub fn text_manipulation(
                         }
                     }
                     TextManipulation::Copy => {
-                        if let Some(id) = state.entity_to_edit {
+                        if let Some(id) = ui_state.entity_to_edit {
                             for (mut text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
@@ -286,7 +284,7 @@ pub fn text_manipulation(
                         }
                     }
                     TextManipulation::OpenAllLinks => {
-                        if let Some(id) = state.entity_to_edit {
+                        if let Some(id) = ui_state.entity_to_edit {
                             for (mut text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
@@ -324,13 +322,14 @@ pub fn new_doc_handler(
     mut commands: Commands,
     mut new_doc_query: Query<&Interaction, (Changed<Interaction>, With<NewDoc>)>,
     mut doc_list_query: Query<Entity, With<DocList>>,
-    mut state: ResMut<AppState>,
+    static_state: ResMut<StaticState>,
+    mut app_state: ResMut<AppState>,
     mut events: EventWriter<UpdateListHighlight>,
 ) {
     for interaction in &mut new_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let font = state.font.as_ref().unwrap().clone();
+                let font = static_state.font.as_ref().unwrap().clone();
                 let doc_id = ReflectableUuid(Uuid::new_v4());
                 let name = "Untitled".to_string();
                 let tab_id = ReflectableUuid(Uuid::new_v4());
@@ -349,7 +348,7 @@ pub fn new_doc_handler(
                     checkpoints,
                     is_active: true,
                 }];
-                state.docs.insert(
+                app_state.docs.insert(
                     doc_id,
                     Doc {
                         id: doc_id,
@@ -359,10 +358,10 @@ pub fn new_doc_handler(
                     },
                 );
                 commands.insert_resource(SaveRequest {
-                    doc_id: Some(state.current_document.unwrap()),
+                    doc_id: Some(app_state.current_document.unwrap()),
                     tab_id: None,
                 });
-                state.current_document = Some(doc_id);
+                app_state.current_document = Some(doc_id);
                 commands.insert_resource(LoadRequest {
                     doc_id: None,
                     drop_last_checkpoint: false,
@@ -380,15 +379,15 @@ pub fn new_doc_handler(
 
 pub fn rename_doc_handler(
     mut rename_doc_query: Query<&Interaction, (Changed<Interaction>, With<RenameDoc>)>,
-    mut state: ResMut<AppState>,
+    app_state: ResMut<AppState>,
+    mut ui_state: ResMut<UiState>,
 ) {
     for interaction in &mut rename_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                state.entity_to_edit = None;
-                state.tab_to_edit = None;
-                let current_document = state.current_document.unwrap();
-                state.doc_to_edit = Some(current_document);
+                *ui_state = UiState::default();
+                let current_document = app_state.current_document.unwrap();
+                ui_state.doc_to_edit = Some(current_document);
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -399,19 +398,20 @@ pub fn rename_doc_handler(
 pub fn delete_doc_handler(
     mut commands: Commands,
     mut delete_doc_query: Query<&Interaction, (Changed<Interaction>, With<DeleteDoc>)>,
-    mut state: ResMut<AppState>,
+    static_state: ResMut<StaticState>,
+    mut ui_state: ResMut<UiState>,
 ) {
     for interaction in &mut delete_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let font = state.font.as_ref().unwrap().clone();
+                let font = static_state.font.as_ref().unwrap().clone();
                 let id = ReflectableUuid(Uuid::new_v4());
-                state.entity_to_edit = None;
-                state.tab_to_edit = None;
-                state.doc_to_edit = None;
-                state.modal_id = Some(id);
+                *ui_state = UiState::default();
+                ui_state.modal_id = Some(id);
                 let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Document);
-                commands.entity(state.main_panel.unwrap()).add_child(entity);
+                commands
+                    .entity(static_state.main_panel.unwrap())
+                    .add_child(entity);
             }
             Interaction::Hovered => {}
             Interaction::None => {}

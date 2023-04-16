@@ -1,7 +1,7 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use super::ui_helpers::{build_arrow, create_arrow, ArrowConnect, ArrowMeta, CreateArrow};
-use crate::{AppState, MainCamera, RedrawArrow};
+use crate::{MainCamera, RedrawArrow, UiState};
 use bevy_prototype_lyon::prelude::Path;
 
 pub fn create_arrow_start(
@@ -9,7 +9,7 @@ pub fn create_arrow_start(
         (&Interaction, &ArrowConnect),
         (Changed<Interaction>, With<ArrowConnect>),
     >,
-    mut state: ResMut<AppState>,
+    mut state: ResMut<UiState>,
     mut create_arrow: EventWriter<CreateArrow>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
