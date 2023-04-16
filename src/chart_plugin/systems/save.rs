@@ -9,7 +9,8 @@ use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
 use crate::{
-    chart_plugin::ui_helpers::style_to_pos, AppState, Doc, JsonNode, JsonNodeText, SaveRequest, MAX_CHECKPOINTS, MAX_SAVED_DOCS_IN_MEMORY,
+    chart_plugin::ui_helpers::style_to_pos, AppState, Doc, JsonNode, JsonNodeText, SaveRequest,
+    MAX_CHECKPOINTS, MAX_SAVED_DOCS_IN_MEMORY,
 };
 
 use super::ui_helpers::{ArrowMeta, EditableText, Rectangle, ReflectableUuid};
@@ -35,7 +36,7 @@ pub fn save_json(
         ),
         With<Rectangle>,
     >,
-    arrows: Query<&ArrowMeta, With<ArrowMeta>>,
+    arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
     request: Res<SaveRequest>,
     mut app_state: ResMut<AppState>,
     text_query: Query<&mut Text, With<EditableText>>,
@@ -90,8 +91,10 @@ pub fn save_json(
     }
 
     let json_arrows = json["arrows"].as_array_mut().unwrap();
-    for arrow_meta in arrows.iter() {
-        json_arrows.push(json!(arrow_meta));
+    for (arrow_meta, visibility) in arrows.iter() {
+        if visibility != Visibility::Hidden {
+            json_arrows.push(json!(arrow_meta));
+        }
     }
 
     let doc = if request.doc_id.is_some() {
