@@ -58,6 +58,11 @@ pub struct SelectedTabTextInput {
 }
 
 #[derive(Component)]
+pub struct DocListItemContainer {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component)]
 pub struct DocListItemButton {
     pub id: ReflectableUuid,
 }
