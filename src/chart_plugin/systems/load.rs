@@ -15,9 +15,9 @@ use super::ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, Rectangle, S
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::canvas::arrow::events::CreateArrow;
 use crate::components::Doc;
-use crate::resources::{AppState, LoadRequest};
+use crate::resources::{AppState, LoadRequest, StaticState,};
 use crate::utils::ReflectableUuid;
-use crate::{JsonNode, MAX_SAVED_DOCS_IN_MEMORY};
+use crate::{JsonNode, UiState, MAX_SAVED_DOCS_IN_MEMORY};
 
 pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
     request.is_some()
@@ -31,7 +31,9 @@ pub fn load_json(
     old_nodes: Query<Entity, With<Rectangle>>,
     mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
     request: Res<LoadRequest>,
-    mut state: ResMut<AppState>,
+    mut app_state: ResMut<AppState>,
+    static_state: ResMut<StaticState>,
+    mut ui_state: ResMut<UiState>,
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrow>,
@@ -39,16 +41,11 @@ pub fn load_json(
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
 ) {
-    state.entity_to_edit = None;
-    state.tab_to_edit = None;
-    state.doc_to_edit = None;
-    state.hold_entity = None;
-    state.entity_to_resize = None;
-    state.arrow_to_draw_start = None;
+    *ui_state = UiState::default();
 
     let bottom_panel = bottom_panel.single_mut();
 
-    let font = state.font.as_ref().unwrap().clone();
+    let font = static_state.font.as_ref().unwrap().clone();
 
     #[allow(unused)]
     for (entity, mut visibility) in &mut old_arrows.iter_mut() {
@@ -69,18 +66,18 @@ pub fn load_json(
     }
 
     if let Some(doc_id) = &request.doc_id {
-        if state.docs.contains_key(doc_id) {
-            state.current_document = Some(*doc_id);
+        if app_state.docs.contains_key(doc_id) {
+            app_state.current_document = Some(*doc_id);
         } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
             if docs.contains_key(doc_id) {
-                while (state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
-                    let keys = state.docs.keys().cloned().collect::<Vec<_>>();
-                    state.docs.remove(&keys[0]);
+                while (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                    let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
+                    app_state.docs.remove(&keys[0]);
                 }
-                state
+                app_state
                     .docs
                     .insert(*doc_id, docs.get(doc_id).unwrap().clone());
-                state.current_document = Some(*doc_id);
+                app_state.current_document = Some(*doc_id);
             } else {
                 panic!("Document not found in pkv");
             }
@@ -89,14 +86,14 @@ pub fn load_json(
 
     let doc = if request.doc_id.is_some() {
         let doc = request.doc_id.unwrap();
-        if !state.docs.contains_key(&doc) {
+        if !app_state.docs.contains_key(&doc) {
             if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
                 if docs.contains_key(&doc) {
-                    if (state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
-                        let keys = state.docs.keys().cloned().collect::<Vec<_>>();
-                        state.docs.remove(&keys[0]);
+                    if (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                        let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
+                        app_state.docs.remove(&keys[0]);
                     }
-                    state.docs.insert(doc, docs.get(&doc).unwrap().clone());
+                    app_state.docs.insert(doc, docs.get(&doc).unwrap().clone());
                 } else {
                     panic!("Document not found in pkv");
                 }
@@ -104,15 +101,15 @@ pub fn load_json(
         }
         request.doc_id.unwrap()
     } else {
-        state.current_document.unwrap()
+        app_state.current_document.unwrap()
     };
 
-    for tab in state.docs.get_mut(&doc).unwrap().tabs.iter() {
+    for tab in app_state.docs.get_mut(&doc).unwrap().tabs.iter() {
         let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
         commands.entity(bottom_panel).add_child(tab_view);
     }
 
-    for tab in state.docs.get_mut(&doc).unwrap().tabs.iter_mut() {
+    for tab in app_state.docs.get_mut(&doc).unwrap().tabs.iter_mut() {
         if tab.is_active {
             if tab.checkpoints.is_empty() {
                 break;
@@ -172,7 +169,9 @@ pub fn load_json(
                         z_index: json_node.z_index,
                     },
                 );
-                commands.entity(state.main_panel.unwrap()).add_child(entity);
+                commands
+                    .entity(static_state.main_panel.unwrap())
+                    .add_child(entity);
             }
 
             let arrows = json["arrows"].as_array_mut().unwrap();

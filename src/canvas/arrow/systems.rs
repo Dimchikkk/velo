@@ -6,7 +6,7 @@ use super::components::{ArrowConnect, ArrowMeta};
 use super::events::{CreateArrow, RedrawArrow};
 use super::utils::{build_arrow, create_arrow, get_pos};
 use crate::components::MainCamera;
-use crate::resources::AppState;
+use crate::chart_plugin::UiState;
 use bevy_prototype_lyon::prelude::Path;
 
 pub fn create_arrow_start(
@@ -14,7 +14,7 @@ pub fn create_arrow_start(
         (&Interaction, &ArrowConnect),
         (Changed<Interaction>, With<ArrowConnect>),
     >,
-    mut state: ResMut<AppState>,
+    mut state: ResMut<UiState>,
     mut create_arrow: EventWriter<CreateArrow>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
