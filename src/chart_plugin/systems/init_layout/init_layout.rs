@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use bevy_pkv::PkvStore;
 
-use crate::{AppState, BlinkTimer, MainCamera, TextPos};
+use crate::{AppState, BlinkTimer, MainCamera, StaticState, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, DeleteDoc,
@@ -47,7 +47,8 @@ use add_menu_button::*;
 
 pub fn init_layout(
     mut commands: Commands,
-    mut state: ResMut<AppState>,
+    mut static_state: ResMut<StaticState>,
+    mut app_state: ResMut<AppState>,
     asset_server: Res<AssetServer>,
     mut pkv: ResMut<PkvStore>,
 ) {
@@ -55,7 +56,7 @@ pub fn init_layout(
     commands.insert_resource(BlinkTimer {
         timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
     });
-    state.font = Some(font.clone());
+    static_state.font = Some(font.clone());
     commands.spawn((Camera2dBundle::default(), MainCamera));
     let bottom_panel = commands
         .spawn((
@@ -165,7 +166,7 @@ pub fn init_layout(
     let docs = add_list(
         bottom_panel,
         &mut commands,
-        &mut state,
+        &mut app_state,
         &mut pkv,
         font.clone(),
     );
@@ -602,5 +603,5 @@ pub fn init_layout(
     commands.entity(root_ui).add_child(menu);
     commands.entity(root_ui).add_child(main_bottom);
 
-    state.main_panel = Some(main_panel);
+    static_state.main_panel = Some(main_panel);
 }
