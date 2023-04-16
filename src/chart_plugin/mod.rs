@@ -217,7 +217,7 @@ impl Plugin for ChartPlugin {
             list_selected_highlight,
         ));
 
-        app.add_systems((button_hover_change, selected_tab_handler).chain());
+        app.add_systems((button_generic_handler, selected_tab_handler).chain());
     }
 }
 
