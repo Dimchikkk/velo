@@ -1,7 +1,12 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use super::ui_helpers::{build_arrow, create_arrow, ArrowConnect, ArrowMeta, CreateArrow};
-use crate::{MainCamera, RedrawArrow, UiState};
+// use super::utils::{build_arrow, create_arrow};
+use super::components::{ArrowConnect, ArrowMeta};
+// use crate::states::{AppState, MainCamera, RedrawArrow};
+use super::events::{CreateArrow, RedrawArrow};
+use super::utils::{build_arrow, create_arrow, get_pos};
+use crate::chart_plugin::UiState;
+use crate::components::MainCamera;
 use bevy_prototype_lyon::prelude::Path;
 
 pub fn create_arrow_start(
@@ -72,7 +77,7 @@ pub fn create_arrow_end(
                         arrow_type: event.arrow_type,
                     },
                 );
-                break
+                break;
             }
         }
     }
@@ -115,14 +120,4 @@ pub fn redraw_arrows(
             }
         }
     }
-}
-fn get_pos(
-    global_transform: &GlobalTransform,
-    primary_window: &Window,
-    camera: &Camera,
-    camera_transform: &GlobalTransform,
-) -> Option<Vec2> {
-    let world_position = global_transform.affine().translation;
-    let point = Vec2::new(world_position.x, primary_window.height() - world_position.y);
-    camera.viewport_to_world_2d(camera_transform, point)
 }
