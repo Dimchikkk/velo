@@ -15,7 +15,7 @@ use super::ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, Rectangle, S
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::canvas::arrow::events::CreateArrow;
 use crate::components::Doc;
-use crate::resources::{AppState, LoadRequest, StaticState,};
+use crate::resources::{AppState, LoadRequest, StaticState};
 use crate::utils::ReflectableUuid;
 use crate::{JsonNode, UiState, MAX_SAVED_DOCS_IN_MEMORY};
 

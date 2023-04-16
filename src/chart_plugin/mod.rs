@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
-use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos,ArrowType};
+use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos, ArrowType};
 use crate::canvas::arrow::events::{CreateArrow, RedrawArrow};
 use crate::resources::AppState;
 use crate::resources::StaticState;
@@ -165,7 +165,7 @@ impl Plugin for ChartPlugin {
             list_selected_highlight,
         ));
 
-        app.add_systems((button_hover_change, selected_tab_handler).chain());
+        app.add_systems((button_generic_handler, selected_tab_handler).chain());
     }
 }
 
