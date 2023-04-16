@@ -10,7 +10,7 @@ use image::*;
 use std::convert::TryInto;
 use uuid::Uuid;
 
-use crate::{AddRect, AppState, LoadRequest, SaveRequest};
+use crate::{AddRect, AppState, BlinkTimer, LoadRequest, SaveRequest};
 
 use super::ui_helpers::{get_sections, DocListItemText, EditableText, SelectedTabTextInput};
 
@@ -47,13 +47,15 @@ pub fn keyboard_input_system(
             With<SelectedTabTextInput>,
         ),
     >,
+    mut blink_timer: ResMut<BlinkTimer>,
+    time: Res<Time>,
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
     let font = state.font.as_ref().unwrap().clone();
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
-
+    blink_timer.timer.tick(time.delta());
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(
@@ -80,12 +82,19 @@ pub fn keyboard_input_system(
             drop_last_checkpoint: true,
         });
     } else {
+        if state.entity_to_edit.is_some() {
+            blink_timer.timer.unpause();
+        } else {
+            blink_timer.timer.pause();
+        }
         for (mut text, editable_text) in &mut node_text_query.iter_mut() {
             if Some(editable_text.id) == state.entity_to_edit {
                 let mut str = "".to_string();
                 for section in text.sections.iter_mut() {
                     str = format!("{}{}", str, section.value.clone());
                 }
+                str.pop();
+                let current_str = str.clone();
                 let (str, is_del_mode) = get_text_val(
                     text.sections[0].value.clone(),
                     *deleting,
@@ -93,7 +102,19 @@ pub fn keyboard_input_system(
                     &mut char_evr,
                 );
                 *deleting = is_del_mode;
-                text.sections = get_sections(str, font.clone()).0;
+                if str != current_str {
+                    text.sections = get_sections(str, font.clone()).0;
+                }
+                if blink_timer.timer.finished() {
+                    text.sections.last_mut().unwrap().value =
+                        if text.sections.last().unwrap().value == "|" {
+                            " ".to_string()
+                        } else {
+                            "|".to_string()
+                        };
+                }
+            } else {
+                text.sections.last_mut().unwrap().value = " ".to_string();
             }
         }
         for (mut text, doc_list_item) in &mut doc_name_query.iter_mut() {
