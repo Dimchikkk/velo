@@ -214,20 +214,6 @@ pub fn init_layout(
         "New Doc".to_string(),
         NewDoc,
     );
-    // let rename_doc = add_menu_button(
-    //     &mut commands,
-    //     &asset_server,
-    //     font.clone(),
-    //     "Rename".to_string(),
-    //     RenameDoc,
-    // );
-    // let delete_doc = add_menu_button(
-    //     &mut commands,
-    //     &asset_server,
-    //     font.clone(),
-    //     "Delete".to_string(),
-    //     DeleteDoc,
-    // );
     let save_doc = add_menu_button(
         &mut commands,
         &asset_server,
@@ -235,9 +221,6 @@ pub fn init_layout(
         "Save".to_string(),
         SaveDoc,
     );
-
-    // commands.entity(menu).add_child(rename_doc);
-    // commands.entity(menu).add_child(delete_doc);
     commands.entity(menu).add_child(save_doc);
     commands.entity(menu).add_child(new_doc);
 

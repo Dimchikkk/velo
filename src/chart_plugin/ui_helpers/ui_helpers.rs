@@ -310,11 +310,25 @@ pub fn add_list_item(
     id: ReflectableUuid,
     name: String,
 ) -> Entity {
-    let button = commands
+    let root = commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            DocListItemContainer { id },
+            AccessibilityNode(NodeBuilder::new(Role::ListItem)),
+        ))
+        .id();
+    let doc_button = commands
         .spawn((
             ButtonBundle {
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    size: Size::new(Val::Percent(90.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
                     padding: UiRect {
                         left: Val::Px(5.),
@@ -328,17 +342,16 @@ pub fn add_list_item(
             },
             GenericButton,
             DocListItemButton { id },
-            AccessibilityNode(NodeBuilder::new(Role::ListItem)),
         ))
         .id();
-    let text_bundle = commands
+    let doc_label = commands
         .spawn((
             TextBundle {
                 text: Text {
                     sections: vec![TextSection {
                         value: name,
                         style: TextStyle {
-                            font,
+                            font: font.clone(),
                             font_size: 18.,
                             color: Color::BLACK,
                         },
@@ -355,6 +368,48 @@ pub fn add_list_item(
             Label,
         ))
         .id();
-    commands.entity(button).add_child(text_bundle);
-    button
+    let del_button = commands
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(10.), Val::Percent(100.)),
+                    justify_content: JustifyContent::Center,
+                    padding: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    ..default()
+                },
+                ..default()
+            },
+            DeleteDoc,
+            GenericButton,
+        ))
+        .id();
+    let del_label = commands
+        .spawn((
+            TextBundle {
+                text: Text {
+                    sections: vec![TextSection {
+                        value: "x".to_string(),
+                        style: TextStyle {
+                            font,
+                            font_size: 24.,
+                            color: Color::BLACK,
+                        },
+                    }],
+                    ..default()
+                },
+                ..default()
+            },
+            Label,
+        ))
+        .id();
+    commands.entity(doc_button).add_child(doc_label);
+    commands.entity(del_button).add_child(del_label);
+    commands.entity(root).add_child(doc_button);
+    commands.entity(root).add_child(del_button);
+    root
 }

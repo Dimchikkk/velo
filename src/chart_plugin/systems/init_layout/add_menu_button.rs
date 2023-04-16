@@ -74,7 +74,7 @@ pub fn add_menu_button(
                     let text_style = TextStyle {
                         font: font.clone(),
                         font_size: 64.0,
-                        color: Color::ALICE_BLUE,
+                        color: Color::GRAY,
                     };
                     let text = Text {
                         sections: vec![TextSection {
