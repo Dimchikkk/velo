@@ -162,7 +162,7 @@ pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<
                     style: text_style,
                 },
             ],
-            vec![false],
+            vec![false, false],
         );
     }
     let mut sections = vec![];
@@ -196,6 +196,7 @@ pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<
         value: " ".to_string(),
         style: text_style,
     });
+    is_link.push(false);
     (sections, is_link)
 }
 
