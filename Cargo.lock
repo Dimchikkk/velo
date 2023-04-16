@@ -3316,6 +3316,7 @@ dependencies = [
  "bevy_ui_borders",
  "console_error_panic_hook",
  "image",
+ "js-sys",
  "linkify",
  "open",
  "serde",

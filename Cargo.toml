@@ -38,3 +38,4 @@ image = { version = "0.24.5", default-features = false, features = ["ico"] }
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 console_error_panic_hook = "0.1.7"
+js-sys = "0.3.61"
