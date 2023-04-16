@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::{collections::VecDeque, time::Duration};
 
 use bevy::{prelude::*, window::PrimaryWindow};
 
@@ -7,14 +7,14 @@ use uuid::Uuid;
 
 use crate::{
     AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType, SaveRequest,
-    StaticState, Tab, UiState, UpdateListHighlight,
+    StaticState, Tab, UiState, UpdateListHighlight, get_timestamp,
 };
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ArrowMeta, ArrowMode, ButtonAction,
     ChangeColor, DeleteDoc, DocList, EditableText, GenericButton, ModalEntity, NewDoc, Rectangle,
-    ReflectableUuid, RenameDoc, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
-    Tooltip,
+    ReflectableUuid, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
+    Tooltip, DocListItemButton,
 };
 
 pub fn rec_button_handlers(
@@ -351,16 +351,24 @@ pub fn new_doc_handler(
 }
 
 pub fn rename_doc_handler(
-    mut rename_doc_query: Query<&Interaction, (Changed<Interaction>, With<RenameDoc>)>,
-    app_state: ResMut<AppState>,
+    mut rename_doc_query: Query<
+        (&Interaction, &DocListItemButton),
+        (Changed<Interaction>, With<DocListItemButton>),
+    >,
     mut ui_state: ResMut<UiState>,
+    mut double_click: Local<(Duration, Option<ReflectableUuid>)>,
 ) {
-    for interaction in &mut rename_doc_query.iter_mut() {
+    for (interaction, item) in &mut rename_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                *ui_state = UiState::default();
-                let current_document = app_state.current_document.unwrap();
-                ui_state.doc_to_edit = Some(current_document);
+                let now_ms = get_timestamp();
+                if double_click.1 == Some(item.id) && Duration::from_millis(now_ms as u64) - double_click.0 < Duration::from_millis(500) {
+                    *ui_state = UiState::default();
+                    ui_state.doc_to_edit = Some(item.id);
+                    *double_click = (Duration::from_secs(0), None);
+                } else {
+                    *double_click = (Duration::from_millis(now_ms as u64), Some(item.id));
+                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
