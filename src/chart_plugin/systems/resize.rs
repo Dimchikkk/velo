@@ -1,9 +1,9 @@
-use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
-use crate::UiState;
 use super::{
     ui_helpers::{EditableText, Rectangle, ResizeMarker},
     RedrawArrow,
 };
+use crate::UiState;
+use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 
 pub fn resize_entity_start(
     mut interaction_query: Query<

@@ -5,8 +5,8 @@ use super::components::{ArrowConnect, ArrowMeta};
 // use crate::states::{AppState, MainCamera, RedrawArrow};
 use super::events::{CreateArrow, RedrawArrow};
 use super::utils::{build_arrow, create_arrow, get_pos};
-use crate::components::MainCamera;
 use crate::chart_plugin::UiState;
+use crate::components::MainCamera;
 use bevy_prototype_lyon::prelude::Path;
 
 pub fn create_arrow_start(
@@ -77,6 +77,7 @@ pub fn create_arrow_end(
                         arrow_type: event.arrow_type,
                     },
                 );
+                break;
             }
         }
     }
@@ -96,10 +97,9 @@ pub fn redraw_arrows(
                 let (arrow_hold_vec, arrow_move_vec): (Vec<_>, Vec<_>) = arrow_markers
                     .iter()
                     .filter(|(x, _)| x.id == arrow.end.id || x.id == arrow.start.id)
-                    .map(|(ac, gt)| {
+                    .filter_map(|(ac, gt)| {
                         Some((ac, get_pos(gt, primary_window, camera, camera_transform)?))
                     })
-                    .flatten()
                     .partition(|(x, _)| x.id == arrow.end.id);
                 let arrow_pos = arrow_hold_vec
                     .iter()

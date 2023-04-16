@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::time::Duration;
 
 use bevy_pkv::PkvStore;
 
@@ -8,9 +9,8 @@ use super::ui_helpers::{
     RenameDoc, RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
 };
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
-use crate::resources::{AppState,StaticState};
-use crate::components::MainCamera;
-use crate::TextPos;
+use crate::resources::{AppState, StaticState};
+use crate::{BlinkTimer, TextPos};
 
 #[path = "add_arrow.rs"]
 mod add_arrow;
@@ -52,9 +52,10 @@ pub fn init_layout(
     mut pkv: ResMut<PkvStore>,
 ) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
-
+    commands.insert_resource(BlinkTimer {
+        timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
+    });
     static_state.font = Some(font.clone());
-    commands.spawn((Camera2dBundle::default(), MainCamera));
     let bottom_panel = commands
         .spawn((
             NodeBundle {
@@ -205,10 +206,34 @@ pub fn init_layout(
             Menu,
         ))
         .id();
-    let new_doc = add_menu_button(&mut commands, font.clone(), "New Doc".to_string(), NewDoc);
-    let rename_doc = add_menu_button(&mut commands, font.clone(), "Rename".to_string(), RenameDoc);
-    let delete_doc = add_menu_button(&mut commands, font.clone(), "Delete".to_string(), DeleteDoc);
-    let save_doc = add_menu_button(&mut commands, font.clone(), "Save".to_string(), SaveDoc);
+    let new_doc = add_menu_button(
+        &mut commands,
+        &asset_server,
+        font.clone(),
+        "New Doc".to_string(),
+        NewDoc,
+    );
+    let rename_doc = add_menu_button(
+        &mut commands,
+        &asset_server,
+        font.clone(),
+        "Rename".to_string(),
+        RenameDoc,
+    );
+    let delete_doc = add_menu_button(
+        &mut commands,
+        &asset_server,
+        font.clone(),
+        "Delete".to_string(),
+        DeleteDoc,
+    );
+    let save_doc = add_menu_button(
+        &mut commands,
+        &asset_server,
+        font.clone(),
+        "Save".to_string(),
+        SaveDoc,
+    );
 
     commands.entity(menu).add_child(new_doc);
     commands.entity(menu).add_child(rename_doc);

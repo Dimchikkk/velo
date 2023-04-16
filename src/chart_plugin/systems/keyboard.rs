@@ -15,7 +15,6 @@ use crate::{AddRect, BlinkTimer, UiState};
 use super::ui_helpers::{get_sections, DocListItemText, EditableText, SelectedTabTextInput};
 use crate::resources::{AppState, LoadRequest, SaveRequest, StaticState};
 
-
 pub fn keyboard_input_system(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
