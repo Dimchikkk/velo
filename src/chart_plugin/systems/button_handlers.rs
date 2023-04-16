@@ -99,18 +99,8 @@ pub fn rec_button_handlers(
                     }
                 }
             },
-            Interaction::Hovered => match button_action.button_type {
-                super::ui_helpers::ButtonTypes::Add => {}
-                super::ui_helpers::ButtonTypes::Del => {}
-                super::ui_helpers::ButtonTypes::Front => {}
-                super::ui_helpers::ButtonTypes::Back => {}
-            },
-            Interaction::None => match button_action.button_type {
-                super::ui_helpers::ButtonTypes::Add => {}
-                super::ui_helpers::ButtonTypes::Del => {}
-                super::ui_helpers::ButtonTypes::Front => {}
-                super::ui_helpers::ButtonTypes::Back => {}
-            },
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
