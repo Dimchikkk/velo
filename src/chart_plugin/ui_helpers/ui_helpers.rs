@@ -159,7 +159,7 @@ pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<
                 },
                 TextSection {
                     value: " ".to_string(),
-                    style: text_style.clone(),
+                    style: text_style,
                 },
             ],
             vec![false, false],
@@ -194,7 +194,7 @@ pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<
     }
     sections.push(TextSection {
         value: " ".to_string(),
-        style: text_style.clone(),
+        style: text_style,
     });
     is_link.push(false);
     (sections, is_link)
@@ -273,36 +273,89 @@ pub fn add_tab(
     name: String,
     id: ReflectableUuid,
 ) -> Entity {
-    commands
+    let root = commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Px(80.), Val::Px(30.)),
+                    justify_content: JustifyContent::Center,
+                    margin: UiRect::all(Val::Px(10.)),
+                    ..default()
+                },
+                ..default()
+            },
+            GenericButton,
+            SelectedTabContainer { id },
+        ))
+        .id();
+    let tab_button = commands
         .spawn((
             ButtonBundle {
                 background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
                 style: Style {
-                    size: Size::new(Val::Px(60.), Val::Px(30.)),
+                    size: Size::new(Val::Percent(90.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     overflow: Overflow::Hidden,
-                    margin: UiRect {
-                        left: Val::Px(10.),
-                        right: Val::Px(10.),
-                        top: Val::Px(0.),
-                        bottom: Val::Px(0.),
-                    },
                     ..default()
                 },
-
                 ..default()
             },
             SelectedTab { id },
             GenericButton,
         ))
-        .with_children(|builder| {
-            builder.spawn((
-                add_rectangle_txt(font.clone(), name),
-                SelectedTabTextInput { id },
-            ));
-        })
-        .id()
+        .id();
+    let tab_label = commands
+        .spawn((
+            add_rectangle_txt(font.clone(), name),
+            SelectedTabTextInput { id },
+        ))
+        .id();
+    let del_button = commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
+                style: Style {
+                    size: Size::new(Val::Percent(10.), Val::Percent(100.)),
+                    justify_content: JustifyContent::Center,
+                    padding: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(5.),
+                        top: Val::Px(5.),
+                        bottom: Val::Px(5.),
+                    },
+                    ..default()
+                },
+                ..default()
+            },
+            DeleteTab,
+            GenericButton,
+        ))
+        .id();
+    let del_label = commands
+        .spawn((
+            TextBundle {
+                text: Text {
+                    sections: vec![TextSection {
+                        value: "x".to_string(),
+                        style: TextStyle {
+                            font,
+                            font_size: 18.,
+                            color: Color::BLACK,
+                        },
+                    }],
+                    ..default()
+                },
+                ..default()
+            },
+            Label,
+        ))
+        .id();
+    commands.entity(tab_button).add_child(tab_label);
+    commands.entity(del_button).add_child(del_label);
+    commands.entity(root).add_child(tab_button);
+    commands.entity(root).add_child(del_button);
+    root
 }
 
 pub fn add_list_item(

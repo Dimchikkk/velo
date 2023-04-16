@@ -66,10 +66,7 @@ pub fn add_menu_button(
                     GenericButton,
                 ))
                 .with_children(|builder| {
-                    builder.spawn((
-                        get_tooltip(font.clone(), name, 14.),
-                        Tooltip,
-                    ));
+                    builder.spawn((get_tooltip(font.clone(), name, 14.), Tooltip));
 
                     let text_style = TextStyle {
                         font: font.clone(),

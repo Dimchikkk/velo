@@ -7,9 +7,9 @@ use bevy_pkv::PkvStore;
 use crate::{AppState, BlinkTimer, MainCamera, StaticState, TextPos};
 
 use super::ui_helpers::{
-    self, add_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, DeleteTab,
-    GenericButton, LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu, NewDoc,
-    RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
+    self, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, LeftPanel, LeftPanelControls,
+    LeftPanelExplorer, MainPanel, Menu, NewDoc, Root, SaveDoc, TextManipulation,
+    TextManipulationAction, TextPosMode,
 };
 
 #[path = "add_arrow.rs"]
