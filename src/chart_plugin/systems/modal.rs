@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_pkv::PkvStore;
 
-use crate::{AppState, Doc, LoadRequest, UpdateListHighlight};
+use crate::{AppState, Doc, LoadRequest, UiState, UpdateListHighlight};
 
 use super::ui_helpers::{
     DocListItemButton, ModalCancel, ModalConfirm, ModalEntity, ModalTop, ReflectableUuid,
@@ -15,7 +15,7 @@ pub fn cancel_modal(
         (&Interaction, &ModalCancel),
         (Changed<Interaction>, With<ModalCancel>),
     >,
-    mut state: ResMut<AppState>,
+    mut state: ResMut<UiState>,
     query: Query<(Entity, &ModalTop), With<ModalTop>>,
 ) {
     for (interaction, path_modal_cancel) in interaction_query.iter_mut() {
@@ -36,7 +36,8 @@ pub fn confirm_modal(
         (&Interaction, &ModalConfirm),
         (Changed<Interaction>, With<ModalConfirm>),
     >,
-    mut state: ResMut<AppState>,
+    mut app_state: ResMut<AppState>,
+    mut ui_state: ResMut<UiState>,
     query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
     mut query_button: Query<(Entity, &DocListItemButton), With<DocListItemButton>>,
     mut events: EventWriter<UpdateListHighlight>,
@@ -46,11 +47,17 @@ pub fn confirm_modal(
         if let Interaction::Clicked = interaction {
             for (entity, path_modal_top) in query_top.iter() {
                 if path_modal_confirm.id == path_modal_top.id {
-                    let current_document = state.current_document.unwrap();
+                    let current_document = app_state.current_document.unwrap();
                     if path_modal_confirm.delete == ModalEntity::Tab
-                        && state.docs.get_mut(&current_document).unwrap().tabs.len() > 1
+                        && app_state
+                            .docs
+                            .get_mut(&current_document)
+                            .unwrap()
+                            .tabs
+                            .len()
+                            > 1
                     {
-                        let index = state
+                        let index = app_state
                             .docs
                             .get_mut(&current_document)
                             .unwrap()
@@ -58,13 +65,13 @@ pub fn confirm_modal(
                             .iter()
                             .position(|x| x.is_active)
                             .unwrap();
-                        state
+                        app_state
                             .docs
                             .get_mut(&current_document)
                             .unwrap()
                             .tabs
                             .remove(index);
-                        let mut last_tab = state
+                        let mut last_tab = app_state
                             .docs
                             .get_mut(&current_document)
                             .unwrap()
@@ -77,17 +84,19 @@ pub fn confirm_modal(
                             drop_last_checkpoint: false,
                         });
                     }
-                    if path_modal_confirm.delete == ModalEntity::Document && state.docs.len() > 1 {
+                    if path_modal_confirm.delete == ModalEntity::Document
+                        && app_state.docs.len() > 1
+                    {
                         let id_to_remove = current_document;
                         for (entity, button) in query_button.iter_mut() {
                             if button.id == id_to_remove {
                                 commands.entity(entity).despawn_recursive();
                             }
                         }
-                        state.docs.remove(&current_document);
+                        app_state.docs.remove(&current_document);
                         for (_, button) in query_button.iter_mut() {
                             if button.id != id_to_remove {
-                                state.current_document = Some(button.id);
+                                app_state.current_document = Some(button.id);
                                 break;
                             }
                         }
@@ -96,10 +105,14 @@ pub fn confirm_modal(
                             drop_last_checkpoint: false,
                         });
                         events.send(UpdateListHighlight);
-                        remove_from_pkv(&mut pkv, id_to_remove, state.current_document.unwrap());
+                        remove_from_pkv(
+                            &mut pkv,
+                            id_to_remove,
+                            app_state.current_document.unwrap(),
+                        );
                     }
                     commands.entity(entity).despawn_recursive();
-                    state.modal_id = None;
+                    ui_state.modal_id = None;
                 }
             }
         }
@@ -107,7 +120,8 @@ pub fn confirm_modal(
 }
 
 pub fn modal_keyboard_input_system(
-    mut state: ResMut<AppState>,
+    mut app_state: ResMut<AppState>,
+    mut ui_state: ResMut<UiState>,
     input: Res<Input<KeyCode>>,
     query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
     mut commands: Commands,
@@ -117,12 +131,18 @@ pub fn modal_keyboard_input_system(
 ) {
     if input.just_pressed(KeyCode::Return) {
         for (entity, path_modal_top) in query_top.iter() {
-            if Some(path_modal_top.id) == state.modal_id {
-                let current_document = state.current_document.unwrap();
+            if Some(path_modal_top.id) == ui_state.modal_id {
+                let current_document = app_state.current_document.unwrap();
                 if path_modal_top.delete == ModalEntity::Tab
-                    && state.docs.get_mut(&current_document).unwrap().tabs.len() > 1
+                    && app_state
+                        .docs
+                        .get_mut(&current_document)
+                        .unwrap()
+                        .tabs
+                        .len()
+                        > 1
                 {
-                    let index = state
+                    let index = app_state
                         .docs
                         .get_mut(&current_document)
                         .unwrap()
@@ -130,13 +150,13 @@ pub fn modal_keyboard_input_system(
                         .iter()
                         .position(|x| x.is_active)
                         .unwrap();
-                    state
+                    app_state
                         .docs
                         .get_mut(&current_document)
                         .unwrap()
                         .tabs
                         .remove(index);
-                    let mut last_tab = state
+                    let mut last_tab = app_state
                         .docs
                         .get_mut(&current_document)
                         .unwrap()
@@ -149,17 +169,17 @@ pub fn modal_keyboard_input_system(
                         drop_last_checkpoint: false,
                     });
                 }
-                if path_modal_top.delete == ModalEntity::Document && state.docs.len() > 1 {
+                if path_modal_top.delete == ModalEntity::Document && app_state.docs.len() > 1 {
                     let id_to_remove = current_document;
                     for (entity, button) in query_button.iter_mut() {
                         if button.id == id_to_remove {
                             commands.entity(entity).despawn_recursive();
                         }
                     }
-                    state.docs.remove(&current_document);
+                    app_state.docs.remove(&current_document);
                     for (_, button) in query_button.iter_mut() {
                         if button.id != id_to_remove {
-                            state.current_document = Some(button.id);
+                            app_state.current_document = Some(button.id);
                             break;
                         }
                     }
@@ -168,10 +188,10 @@ pub fn modal_keyboard_input_system(
                         drop_last_checkpoint: false,
                     });
                     events.send(UpdateListHighlight);
-                    remove_from_pkv(&mut pkv, id_to_remove, state.current_document.unwrap());
+                    remove_from_pkv(&mut pkv, id_to_remove, app_state.current_document.unwrap());
                 }
                 commands.entity(entity).despawn_recursive();
-                state.modal_id = None;
+                ui_state.modal_id = None;
             }
         }
     }

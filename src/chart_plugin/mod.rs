@@ -120,10 +120,8 @@ pub const MAX_CHECKPOINTS: i32 = 7;
 pub const MAX_SAVED_DOCS_IN_MEMORY: i32 = 7;
 
 #[derive(Resource, Default)]
-pub struct AppState {
-    pub font: Option<Handle<Font>>,
+pub struct UiState {
     pub modal_id: Option<ReflectableUuid>,
-    pub main_panel: Option<Entity>,
     pub arrow_type: ArrowType,
     pub entity_to_edit: Option<ReflectableUuid>,
     pub tab_to_edit: Option<ReflectableUuid>,
@@ -131,6 +129,16 @@ pub struct AppState {
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
+}
+
+#[derive(Resource, Default)]
+pub struct StaticState {
+    pub font: Option<Handle<Font>>,
+    pub main_panel: Option<Entity>,
+}
+
+#[derive(Resource, Default)]
+pub struct AppState {
     pub current_document: Option<ReflectableUuid>,
     pub docs: HashMap<ReflectableUuid, Doc>,
 }
@@ -142,6 +150,8 @@ pub struct BlinkTimer {
 
 impl Plugin for ChartPlugin {
     fn build(&self, app: &mut App) {
+        app.init_resource::<UiState>();
+        app.init_resource::<StaticState>();
         app.init_resource::<AppState>();
 
         app.register_type::<Rectangle>();
@@ -216,7 +226,7 @@ fn set_focused_entity(
         (&Interaction, &Rectangle),
         (Changed<Interaction>, With<Rectangle>),
     >,
-    mut state: ResMut<AppState>,
+    mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
     #[cfg(not(target_arch = "wasm32"))] mut holding_time: Local<(
@@ -285,7 +295,7 @@ fn set_focused_entity(
 fn update_rectangle_position(
     mut cursor_moved_events: EventReader<CursorMoved>,
     mut node_position: Query<(&mut Style, &Rectangle), With<Rectangle>>,
-    state: Res<AppState>,
+    state: Res<UiState>,
     mut query: Query<(&Style, &LeftPanel), Without<Rectangle>>,
     mut events: EventWriter<RedrawArrow>,
     windows: Query<&Window, With<PrimaryWindow>>,
@@ -311,11 +321,13 @@ fn update_rectangle_position(
 fn create_new_rectangle(
     mut commands: Commands,
     mut events: EventReader<AddRect>,
-    mut state: ResMut<AppState>,
+    state: ResMut<StaticState>,
+    mut ui_state: ResMut<UiState>,
 ) {
     for event in events.iter() {
         let font = state.font.as_ref().unwrap().clone();
-        state.entity_to_edit = Some(ReflectableUuid(event.node.id));
+        *ui_state = UiState::default();
+        ui_state.entity_to_edit = Some(ReflectableUuid(event.node.id));
         let entity = spawn_node(
             &mut commands,
             NodeMeta {
