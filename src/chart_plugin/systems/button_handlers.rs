@@ -234,6 +234,7 @@ pub fn text_manipulation(
                             for (mut text, editable_text) in editable_text.iter_mut() {
                                 if Some(editable_text.id) == ui_state.entity_to_edit {
                                     let mut str = "".to_string();
+                                    text.sections.pop();
                                     for section in text.sections.iter_mut() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
