@@ -254,11 +254,10 @@ pub fn init_layout(
     commands.entity(left_panel).add_child(left_panel_controls);
     commands.entity(left_panel).add_child(left_panel_explorer);
 
-    let creation = add_new_delete_rec(
+    let rectangle_creation = add_new_delete_rec(
         &mut commands,
+        &asset_server,
         font.clone(),
-        "New Rec".to_string(),
-        "Del Rec".to_string(),
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Add,
         },
@@ -522,7 +521,9 @@ pub fn init_layout(
     }
     commands.entity(text_manipulation).add_child(cut);
 
-    commands.entity(left_panel_controls).add_child(creation);
+    commands
+        .entity(left_panel_controls)
+        .add_child(rectangle_creation);
     commands.entity(left_panel_controls).add_child(color_picker);
     commands.entity(left_panel_controls).add_child(arrow_modes);
     commands.entity(left_panel_controls).add_child(text_modes);
