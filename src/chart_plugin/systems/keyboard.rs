@@ -10,33 +10,58 @@ use image::*;
 use std::convert::TryInto;
 use uuid::Uuid;
 
-use crate::{AddRect, AppState, LoadRequest, SaveRequest};
+use crate::{AddRect, AppState, BlinkTimer, LoadRequest, SaveRequest};
 
-use super::ui_helpers::{get_sections, EditableText};
+use super::ui_helpers::{get_sections, DocListItemText, EditableText, SelectedTabTextInput};
 
 pub fn keyboard_input_system(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
     mut state: ResMut<AppState>,
-    mut query: Query<(&mut Text, &EditableText), With<EditableText>>,
     mut char_evr: EventReader<ReceivedCharacter>,
     mut events: EventWriter<AddRect>,
     input: Res<Input<KeyCode>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut deleting: Local<bool>,
+    mut node_text_query: Query<
+        (&mut Text, &EditableText),
+        (
+            With<EditableText>,
+            Without<DocListItemText>,
+            Without<SelectedTabTextInput>,
+        ),
+    >,
+    mut doc_name_query: Query<
+        (&mut Text, &DocListItemText),
+        (
+            Without<EditableText>,
+            With<DocListItemText>,
+            Without<SelectedTabTextInput>,
+        ),
+    >,
+    mut tab_name_query: Query<
+        (&mut Text, &SelectedTabTextInput),
+        (
+            Without<EditableText>,
+            Without<DocListItemText>,
+            With<SelectedTabTextInput>,
+        ),
+    >,
+    mut blink_timer: ResMut<BlinkTimer>,
+    time: Res<Time>,
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
     let font = state.font.as_ref().unwrap().clone();
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
-
+    blink_timer.timer.tick(time.delta());
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(
             &mut images,
             &mut state,
-            &mut query,
+            &mut node_text_query,
             &mut events,
             font,
             scale_factor,
@@ -57,37 +82,126 @@ pub fn keyboard_input_system(
             drop_last_checkpoint: true,
         });
     } else {
-        for (mut text, editable_text) in &mut query.iter_mut() {
+        if state.entity_to_edit.is_some() {
+            blink_timer.timer.unpause();
+        } else {
+            blink_timer.timer.pause();
+        }
+        for (mut text, editable_text) in &mut node_text_query.iter_mut() {
             if Some(editable_text.id) == state.entity_to_edit {
                 let mut str = "".to_string();
                 for section in text.sections.iter_mut() {
                     str = format!("{}{}", str, section.value.clone());
                 }
-                if input.just_pressed(KeyCode::Back) {
-                    *deleting = true;
-                    str.pop();
-                } else if input.just_released(KeyCode::Back) {
-                    *deleting = false;
-                } else {
-                    for ev in char_evr.iter() {
-                        if *deleting {
-                            str.pop();
-                        } else {
-                            str = format!("{}{}", str, ev.char);
-                        }
-                    }
+                str.pop();
+                let current_str = str.clone();
+                let (str, is_del_mode) = get_text_val(
+                    text.sections[0].value.clone(),
+                    *deleting,
+                    &input,
+                    &mut char_evr,
+                );
+                *deleting = is_del_mode;
+                if str != current_str {
+                    text.sections = get_sections(str, font.clone()).0;
                 }
-                text.sections = get_sections(str, font.clone()).0;
+                if blink_timer.timer.finished() {
+                    text.sections.last_mut().unwrap().value =
+                        if text.sections.last().unwrap().value == "|" {
+                            " ".to_string()
+                        } else {
+                            "|".to_string()
+                        };
+                }
+            } else {
+                text.sections.last_mut().unwrap().value = " ".to_string();
+            }
+        }
+        for (mut text, doc_list_item) in &mut doc_name_query.iter_mut() {
+            if Some(doc_list_item.id) == state.doc_to_edit {
+                if text.sections[0].value == *"Untitled" {
+                    text.sections[0].value = "".to_string();
+                }
+                if input.just_pressed(KeyCode::Return) {
+                    state.doc_to_edit = None;
+                    continue;
+                }
+                let (str, is_del_mode) = get_text_val(
+                    text.sections[0].value.clone(),
+                    *deleting,
+                    &input,
+                    &mut char_evr,
+                );
+                *deleting = is_del_mode;
+                text.sections[0].value = str.clone();
+                let doc = state.docs.get_mut(&doc_list_item.id).unwrap();
+                doc.name = str.clone();
+            }
+        }
+        for (mut text, tab_input) in &mut tab_name_query.iter_mut() {
+            if Some(tab_input.id) == state.tab_to_edit {
+                if input.just_pressed(KeyCode::Return) {
+                    state.tab_to_edit = None;
+                    continue;
+                }
+                let (str, is_del_mode) = get_text_val(
+                    text.sections[0].value.clone(),
+                    *deleting,
+                    &input,
+                    &mut char_evr,
+                );
+                *deleting = is_del_mode;
+                text.sections[0].value = str.clone();
+                let current_document = state.current_document.unwrap();
+                let tab = state
+                    .docs
+                    .get_mut(&current_document)
+                    .unwrap()
+                    .tabs
+                    .iter_mut()
+                    .find(|x| x.id == tab_input.id)
+                    .unwrap();
+                tab.name = str.clone();
             }
         }
     }
+}
+
+fn get_text_val(
+    mut str: String,
+    mut deleting: bool,
+    input: &Res<Input<KeyCode>>,
+    char_evr: &mut EventReader<ReceivedCharacter>,
+) -> (String, bool) {
+    if input.just_pressed(KeyCode::Back) {
+        deleting = true;
+        str.pop();
+    } else if input.just_released(KeyCode::Back) {
+        deleting = false;
+    } else {
+        for ev in char_evr.iter() {
+            if deleting {
+                str.pop();
+            } else {
+                str = format!("{}{}", str, ev.char);
+            }
+        }
+    }
+    (str, deleting)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn insert_from_clipboard(
     images: &mut ResMut<Assets<Image>>,
     state: &mut ResMut<AppState>,
-    query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
+    query: &mut Query<
+        (&mut Text, &EditableText),
+        (
+            With<EditableText>,
+            Without<DocListItemText>,
+            Without<SelectedTabTextInput>,
+        ),
+    >,
     events: &mut EventWriter<AddRect>,
     font: Handle<Font>,
     scale_factor: f64,
