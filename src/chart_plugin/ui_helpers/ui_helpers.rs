@@ -307,7 +307,7 @@ pub fn add_tab(
         .id();
     let tab_label = commands
         .spawn((
-           TextBundle {
+            TextBundle {
                 text: Text {
                     sections: vec![
                         TextSection {
