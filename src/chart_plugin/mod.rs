@@ -222,16 +222,16 @@ impl Plugin for ChartPlugin {
 }
 
 #[cfg(target_arch = "wasm32")]
-fn get_timestamp() -> f64 {
+pub fn get_timestamp() -> f64 {
     js_sys::Date::now()
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn get_timestamp() -> f64 {
+pub fn get_timestamp() -> f64 {
     use std::time::SystemTime;
     use std::time::UNIX_EPOCH;
     let duration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-    duration.as_secs_f64() * 1000.0 + f64::from(duration.subsec_nanos()) / 1_000_000.0
+    duration.as_millis() as f64
 }
 
 fn set_focused_entity(
@@ -271,10 +271,10 @@ fn set_focused_entity(
         window.cursor.icon = CursorIcon::Move;
     }
 
-    let now = get_timestamp();
+    let now_ms = get_timestamp();
     // 150ms delay before re-positioning the rectangle
     if state.hold_entity.is_none()
-        && now - holding_time.0.as_secs_f64() * 1000.0 > 150.0
+        && Duration::from_millis(now_ms as u64) - holding_time.0 > Duration::from_millis(150)
         && holding_time.1.is_some()
     {
         state.hold_entity = holding_time.1;

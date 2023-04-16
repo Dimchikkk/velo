@@ -132,15 +132,17 @@ pub fn list_item_click(
     for (interaction, doc_list_item) in &mut interaction_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                commands.insert_resource(SaveRequest {
-                    doc_id: Some(state.current_document.unwrap()),
-                    tab_id: None,
-                });
-                state.current_document = Some(doc_list_item.id);
-                commands.insert_resource(LoadRequest {
-                    doc_id: Some(doc_list_item.id),
-                    drop_last_checkpoint: false,
-                });
+                if Some(doc_list_item.id) != state.current_document {
+                    commands.insert_resource(SaveRequest {
+                        doc_id: Some(state.current_document.unwrap()),
+                        tab_id: None,
+                    });
+                    state.current_document = Some(doc_list_item.id);
+                    commands.insert_resource(LoadRequest {
+                        doc_id: Some(doc_list_item.id),
+                        drop_last_checkpoint: false,
+                    });
+                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}

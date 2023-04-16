@@ -34,9 +34,6 @@ pub struct NewDoc;
 pub struct DocList;
 
 #[derive(Component)]
-pub struct RenameDoc;
-
-#[derive(Component)]
 pub struct SaveDoc;
 
 #[derive(Component)]
