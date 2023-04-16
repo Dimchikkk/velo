@@ -22,9 +22,6 @@ pub struct AddTab;
 pub struct DeleteTab;
 
 #[derive(Component)]
-pub struct RenameTab;
-
-#[derive(Component)]
 pub struct Tooltip;
 
 #[derive(Component)]

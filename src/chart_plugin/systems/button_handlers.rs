@@ -6,15 +6,15 @@ use serde_json::json;
 use uuid::Uuid;
 
 use crate::{
-    AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType, SaveRequest,
-    StaticState, Tab, UiState, UpdateListHighlight, get_timestamp,
+    get_timestamp, AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType,
+    SaveRequest, StaticState, Tab, UiState, UpdateListHighlight,
 };
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ArrowMeta, ArrowMode, ButtonAction,
-    ChangeColor, DeleteDoc, DocList, EditableText, GenericButton, ModalEntity, NewDoc, Rectangle,
-    ReflectableUuid, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
-    Tooltip, DocListItemButton,
+    ChangeColor, DeleteDoc, DocList, DocListItemButton, EditableText, GenericButton, ModalEntity,
+    NewDoc, Rectangle, ReflectableUuid, SaveDoc, TextManipulation, TextManipulationAction,
+    TextPosMode, Tooltip,
 };
 
 pub fn rec_button_handlers(
@@ -362,7 +362,10 @@ pub fn rename_doc_handler(
         match *interaction {
             Interaction::Clicked => {
                 let now_ms = get_timestamp();
-                if double_click.1 == Some(item.id) && Duration::from_millis(now_ms as u64) - double_click.0 < Duration::from_millis(500) {
+                if double_click.1 == Some(item.id)
+                    && Duration::from_millis(now_ms as u64) - double_click.0
+                        < Duration::from_millis(500)
+                {
                     *ui_state = UiState::default();
                     ui_state.doc_to_edit = Some(item.id);
                     *double_click = (Duration::from_secs(0), None);

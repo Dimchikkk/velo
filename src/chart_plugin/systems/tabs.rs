@@ -4,11 +4,10 @@ use bevy::prelude::*;
 
 use uuid::Uuid;
 
-use crate::{AppState, LoadRequest, SaveRequest, StaticState, Tab, UiState, get_timestamp};
+use crate::{get_timestamp, AppState, LoadRequest, SaveRequest, StaticState, Tab, UiState};
 
 use super::ui_helpers::{
-    spawn_modal, AddTab, DeleteTab, ModalEntity, ReflectableUuid, RenameTab, SelectedTab,
-    SelectedTabContainer,
+    spawn_modal, AddTab, DeleteTab, ModalEntity, ReflectableUuid, SelectedTab, SelectedTabContainer,
 };
 
 pub fn selected_tab_handler(
@@ -109,7 +108,10 @@ pub fn add_tab_handler(
 }
 
 pub fn rename_tab_handler(
-    mut interaction_query: Query<(&Interaction, &SelectedTab), (Changed<Interaction>, With<SelectedTab>)>,
+    mut interaction_query: Query<
+        (&Interaction, &SelectedTab),
+        (Changed<Interaction>, With<SelectedTab>),
+    >,
     mut ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
     mut double_click: Local<(Duration, Option<ReflectableUuid>)>,
@@ -118,7 +120,10 @@ pub fn rename_tab_handler(
         match *interaction {
             Interaction::Clicked => {
                 let now_ms = get_timestamp();
-                if double_click.1 == Some(item.id) && Duration::from_millis(now_ms as u64) - double_click.0 < Duration::from_millis(500) {
+                if double_click.1 == Some(item.id)
+                    && Duration::from_millis(now_ms as u64) - double_click.0
+                        < Duration::from_millis(500)
+                {
                     *ui_state = UiState::default();
                     let current_document = app_state.current_document.unwrap();
                     let tab = app_state
