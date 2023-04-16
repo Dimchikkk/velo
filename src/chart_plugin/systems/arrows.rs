@@ -72,6 +72,7 @@ pub fn create_arrow_end(
                         arrow_type: event.arrow_type,
                     },
                 );
+                break
             }
         }
     }
