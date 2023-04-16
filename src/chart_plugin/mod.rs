@@ -135,6 +135,11 @@ pub struct AppState {
     pub docs: HashMap<ReflectableUuid, Doc>,
 }
 
+#[derive(Resource)]
+pub struct BlinkTimer {
+    timer: Timer,
+}
+
 impl Plugin for ChartPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AppState>();
@@ -201,7 +206,7 @@ impl Plugin for ChartPlugin {
             keyboard_input_system,
             list_selected_highlight,
         ));
-        
+
         app.add_systems((button_hover_change, selected_tab_handler).chain());
     }
 }
