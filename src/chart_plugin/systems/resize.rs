@@ -1,6 +1,6 @@
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 
-use crate::AppState;
+use crate::UiState;
 
 use super::{
     ui_helpers::{EditableText, Rectangle, ResizeMarker},
@@ -13,7 +13,7 @@ pub fn resize_entity_start(
         (Changed<Interaction>, With<ResizeMarker>),
     >,
     mut button_query: Query<&Rectangle, With<Rectangle>>,
-    mut state: ResMut<AppState>,
+    mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let mut primary_window = windows.single_mut();
@@ -46,7 +46,7 @@ pub fn resize_entity_start(
 
 pub fn resize_entity_end(
     mut mouse_motion_events: EventReader<MouseMotion>,
-    state: Res<AppState>,
+    state: Res<UiState>,
     mut rectangle_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
     mut text_input_query: Query<
         (&EditableText, &mut Style),
