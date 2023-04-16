@@ -7,10 +7,9 @@ use bevy_pkv::PkvStore;
 use crate::{AppState, BlinkTimer, MainCamera, StaticState, TextPos};
 
 use super::ui_helpers::{
-    self, add_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, DeleteDoc,
-    DeleteTab, GenericButton, LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu,
-    NewDoc, RenameDoc, RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction,
-    TextPosMode,
+    self, add_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, DeleteTab,
+    GenericButton, LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu, NewDoc,
+    RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
 };
 
 #[path = "add_arrow.rs"]
@@ -215,20 +214,20 @@ pub fn init_layout(
         "New Doc".to_string(),
         NewDoc,
     );
-    let rename_doc = add_menu_button(
-        &mut commands,
-        &asset_server,
-        font.clone(),
-        "Rename".to_string(),
-        RenameDoc,
-    );
-    let delete_doc = add_menu_button(
-        &mut commands,
-        &asset_server,
-        font.clone(),
-        "Delete".to_string(),
-        DeleteDoc,
-    );
+    // let rename_doc = add_menu_button(
+    //     &mut commands,
+    //     &asset_server,
+    //     font.clone(),
+    //     "Rename".to_string(),
+    //     RenameDoc,
+    // );
+    // let delete_doc = add_menu_button(
+    //     &mut commands,
+    //     &asset_server,
+    //     font.clone(),
+    //     "Delete".to_string(),
+    //     DeleteDoc,
+    // );
     let save_doc = add_menu_button(
         &mut commands,
         &asset_server,
@@ -237,10 +236,10 @@ pub fn init_layout(
         SaveDoc,
     );
 
-    commands.entity(menu).add_child(new_doc);
-    commands.entity(menu).add_child(rename_doc);
-    commands.entity(menu).add_child(delete_doc);
+    // commands.entity(menu).add_child(rename_doc);
+    // commands.entity(menu).add_child(delete_doc);
     commands.entity(menu).add_child(save_doc);
+    commands.entity(menu).add_child(new_doc);
 
     let main_bottom = commands
         .spawn(NodeBundle {
