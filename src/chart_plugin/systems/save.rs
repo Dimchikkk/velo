@@ -42,7 +42,7 @@ pub fn save_json(
     >,
     arrows: Query<&ArrowMeta, With<ArrowMeta>>,
     request: Res<SaveRequest>,
-    mut state: ResMut<AppState>,
+    mut app_state: ResMut<AppState>,
     text_query: Query<&mut Text, With<EditableText>>,
     mut pkv: ResMut<PkvStore>,
 ) {
@@ -101,14 +101,14 @@ pub fn save_json(
 
     let doc = if request.doc_id.is_some() {
         let doc = request.doc_id.unwrap();
-        if !state.docs.contains_key(&doc) {
+        if !app_state.docs.contains_key(&doc) {
             if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
                 if docs.contains_key(&doc) {
-                    if (state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
-                        let keys = state.docs.keys().cloned().collect::<Vec<_>>();
-                        state.docs.remove(&keys[0]);
+                    if (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                        let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
+                        app_state.docs.remove(&keys[0]);
                     }
-                    state.docs.insert(doc, docs.get(&doc).unwrap().clone());
+                    app_state.docs.insert(doc, docs.get(&doc).unwrap().clone());
                 } else {
                     panic!("Document not found in pkv");
                 }
@@ -116,10 +116,10 @@ pub fn save_json(
         }
         request.doc_id.unwrap()
     } else {
-        state.current_document.unwrap()
+        app_state.current_document.unwrap()
     };
 
-    for tab in &mut state.docs.get_mut(&doc).unwrap().tabs {
+    for tab in &mut app_state.docs.get_mut(&doc).unwrap().tabs {
         if request.tab_id.is_some() {
             if tab.id == request.tab_id.unwrap() {
                 if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
@@ -139,28 +139,28 @@ pub fn save_json(
 
     if let Some(doc_id) = request.doc_id {
         if let Ok(mut docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
-            docs.insert(doc_id, state.docs.get(&doc_id).unwrap().clone());
+            docs.insert(doc_id, app_state.docs.get(&doc_id).unwrap().clone());
             pkv.set("docs", &docs).unwrap();
         } else {
             let mut docs = HashMap::new();
-            docs.insert(doc_id, state.docs.get(&doc_id).unwrap().clone());
+            docs.insert(doc_id, app_state.docs.get(&doc_id).unwrap().clone());
             pkv.set("docs", &docs).unwrap();
         }
         if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, Vec<String>>>("tags") {
-            let doc = state.docs.get(&doc_id).unwrap();
+            let doc = app_state.docs.get(&doc_id).unwrap();
             let tags = tags.get_mut(&doc_id).unwrap();
             tags.append(&mut doc.tags.clone());
             pkv.set("tags", &tags).unwrap();
         } else {
-            let doc = state.docs.get(&doc_id).unwrap();
+            let doc = app_state.docs.get(&doc_id).unwrap();
             pkv.set("tags", &doc.tags).unwrap();
         }
         if let Ok(mut names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-            let doc = state.docs.get(&doc_id).unwrap();
+            let doc = app_state.docs.get(&doc_id).unwrap();
             names.insert(doc.id, doc.name.clone());
             pkv.set("names", &names).unwrap();
         } else {
-            let doc = state.docs.get(&doc_id).unwrap();
+            let doc = app_state.docs.get(&doc_id).unwrap();
             let mut names = HashMap::new();
             names.insert(doc.id, doc.name.clone());
             pkv.set("names", &names).unwrap();
