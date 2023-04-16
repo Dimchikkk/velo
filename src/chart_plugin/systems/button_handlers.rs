@@ -249,6 +249,7 @@ pub fn text_manipulation(
                             for (mut text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
+                                    text.sections.pop();
                                     for section in text.sections.iter_mut() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
@@ -263,6 +264,7 @@ pub fn text_manipulation(
                             for (mut text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
+                                    text.sections.pop();
                                     for section in text.sections.iter_mut() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
