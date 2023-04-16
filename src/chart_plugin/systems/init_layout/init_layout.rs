@@ -80,87 +80,14 @@ pub fn init_layout(
             BottomPanel,
         ))
         .id();
-    let add_tab = commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
-                style: Style {
-                    size: Size::new(Val::Px(60.), Val::Px(30.)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    margin: UiRect {
-                        left: Val::Px(10.),
-                        right: Val::Px(10.),
-                        top: Val::Px(0.),
-                        bottom: Val::Px(0.),
-                    },
-                    ..default()
-                },
-
-                ..default()
-            },
-            AddTab,
-            GenericButton,
-        ))
-        .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), "New Tab".to_string()));
-        })
-        .id();
-    let rename_tab = commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
-                style: Style {
-                    size: Size::new(Val::Px(60.), Val::Px(30.)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    margin: UiRect {
-                        left: Val::Px(0.),
-                        right: Val::Px(10.),
-                        top: Val::Px(0.),
-                        bottom: Val::Px(0.),
-                    },
-                    ..default()
-                },
-
-                ..default()
-            },
-            RenameTab,
-            GenericButton,
-        ))
-        .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), "Rename".to_string()));
-        })
-        .id();
-    let del_tab = commands
-        .spawn((
-            ButtonBundle {
-                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
-                style: Style {
-                    size: Size::new(Val::Px(60.), Val::Px(30.)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    margin: UiRect {
-                        left: Val::Px(0.),
-                        right: Val::Px(20.),
-                        top: Val::Px(0.),
-                        bottom: Val::Px(0.),
-                    },
-                    ..default()
-                },
-
-                ..default()
-            },
-            DeleteTab,
-            GenericButton,
-        ))
-        .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), "Delete".to_string()));
-        })
-        .id();
+    let add_tab = add_menu_button(
+        &mut commands,
+        &asset_server,
+        font.clone(),
+        "New Tab".to_string(),
+        AddTab,
+    );
     commands.entity(bottom_panel).add_child(add_tab);
-    commands.entity(bottom_panel).add_child(rename_tab);
-    commands.entity(bottom_panel).add_child(del_tab);
 
     let docs = add_list(
         bottom_panel,
@@ -211,7 +138,7 @@ pub fn init_layout(
         &mut commands,
         &asset_server,
         font.clone(),
-        "New Doc".to_string(),
+        "New Document".to_string(),
         NewDoc,
     );
     let save_doc = add_menu_button(
