@@ -48,7 +48,7 @@ pub fn add_menu_button(
                 })
                 .id()
         }
-        "New Doc" => {
+        "New Document" | "New Tab" => {
             commands
                 .spawn((
                     ButtonBundle {
@@ -67,7 +67,7 @@ pub fn add_menu_button(
                 ))
                 .with_children(|builder| {
                     builder.spawn((
-                        get_tooltip(font.clone(), "New Document".to_string(), 14.),
+                        get_tooltip(font.clone(), name, 14.),
                         Tooltip,
                     ));
 
