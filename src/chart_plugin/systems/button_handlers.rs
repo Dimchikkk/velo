@@ -384,10 +384,14 @@ pub fn delete_doc_handler(
     mut delete_doc_query: Query<&Interaction, (Changed<Interaction>, With<DeleteDoc>)>,
     static_state: ResMut<StaticState>,
     mut ui_state: ResMut<UiState>,
+    app_state: Res<AppState>,
 ) {
     for interaction in &mut delete_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
+                if app_state.docs.len() < 2 {
+                    return;
+                }
                 let font = static_state.font.as_ref().unwrap().clone();
                 let id = ReflectableUuid(Uuid::new_v4());
                 *ui_state = UiState::default();

@@ -84,9 +84,7 @@ pub fn confirm_modal(
                             drop_last_checkpoint: false,
                         });
                     }
-                    if path_modal_confirm.delete == ModalEntity::Document
-                        && app_state.docs.len() > 1
-                    {
+                    if path_modal_confirm.delete == ModalEntity::Document {
                         let id_to_remove = current_document;
                         for (entity, button) in query_container.iter_mut() {
                             if button.id == id_to_remove {
@@ -169,7 +167,7 @@ pub fn modal_keyboard_input_system(
                         drop_last_checkpoint: false,
                     });
                 }
-                if path_modal_top.delete == ModalEntity::Document && app_state.docs.len() > 1 {
+                if path_modal_top.delete == ModalEntity::Document {
                     let id_to_remove = current_document;
                     for (entity, button) in query_container.iter_mut() {
                         if button.id == id_to_remove {

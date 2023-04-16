@@ -1,23 +1,22 @@
 use bevy::prelude::*;
-use bevy_ui_borders::BorderColor;
 
-use crate::chart_plugin::ui_helpers::GenericButton;
 
-use super::ui_helpers::add_rectangle_txt;
+use crate::chart_plugin::ui_helpers::{get_tooltip, ButtonAction, GenericButton, Tooltip};
+
+
 
 pub fn add_new_delete_rec(
     commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
     font: Handle<Font>,
-    label_do: String,
-    label_undo: String,
-    component_do: impl Component,
-    component_undo: impl Component,
+    create_component: ButtonAction,
+    delete_component: ButtonAction,
 ) -> Entity {
     let node = commands
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(85.), Val::Percent(15.)),
+                size: Size::new(Val::Percent(80.), Val::Percent(18.)),
                 margin: UiRect {
                     left: Val::Px(5.),
                     right: Val::Px(5.),
@@ -30,50 +29,56 @@ pub fn add_new_delete_rec(
             ..default()
         })
         .id();
-    let do_button = commands
+    let new_rec = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
+                background_color: Color::BLACK.into(),
+                image: asset_server.load("rec-add.png").into(),
                 style: Style {
-                    size: Size::new(Val::Percent(40.), Val::Percent(100.)),
+                    size: Size::new(Val::Px(45.), Val::Px(45.)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
-                    border: UiRect::all(Val::Px(1.)),
+                    margin: UiRect::all(Val::Px(5.)),
                     ..default()
                 },
                 ..default()
             },
-            component_do,
+            create_component,
             GenericButton,
-            BorderColor(Color::BLACK),
         ))
         .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), label_do));
+            builder.spawn((
+                get_tooltip(font.clone(), "New Rectangle".to_string(), 14.),
+                Tooltip,
+            ));
         })
         .id();
 
-    let undo_button = commands
+    let del_rec = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
+                background_color: Color::BLACK.into(),
+                image: asset_server.load("rec-del.png").into(),
                 style: Style {
+                    size: Size::new(Val::Px(45.), Val::Px(45.)),
                     align_items: AlignItems::Center,
-                    size: Size::new(Val::Percent(40.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
-                    border: UiRect::all(Val::Px(1.)),
+                    margin: UiRect::all(Val::Px(5.)),
                     ..default()
                 },
                 ..default()
             },
-            component_undo,
+            delete_component,
             GenericButton,
-            BorderColor(Color::BLACK),
         ))
         .with_children(|builder| {
-            builder.spawn(add_rectangle_txt(font.clone(), label_undo));
+            builder.spawn((
+                get_tooltip(font.clone(), "Delete Rectangle".to_string(), 14.),
+                Tooltip,
+            ));
         })
         .id();
-    commands.entity(node).add_child(do_button);
-    commands.entity(node).add_child(undo_button);
+    commands.entity(node).add_child(del_rec);
+    commands.entity(node).add_child(new_rec);
     node
 }
