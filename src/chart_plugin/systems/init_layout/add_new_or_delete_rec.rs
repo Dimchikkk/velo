@@ -1,9 +1,6 @@
 use bevy::prelude::*;
 
-
 use crate::chart_plugin::ui_helpers::{get_tooltip, ButtonAction, GenericButton, Tooltip};
-
-
 
 pub fn add_new_delete_rec(
     commands: &mut Commands,
