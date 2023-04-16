@@ -307,7 +307,34 @@ pub fn add_tab(
         .id();
     let tab_label = commands
         .spawn((
-            add_rectangle_txt(font.clone(), name),
+           TextBundle {
+                text: Text {
+                    sections: vec![
+                        TextSection {
+                            value: name,
+                            style: TextStyle {
+                                font: font.clone(),
+                                font_size: 18.,
+                                color: Color::BLACK,
+                            },
+                        },
+                        TextSection {
+                            value: " ".to_string(),
+                            style: TextStyle {
+                                font: font.clone(),
+                                font_size: 18.,
+                                color: Color::BLACK,
+                            },
+                        },
+                    ],
+                    ..default()
+                },
+                style: Style {
+                    margin: UiRect::all(Val::Px(5.)),
+                    ..default()
+                },
+                ..default()
+            },
             SelectedTabTextInput { id },
         ))
         .id();
@@ -402,14 +429,24 @@ pub fn add_list_item(
         .spawn((
             TextBundle {
                 text: Text {
-                    sections: vec![TextSection {
-                        value: name,
-                        style: TextStyle {
-                            font: font.clone(),
-                            font_size: 18.,
-                            color: Color::BLACK,
+                    sections: vec![
+                        TextSection {
+                            value: name,
+                            style: TextStyle {
+                                font: font.clone(),
+                                font_size: 18.,
+                                color: Color::BLACK,
+                            },
                         },
-                    }],
+                        TextSection {
+                            value: " ".to_string(),
+                            style: TextStyle {
+                                font: font.clone(),
+                                font_size: 18.,
+                                color: Color::BLACK,
+                            },
+                        },
+                    ],
                     ..default()
                 },
                 style: Style {
