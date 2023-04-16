@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use base64::{engine::general_purpose, Engine};
 use bevy::{
