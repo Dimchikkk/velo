@@ -394,33 +394,34 @@ pub fn save_doc_handler(
 }
 
 pub fn button_generic_handler(
+    _commands: Commands,
     mut generic_button_query: Query<
-        (&Interaction, &mut BackgroundColor, &Children),
+        (&Interaction, &mut BackgroundColor, Entity),
         (Changed<Interaction>, With<GenericButton>),
     >,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
+    mut tooltips_query: Query<(&mut Visibility, &Parent), With<Tooltip>>,
 ) {
     let mut primary_window = windows.single_mut();
-    for (interaction, mut bg_color, children) in &mut generic_button_query.iter_mut() {
+    for (interaction, mut bg_color, entity) in &mut generic_button_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {}
             Interaction::Hovered => {
                 primary_window.cursor.icon = CursorIcon::Hand;
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
-                let child = children.iter().next().unwrap();
-                let tooltip = tooltips_query.get_mut(*child);
-                if let Ok(mut visibility) = tooltip {
-                    *visibility = Visibility::Visible;
+                for (mut visibility, parent) in tooltips_query.iter_mut() {
+                    if parent.get() == entity {
+                        *visibility = Visibility::Visible;
+                    }
                 }
             }
             Interaction::None => {
                 primary_window.cursor.icon = CursorIcon::Default;
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-                let child = children.iter().next().unwrap();
-                let tooltip = tooltips_query.get_mut(*child);
-                if let Ok(mut visibility) = tooltip {
-                    *visibility = Visibility::Hidden;
+                for (mut visibility, parent) in tooltips_query.iter_mut() {
+                    if parent.get() == entity {
+                        *visibility = Visibility::Hidden;
+                    }
                 }
             }
         }
