@@ -11,12 +11,13 @@ use bevy_pkv::PkvStore;
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
-use crate::{AppState, Doc, JsonNode, LoadRequest, StaticState, UiState, MAX_SAVED_DOCS_IN_MEMORY};
-
-use super::ui_helpers::{
-    add_tab, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle, ReflectableUuid,
-    SelectedTab,
-};
+use super::ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, Rectangle, SelectedTab};
+use crate::canvas::arrow::components::ArrowMeta;
+use crate::canvas::arrow::events::CreateArrow;
+use crate::components::Doc;
+use crate::resources::{AppState, LoadRequest, StaticState};
+use crate::utils::ReflectableUuid;
+use crate::{JsonNode, UiState, MAX_SAVED_DOCS_IN_MEMORY};
 
 pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
     request.is_some()

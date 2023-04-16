@@ -5,17 +5,17 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::{
-    AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType, SaveRequest,
-    StaticState, Tab, UiState, UpdateListHighlight,
-};
+use crate::{AddRect, JsonNode, JsonNodeText, NodeType, UiState, UpdateListHighlight};
 
 use super::ui_helpers::{
-    add_list_item, get_sections, pos_to_style, spawn_modal, ArrowMeta, ArrowMode, ButtonAction,
-    ChangeColor, DeleteDoc, DocList, EditableText, GenericButton, ModalEntity, NewDoc, Rectangle,
-    ReflectableUuid, RenameDoc, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
-    Tooltip,
+    add_list_item, get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
+    DocList, EditableText, GenericButton, ModalEntity, NewDoc, Rectangle, RenameDoc, SaveDoc,
+    TextManipulation, TextManipulationAction, TextPosMode, Tooltip,
 };
+use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
+use crate::components::{Doc, Tab};
+use crate::resources::{AppState, LoadRequest, SaveRequest, StaticState};
+use crate::utils::ReflectableUuid;
 
 pub fn rec_button_handlers(
     mut commands: Commands,
