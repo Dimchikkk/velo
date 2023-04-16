@@ -6,8 +6,10 @@ use crate::TextPos;
 
 use super::{
     create_arrow_marker, create_rectangle_btn, create_rectangle_txt, create_resize_marker,
-    ArrowConnect, ArrowConnectPos, EditableText, Rectangle, ReflectableUuid, ResizeMarker,
+    EditableText, Rectangle, ResizeMarker,
 };
+use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
+use crate::utils::ReflectableUuid;
 
 #[derive(Clone)]
 pub struct NodeMeta {

@@ -2,14 +2,14 @@ use bevy::prelude::*;
 
 use bevy_pkv::PkvStore;
 
-use crate::{AppState, MainCamera, TextPos};
-
 use super::ui_helpers::{
-    self, add_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, DeleteDoc,
-    DeleteTab, GenericButton, LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu,
-    NewDoc, RenameDoc, RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction,
-    TextPosMode,
+    self, add_rectangle_txt, AddTab, BottomPanel, ButtonAction, DeleteDoc, DeleteTab,
+    GenericButton, LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu, NewDoc,
+    RenameDoc, RenameTab, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
 };
+use crate::canvas::arrow::components::{ArrowMode, ArrowType};
+use crate::resources::AppState;
+use crate::TextPos;
 
 #[path = "add_arrow.rs"]
 mod add_arrow;
@@ -52,7 +52,6 @@ pub fn init_layout(
     let font = asset_server.load("fonts/iosevka-regular.ttf");
 
     state.font = Some(font.clone());
-    commands.spawn((Camera2dBundle::default(), MainCamera));
     let bottom_panel = commands
         .spawn((
             NodeBundle {

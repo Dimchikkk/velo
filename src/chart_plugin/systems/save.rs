@@ -8,12 +8,16 @@ use image::*;
 use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
+use super::ui_helpers::{EditableText, Rectangle};
+use crate::canvas::arrow::components::ArrowMeta;
+use crate::components::Doc;
+use crate::resources::AppState;
+use crate::resources::SaveRequest;
+use crate::utils::ReflectableUuid;
 use crate::{
-    chart_plugin::ui_helpers::style_to_pos, AppState, Doc, JsonNode, JsonNodeText, SaveRequest,
-    MAX_CHECKPOINTS, MAX_SAVED_DOCS_IN_MEMORY,
+    chart_plugin::ui_helpers::style_to_pos, JsonNode, JsonNodeText, MAX_CHECKPOINTS,
+    MAX_SAVED_DOCS_IN_MEMORY,
 };
-
-use super::ui_helpers::{ArrowMeta, EditableText, Rectangle, ReflectableUuid};
 
 pub fn should_save(request: Option<Res<SaveRequest>>) -> bool {
     request.is_some()
