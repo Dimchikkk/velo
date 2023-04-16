@@ -1,8 +1,10 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 
 use bevy_pkv::PkvStore;
 
-use crate::{AppState, MainCamera, TextPos};
+use crate::{AppState, BlinkTimer, MainCamera, TextPos};
 
 use super::ui_helpers::{
     self, add_rectangle_txt, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, DeleteDoc,
@@ -50,7 +52,9 @@ pub fn init_layout(
     mut pkv: ResMut<PkvStore>,
 ) {
     let font = asset_server.load("fonts/iosevka-regular.ttf");
-
+    commands.insert_resource(BlinkTimer {
+        timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
+    });
     state.font = Some(font.clone());
     commands.spawn((Camera2dBundle::default(), MainCamera));
     let bottom_panel = commands

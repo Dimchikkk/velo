@@ -152,10 +152,16 @@ pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<
     let links: Vec<_> = finder.links(&text).collect();
     if links.is_empty() {
         return (
-            vec![TextSection {
-                value: text,
-                style: text_style,
-            }],
+            vec![
+                TextSection {
+                    value: text,
+                    style: text_style.clone(),
+                },
+                TextSection {
+                    value: " ".to_string(),
+                    style: text_style,
+                },
+            ],
             vec![false],
         );
     }
@@ -182,10 +188,14 @@ pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<
     if idx < text.len() {
         sections.push(TextSection {
             value: text[idx..text.len()].to_string(),
-            style: text_style,
+            style: text_style.clone(),
         });
         is_link.push(false);
     }
+    sections.push(TextSection {
+        value: " ".to_string(),
+        style: text_style,
+    });
     (sections, is_link)
 }
 
