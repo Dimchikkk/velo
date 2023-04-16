@@ -47,6 +47,11 @@ pub struct SelectedTab {
     pub id: ReflectableUuid,
 }
 
+#[derive(Component)]
+pub struct SelectedTabContainer {
+    pub id: ReflectableUuid,
+}
+
 #[derive(Component, Default)]
 pub struct ScrollingList {
     pub position: f32,
