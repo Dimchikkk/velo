@@ -1,16 +1,15 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
+use std::time::Duration;
 
 use bevy_pkv::PkvStore;
 
-use crate::{AppState, BlinkTimer, MainCamera, StaticState, TextPos};
-
 use super::ui_helpers::{
-    self, AddTab, ArrowMode, ArrowType, BottomPanel, ButtonAction, LeftPanel, LeftPanelControls,
-    LeftPanelExplorer, MainPanel, Menu, NewDoc, Root, SaveDoc, TextManipulation,
-    TextManipulationAction, TextPosMode,
+    self, AddTab, BottomPanel, ButtonAction, LeftPanel, LeftPanelControls, LeftPanelExplorer,
+    MainPanel, Menu, NewDoc, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
 };
+use crate::canvas::arrow::components::{ArrowMode, ArrowType};
+use crate::resources::{AppState, StaticState};
+use crate::{BlinkTimer, TextPos};
 
 #[path = "add_arrow.rs"]
 mod add_arrow;
@@ -56,7 +55,6 @@ pub fn init_layout(
         timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
     });
     static_state.font = Some(font.clone());
-    commands.spawn((Camera2dBundle::default(), MainCamera));
     let bottom_panel = commands
         .spawn((
             NodeBundle {
