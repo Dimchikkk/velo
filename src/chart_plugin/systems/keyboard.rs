@@ -102,7 +102,11 @@ pub fn keyboard_input_system(
                     str = format!("{}{}", str, section.value.clone());
                 }
                 let current_str = str.clone();
-                let (str, is_del_mode) = get_text_val(str, *deleting, &input, &mut char_evr);
+                let (str, is_del_mode) = if input.just_pressed(KeyCode::Return) {
+                    (format!("{}{}", str, "\n"), false)
+                } else {
+                    get_text_val(str, *deleting, &input, &mut char_evr)
+                };
                 *deleting = is_del_mode;
                 if str != current_str {
                     text.sections = get_sections(str, font.clone()).0;
