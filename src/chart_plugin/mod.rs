@@ -1,4 +1,8 @@
-use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
+use bevy::{
+    prelude::*,
+    text::BreakLineOn,
+    window::{PrimaryWindow, WindowResized},
+};
 use serde::{Deserialize, Serialize};
 
 use std::{
@@ -185,6 +189,7 @@ impl Plugin for ChartPlugin {
             cancel_modal,
             modal_keyboard_input_system,
             confirm_modal,
+            resize_notificator,
         ));
 
         app.add_systems(
@@ -340,5 +345,15 @@ fn create_new_rectangle(
             },
         );
         commands.entity(state.main_panel.unwrap()).add_child(entity);
+    }
+}
+
+fn resize_notificator(mut commands: Commands, resize_event: Res<Events<WindowResized>>) {
+    let mut reader = resize_event.get_reader();
+    for _ in reader.iter(&resize_event) {
+        commands.insert_resource(LoadRequest {
+            doc_id: None,
+            drop_last_checkpoint: false,
+        });
     }
 }
