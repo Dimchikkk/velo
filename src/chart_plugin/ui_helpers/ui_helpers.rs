@@ -9,16 +9,11 @@ use bevy::{
     text::BreakLineOn,
 };
 
+use crate::utils::ReflectableUuid;
 use crate::TextPos;
-
 #[path = "components.rs"]
 mod components;
 pub use components::*;
-
-#[path = "create_arrow.rs"]
-mod create_arrow;
-pub use create_arrow::*;
-
 #[path = "spawn_node.rs"]
 mod spawn_node;
 pub use spawn_node::*;
