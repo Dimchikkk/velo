@@ -11,7 +11,6 @@ The wasm target has a limited set of features and is currently only compatible w
 ** Inspiration  
 At work, I frequently rely on lucid.app to brainstorm ideas with my colleagues or by myself. Typically, I share my ideas by sending either the diagrams themselves or screenshots of them. While I tend to stick with simple features like rectangles and arrows, I've been contemplating the idea of creating a similar tool in Rust. Not only would it allow me to learn the language, but it would also be an enjoyable project to work on.
 
-
 ** What's implemented:
 - add/remove rectangle  
 - rectangle resizing  
