@@ -6,7 +6,7 @@ use bevy_pkv::PkvStore;
 use crate::{AppState, Doc, LoadRequest, UiState, UpdateListHighlight};
 
 use super::ui_helpers::{
-    DocListItemButton, ModalCancel, ModalConfirm, ModalEntity, ModalTop, ReflectableUuid,
+    DocListItemContainer, ModalCancel, ModalConfirm, ModalEntity, ModalTop, ReflectableUuid,
 };
 
 pub fn cancel_modal(
@@ -39,7 +39,7 @@ pub fn confirm_modal(
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
-    mut query_button: Query<(Entity, &DocListItemButton), With<DocListItemButton>>,
+    mut query_container: Query<(Entity, &DocListItemContainer), With<DocListItemContainer>>,
     mut events: EventWriter<UpdateListHighlight>,
     mut pkv: ResMut<PkvStore>,
 ) {
@@ -84,17 +84,15 @@ pub fn confirm_modal(
                             drop_last_checkpoint: false,
                         });
                     }
-                    if path_modal_confirm.delete == ModalEntity::Document
-                        && app_state.docs.len() > 1
-                    {
+                    if path_modal_confirm.delete == ModalEntity::Document {
                         let id_to_remove = current_document;
-                        for (entity, button) in query_button.iter_mut() {
+                        for (entity, button) in query_container.iter_mut() {
                             if button.id == id_to_remove {
                                 commands.entity(entity).despawn_recursive();
                             }
                         }
                         app_state.docs.remove(&current_document);
-                        for (_, button) in query_button.iter_mut() {
+                        for (_, button) in query_container.iter_mut() {
                             if button.id != id_to_remove {
                                 app_state.current_document = Some(button.id);
                                 break;
@@ -125,7 +123,7 @@ pub fn modal_keyboard_input_system(
     input: Res<Input<KeyCode>>,
     query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
     mut commands: Commands,
-    mut query_button: Query<(Entity, &DocListItemButton), With<DocListItemButton>>,
+    mut query_container: Query<(Entity, &DocListItemContainer), With<DocListItemContainer>>,
     mut events: EventWriter<UpdateListHighlight>,
     mut pkv: ResMut<PkvStore>,
 ) {
@@ -169,15 +167,15 @@ pub fn modal_keyboard_input_system(
                         drop_last_checkpoint: false,
                     });
                 }
-                if path_modal_top.delete == ModalEntity::Document && app_state.docs.len() > 1 {
+                if path_modal_top.delete == ModalEntity::Document {
                     let id_to_remove = current_document;
-                    for (entity, button) in query_button.iter_mut() {
+                    for (entity, button) in query_container.iter_mut() {
                         if button.id == id_to_remove {
                             commands.entity(entity).despawn_recursive();
                         }
                     }
                     app_state.docs.remove(&current_document);
-                    for (_, button) in query_button.iter_mut() {
+                    for (_, button) in query_container.iter_mut() {
                         if button.id != id_to_remove {
                             app_state.current_document = Some(button.id);
                             break;

@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::{collections::VecDeque, time::Duration};
 
 use bevy::{prelude::*, window::PrimaryWindow};
 
@@ -6,15 +6,15 @@ use serde_json::json;
 use uuid::Uuid;
 
 use crate::{
-    AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType, SaveRequest,
-    StaticState, Tab, UiState, UpdateListHighlight,
+    get_timestamp, AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType,
+    SaveRequest, StaticState, Tab, UiState, UpdateListHighlight,
 };
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ArrowMeta, ArrowMode, ButtonAction,
-    ChangeColor, DeleteDoc, DocList, EditableText, GenericButton, ModalEntity, NewDoc, Rectangle,
-    ReflectableUuid, RenameDoc, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
-    Tooltip,
+    ChangeColor, DeleteDoc, DocList, DocListItemButton, EditableText, GenericButton, ModalEntity,
+    NewDoc, Rectangle, ReflectableUuid, SaveDoc, TextManipulation, TextManipulationAction,
+    TextPosMode, Tooltip,
 };
 
 pub fn rec_button_handlers(
@@ -199,17 +199,29 @@ pub fn text_manipulation(
                             for (mut text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
-                                    for section in text.sections.iter_mut() {
+                                    let mut text_sections = text.sections.clone();
+                                    text_sections.pop();
+                                    for section in text_sections.iter() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
-                                    text.sections = vec![TextSection {
-                                        value: "".to_string(),
-                                        style: TextStyle {
-                                            font: font.clone(),
-                                            font_size: 20.0,
-                                            color: Color::BLACK,
+                                    text.sections = vec![
+                                        TextSection {
+                                            value: "".to_string(),
+                                            style: TextStyle {
+                                                font: font.clone(),
+                                                font_size: 20.0,
+                                                color: Color::BLACK,
+                                            },
                                         },
-                                    }];
+                                        TextSection {
+                                            value: " ".to_string(),
+                                            style: TextStyle {
+                                                font: font.clone(),
+                                                font_size: 20.0,
+                                                color: Color::BLACK,
+                                            },
+                                        },
+                                    ];
                                     #[cfg(not(target_arch = "wasm32"))]
                                     clipboard.set_text(str).unwrap()
                                 }
@@ -223,7 +235,9 @@ pub fn text_manipulation(
                             for (mut text, editable_text) in editable_text.iter_mut() {
                                 if Some(editable_text.id) == ui_state.entity_to_edit {
                                     let mut str = "".to_string();
-                                    for section in text.sections.iter_mut() {
+                                    let mut text_sections = text.sections.clone();
+                                    text_sections.pop();
+                                    for section in text_sections.iter() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
                                     str = format!("{}{}", str, clipboard_text);
@@ -234,10 +248,12 @@ pub fn text_manipulation(
                     }
                     TextManipulation::Copy => {
                         if let Some(id) = ui_state.entity_to_edit {
-                            for (mut text, node) in editable_text.iter_mut() {
+                            for (text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
-                                    for section in text.sections.iter_mut() {
+                                    let mut text_sections = text.sections.clone();
+                                    text_sections.pop();
+                                    for section in text_sections.iter() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
                                     #[cfg(not(target_arch = "wasm32"))]
@@ -248,10 +264,12 @@ pub fn text_manipulation(
                     }
                     TextManipulation::OpenAllLinks => {
                         if let Some(id) = ui_state.entity_to_edit {
-                            for (mut text, node) in editable_text.iter_mut() {
+                            for (text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
-                                    for section in text.sections.iter_mut() {
+                                    let mut text_sections = text.sections.clone();
+                                    text_sections.pop();
+                                    for section in text_sections.iter() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
                                     let (sections, is_link) = get_sections(str, font.clone());
@@ -333,16 +351,27 @@ pub fn new_doc_handler(
 }
 
 pub fn rename_doc_handler(
-    mut rename_doc_query: Query<&Interaction, (Changed<Interaction>, With<RenameDoc>)>,
-    app_state: ResMut<AppState>,
+    mut rename_doc_query: Query<
+        (&Interaction, &DocListItemButton),
+        (Changed<Interaction>, With<DocListItemButton>),
+    >,
     mut ui_state: ResMut<UiState>,
+    mut double_click: Local<(Duration, Option<ReflectableUuid>)>,
 ) {
-    for interaction in &mut rename_doc_query.iter_mut() {
+    for (interaction, item) in &mut rename_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                *ui_state = UiState::default();
-                let current_document = app_state.current_document.unwrap();
-                ui_state.doc_to_edit = Some(current_document);
+                let now_ms = get_timestamp();
+                if double_click.1 == Some(item.id)
+                    && Duration::from_millis(now_ms as u64) - double_click.0
+                        < Duration::from_millis(500)
+                {
+                    *ui_state = UiState::default();
+                    ui_state.doc_to_edit = Some(item.id);
+                    *double_click = (Duration::from_secs(0), None);
+                } else {
+                    *double_click = (Duration::from_millis(now_ms as u64), Some(item.id));
+                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -355,10 +384,14 @@ pub fn delete_doc_handler(
     mut delete_doc_query: Query<&Interaction, (Changed<Interaction>, With<DeleteDoc>)>,
     static_state: ResMut<StaticState>,
     mut ui_state: ResMut<UiState>,
+    app_state: Res<AppState>,
 ) {
     for interaction in &mut delete_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
+                if app_state.docs.len() < 2 {
+                    return;
+                }
                 let font = static_state.font.as_ref().unwrap().clone();
                 let id = ReflectableUuid(Uuid::new_v4());
                 *ui_state = UiState::default();
@@ -394,33 +427,34 @@ pub fn save_doc_handler(
 }
 
 pub fn button_generic_handler(
+    _commands: Commands,
     mut generic_button_query: Query<
-        (&Interaction, &mut BackgroundColor, &Children),
+        (&Interaction, &mut BackgroundColor, Entity),
         (Changed<Interaction>, With<GenericButton>),
     >,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut tooltips_query: Query<&mut Visibility, With<Tooltip>>,
+    mut tooltips_query: Query<(&mut Visibility, &Parent), With<Tooltip>>,
 ) {
     let mut primary_window = windows.single_mut();
-    for (interaction, mut bg_color, children) in &mut generic_button_query.iter_mut() {
+    for (interaction, mut bg_color, entity) in &mut generic_button_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {}
             Interaction::Hovered => {
                 primary_window.cursor.icon = CursorIcon::Hand;
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
-                let child = children.iter().next().unwrap();
-                let tooltip = tooltips_query.get_mut(*child);
-                if let Ok(mut visibility) = tooltip {
-                    *visibility = Visibility::Visible;
+                for (mut visibility, parent) in tooltips_query.iter_mut() {
+                    if parent.get() == entity {
+                        *visibility = Visibility::Visible;
+                    }
                 }
             }
             Interaction::None => {
                 primary_window.cursor.icon = CursorIcon::Default;
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
-                let child = children.iter().next().unwrap();
-                let tooltip = tooltips_query.get_mut(*child);
-                if let Ok(mut visibility) = tooltip {
-                    *visibility = Visibility::Hidden;
+                for (mut visibility, parent) in tooltips_query.iter_mut() {
+                    if parent.get() == entity {
+                        *visibility = Visibility::Hidden;
+                    }
                 }
             }
         }
