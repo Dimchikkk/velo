@@ -85,7 +85,10 @@ pub fn keyboard_input_system(
             drop_last_checkpoint: true,
         });
     } else {
-        if ui_state.entity_to_edit.is_some() {
+        if ui_state.entity_to_edit.is_some()
+            || ui_state.doc_to_edit.is_some()
+            || ui_state.tab_to_edit.is_some()
+        {
             blink_timer.timer.unpause();
         } else {
             blink_timer.timer.pause();
@@ -93,17 +96,13 @@ pub fn keyboard_input_system(
         for (mut text, editable_text) in &mut node_text_query.iter_mut() {
             if Some(editable_text.id) == ui_state.entity_to_edit {
                 let mut str = "".to_string();
-                for section in text.sections.iter_mut() {
+                let mut text_copy = text.clone();
+                text_copy.sections.pop();
+                for section in text_copy.sections.iter() {
                     str = format!("{}{}", str, section.value.clone());
                 }
-                str.pop();
                 let current_str = str.clone();
-                let (str, is_del_mode) = get_text_val(
-                    text.sections[0].value.clone(),
-                    *deleting,
-                    &input,
-                    &mut char_evr,
-                );
+                let (str, is_del_mode) = get_text_val(str, *deleting, &input, &mut char_evr);
                 *deleting = is_del_mode;
                 if str != current_str {
                     text.sections = get_sections(str, font.clone()).0;
@@ -139,6 +138,16 @@ pub fn keyboard_input_system(
                 text.sections[0].value = str.clone();
                 let doc = app_state.docs.get_mut(&doc_list_item.id).unwrap();
                 doc.name = str.clone();
+                if blink_timer.timer.finished() {
+                    text.sections.last_mut().unwrap().value =
+                        if text.sections.last().unwrap().value == "|" {
+                            " ".to_string()
+                        } else {
+                            "|".to_string()
+                        };
+                }
+            } else {
+                text.sections.last_mut().unwrap().value = " ".to_string();
             }
         }
         for (mut text, tab_input) in &mut tab_name_query.iter_mut() {
@@ -156,15 +165,23 @@ pub fn keyboard_input_system(
                 *deleting = is_del_mode;
                 text.sections[0].value = str.clone();
                 let current_document = app_state.current_document.unwrap();
-                let tab = app_state
-                    .docs
-                    .get_mut(&current_document)
-                    .unwrap()
-                    .tabs
-                    .iter_mut()
-                    .find(|x| x.id == tab_input.id)
-                    .unwrap();
-                tab.name = str.clone();
+                let doc = app_state.docs.get_mut(&current_document);
+                if let Some(doc) = doc {
+                    let tab = doc.tabs.iter_mut().find(|x| x.id == tab_input.id);
+                    if let Some(tab) = tab {
+                        tab.name = str.clone();
+                        if blink_timer.timer.finished() {
+                            text.sections.last_mut().unwrap().value =
+                                if text.sections.last().unwrap().value == "|" {
+                                    " ".to_string()
+                                } else {
+                                    "|".to_string()
+                                };
+                        }
+                    }
+                }
+            } else {
+                text.sections.last_mut().unwrap().value = " ".to_string();
             }
         }
     }

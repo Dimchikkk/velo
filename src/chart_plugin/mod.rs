@@ -1,7 +1,9 @@
 use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
 use serde::{Deserialize, Serialize};
 
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{
+    time::{Duration},
+};
 use uuid::Uuid;
 
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos, ArrowType};
@@ -169,6 +171,19 @@ impl Plugin for ChartPlugin {
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+pub fn get_timestamp() -> f64 {
+    js_sys::Date::now()
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn get_timestamp() -> f64 {
+    use std::time::SystemTime;
+    use std::time::UNIX_EPOCH;
+    let duration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    duration.as_millis() as f64
+}
+
 fn set_focused_entity(
     mut interaction_query: Query<
         (&Interaction, &Rectangle),
@@ -177,28 +192,17 @@ fn set_focused_entity(
     mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
-    #[cfg(not(target_arch = "wasm32"))] mut holding_time: Local<(
-        Duration,
-        Option<ReflectableUuid>,
-    )>,
+    mut holding_time: Local<(Duration, Option<ReflectableUuid>)>,
 ) {
     let mut window = windows.single_mut();
     for (interaction, rectangle) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 window.cursor.icon = CursorIcon::Text;
+                *state = UiState::default();
                 state.entity_to_edit = Some(rectangle.id);
-                #[cfg(not(target_arch = "wasm32"))]
-                {
-                    *holding_time = (
-                        SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
-                        Some(rectangle.id),
-                    );
-                }
-                #[cfg(target_arch = "wasm32")]
-                {
-                    state.hold_entity = Some(rectangle.id);
-                }
+                let now_ms = get_timestamp();
+                *holding_time = (Duration::from_millis(now_ms as u64), Some(rectangle.id));
             }
             Interaction::Hovered => {
                 if state.hold_entity.is_none() && state.entity_to_edit.is_none() {
@@ -218,23 +222,17 @@ fn set_focused_entity(
         window.cursor.icon = CursorIcon::Move;
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
+    let now_ms = get_timestamp();
+    // 150ms delay before re-positioning the rectangle
+    if state.hold_entity.is_none()
+        && Duration::from_millis(now_ms as u64) - holding_time.0 > Duration::from_millis(150)
+        && holding_time.1.is_some()
     {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-        // 150ms delay before re-positioning the rectangle
-        if state.hold_entity.is_none()
-            && now - holding_time.0 > Duration::new(0, 150000000)
-            && holding_time.1.is_some()
-        {
-            state.hold_entity = holding_time.1;
-        }
+        state.hold_entity = holding_time.1;
     }
 
     if buttons.just_released(MouseButton::Left) {
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            *holding_time = (Duration::new(0, 0), None);
-        }
+        *holding_time = (Duration::new(0, 0), None);
         state.hold_entity = None;
         state.entity_to_resize = None;
     }

@@ -6,18 +6,19 @@ use bevy::{
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
 
-use bevy_pkv::PkvStore;
-#[cfg(not(target_arch = "wasm32"))]
-use image::{load_from_memory_with_format, ImageFormat};
-use serde_json::Value;
-
-use super::ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, Rectangle, SelectedTab};
+use super::ui_helpers::{
+    add_tab, spawn_node, BottomPanel, NodeMeta, Rectangle, SelectedTabContainer,
+};
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::canvas::arrow::events::CreateArrow;
 use crate::components::Doc;
 use crate::resources::{AppState, LoadRequest, StaticState};
 use crate::utils::ReflectableUuid;
 use crate::{JsonNode, UiState, MAX_SAVED_DOCS_IN_MEMORY};
+use bevy_pkv::PkvStore;
+#[cfg(not(target_arch = "wasm32"))]
+use image::{load_from_memory_with_format, ImageFormat};
+use serde_json::Value;
 
 pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
     request.is_some()
@@ -37,7 +38,7 @@ pub fn load_json(
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrow>,
-    mut selected_tabs_query: Query<Entity, With<SelectedTab>>,
+    mut selected_tabs_query: Query<Entity, With<SelectedTabContainer>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
 ) {
@@ -104,10 +105,12 @@ pub fn load_json(
         app_state.current_document.unwrap()
     };
 
+    let mut tabs = vec![];
     for tab in app_state.docs.get_mut(&doc).unwrap().tabs.iter() {
         let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
-        commands.entity(bottom_panel).add_child(tab_view);
+        tabs.push(tab_view);
     }
+    commands.entity(bottom_panel).insert_children(0, &tabs);
 
     for tab in app_state.docs.get_mut(&doc).unwrap().tabs.iter_mut() {
         if tab.is_active {
