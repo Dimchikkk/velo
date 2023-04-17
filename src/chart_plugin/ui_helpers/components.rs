@@ -1,8 +1,5 @@
-use serde::{Deserialize, Serialize};
-
+use crate::utils::ReflectableUuid;
 use bevy::prelude::*;
-
-use uuid::Uuid;
 
 use crate::TextPos;
 
@@ -76,22 +73,6 @@ pub struct ChangeColor {
     pub color: Color,
 }
 
-#[derive(Serialize, Deserialize, Default, Copy, Clone, Reflect, Debug, Eq, PartialEq, Hash)]
-pub enum ArrowType {
-    Line,
-    Arrow,
-    DoubleArrow,
-    ParallelLine,
-    #[default]
-    ParallelArrow,
-    ParallelDoubleArrow,
-}
-
-#[derive(Component)]
-pub struct ArrowMode {
-    pub arrow_type: ArrowType,
-}
-
 #[derive(Component)]
 pub struct TextPosMode {
     pub text_pos: TextPos,
@@ -124,17 +105,6 @@ pub struct LeftPanelControls;
 #[derive(Component)]
 pub struct LeftPanelExplorer;
 
-#[derive(Eq, PartialEq, Hash, Debug, Clone, Copy)]
-pub struct CreateArrow {
-    pub arrow_type: ArrowType,
-    pub start: ArrowConnect,
-    pub end: ArrowConnect,
-}
-
-#[derive(Clone, Reflect, Default, Debug, Copy, Eq, PartialEq, Hash, Serialize, Deserialize)]
-#[reflect_value]
-pub struct ReflectableUuid(pub Uuid);
-
 #[derive(Component, Default, Reflect, Debug)]
 #[reflect(Component)]
 pub struct Rectangle {
@@ -159,24 +129,6 @@ pub struct EditableText {
     pub id: ReflectableUuid,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default, Serialize, Deserialize)]
-pub enum ArrowConnectPos {
-    #[default]
-    Top,
-    Bottom,
-    Left,
-    Right,
-}
-
-#[derive(
-    Component, Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default, Serialize, Deserialize,
-)]
-#[reflect(Component)]
-pub struct ArrowConnect {
-    pub id: ReflectableUuid,
-    pub pos: ArrowConnectPos,
-}
-
 #[derive(Component, Copy, Clone, Debug, Reflect, Default)]
 #[reflect(Component)]
 pub enum ResizeMarker {
@@ -185,16 +137,6 @@ pub enum ResizeMarker {
     TopRight,
     BottomLeft,
     BottomRight,
-}
-
-#[derive(
-    Component, Copy, Clone, Debug, Eq, PartialEq, Hash, Reflect, Default, Serialize, Deserialize,
-)]
-#[reflect(Component)]
-pub struct ArrowMeta {
-    pub arrow_type: ArrowType,
-    pub start: ArrowConnect,
-    pub end: ArrowConnect,
 }
 
 #[derive(Component)]

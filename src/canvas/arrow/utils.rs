@@ -6,10 +6,9 @@ use bevy_prototype_lyon::{
     shapes,
 };
 
-use crate::chart_plugin::ui_helpers::ArrowConnectPos;
+// use crate::chart_plugin::ui_helpers::ArrowConnectPos;
 
-use super::{ArrowMeta, ArrowType};
-
+use super::components::{ArrowConnectPos, ArrowMeta, ArrowType};
 pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta: ArrowMeta) {
     let arrow_path = build_arrow(start, end, arrow_meta);
     commands.spawn((
@@ -134,4 +133,15 @@ pub fn build_arrow(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> Path {
                 .build()
         }
     }
+}
+
+pub fn get_pos(
+    global_transform: &GlobalTransform,
+    primary_window: &Window,
+    camera: &Camera,
+    camera_transform: &GlobalTransform,
+) -> Option<Vec2> {
+    let world_position = global_transform.affine().translation;
+    let point = Vec2::new(world_position.x, primary_window.height() - world_position.y);
+    camera.viewport_to_world_2d(camera_transform, point)
 }

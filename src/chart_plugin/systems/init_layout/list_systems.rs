@@ -11,14 +11,16 @@ use bevy::{
 use bevy_pkv::PkvStore;
 use uuid::Uuid;
 
+use super::ui_helpers::ScrollingList;
+use crate::components::{Doc, Tab};
+use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::utils::ReflectableUuid;
 use crate::{
     chart_plugin::ui_helpers::{
-        add_list_item, add_tab, DocList, DocListItemButton, DocListItemContainer, ReflectableUuid,
+        add_list_item, add_tab, DocList, DocListItemButton, DocListItemContainer,
     },
-    AppState, Doc, LoadRequest, SaveRequest, Tab, UpdateListHighlight,
+    UpdateListHighlight,
 };
-
-use super::ui_helpers::ScrollingList;
 
 pub fn add_list(
     bottom_panel: Entity,

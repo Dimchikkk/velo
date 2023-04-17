@@ -6,16 +6,18 @@ use serde_json::json;
 use uuid::Uuid;
 
 use crate::{
-    get_timestamp, AddRect, AppState, Doc, JsonNode, JsonNodeText, LoadRequest, NodeType,
-    SaveRequest, StaticState, Tab, UiState, UpdateListHighlight,
+    get_timestamp, AddRect, JsonNode, JsonNodeText, NodeType, UiState, UpdateListHighlight,
 };
 
 use super::ui_helpers::{
-    add_list_item, get_sections, pos_to_style, spawn_modal, ArrowMeta, ArrowMode, ButtonAction,
-    ChangeColor, DeleteDoc, DocList, DocListItemButton, EditableText, GenericButton, ModalEntity,
-    NewDoc, Rectangle, ReflectableUuid, SaveDoc, TextManipulation, TextManipulationAction,
-    TextPosMode, Tooltip,
+    add_list_item, get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
+    DocList, DocListItemButton, EditableText, GenericButton, ModalEntity, NewDoc, Rectangle,
+    SaveDoc, TextManipulation, TextManipulationAction, TextPosMode, Tooltip,
 };
+use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
+use crate::components::{Doc, Tab};
+use crate::resources::{AppState, LoadRequest, SaveRequest, StaticState};
+use crate::utils::ReflectableUuid;
 
 pub fn rec_button_handlers(
     mut commands: Commands,
