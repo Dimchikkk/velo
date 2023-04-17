@@ -101,27 +101,31 @@ pub fn save_json(
         }
     }
 
-    let doc = if request.doc_id.is_some() {
-        let doc = request.doc_id.unwrap();
-        if !app_state.docs.contains_key(&doc) {
-            if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
-                if docs.contains_key(&doc) {
-                    if (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
-                        let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
-                        app_state.docs.remove(&keys[0]);
-                    }
-                    app_state.docs.insert(doc, docs.get(&doc).unwrap().clone());
-                } else {
-                    panic!("Document not found in pkv");
-                }
-            }
-        }
+    let doc_id = if request.doc_id.is_some() {
         request.doc_id.unwrap()
     } else {
         app_state.current_document.unwrap()
     };
 
-    for tab in &mut app_state.docs.get_mut(&doc).unwrap().tabs {
+    if app_state.docs.contains_key(&doc_id) {
+        app_state.current_document = Some(doc_id);
+    } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+        if docs.contains_key(&doc_id) {
+            while (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
+                app_state.docs.remove(&keys[0]);
+            }
+            app_state
+                .docs
+                .insert(doc_id, docs.get(&doc_id).unwrap().clone());
+            app_state.current_document = Some(doc_id);
+        } else {
+            panic!("Document not found in pkv");
+        }
+    }
+    let doc_id: ReflectableUuid = app_state.current_document.unwrap();
+
+    for tab in &mut app_state.docs.get_mut(&doc_id).unwrap().tabs {
         if request.tab_id.is_some() {
             if tab.id == request.tab_id.unwrap() {
                 if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
