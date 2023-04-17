@@ -1,16 +1,20 @@
-use bevy::{prelude::*, text::BreakLineOn, window::PrimaryWindow};
-use serde::{Deserialize, Serialize};
-
-use std::{
-    time::{Duration},
+use bevy::{
+    prelude::*,
+    text::BreakLineOn,
+    window::{PrimaryWindow, WindowResized},
 };
-use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos, ArrowType};
 use crate::canvas::arrow::events::{CreateArrow, RedrawArrow};
 use crate::resources::AppState;
+use crate::resources::LoadRequest;
 use crate::resources::StaticState;
 use crate::utils::ReflectableUuid;
+use std::{
+    time::Duration,
+};
+use uuid::Uuid;
 #[path = "ui_helpers/ui_helpers.rs"]
 pub mod ui_helpers;
 pub use ui_helpers::*;
@@ -135,6 +139,7 @@ impl Plugin for ChartPlugin {
             cancel_modal,
             modal_keyboard_input_system,
             confirm_modal,
+            resize_notificator,
         ));
 
         app.add_systems(
@@ -290,5 +295,15 @@ fn create_new_rectangle(
             },
         );
         commands.entity(state.main_panel.unwrap()).add_child(entity);
+    }
+}
+
+fn resize_notificator(mut commands: Commands, resize_event: Res<Events<WindowResized>>) {
+    let mut reader = resize_event.get_reader();
+    for _ in reader.iter(&resize_event) {
+        commands.insert_resource(LoadRequest {
+            doc_id: None,
+            drop_last_checkpoint: false,
+        });
     }
 }

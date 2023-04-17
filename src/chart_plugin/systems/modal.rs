@@ -3,9 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_pkv::PkvStore;
 
-use super::ui_helpers::{
-    DocListItemContainer, ModalCancel, ModalConfirm, ModalEntity, ModalTop,
-};
+use super::ui_helpers::{DocListItemContainer, ModalCancel, ModalConfirm, ModalEntity, ModalTop};
 use crate::components::Doc;
 use crate::resources::{AppState, LoadRequest};
 use crate::utils::ReflectableUuid;
