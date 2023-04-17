@@ -33,8 +33,8 @@ impl Plugin for VeloPlugin {
                     .build()
                     .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
             )
-            .add_plugin(ChartPlugin)
             .add_plugin(CanvasPlugin)
+            .add_plugin(ChartPlugin)
             .add_plugin(BordersPlugin)
             .insert_resource(PkvStore::new("", "velo"));
     }
