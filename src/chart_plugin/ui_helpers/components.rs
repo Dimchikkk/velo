@@ -22,9 +22,6 @@ pub struct AddTab;
 pub struct DeleteTab;
 
 #[derive(Component)]
-pub struct RenameTab;
-
-#[derive(Component)]
 pub struct Tooltip;
 
 #[derive(Component)]
@@ -32,9 +29,6 @@ pub struct NewDoc;
 
 #[derive(Component)]
 pub struct DocList;
-
-#[derive(Component)]
-pub struct RenameDoc;
 
 #[derive(Component)]
 pub struct SaveDoc;
@@ -47,6 +41,11 @@ pub struct SelectedTab {
     pub id: ReflectableUuid,
 }
 
+#[derive(Component)]
+pub struct SelectedTabContainer {
+    pub id: ReflectableUuid,
+}
+
 #[derive(Component, Default)]
 pub struct ScrollingList {
     pub position: f32,
@@ -54,6 +53,11 @@ pub struct ScrollingList {
 
 #[derive(Component)]
 pub struct SelectedTabTextInput {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component)]
+pub struct DocListItemContainer {
     pub id: ReflectableUuid,
 }
 

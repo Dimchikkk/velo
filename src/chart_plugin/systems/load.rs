@@ -13,9 +13,10 @@ use serde_json::Value;
 
 use crate::{AppState, Doc, JsonNode, LoadRequest, StaticState, UiState, MAX_SAVED_DOCS_IN_MEMORY};
 
+use super::ui_helpers::spawn_node;
 use super::ui_helpers::{
-    add_tab, spawn_node, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle, ReflectableUuid,
-    SelectedTab,
+    add_tab, ArrowMeta, BottomPanel, CreateArrow, NodeMeta, Rectangle, ReflectableUuid,
+    SelectedTabContainer,
 };
 
 pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
@@ -36,7 +37,7 @@ pub fn load_json(
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrow>,
-    mut selected_tabs_query: Query<Entity, With<SelectedTab>>,
+    mut selected_tabs_query: Query<Entity, With<SelectedTabContainer>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
 ) {
@@ -103,10 +104,12 @@ pub fn load_json(
         app_state.current_document.unwrap()
     };
 
+    let mut tabs = vec![];
     for tab in app_state.docs.get_mut(&doc).unwrap().tabs.iter() {
         let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
-        commands.entity(bottom_panel).add_child(tab_view);
+        tabs.push(tab_view);
     }
+    commands.entity(bottom_panel).insert_children(0, &tabs);
 
     for tab in app_state.docs.get_mut(&doc).unwrap().tabs.iter_mut() {
         if tab.is_active {
