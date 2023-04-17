@@ -16,7 +16,9 @@ use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadRequest, SaveRequest};
 use crate::utils::ReflectableUuid;
 use crate::{
-    chart_plugin::ui_helpers::{add_list_item, add_tab, DocList, DocListItemButton},
+    chart_plugin::ui_helpers::{
+        add_list_item, add_tab, DocList, DocListItemButton, DocListItemContainer,
+    },
     UpdateListHighlight,
 };
 
@@ -105,7 +107,7 @@ pub fn add_list(
 }
 
 pub fn list_selected_highlight(
-    mut query: Query<(&DocListItemButton, &mut BackgroundColor), With<DocListItemButton>>,
+    mut query: Query<(&DocListItemContainer, &mut BackgroundColor), With<DocListItemContainer>>,
     state: Res<AppState>,
     mut events: EventReader<UpdateListHighlight>,
 ) {
@@ -132,15 +134,17 @@ pub fn list_item_click(
     for (interaction, doc_list_item) in &mut interaction_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                commands.insert_resource(SaveRequest {
-                    doc_id: Some(state.current_document.unwrap()),
-                    tab_id: None,
-                });
-                state.current_document = Some(doc_list_item.id);
-                commands.insert_resource(LoadRequest {
-                    doc_id: Some(doc_list_item.id),
-                    drop_last_checkpoint: false,
-                });
+                if Some(doc_list_item.id) != state.current_document {
+                    commands.insert_resource(SaveRequest {
+                        doc_id: Some(state.current_document.unwrap()),
+                        tab_id: None,
+                    });
+                    state.current_document = Some(doc_list_item.id);
+                    commands.insert_resource(LoadRequest {
+                        doc_id: Some(doc_list_item.id),
+                        drop_last_checkpoint: false,
+                    });
+                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
