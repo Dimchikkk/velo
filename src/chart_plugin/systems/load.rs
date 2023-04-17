@@ -66,53 +66,38 @@ pub fn load_json(
         commands.entity(entity).despawn_recursive();
     }
 
-    if let Some(doc_id) = &request.doc_id {
-        if app_state.docs.contains_key(doc_id) {
-            app_state.current_document = Some(*doc_id);
-        } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
-            if docs.contains_key(doc_id) {
-                while (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
-                    let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
-                    app_state.docs.remove(&keys[0]);
-                }
-                app_state
-                    .docs
-                    .insert(*doc_id, docs.get(doc_id).unwrap().clone());
-                app_state.current_document = Some(*doc_id);
-            } else {
-                panic!("Document not found in pkv");
-            }
-        }
-    }
-
-    let doc = if request.doc_id.is_some() {
-        let doc = request.doc_id.unwrap();
-        if !app_state.docs.contains_key(&doc) {
-            if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
-                if docs.contains_key(&doc) {
-                    if (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
-                        let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
-                        app_state.docs.remove(&keys[0]);
-                    }
-                    app_state.docs.insert(doc, docs.get(&doc).unwrap().clone());
-                } else {
-                    panic!("Document not found in pkv");
-                }
-            }
-        }
+    let doc_id = if request.doc_id.is_some() {
         request.doc_id.unwrap()
     } else {
         app_state.current_document.unwrap()
     };
 
+    if app_state.docs.contains_key(&doc_id) {
+        app_state.current_document = Some(doc_id);
+    } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+        if docs.contains_key(&doc_id) {
+            while (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
+                app_state.docs.remove(&keys[0]);
+            }
+            app_state
+                .docs
+                .insert(doc_id, docs.get(&doc_id).unwrap().clone());
+            app_state.current_document = Some(doc_id);
+        } else {
+            panic!("Document not found in pkv");
+        }
+    }
+    let doc_id = app_state.current_document.unwrap();
+
     let mut tabs = vec![];
-    for tab in app_state.docs.get_mut(&doc).unwrap().tabs.iter() {
+    for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter() {
         let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
         tabs.push(tab_view);
     }
     commands.entity(bottom_panel).insert_children(0, &tabs);
 
-    for tab in app_state.docs.get_mut(&doc).unwrap().tabs.iter_mut() {
+    for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter_mut() {
         if tab.is_active {
             if tab.checkpoints.is_empty() {
                 break;

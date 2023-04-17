@@ -48,15 +48,7 @@ pub fn confirm_modal(
             for (entity, path_modal_top) in query_top.iter() {
                 if path_modal_confirm.id == path_modal_top.id {
                     let current_document = app_state.current_document.unwrap();
-                    if path_modal_confirm.delete == ModalEntity::Tab
-                        && app_state
-                            .docs
-                            .get_mut(&current_document)
-                            .unwrap()
-                            .tabs
-                            .len()
-                            > 1
-                    {
+                    if path_modal_confirm.delete == ModalEntity::Tab {
                         let index = app_state
                             .docs
                             .get_mut(&current_document)
