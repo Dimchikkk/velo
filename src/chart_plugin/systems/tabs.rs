@@ -25,13 +25,13 @@ pub fn selected_tab_handler(
         match *interaction {
             Interaction::Clicked => {
                 let current_document = state.current_document.unwrap();
-                let tabs = state
+                for tab in state
                     .docs
                     .get_mut(&current_document)
                     .unwrap()
                     .tabs
-                    .iter_mut();
-                for tab in tabs {
+                    .iter_mut()
+                {
                     if tab.is_active {
                         if tab.id == selected_tab.id {
                             return;
@@ -41,6 +41,14 @@ pub fn selected_tab_handler(
                             tab_id: Some(tab.id),
                         });
                     }
+                }
+                for tab in state
+                    .docs
+                    .get_mut(&current_document)
+                    .unwrap()
+                    .tabs
+                    .iter_mut()
+                {
                     tab.is_active = tab.id == selected_tab.id;
                 }
 
@@ -152,6 +160,7 @@ pub fn delete_tab_handler(
     mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<DeleteTab>)>,
     static_state: ResMut<StaticState>,
+    mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
 ) {
     let font = static_state.font.as_ref().unwrap().clone();
@@ -160,6 +169,16 @@ pub fn delete_tab_handler(
             Interaction::Clicked => {
                 let id = ReflectableUuid(Uuid::new_v4());
                 *ui_state = UiState::default();
+                let current_document = app_state.current_document.unwrap();
+                let tabs_len = app_state
+                    .docs
+                    .get_mut(&current_document)
+                    .unwrap()
+                    .tabs
+                    .len();
+                if tabs_len < 2 {
+                    return;
+                }
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Tab);
                 commands
