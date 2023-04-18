@@ -7,6 +7,44 @@ on:
 name: pr checks
 
 jobs:
+  check-wasm:
+    name: Check default
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check
+        run: cargo check --all-targets
+
+  check-wasm:
+    name: Check wasm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check
+        run: cargo check --target wasm32-unknown-unknown --all-targets
+
   lints:
     name: Lints
     runs-on: ubuntu-latest
@@ -19,11 +57,6 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt, clippy
-
-      - name: install deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libasound2-dev
 
       - name: Cache
         uses: Swatinem/rust-cache@v2
