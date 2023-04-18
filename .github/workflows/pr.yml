@@ -17,6 +17,8 @@ jobs:
         with:
           toolchain: stable
           target: wasm32-unknown-unknown
+      - name: Deps
+        run: sudo apt-get install g++ pkg-config libx11-dev libasound2-dev libudev-dev
       - name: Cache
         uses: Swatinem/rust-cache@v2
       - name: Check
@@ -47,6 +49,8 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt, clippy
+      - name: Deps
+        run: sudo apt-get install g++ pkg-config libx11-dev libasound2-dev libudev-dev
       - name: Cache
         uses: Swatinem/rust-cache@v2
       - name: Fmt
