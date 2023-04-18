@@ -1,0 +1,60 @@
+---
+on:
+  push:
+    branches:
+      - main
+  pull_request: null
+name: pr checks
+jobs:
+  check-default:
+    name: Check default
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+      - name: Deps
+        run: sudo apt-get install g++ pkg-config libx11-dev libasound2-dev libudev-dev
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Check
+        run: cargo check --all-targets
+  check-wasm:
+    name: Check wasm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Check
+        run: cargo check --target wasm32-unknown-unknown --all-targets
+  lints:
+    name: Lints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - name: Deps
+        run: sudo apt-get install g++ pkg-config libx11-dev libasound2-dev libudev-dev
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Fmt
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments -D
+          warnings
