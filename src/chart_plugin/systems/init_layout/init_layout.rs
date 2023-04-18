@@ -407,7 +407,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(100.), Val::Percent(10.)),
+                size: Size::new(Val::Percent(100.), Val::Percent(8.)),
                 margin: UiRect {
                     left: Val::Px(5.),
                     right: Val::Px(5.),
