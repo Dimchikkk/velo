@@ -6,7 +6,7 @@ on:
   pull_request: null
 name: pr checks
 jobs:
-  check-wasm:
+  check-default:
     name: Check default
     runs-on: ubuntu-latest
     steps:
@@ -21,7 +21,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Check
         run: cargo check --all-targets
-  -check-wasm:
+  check-wasm:
     name: Check wasm
     runs-on: ubuntu-latest
     steps:
