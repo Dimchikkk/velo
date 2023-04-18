@@ -4,7 +4,7 @@ on:
       - main
   pull_request:
 
-name: ci
+name: pr checks
 
 jobs:
   lints:
