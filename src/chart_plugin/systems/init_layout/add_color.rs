@@ -6,18 +6,32 @@ use crate::chart_plugin::ui_helpers::GenericButton;
 use super::ui_helpers::ChangeColor;
 
 pub fn add_color(commands: &mut Commands, color: Color) -> Entity {
-    commands
+    let top = commands
+        .spawn(NodeBundle {
+            style: Style {
+                flex_direction: FlexDirection::Column,
+                align_self: AlignSelf::Stretch,
+                margin: UiRect::all(Val::Px(5.)),
+                size: Size::new(Val::Percent(20.), Val::Percent(100.)),
+                ..default()
+            },
+            background_color: Color::BLACK.with_a(0.5).into(),
+            ..default()
+        })
+        .id();
+    let button = commands
         .spawn((
             ButtonBundle {
                 background_color: color.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(20.), Val::Percent(100.)),
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
-                    margin: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(5.),
-                        bottom: Val::Px(5.),
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Px(-2.),
+                        right: Val::Px(0.),
+                        top: Val::Px(-2.),
+                        bottom: Val::Px(0.),
                     },
                     border: UiRect::all(Val::Px(1.)),
                     justify_content: JustifyContent::Center,
@@ -29,5 +43,7 @@ pub fn add_color(commands: &mut Commands, color: Color) -> Entity {
             ChangeColor { color },
             GenericButton,
         ))
-        .id()
+        .id();
+    commands.entity(top).add_child(button);
+    top
 }

@@ -5,22 +5,16 @@ use bevy::{
         accesskit::{NodeBuilder, Role},
         AccessibilityNode,
     },
-    input::mouse::{MouseScrollUnit, MouseWheel},
     prelude::*,
 };
 use bevy_pkv::PkvStore;
 use uuid::Uuid;
 
 use super::ui_helpers::ScrollingList;
+use crate::chart_plugin::ui_helpers::{add_list_item, add_tab, DocList};
 use crate::components::{Doc, Tab};
-use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::resources::{AppState, LoadRequest};
 use crate::utils::ReflectableUuid;
-use crate::{
-    chart_plugin::ui_helpers::{
-        add_list_item, add_tab, DocList, DocListItemButton, DocListItemContainer,
-    },
-    UpdateListHighlight,
-};
 
 pub fn add_list(
     bottom_panel: Entity,
@@ -104,75 +98,4 @@ pub fn add_list(
     }
     commands.entity(top).add_child(node);
     top
-}
-
-pub fn list_selected_highlight(
-    mut query: Query<(&DocListItemContainer, &mut BackgroundColor), With<DocListItemContainer>>,
-    state: Res<AppState>,
-    mut events: EventReader<UpdateListHighlight>,
-) {
-    for _ in events.iter() {
-        for (doc_list_item, mut bg_color) in &mut query.iter_mut() {
-            if doc_list_item.id == state.current_document.unwrap() {
-                bg_color.0 = Color::ALICE_BLUE;
-            } else {
-                bg_color.0 = Color::rgba(1.0, 1.0, 1.0, 1.0);
-            }
-        }
-    }
-}
-
-pub fn list_item_click(
-    mut interaction_query: Query<
-        (&Interaction, &DocListItemButton),
-        (Changed<Interaction>, With<DocListItemButton>),
-    >,
-    mut state: ResMut<AppState>,
-    mut commands: Commands,
-    mut events: EventWriter<UpdateListHighlight>,
-) {
-    for (interaction, doc_list_item) in &mut interaction_query.iter_mut() {
-        match *interaction {
-            Interaction::Clicked => {
-                if Some(doc_list_item.id) != state.current_document {
-                    commands.insert_resource(SaveRequest {
-                        doc_id: Some(state.current_document.unwrap()),
-                        tab_id: None,
-                    });
-                    state.current_document = Some(doc_list_item.id);
-                    commands.insert_resource(LoadRequest {
-                        doc_id: Some(doc_list_item.id),
-                        drop_last_checkpoint: false,
-                    });
-                }
-            }
-            Interaction::Hovered => {}
-            Interaction::None => {}
-        }
-        events.send(UpdateListHighlight);
-    }
-}
-
-pub fn mouse_scroll_list(
-    mut mouse_wheel_events: EventReader<MouseWheel>,
-    mut query_list: Query<(&mut ScrollingList, &mut Style, &Parent, &Node)>,
-    query_node: Query<&Node>,
-) {
-    for mouse_wheel_event in mouse_wheel_events.iter() {
-        for (mut scrolling_list, mut style, parent, list_node) in &mut query_list {
-            let items_height = list_node.size().y;
-            let container_height = query_node.get(parent.get()).unwrap().size().y;
-
-            let max_scroll = (items_height - container_height).max(0.);
-
-            let dy = match mouse_wheel_event.unit {
-                MouseScrollUnit::Line => mouse_wheel_event.y * 20.,
-                MouseScrollUnit::Pixel => mouse_wheel_event.y,
-            };
-
-            scrolling_list.position += dy;
-            scrolling_list.position = scrolling_list.position.clamp(-max_scroll, 0.);
-            style.position.top = Val::Px(scrolling_list.position);
-        }
-    }
 }

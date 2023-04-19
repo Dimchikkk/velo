@@ -40,6 +40,9 @@ use button_handlers::*;
 #[path = "systems/tabs.rs"]
 mod tabs;
 use tabs::*;
+#[path = "systems/doc_list.rs"]
+mod doc_list;
+use doc_list::*;
 
 pub struct ChartPlugin;
 
@@ -48,7 +51,7 @@ pub struct AddRect {
     pub image: Option<UiImage>,
 }
 
-pub struct UpdateListHighlight;
+pub struct HighlightEvent;
 
 #[derive(Serialize, Deserialize)]
 pub enum NodeType {
@@ -109,7 +112,7 @@ impl Plugin for ChartPlugin {
         app.init_resource::<StaticState>();
         app.init_resource::<AppState>();
 
-        app.register_type::<Rectangle>();
+        app.register_type::<VeloNode>();
         app.register_type::<EditableText>();
         app.register_type::<ArrowConnect>();
         app.register_type::<ResizeMarker>();
@@ -123,7 +126,7 @@ impl Plugin for ChartPlugin {
         app.add_event::<AddRect>();
         app.add_event::<CreateArrow>();
         app.add_event::<RedrawArrow>();
-        app.add_event::<UpdateListHighlight>();
+        app.add_event::<HighlightEvent>();
 
         app.add_startup_system(init_layout);
 
@@ -167,10 +170,13 @@ impl Plugin for ChartPlugin {
             delete_doc_handler,
             save_doc_handler,
             keyboard_input_system,
-            list_selected_highlight,
         ));
 
-        app.add_systems((button_generic_handler, selected_tab_handler).chain());
+        app.add_systems((
+            button_generic_handler,
+            selected_tab_handler,
+            higlight_event_handler,
+        ));
     }
 }
 
@@ -188,10 +194,7 @@ pub fn get_timestamp() -> f64 {
 }
 
 fn set_focused_entity(
-    mut interaction_query: Query<
-        (&Interaction, &Rectangle),
-        (Changed<Interaction>, With<Rectangle>),
-    >,
+    mut interaction_query: Query<(&Interaction, &VeloNode), (Changed<Interaction>, With<VeloNode>)>,
     mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
@@ -243,9 +246,9 @@ fn set_focused_entity(
 
 fn update_rectangle_position(
     mut cursor_moved_events: EventReader<CursorMoved>,
-    mut node_position: Query<(&mut Style, &Rectangle), With<Rectangle>>,
+    mut node_position: Query<(&mut Style, &VeloNodeContainer), With<VeloNodeContainer>>,
     state: Res<UiState>,
-    mut query: Query<(&Style, &LeftPanel), Without<Rectangle>>,
+    mut query: Query<(&Style, &LeftPanel), Without<VeloNodeContainer>>,
     mut events: EventWriter<RedrawArrow>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
@@ -303,5 +306,35 @@ fn resize_notificator(mut commands: Commands, resize_event: Res<Events<WindowRes
             doc_id: None,
             drop_last_checkpoint: false,
         });
+    }
+}
+
+fn higlight_event_handler(
+    mut app_state: ResMut<AppState>,
+    mut docs: Query<(&mut BackgroundColor, &DocListItemContainer), With<DocListItemContainer>>,
+    mut tabs: Query<
+        (&mut BackgroundColor, &TabContainer),
+        (With<TabContainer>, Without<DocListItemContainer>),
+    >,
+) {
+    let current_doc = app_state.current_document.unwrap();
+
+    for (mut bg_color, i) in &mut docs.iter_mut() {
+        if current_doc == i.id {
+            bg_color.0 = Color::ALICE_BLUE;
+        } else {
+            bg_color.0 = Color::rgba(0.8, 0.8, 0.8, 0.5)
+        }
+    }
+
+    if let Some(doc) = app_state.docs.get_mut(&current_doc) {
+        let tab = doc.tabs.iter().find(|x| x.is_active).unwrap();
+        for (mut bg_color, i) in &mut tabs.iter_mut() {
+            if tab.id == i.id {
+                bg_color.0 = Color::ALICE_BLUE;
+            } else {
+                bg_color.0 = Color::rgba(0.8, 0.8, 0.8, 0.5)
+            }
+        }
     }
 }
