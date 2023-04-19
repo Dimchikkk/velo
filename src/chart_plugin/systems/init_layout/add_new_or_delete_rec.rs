@@ -107,7 +107,7 @@ pub fn add_new_delete_rec(
         .id();
     commands.entity(top_new).add_child(new_rec);
     commands.entity(top_del).add_child(del_rec);
-    commands.entity(node).add_child(top_new);
     commands.entity(node).add_child(top_del);
+    commands.entity(node).add_child(top_new);
     node
 }

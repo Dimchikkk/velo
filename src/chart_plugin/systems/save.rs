@@ -8,7 +8,8 @@ use image::*;
 use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
-use super::ui_helpers::{EditableText, Rectangle};
+use super::ui_helpers::{EditableText, VeloNode};
+use super::VeloNodeContainer;
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::components::Doc;
 use crate::resources::AppState;
@@ -29,16 +30,17 @@ pub fn remove_save_request(world: &mut World) {
 
 pub fn save_json(
     images: Res<Assets<Image>>,
+    rec_container_query: Query<&Style, With<VeloNodeContainer>>,
     rec_query: Query<
         (
-            &Rectangle,
+            &VeloNode,
             &UiImage,
             &BackgroundColor,
-            &Style,
             &Children,
             &ZIndex,
+            &Parent,
         ),
-        With<Rectangle>,
+        With<VeloNode>,
     >,
     arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
     request: Res<SaveRequest>,
@@ -66,9 +68,10 @@ pub fn save_json(
     }
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
-    for (rect, _, bg_color, style, children, z_index) in rec_query.iter() {
+    for (rect, _, bg_color, children, z_index, parent) in rec_query.iter() {
         let text = text_query.get(children[children.len() - 1]).unwrap();
         let text = text.sections[0].value.clone();
+        let style = rec_container_query.get(parent.get()).unwrap();
         let left = style.position.left;
         let bottom = style.position.bottom;
         let size = style.size;

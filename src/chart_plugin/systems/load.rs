@@ -7,8 +7,8 @@ use bevy::{
 };
 
 use super::{
-    ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, Rectangle, TabContainer},
-    HighlightEvent,
+    ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
+    HighlightEvent, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::canvas::arrow::events::CreateArrow;
@@ -30,7 +30,7 @@ pub fn remove_load_request(world: &mut World) {
 }
 
 pub fn load_json(
-    old_nodes: Query<Entity, With<Rectangle>>,
+    old_nodes: Query<Entity, With<VeloNodeContainer>>,
     mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
     request: Res<LoadRequest>,
     mut app_state: ResMut<AppState>,
