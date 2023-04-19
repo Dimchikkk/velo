@@ -1,6 +1,6 @@
 * Velo 🚵
 
-[[file:velo.gif]]
+[[file:velo.png]]
 
 ** Demo
 
@@ -46,9 +46,6 @@ cargo r --target wasm32-unknown-unknown
 cargo fmt
 cargo clippy --fix --allow-staged -- -A clippy::type_complexity -A clippy::too_many_arguments
 #+END_SRC
-
-** Screenshot
-[[file:velo.png]]
 
 * Contributing
 

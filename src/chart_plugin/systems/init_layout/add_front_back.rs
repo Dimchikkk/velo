@@ -16,7 +16,20 @@ pub fn add_front_back(
     } else {
         (asset_server.load("back.png"), "Move to back")
     };
-    commands
+    let top = commands
+        .spawn(NodeBundle {
+            style: Style {
+                flex_direction: FlexDirection::Column,
+                align_self: AlignSelf::Stretch,
+                margin: UiRect::all(Val::Px(5.)),
+                size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                ..default()
+            },
+            background_color: Color::BLACK.with_a(0.5).into(),
+            ..default()
+        })
+        .id();
+    let button = commands
         .spawn((
             ButtonBundle {
                 background_color: Color::Rgba {
@@ -28,14 +41,15 @@ pub fn add_front_back(
                 .into(),
                 image: image.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     border: UiRect::all(Val::Px(1.)),
-                    margin: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(5.),
-                        bottom: Val::Px(5.),
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Px(-2.),
+                        right: Val::Px(0.),
+                        top: Val::Px(-2.),
+                        bottom: Val::Px(0.),
                     },
                     justify_content: JustifyContent::Center,
                     ..default()
@@ -49,5 +63,7 @@ pub fn add_front_back(
         .with_children(|builder| {
             builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
         })
-        .id()
+        .id();
+    commands.entity(top).add_child(button);
+    top
 }

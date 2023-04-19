@@ -13,14 +13,22 @@ pub fn add_new_delete_rec(
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(80.), Val::Percent(18.)),
-                margin: UiRect {
-                    left: Val::Px(5.),
-                    right: Val::Px(5.),
-                    top: Val::Px(5.),
-                    bottom: Val::Px(5.),
-                },
-                justify_content: JustifyContent::SpaceBetween,
+                size: Size::new(Val::Percent(90.), Val::Percent(14.)),
+                margin: UiRect::all(Val::Px(5.)),
+                justify_content: JustifyContent::Start,
+                ..default()
+            },
+            ..default()
+        })
+        .id();
+    let top_new = commands
+        .spawn(NodeBundle {
+            background_color: Color::BLACK.with_a(0.5).into(),
+            style: Style {
+                flex_direction: FlexDirection::Column,
+                align_self: AlignSelf::Stretch,
+                margin: UiRect::all(Val::Px(5.)),
+                size: Size::new(Val::Percent(23.), Val::Percent(100.)),
                 ..default()
             },
             ..default()
@@ -29,13 +37,18 @@ pub fn add_new_delete_rec(
     let new_rec = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::BLACK.into(),
                 image: asset_server.load("rec-add.png").into(),
                 style: Style {
-                    size: Size::new(Val::Px(45.), Val::Px(45.)),
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
-                    margin: UiRect::all(Val::Px(5.)),
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Px(-2.),
+                        right: Val::Px(0.),
+                        top: Val::Px(-2.),
+                        bottom: Val::Px(0.),
+                    },
                     ..default()
                 },
                 ..default()
@@ -50,17 +63,34 @@ pub fn add_new_delete_rec(
             ));
         })
         .id();
-
+    let top_del = commands
+        .spawn(NodeBundle {
+            background_color: Color::BLACK.with_a(0.5).into(),
+            style: Style {
+                flex_direction: FlexDirection::Column,
+                margin: UiRect::all(Val::Px(5.)),
+                align_self: AlignSelf::Stretch,
+                size: Size::new(Val::Percent(23.), Val::Percent(100.)),
+                ..default()
+            },
+            ..default()
+        })
+        .id();
     let del_rec = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::BLACK.into(),
                 image: asset_server.load("rec-del.png").into(),
                 style: Style {
-                    size: Size::new(Val::Px(45.), Val::Px(45.)),
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
-                    margin: UiRect::all(Val::Px(5.)),
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Px(-2.),
+                        right: Val::Px(0.),
+                        top: Val::Px(-2.),
+                        bottom: Val::Px(0.),
+                    },
                     ..default()
                 },
                 ..default()
@@ -75,7 +105,9 @@ pub fn add_new_delete_rec(
             ));
         })
         .id();
-    commands.entity(node).add_child(del_rec);
-    commands.entity(node).add_child(new_rec);
+    commands.entity(top_new).add_child(new_rec);
+    commands.entity(top_del).add_child(del_rec);
+    commands.entity(node).add_child(top_del);
+    commands.entity(node).add_child(top_new);
     node
 }
