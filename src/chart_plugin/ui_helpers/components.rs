@@ -39,7 +39,7 @@ pub struct SelectedTab {
 }
 
 #[derive(Component)]
-pub struct SelectedTabContainer {
+pub struct TabContainer {
     pub id: ReflectableUuid,
 }
 

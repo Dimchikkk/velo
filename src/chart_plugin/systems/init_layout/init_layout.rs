@@ -23,10 +23,6 @@ use add_color::*;
 mod add_front_back;
 use add_front_back::*;
 
-#[path = "list_systems.rs"]
-mod list_systems;
-pub use list_systems::*;
-
 #[path = "add_text_manipulation.rs"]
 mod add_text_manipulation;
 use add_text_manipulation::*;
@@ -42,6 +38,10 @@ use add_new_or_delete_rec::*;
 #[path = "add_menu_button.rs"]
 mod add_menu_button;
 use add_menu_button::*;
+
+#[path = "add_list.rs"]
+mod add_list;
+use add_list::*;
 
 pub fn init_layout(
     mut commands: Commands,
@@ -267,14 +267,9 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(100.), Val::Percent(10.)),
-                margin: UiRect {
-                    left: Val::Px(5.),
-                    right: Val::Px(5.),
-                    top: Val::Px(5.),
-                    bottom: Val::Px(5.),
-                },
-                justify_content: JustifyContent::Center,
+                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
+                margin: UiRect::all(Val::Px(5.)),
+                justify_content: JustifyContent::Start,
                 ..default()
             },
             ..default()
@@ -303,14 +298,9 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
-                margin: UiRect {
-                    left: Val::Px(5.),
-                    right: Val::Px(5.),
-                    top: Val::Px(5.),
-                    bottom: Val::Px(5.),
-                },
-                justify_content: JustifyContent::Center,
+                size: Size::new(Val::Percent(90.), Val::Percent(9.)),
+                margin: UiRect::all(Val::Px(5.)),
+                justify_content: JustifyContent::Start,
                 ..default()
             },
             ..default()
@@ -335,14 +325,9 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(100.), Val::Percent(10.)),
-                margin: UiRect {
-                    left: Val::Px(5.),
-                    right: Val::Px(5.),
-                    top: Val::Px(5.),
-                    bottom: Val::Px(5.),
-                },
-                justify_content: JustifyContent::Center,
+                size: Size::new(Val::Percent(90.), Val::Percent(8.)),
+                margin: UiRect::all(Val::Px(5.)),
+                justify_content: JustifyContent::Start,
                 ..default()
             },
             ..default()
@@ -407,14 +392,9 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(100.), Val::Percent(8.)),
-                margin: UiRect {
-                    left: Val::Px(5.),
-                    right: Val::Px(5.),
-                    top: Val::Px(5.),
-                    bottom: Val::Px(5.),
-                },
-                justify_content: JustifyContent::Center,
+                size: Size::new(Val::Percent(90.), Val::Percent(8.)),
+                margin: UiRect::all(Val::Px(5.)),
+                justify_content: JustifyContent::Start,
                 ..default()
             },
             ..default()
@@ -465,14 +445,9 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(100.), Val::Percent(10.)),
-                margin: UiRect {
-                    left: Val::Px(5.),
-                    right: Val::Px(5.),
-                    top: Val::Px(5.),
-                    bottom: Val::Px(5.),
-                },
-                justify_content: JustifyContent::Center,
+                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
+                margin: UiRect::all(Val::Px(5.)),
+                justify_content: JustifyContent::Start,
                 ..default()
             },
             ..default()
