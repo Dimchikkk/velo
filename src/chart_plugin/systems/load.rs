@@ -6,8 +6,9 @@ use bevy::{
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
 
-use super::ui_helpers::{
-    add_tab, spawn_node, BottomPanel, NodeMeta, Rectangle, SelectedTabContainer,
+use super::{
+    ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, Rectangle, TabContainer},
+    HighlightEvent,
 };
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::canvas::arrow::events::CreateArrow;
@@ -38,9 +39,10 @@ pub fn load_json(
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrow>,
-    mut selected_tabs_query: Query<Entity, With<SelectedTabContainer>>,
+    mut selected_tabs_query: Query<Entity, With<TabContainer>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
+    mut events: EventWriter<HighlightEvent>,
 ) {
     *ui_state = UiState::default();
 
@@ -174,4 +176,5 @@ pub fn load_json(
             break;
         }
     }
+    events.send(HighlightEvent);
 }
