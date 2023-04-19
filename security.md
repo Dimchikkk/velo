@@ -6,9 +6,6 @@ This security policy outlines the expectations and procedures for reporting and 
 ## Reporting a Vulnerability
 If you believe you have discovered a vulnerability in our repository, please report it to us immediately by opening a new issue on our GitHub repository. When reporting a vulnerability, please include as much detail as possible, including a clear description of the issue, steps to reproduce the vulnerability, and any relevant code snippets or screenshots.
 
-## Response Time
-We will acknowledge receipt of your vulnerability report within 24 hours, and we will work to triage the issue within five business days of receiving your report. We will provide regular updates on the status of the vulnerability and our progress in addressing it.
-
 ## Vulnerability Assessment
 We will review the reported vulnerability and assess the potential impact to our codebase and systems. If the vulnerability is confirmed, we will determine the severity of the issue and prioritize it accordingly.
 
