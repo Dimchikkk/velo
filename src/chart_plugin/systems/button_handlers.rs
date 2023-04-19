@@ -5,9 +5,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::{
-    get_timestamp, AddRect, JsonNode, JsonNodeText, NodeType, UiState, UpdateListHighlight,
-};
+use crate::{get_timestamp, AddRect, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
@@ -299,7 +297,6 @@ pub fn new_doc_handler(
     mut doc_list_query: Query<Entity, With<DocList>>,
     static_state: ResMut<StaticState>,
     mut app_state: ResMut<AppState>,
-    mut events: EventWriter<UpdateListHighlight>,
 ) {
     for interaction in &mut new_doc_query.iter_mut() {
         match *interaction {
@@ -344,7 +341,6 @@ pub fn new_doc_handler(
                 let button = add_list_item(&mut commands, font.clone(), doc_id, name);
                 let doc_list = doc_list_query.single_mut();
                 commands.entity(doc_list).add_child(button);
-                events.send(UpdateListHighlight);
             }
             Interaction::Hovered => {}
             Interaction::None => {}
