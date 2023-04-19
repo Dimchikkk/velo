@@ -9,9 +9,10 @@ use crate::{get_timestamp, AddRect, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
-    DocList, DocListItemButton, EditableText, GenericButton, ModalEntity, NewDoc, Rectangle,
-    SaveDoc, TextManipulation, TextManipulationAction, TextPosMode, Tooltip,
+    DocList, DocListItemButton, EditableText, GenericButton, ModalEntity, NewDoc, SaveDoc,
+    TextManipulation, TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
+use super::VeloNodeContainer;
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadRequest, SaveRequest, StaticState};
@@ -24,7 +25,7 @@ pub fn rec_button_handlers(
         (&Interaction, &ButtonAction),
         (Changed<Interaction>, With<ButtonAction>),
     >,
-    mut nodes: Query<(Entity, &Rectangle, &mut ZIndex), With<Rectangle>>,
+    mut nodes: Query<(Entity, &VeloNodeContainer, &mut ZIndex), With<VeloNodeContainer>>,
     mut arrows: Query<(Entity, &ArrowMeta, &mut Visibility), (With<ArrowMeta>, Without<Tooltip>)>,
     mut state: ResMut<UiState>,
     windows: Query<&Window, With<PrimaryWindow>>,
@@ -108,9 +109,9 @@ pub fn rec_button_handlers(
 pub fn change_color_pallete(
     mut interaction_query: Query<
         (&Interaction, &ChangeColor),
-        (Changed<Interaction>, With<ChangeColor>, Without<Rectangle>),
+        (Changed<Interaction>, With<ChangeColor>, Without<VeloNode>),
     >,
-    mut nodes: Query<(&mut BackgroundColor, &Rectangle), With<Rectangle>>,
+    mut nodes: Query<(&mut BackgroundColor, &VeloNode), With<VeloNode>>,
     state: Res<UiState>,
 ) {
     for (interaction, change_color) in &mut interaction_query {
@@ -136,7 +137,7 @@ pub fn change_text_pos(
         (&Interaction, &TextPosMode),
         (Changed<Interaction>, With<TextPosMode>),
     >,
-    mut nodes: Query<(&mut Style, &Rectangle), With<Rectangle>>,
+    mut nodes: Query<(&mut Style, &VeloNode), With<VeloNode>>,
     state: Res<UiState>,
 ) {
     for (interaction, text_pos_mode) in &mut interaction_query {

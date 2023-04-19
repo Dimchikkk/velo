@@ -112,7 +112,7 @@ impl Plugin for ChartPlugin {
         app.init_resource::<StaticState>();
         app.init_resource::<AppState>();
 
-        app.register_type::<Rectangle>();
+        app.register_type::<VeloNode>();
         app.register_type::<EditableText>();
         app.register_type::<ArrowConnect>();
         app.register_type::<ResizeMarker>();
@@ -194,10 +194,7 @@ pub fn get_timestamp() -> f64 {
 }
 
 fn set_focused_entity(
-    mut interaction_query: Query<
-        (&Interaction, &Rectangle),
-        (Changed<Interaction>, With<Rectangle>),
-    >,
+    mut interaction_query: Query<(&Interaction, &VeloNode), (Changed<Interaction>, With<VeloNode>)>,
     mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
@@ -249,9 +246,9 @@ fn set_focused_entity(
 
 fn update_rectangle_position(
     mut cursor_moved_events: EventReader<CursorMoved>,
-    mut node_position: Query<(&mut Style, &Rectangle), With<Rectangle>>,
+    mut node_position: Query<(&mut Style, &VeloNodeContainer), With<VeloNodeContainer>>,
     state: Res<UiState>,
-    mut query: Query<(&Style, &LeftPanel), Without<Rectangle>>,
+    mut query: Query<(&Style, &LeftPanel), Without<VeloNodeContainer>>,
     mut events: EventWriter<RedrawArrow>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {

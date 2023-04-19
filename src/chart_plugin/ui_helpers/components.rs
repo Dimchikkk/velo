@@ -107,7 +107,13 @@ pub struct LeftPanelExplorer;
 
 #[derive(Component, Default, Reflect, Debug)]
 #[reflect(Component)]
-pub struct Rectangle {
+pub struct VeloNodeContainer {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component, Default, Reflect, Debug)]
+#[reflect(Component)]
+pub struct VeloNode {
     pub id: ReflectableUuid,
 }
 
