@@ -68,8 +68,6 @@ pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
 }
 
 fn create_rectangle_btn(
-    size: (Val, Val),
-    position: (Val, Val),
     bg_color: Color,
     image: Option<UiImage>,
     z_index: i32,
@@ -81,12 +79,13 @@ fn create_rectangle_btn(
         z_index: ZIndex::Local(z_index),
         style: Style {
             position_type: PositionType::Absolute,
+            size: Size::new(Val::Percent(100.), Val::Percent(100.)),
             position: UiRect {
-                left: position.0,
-                bottom: position.1,
-                ..Default::default()
+                left: Val::Px(-3.),
+                right: Val::Px(0.),
+                top: Val::Px(-3.),
+                bottom: Val::Px(0.),
             },
-            size: Size::new(size.0, size.1),
             justify_content,
             align_items,
             // overflow: Overflow::Hidden,
