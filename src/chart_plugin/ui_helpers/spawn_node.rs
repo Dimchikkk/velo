@@ -6,7 +6,7 @@ use crate::TextPos;
 
 use super::{
     create_arrow_marker, create_rectangle_btn, create_rectangle_txt, create_resize_marker,
-    EditableText, Rectangle, ResizeMarker,
+    EditableText, ResizeMarker, VeloNode, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
 use crate::utils::ReflectableUuid;
@@ -26,17 +26,36 @@ pub struct NodeMeta {
 }
 
 pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
-    commands
+    let top = commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    flex_direction: FlexDirection::Column,
+                    align_self: AlignSelf::Stretch,
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: item_meta.position.0,
+                        bottom: item_meta.position.1,
+                        ..Default::default()
+                    },
+                    size: Size::new(item_meta.size.0, item_meta.size.1),
+                    ..default()
+                },
+                background_color: Color::BLACK.with_a(0.5).into(),
+                ..default()
+            },
+            VeloNodeContainer { id: item_meta.id },
+        ))
+        .id();
+    let button = commands
         .spawn((
             create_rectangle_btn(
-                item_meta.size,
-                item_meta.position,
                 item_meta.bg_color,
                 item_meta.image,
                 item_meta.z_index,
                 item_meta.text_pos,
             ),
-            Rectangle { id: item_meta.id },
+            VeloNode { id: item_meta.id },
             Outline::all(Color::BLACK, Val::Px(1.)),
         ))
         .with_children(|builder| {
@@ -90,5 +109,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                 EditableText { id: item_meta.id },
             ));
         })
-        .id()
+        .id();
+    commands.entity(top).add_child(button);
+    top
 }

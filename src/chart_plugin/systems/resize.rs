@@ -1,6 +1,6 @@
 use super::{
-    ui_helpers::{EditableText, Rectangle, ResizeMarker},
-    RedrawArrow,
+    ui_helpers::{EditableText, ResizeMarker},
+    RedrawArrow, VeloNode, VeloNodeContainer,
 };
 use crate::UiState;
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
@@ -10,7 +10,7 @@ pub fn resize_entity_start(
         (&Interaction, &Parent, &ResizeMarker),
         (Changed<Interaction>, With<ResizeMarker>),
     >,
-    mut button_query: Query<&Rectangle, With<Rectangle>>,
+    mut button_query: Query<&VeloNode, With<VeloNode>>,
     mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
@@ -45,10 +45,10 @@ pub fn resize_entity_start(
 pub fn resize_entity_end(
     mut mouse_motion_events: EventReader<MouseMotion>,
     state: Res<UiState>,
-    mut rectangle_query: Query<(&Rectangle, &mut Style), With<Rectangle>>,
+    mut rectangle_query: Query<(&VeloNodeContainer, &mut Style), With<VeloNodeContainer>>,
     mut text_input_query: Query<
         (&EditableText, &mut Style),
-        (With<EditableText>, Without<Rectangle>),
+        (With<EditableText>, Without<VeloNodeContainer>),
     >,
     mut events: EventWriter<RedrawArrow>,
 ) {

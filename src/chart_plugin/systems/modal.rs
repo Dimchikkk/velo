@@ -7,7 +7,7 @@ use super::ui_helpers::{DocListItemContainer, ModalCancel, ModalConfirm, ModalEn
 use crate::components::Doc;
 use crate::resources::{AppState, LoadRequest};
 use crate::utils::ReflectableUuid;
-use crate::{UiState, UpdateListHighlight};
+use crate::UiState;
 
 pub fn cancel_modal(
     mut commands: Commands,
@@ -40,7 +40,6 @@ pub fn confirm_modal(
     mut ui_state: ResMut<UiState>,
     query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
     mut query_container: Query<(Entity, &DocListItemContainer), With<DocListItemContainer>>,
-    mut events: EventWriter<UpdateListHighlight>,
     mut pkv: ResMut<PkvStore>,
 ) {
     for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
@@ -94,7 +93,6 @@ pub fn confirm_modal(
                             doc_id: None,
                             drop_last_checkpoint: false,
                         });
-                        events.send(UpdateListHighlight);
                         remove_from_pkv(
                             &mut pkv,
                             id_to_remove,
@@ -116,7 +114,6 @@ pub fn modal_keyboard_input_system(
     query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
     mut commands: Commands,
     mut query_container: Query<(Entity, &DocListItemContainer), With<DocListItemContainer>>,
-    mut events: EventWriter<UpdateListHighlight>,
     mut pkv: ResMut<PkvStore>,
 ) {
     if input.just_pressed(KeyCode::Return) {
@@ -177,7 +174,6 @@ pub fn modal_keyboard_input_system(
                         doc_id: None,
                         drop_last_checkpoint: false,
                     });
-                    events.send(UpdateListHighlight);
                     remove_from_pkv(&mut pkv, id_to_remove, app_state.current_document.unwrap());
                 }
                 commands.entity(entity).despawn_recursive();
