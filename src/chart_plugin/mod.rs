@@ -11,7 +11,7 @@ use crate::resources::AppState;
 use crate::resources::LoadRequest;
 use crate::resources::StaticState;
 use crate::utils::ReflectableUuid;
-use std::{time::Duration};
+use std::time::Duration;
 use uuid::Uuid;
 #[path = "ui_helpers/ui_helpers.rs"]
 pub mod ui_helpers;
@@ -172,7 +172,11 @@ impl Plugin for ChartPlugin {
             keyboard_input_system,
         ));
 
-        app.add_systems((button_generic_handler, selected_tab_handler, higlight_event_handler));
+        app.add_systems((
+            button_generic_handler,
+            selected_tab_handler,
+            higlight_event_handler,
+        ));
     }
 }
 

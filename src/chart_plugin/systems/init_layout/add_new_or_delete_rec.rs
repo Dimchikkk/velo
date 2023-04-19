@@ -13,7 +13,7 @@ pub fn add_new_delete_rec(
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(18.)),
+                size: Size::new(Val::Percent(90.), Val::Percent(14.)),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -28,7 +28,7 @@ pub fn add_new_delete_rec(
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
                 margin: UiRect::all(Val::Px(5.)),
-                size: Size::new(Val::Percent(31.), Val::Percent(100.)),
+                size: Size::new(Val::Percent(23.), Val::Percent(100.)),
                 ..default()
             },
             ..default()
@@ -70,7 +70,7 @@ pub fn add_new_delete_rec(
                 flex_direction: FlexDirection::Column,
                 margin: UiRect::all(Val::Px(5.)),
                 align_self: AlignSelf::Stretch,
-                size: Size::new(Val::Percent(31.), Val::Percent(100.)),
+                size: Size::new(Val::Percent(23.), Val::Percent(100.)),
                 ..default()
             },
             ..default()
