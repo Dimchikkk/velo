@@ -5,7 +5,6 @@ use crate::chart_plugin::ui_helpers::{get_tooltip, ButtonAction, GenericButton, 
 pub fn add_new_delete_rec(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
-    font: Handle<Font>,
     create_component: ButtonAction,
     delete_component: ButtonAction,
 ) -> Entity {
@@ -58,7 +57,7 @@ pub fn add_new_delete_rec(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip(font.clone(), "New Rectangle".to_string(), 14.),
+                get_tooltip("New Rectangle".to_string(), 14.),
                 Tooltip,
             ));
         })
@@ -100,7 +99,7 @@ pub fn add_new_delete_rec(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip(font.clone(), "Delete Rectangle".to_string(), 14.),
+                get_tooltip("Delete Rectangle".to_string(), 14.),
                 Tooltip,
             ));
         })

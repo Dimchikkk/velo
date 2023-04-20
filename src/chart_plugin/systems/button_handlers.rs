@@ -12,10 +12,10 @@ use super::ui_helpers::{
     DocList, DocListItemButton, EditableText, GenericButton, ModalEntity, NewDoc, SaveDoc,
     TextManipulation, TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
-use super::VeloNodeContainer;
+use super::{VeloNodeContainer, MainPanel};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, Tab};
-use crate::resources::{AppState, LoadRequest, SaveRequest, StaticState};
+use crate::resources::{AppState, LoadRequest, SaveRequest};
 use crate::utils::ReflectableUuid;
 
 pub fn rec_button_handlers(
@@ -184,10 +184,8 @@ pub fn text_manipulation(
         (Changed<Interaction>, With<TextManipulationAction>),
     >,
     mut editable_text: Query<(&mut Text, &EditableText), With<EditableText>>,
-    static_state: Res<StaticState>,
     ui_state: Res<UiState>,
 ) {
-    let font = static_state.font.as_ref().unwrap().clone();
     for (interaction, text_manipulation) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
@@ -209,17 +207,17 @@ pub fn text_manipulation(
                                         TextSection {
                                             value: "".to_string(),
                                             style: TextStyle {
-                                                font: font.clone(),
                                                 font_size: 20.0,
                                                 color: Color::BLACK,
+                                                ..default()
                                             },
                                         },
                                         TextSection {
                                             value: " ".to_string(),
                                             style: TextStyle {
-                                                font: font.clone(),
                                                 font_size: 20.0,
                                                 color: Color::BLACK,
+                                                ..default()
                                             },
                                         },
                                     ];
@@ -242,7 +240,7 @@ pub fn text_manipulation(
                                         str = format!("{}{}", str, section.value.clone());
                                     }
                                     str = format!("{}{}", str, clipboard_text);
-                                    text.sections = get_sections(str, font.clone()).0;
+                                    text.sections = get_sections(str).0;
                                 }
                             }
                         }
@@ -273,7 +271,7 @@ pub fn text_manipulation(
                                     for section in text_sections.iter() {
                                         str = format!("{}{}", str, section.value.clone());
                                     }
-                                    let (sections, is_link) = get_sections(str, font.clone());
+                                    let (sections, is_link) = get_sections(str);
                                     for (i, section) in sections.iter().enumerate() {
                                         if is_link[i] {
                                             #[cfg(not(target_arch = "wasm32"))]
@@ -296,13 +294,11 @@ pub fn new_doc_handler(
     mut commands: Commands,
     mut new_doc_query: Query<&Interaction, (Changed<Interaction>, With<NewDoc>)>,
     mut doc_list_query: Query<Entity, With<DocList>>,
-    static_state: ResMut<StaticState>,
     mut app_state: ResMut<AppState>,
 ) {
     for interaction in &mut new_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let font = static_state.font.as_ref().unwrap().clone();
                 let doc_id = ReflectableUuid(Uuid::new_v4());
                 let name = "Untitled".to_string();
                 let tab_id = ReflectableUuid(Uuid::new_v4());
@@ -339,7 +335,7 @@ pub fn new_doc_handler(
                     doc_id: None,
                     drop_last_checkpoint: false,
                 });
-                let button = add_list_item(&mut commands, font.clone(), doc_id, name);
+                let button = add_list_item(&mut commands, doc_id, name);
                 let doc_list = doc_list_query.single_mut();
                 commands.entity(doc_list).add_child(button);
             }
@@ -381,9 +377,9 @@ pub fn rename_doc_handler(
 pub fn delete_doc_handler(
     mut commands: Commands,
     mut delete_doc_query: Query<&Interaction, (Changed<Interaction>, With<DeleteDoc>)>,
-    static_state: ResMut<StaticState>,
     mut ui_state: ResMut<UiState>,
     app_state: Res<AppState>,
+    main_panel_query: Query<Entity, With<MainPanel>>
 ) {
     for interaction in &mut delete_doc_query.iter_mut() {
         match *interaction {
@@ -391,13 +387,12 @@ pub fn delete_doc_handler(
                 if app_state.docs.len() < 2 {
                     return;
                 }
-                let font = static_state.font.as_ref().unwrap().clone();
                 let id = ReflectableUuid(Uuid::new_v4());
                 *ui_state = UiState::default();
                 ui_state.modal_id = Some(id);
-                let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Document);
+                let entity = spawn_modal(&mut commands, id, ModalEntity::Document);
                 commands
-                    .entity(static_state.main_panel.unwrap())
+                    .entity(main_panel_query.single())
                     .add_child(entity);
             }
             Interaction::Hovered => {}

@@ -21,7 +21,6 @@ pub fn add_list(
     commands: &mut Commands,
     state: &mut ResMut<AppState>,
     pkv: &mut ResMut<PkvStore>,
-    font: Handle<Font>,
 ) -> Entity {
     if let Ok(last_saved) = pkv.get::<ReflectableUuid>("last_saved") {
         state.current_document = Some(last_saved);
@@ -67,7 +66,7 @@ pub fn add_list(
 
         for key in keys {
             let name = names.get(key).unwrap();
-            let button = add_list_item(commands, font.clone(), *key, name.clone());
+            let button = add_list_item(commands, *key, name.clone());
             commands.entity(node).add_child(button);
         }
     } else {
@@ -90,9 +89,9 @@ pub fn add_list(
                 tags: vec![],
             },
         );
-        let button = add_list_item(commands, font.clone(), doc_id, name);
+        let button = add_list_item(commands, doc_id, name);
         state.current_document = Some(doc_id);
-        let tab_view = add_tab(commands, font, tab_name, tab_id);
+        let tab_view = add_tab(commands, tab_name, tab_id);
         commands.entity(bottom_panel).add_child(tab_view);
         commands.entity(node).add_child(button);
     }
