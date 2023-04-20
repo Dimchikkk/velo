@@ -4,11 +4,7 @@ use crate::utils::ReflectableUuid;
 
 use super::{DeleteTab, GenericButton, SelectedTab, SelectedTabTextInput, TabContainer};
 
-pub fn add_tab(
-    commands: &mut Commands,
-    name: String,
-    id: ReflectableUuid,
-) -> Entity {
+pub fn add_tab(commands: &mut Commands, name: String, id: ReflectableUuid) -> Entity {
     let root = commands
         .spawn((
             NodeBundle {

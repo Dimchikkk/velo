@@ -56,10 +56,7 @@ pub fn add_new_delete_rec(
             GenericButton,
         ))
         .with_children(|builder| {
-            builder.spawn((
-                get_tooltip("New Rectangle".to_string(), 14.),
-                Tooltip,
-            ));
+            builder.spawn((get_tooltip("New Rectangle".to_string(), 14.), Tooltip));
         })
         .id();
     let top_del = commands
@@ -98,10 +95,7 @@ pub fn add_new_delete_rec(
             GenericButton,
         ))
         .with_children(|builder| {
-            builder.spawn((
-                get_tooltip("Delete Rectangle".to_string(), 14.),
-                Tooltip,
-            ));
+            builder.spawn((get_tooltip("Delete Rectangle".to_string(), 14.), Tooltip));
         })
         .id();
     commands.entity(top_new).add_child(new_rec);
