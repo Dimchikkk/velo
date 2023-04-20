@@ -4,8 +4,8 @@ use bevy::prelude::*;
 
 use uuid::Uuid;
 
-use super::MainPanel;
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, ModalEntity, SelectedTab};
+use super::MainPanel;
 use crate::components::Tab;
 use crate::resources::{AppState, LoadRequest, SaveRequest};
 use crate::utils::ReflectableUuid;
@@ -162,9 +162,7 @@ pub fn delete_tab_handler(
                 }
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(&mut commands, id, ModalEntity::Tab);
-                commands
-                    .entity(main_panel_query.single())
-                    .add_child(entity);
+                commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}
             Interaction::None => {}

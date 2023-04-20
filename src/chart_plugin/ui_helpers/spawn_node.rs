@@ -104,7 +104,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                 ResizeMarker::BottomLeft,
             ));
             builder.spawn((
-                create_rectangle_txt( item_meta.text, Some(item_meta.size)),
+                create_rectangle_txt(item_meta.text, Some(item_meta.size)),
                 EditableText { id: item_meta.id },
             ));
         })

@@ -12,7 +12,7 @@ use super::ui_helpers::{
     DocList, DocListItemButton, EditableText, GenericButton, ModalEntity, NewDoc, SaveDoc,
     TextManipulation, TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
-use super::{VeloNodeContainer, MainPanel};
+use super::{MainPanel, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadRequest, SaveRequest};
@@ -379,7 +379,7 @@ pub fn delete_doc_handler(
     mut delete_doc_query: Query<&Interaction, (Changed<Interaction>, With<DeleteDoc>)>,
     mut ui_state: ResMut<UiState>,
     app_state: Res<AppState>,
-    main_panel_query: Query<Entity, With<MainPanel>>
+    main_panel_query: Query<Entity, With<MainPanel>>,
 ) {
     for interaction in &mut delete_doc_query.iter_mut() {
         match *interaction {
@@ -391,9 +391,7 @@ pub fn delete_doc_handler(
                 *ui_state = UiState::default();
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(&mut commands, id, ModalEntity::Document);
-                commands
-                    .entity(main_panel_query.single())
-                    .add_child(entity);
+                commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}
             Interaction::None => {}

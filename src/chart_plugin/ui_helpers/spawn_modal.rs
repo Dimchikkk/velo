@@ -59,9 +59,10 @@ pub fn spawn_modal(
                             ..default()
                         })
                         .with_children(|builder| {
-                            builder.spawn(add_rectangle_txt(
-                                format!("Are you sure you want to delete {}?", modal_entity),
-                            ));
+                            builder.spawn(add_rectangle_txt(format!(
+                                "Are you sure you want to delete {}?",
+                                modal_entity
+                            )));
                         });
                 });
 

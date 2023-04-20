@@ -12,11 +12,7 @@ use crate::utils::ReflectableUuid;
 
 use super::{DeleteDoc, DocListItemButton, DocListItemContainer, DocListItemText, GenericButton};
 
-pub fn add_list_item(
-    commands: &mut Commands,
-    id: ReflectableUuid,
-    name: String,
-) -> Entity {
+pub fn add_list_item(commands: &mut Commands, id: ReflectableUuid, name: String) -> Entity {
     let root = commands
         .spawn((
             ButtonBundle {
