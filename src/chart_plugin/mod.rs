@@ -136,7 +136,6 @@ impl Plugin for ChartPlugin {
             resize_entity_end,
             set_focused_entity,
             cancel_modal,
-            modal_keyboard_input_system,
             confirm_modal,
             resize_notificator,
         ));
