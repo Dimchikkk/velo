@@ -20,7 +20,7 @@ pub fn add_menu_button(
                         flex_direction: FlexDirection::Column,
                         align_self: AlignSelf::Stretch,
                         margin: UiRect {
-                            left: Val::Px(15.),
+                            left: Val::Px(20.),
                             right: Val::Px(5.),
                             top: Val::Px(3.),
                             bottom: Val::Px(2.),
@@ -69,8 +69,8 @@ pub fn add_menu_button(
                         flex_direction: FlexDirection::Column,
                         align_self: AlignSelf::Stretch,
                         margin: UiRect {
-                            left: Val::Px(15.),
-                            right: Val::Px(5.),
+                            left: Val::Px(10.),
+                            right: Val::Px(10.),
                             top: Val::Px(3.),
                             bottom: Val::Px(2.),
                         },
