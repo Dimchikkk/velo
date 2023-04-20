@@ -4,12 +4,6 @@ use bevy::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Resource, Default)]
-pub struct StaticState {
-    pub font: Option<Handle<Font>>,
-    pub main_panel: Option<Entity>,
-}
-
-#[derive(Resource, Default)]
 pub struct AppState {
     pub current_document: Option<ReflectableUuid>,
     pub docs: HashMap<ReflectableUuid, Doc>,
@@ -26,3 +20,6 @@ pub struct LoadRequest {
     pub doc_id: Option<ReflectableUuid>, // None means current doc
     pub drop_last_checkpoint: bool,      // Useful for undo functionality
 }
+
+#[derive(Resource)]
+pub struct FontHandle(pub Handle<Font>);

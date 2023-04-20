@@ -9,7 +9,6 @@ pub fn add_text_manipulation(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     text_manipulation: TextManipulationAction,
-    font: Handle<Font>,
 ) -> Entity {
     let (image, text) = match text_manipulation.action_type {
         TextManipulation::Cut => (asset_server.load("cut-text.png"), "Cut text"),
@@ -68,7 +67,7 @@ pub fn add_text_manipulation(
             GenericButton,
         ))
         .with_children(|builder| {
-            builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
+            builder.spawn((get_tooltip(text.to_string(), 14.), Tooltip));
         })
         .id();
     commands.entity(top).add_child(button);

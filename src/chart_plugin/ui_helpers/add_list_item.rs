@@ -14,7 +14,6 @@ use super::{DeleteDoc, DocListItemButton, DocListItemContainer, DocListItemText,
 
 pub fn add_list_item(
     commands: &mut Commands,
-    font: Handle<Font>,
     id: ReflectableUuid,
     name: String,
 ) -> Entity {
@@ -59,17 +58,17 @@ pub fn add_list_item(
                         TextSection {
                             value: name,
                             style: TextStyle {
-                                font: font.clone(),
                                 font_size: 18.,
                                 color: Color::BLACK,
+                                ..default()
                             },
                         },
                         TextSection {
                             value: " ".to_string(),
                             style: TextStyle {
-                                font: font.clone(),
                                 font_size: 18.,
                                 color: Color::BLACK,
+                                ..default()
                             },
                         },
                     ],
@@ -117,9 +116,9 @@ pub fn add_list_item(
                     sections: vec![TextSection {
                         value: "x".to_string(),
                         style: TextStyle {
-                            font,
                             font_size: 24.,
                             color: Color::BLACK,
+                            ..default()
                         },
                     }],
                     ..default()
