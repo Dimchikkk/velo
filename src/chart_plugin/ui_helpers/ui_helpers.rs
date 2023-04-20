@@ -34,11 +34,11 @@ fn get_marker_style(position: UiRect, size: f32) -> Style {
     }
 }
 
-pub fn add_rectangle_txt(font: Handle<Font>, text: String) -> TextBundle {
+pub fn add_rectangle_txt(text: String) -> TextBundle {
     let text_style = TextStyle {
-        font,
         font_size: 18.0,
         color: Color::BLACK,
+        ..default()
     };
     TextBundle::from_section(text, text_style).with_style(Style {
         position_type: PositionType::Relative,
@@ -130,16 +130,16 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
     }
 }
 
-pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<bool>) {
+pub fn get_sections(text: String) -> (Vec<TextSection>, Vec<bool>) {
     let text_style = TextStyle {
-        font: font.clone(),
         font_size: 18.0,
         color: Color::BLACK,
+        ..default()
     };
     let link_style = TextStyle {
-        font,
         font_size: 18.0,
         color: Color::BLUE,
+        ..default()
     };
     let mut finder = LinkFinder::new();
     finder.kinds(&[LinkKind::Url]);
@@ -194,13 +194,9 @@ pub fn get_sections(text: String, font: Handle<Font>) -> (Vec<TextSection>, Vec<
     (sections, is_link)
 }
 
-pub fn create_rectangle_txt(
-    font: Handle<Font>,
-    text: String,
-    max_size: Option<(Val, Val)>,
-) -> TextBundle {
+pub fn create_rectangle_txt(text: String, max_size: Option<(Val, Val)>) -> TextBundle {
     let text = Text {
-        sections: get_sections(text, font).0,
+        sections: get_sections(text).0,
         alignment: TextAlignment::Left,
         linebreak_behaviour: BreakLineOn::WordBoundary,
     };
@@ -223,14 +219,14 @@ pub fn create_rectangle_txt(
     }
 }
 
-pub fn get_tooltip(font: Handle<Font>, text: String, size: f32) -> TextBundle {
+pub fn get_tooltip(text: String, size: f32) -> TextBundle {
     let text = Text {
         sections: vec![TextSection {
             value: text,
             style: TextStyle {
-                font,
                 font_size: size,
                 color: Color::BLACK,
+                ..default()
             },
         }],
         alignment: TextAlignment::Left,

@@ -18,7 +18,6 @@ pub struct NodeMeta {
     pub position: (Val, Val),
     pub text: String,
     pub bg_color: Color,
-    pub font: Handle<Font>,
     pub image: Option<UiImage>,
     pub tags: Vec<String>,
     pub text_pos: TextPos,
@@ -105,7 +104,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                 ResizeMarker::BottomLeft,
             ));
             builder.spawn((
-                create_rectangle_txt(item_meta.font, item_meta.text, Some(item_meta.size)),
+                create_rectangle_txt(item_meta.text, Some(item_meta.size)),
                 EditableText { id: item_meta.id },
             ));
         })

@@ -6,7 +6,6 @@ use super::{add_rectangle_txt, ModalCancel, ModalConfirm, ModalEntity, ModalTop}
 use crate::utils::ReflectableUuid;
 pub fn spawn_modal(
     commands: &mut Commands,
-    font: Handle<Font>,
     id: ReflectableUuid,
     modal_entity: ModalEntity,
 ) -> Entity {
@@ -60,10 +59,10 @@ pub fn spawn_modal(
                             ..default()
                         })
                         .with_children(|builder| {
-                            builder.spawn(add_rectangle_txt(
-                                font.clone(),
-                                format!("Are you sure you want to delete {}?", modal_entity),
-                            ));
+                            builder.spawn(add_rectangle_txt(format!(
+                                "Are you sure you want to delete {}?",
+                                modal_entity
+                            )));
                         });
                 });
 
@@ -106,7 +105,7 @@ pub fn spawn_modal(
                             },
                         ))
                         .with_children(|builder| {
-                            builder.spawn(add_rectangle_txt(font.clone(), "Yes".to_string()));
+                            builder.spawn(add_rectangle_txt("Yes".to_string()));
                         });
                     builder
                         .spawn((
@@ -129,7 +128,7 @@ pub fn spawn_modal(
                             ModalCancel { id },
                         ))
                         .with_children(|builder| {
-                            builder.spawn(add_rectangle_txt(font.clone(), "Cancel".to_string()));
+                            builder.spawn(add_rectangle_txt("Cancel".to_string()));
                         });
                 });
         })

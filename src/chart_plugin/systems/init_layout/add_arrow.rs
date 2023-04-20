@@ -9,7 +9,6 @@ pub fn add_arrow(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     arrow_mode: ArrowMode,
-    font: Handle<Font>,
 ) -> Entity {
     let (image, text) = match arrow_mode.arrow_type {
         ArrowType::Line => (asset_server.load("line.png"), "Enable line mode"),
@@ -76,7 +75,7 @@ pub fn add_arrow(
             GenericButton,
         ))
         .with_children(|builder| {
-            builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
+            builder.spawn((get_tooltip(text.to_string(), 14.), Tooltip));
         })
         .id();
     commands.entity(top).add_child(button);
