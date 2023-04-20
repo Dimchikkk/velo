@@ -2,36 +2,63 @@ use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
 
-use super::{add_rectangle_txt, ModalCancel, ModalConfirm, ModalEntity, ModalTop};
+use super::{add_rectangle_txt, ModalAction, ModalCancel, ModalConfirm, ModalTop};
 use crate::utils::ReflectableUuid;
 pub fn spawn_modal(
     commands: &mut Commands,
+    window: &Window,
     id: ReflectableUuid,
-    modal_entity: ModalEntity,
+    modal_action: ModalAction,
 ) -> Entity {
     let width = 300.;
     let height = 200.;
-    commands
+    let top = commands
         .spawn((
             NodeBundle {
                 z_index: ZIndex::Global(1),
+                style: Style {
+                    flex_direction: FlexDirection::Column,
+                    align_self: AlignSelf::Stretch,
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Px(window.width() / 2. - 250.),
+                        bottom: Val::Px(window.height() / 2. - 50.),
+                        ..default()
+                    },
+                    size: Size::new(Val::Px(width), Val::Px(height)),
+                    ..default()
+                },
+                background_color: Color::BLACK.with_a(0.5).into(),
+                ..default()
+            },
+            ModalTop {
+                id,
+                action: modal_action.clone(),
+            },
+        ))
+        .id();
+    let modal = commands
+        .spawn((
+            NodeBundle {
                 background_color: Color::WHITE.into(),
                 style: Style {
-                    position_type: PositionType::Absolute,
-                    size: Size::new(Val::Px(width), Val::Px(height)),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     border: UiRect::all(Val::Px(1.)),
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Px(-3.),
+                        right: Val::Px(0.),
+                        top: Val::Px(-3.),
+                        bottom: Val::Px(0.),
+                    },
                     flex_direction: FlexDirection::Column,
                     ..default()
                 },
                 ..default()
             },
             BorderColor(Color::BLACK),
-            ModalTop {
-                id,
-                delete: modal_entity.clone(),
-            },
         ))
         .with_children(|builder| {
             builder
@@ -60,8 +87,8 @@ pub fn spawn_modal(
                         })
                         .with_children(|builder| {
                             builder.spawn(add_rectangle_txt(format!(
-                                "Are you sure you want to delete {}?",
-                                modal_entity
+                                "Are you sure you want to {}?",
+                                modal_action
                             )));
                         });
                 });
@@ -87,12 +114,7 @@ pub fn spawn_modal(
                                     justify_content: JustifyContent::Center,
                                     border: UiRect::all(Val::Px(1.)),
                                     align_items: AlignItems::Center,
-                                    padding: UiRect {
-                                        left: Val::Px(5.),
-                                        right: Val::Px(5.),
-                                        top: Val::Px(5.),
-                                        bottom: Val::Px(5.),
-                                    },
+                                    padding: UiRect::all(Val::Px(5.)),
                                     // overflow: Overflow::Hidden,
                                     ..default()
                                 },
@@ -101,7 +123,7 @@ pub fn spawn_modal(
                             BorderColor(Color::BLACK),
                             ModalConfirm {
                                 id,
-                                delete: modal_entity.clone(),
+                                action: modal_action.clone(),
                             },
                         ))
                         .with_children(|builder| {
@@ -114,12 +136,7 @@ pub fn spawn_modal(
                                     justify_content: JustifyContent::Center,
                                     align_items: AlignItems::Center,
                                     border: UiRect::all(Val::Px(1.)),
-                                    padding: UiRect {
-                                        left: Val::Px(5.),
-                                        right: Val::Px(5.),
-                                        top: Val::Px(5.),
-                                        bottom: Val::Px(5.),
-                                    },
+                                    padding: UiRect::all(Val::Px(5.)),
                                     ..default()
                                 },
                                 ..default()
@@ -132,5 +149,7 @@ pub fn spawn_modal(
                         });
                 });
         })
-        .id()
+        .id();
+    commands.entity(top).add_child(modal);
+    top
 }
