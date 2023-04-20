@@ -136,7 +136,6 @@ impl Plugin for ChartPlugin {
             resize_entity_end,
             set_focused_entity,
             cancel_modal,
-            modal_keyboard_input_system,
             confirm_modal,
             resize_notificator,
         ));
@@ -307,28 +306,39 @@ fn resize_notificator(mut commands: Commands, resize_event: Res<Events<WindowRes
 
 fn higlight_event_handler(
     mut app_state: ResMut<AppState>,
-    mut docs: Query<(&mut BackgroundColor, &DocListItemContainer), With<DocListItemContainer>>,
+    mut docs: Query<
+        (&mut BackgroundColor, &DocListItemContainer, &Children),
+        With<DocListItemContainer>,
+    >,
     mut tabs: Query<
-        (&mut BackgroundColor, &TabContainer),
+        (&mut BackgroundColor, &TabContainer, &Children),
         (With<TabContainer>, Without<DocListItemContainer>),
     >,
+    mut delete_tab: Query<&mut Visibility, With<DeleteTab>>,
+    mut delete_doc: Query<&mut Visibility, (With<DeleteDoc>, Without<DeleteTab>)>,
 ) {
     let current_doc = app_state.current_document.unwrap();
 
-    for (mut bg_color, i) in &mut docs.iter_mut() {
-        if current_doc == i.id {
+    for (mut bg_color, container, children) in &mut docs.iter_mut() {
+        let mut delete_doc_visibility = delete_doc.get_mut(children[1]).unwrap();
+        if current_doc == container.id {
+            *delete_doc_visibility = Visibility::Visible;
             bg_color.0 = Color::ALICE_BLUE;
         } else {
+            *delete_doc_visibility = Visibility::Hidden;
             bg_color.0 = Color::rgba(0.8, 0.8, 0.8, 0.5)
         }
     }
 
     if let Some(doc) = app_state.docs.get_mut(&current_doc) {
         let tab = doc.tabs.iter().find(|x| x.is_active).unwrap();
-        for (mut bg_color, i) in &mut tabs.iter_mut() {
-            if tab.id == i.id {
+        for (mut bg_color, container, children) in &mut tabs.iter_mut() {
+            let mut delete_tab_visibility = delete_tab.get_mut(children[1]).unwrap();
+            if tab.id == container.id {
+                *delete_tab_visibility = Visibility::Visible;
                 bg_color.0 = Color::ALICE_BLUE;
             } else {
+                *delete_tab_visibility = Visibility::Hidden;
                 bg_color.0 = Color::rgba(0.8, 0.8, 0.8, 0.5)
             }
         }

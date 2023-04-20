@@ -148,20 +148,26 @@ pub enum ResizeMarker {
 #[derive(Component)]
 pub struct ModalTop {
     pub id: ReflectableUuid,
-    pub delete: ModalEntity,
+    pub action: ModalAction,
 }
 
 #[derive(Eq, PartialEq, Clone)]
-pub enum ModalEntity {
-    Document,
-    Tab,
+pub enum ModalAction {
+    SaveToFile,
+    LoadFromFile,
+    LoadFromUrl,
+    DeleteDocument,
+    DeleteTab,
 }
 
-impl std::fmt::Display for ModalEntity {
+impl std::fmt::Display for ModalAction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ModalEntity::Document => write!(f, "document"),
-            ModalEntity::Tab => write!(f, "tab"),
+            ModalAction::DeleteDocument => write!(f, "delete document"),
+            ModalAction::DeleteTab => write!(f, "delete tab"),
+            ModalAction::LoadFromFile => write!(f, "load from file"),
+            ModalAction::LoadFromUrl => write!(f, "load from url"),
+            ModalAction::SaveToFile => write!(f, "save to file"),
         }
     }
 }
@@ -169,7 +175,7 @@ impl std::fmt::Display for ModalEntity {
 #[derive(Component)]
 pub struct ModalConfirm {
     pub id: ReflectableUuid,
-    pub delete: ModalEntity,
+    pub action: ModalAction,
 }
 
 #[derive(Component, Default)]
