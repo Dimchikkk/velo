@@ -13,12 +13,11 @@ use uuid::Uuid;
 use crate::{AddRect, BlinkTimer, UiState};
 
 use super::ui_helpers::{get_sections, DocListItemText, EditableText, SelectedTabTextInput};
-use crate::resources::{AppState, LoadRequest, SaveRequest, StaticState};
+use crate::resources::{AppState, LoadRequest, SaveRequest};
 
 pub fn keyboard_input_system(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
-    static_state: ResMut<StaticState>,
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     mut char_evr: EventReader<ReceivedCharacter>,
@@ -55,7 +54,6 @@ pub fn keyboard_input_system(
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
-    let font = static_state.font.as_ref().unwrap().clone();
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
     blink_timer.timer.tick(time.delta());
@@ -66,7 +64,6 @@ pub fn keyboard_input_system(
             &mut ui_state,
             &mut node_text_query,
             &mut events,
-            font,
             scale_factor,
         );
     } else if command && shift && input.just_pressed(KeyCode::S) {
@@ -109,7 +106,7 @@ pub fn keyboard_input_system(
                 };
                 *deleting = is_del_mode;
                 if str != current_str {
-                    text.sections = get_sections(str, font.clone()).0;
+                    text.sections = get_sections(str).0;
                 }
                 if blink_timer.timer.finished() {
                     text.sections.last_mut().unwrap().value =
@@ -227,7 +224,6 @@ pub fn insert_from_clipboard(
         ),
     >,
     events: &mut EventWriter<AddRect>,
-    font: Handle<Font>,
     scale_factor: f64,
 ) {
     use crate::JsonNode;
@@ -300,7 +296,7 @@ pub fn insert_from_clipboard(
                 for section in text.sections.iter_mut() {
                     str = format!("{}{}", str, section.value.clone());
                 }
-                text.sections = get_sections(format!("{}{}", str, clipboard_text), font.clone()).0;
+                text.sections = get_sections(format!("{}{}", str, clipboard_text)).0;
             }
         }
     }

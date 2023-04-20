@@ -10,12 +10,15 @@ use bevy_pkv::PkvStore;
 use bevy_ui_borders::BordersPlugin;
 use canvas::CanvasPlugin;
 use chart_plugin::*;
+use resources::FontHandle;
 use systems::*;
 pub struct VeloPlugin;
 impl Plugin for VeloPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_camera)
             .add_startup_system(setup_background)
+            .add_startup_system(setup_font)
+            .add_system(set_default_font.run_if(resource_exists::<FontHandle>()))
             .add_plugins(
                 DefaultPlugins
                     .set(WindowPlugin {

@@ -6,7 +6,6 @@ use super::{DeleteTab, GenericButton, SelectedTab, SelectedTabTextInput, TabCont
 
 pub fn add_tab(
     commands: &mut Commands,
-    font: Handle<Font>,
     name: String,
     id: ReflectableUuid,
 ) -> Entity {
@@ -49,17 +48,17 @@ pub fn add_tab(
                         TextSection {
                             value: name,
                             style: TextStyle {
-                                font: font.clone(),
                                 font_size: 18.,
                                 color: Color::BLACK,
+                                ..default()
                             },
                         },
                         TextSection {
                             value: " ".to_string(),
                             style: TextStyle {
-                                font: font.clone(),
                                 font_size: 18.,
                                 color: Color::BLACK,
+                                ..default()
                             },
                         },
                     ],
@@ -106,9 +105,9 @@ pub fn add_tab(
                     sections: vec![TextSection {
                         value: "x".to_string(),
                         style: TextStyle {
-                            font,
                             font_size: 18.,
                             color: Color::BLACK,
+                            ..default()
                         },
                     }],
                     ..default()

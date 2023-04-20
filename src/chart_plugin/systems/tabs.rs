@@ -4,9 +4,10 @@ use bevy::prelude::*;
 
 use uuid::Uuid;
 
+use super::MainPanel;
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, ModalEntity, SelectedTab};
 use crate::components::Tab;
-use crate::resources::{AppState, LoadRequest, SaveRequest, StaticState};
+use crate::resources::{AppState, LoadRequest, SaveRequest};
 use crate::utils::ReflectableUuid;
 use crate::{get_timestamp, UiState};
 
@@ -140,11 +141,10 @@ pub fn rename_tab_handler(
 pub fn delete_tab_handler(
     mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<DeleteTab>)>,
-    static_state: ResMut<StaticState>,
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
+    main_panel_query: Query<Entity, With<MainPanel>>,
 ) {
-    let font = static_state.font.as_ref().unwrap().clone();
     for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
@@ -161,9 +161,9 @@ pub fn delete_tab_handler(
                     return;
                 }
                 ui_state.modal_id = Some(id);
-                let entity = spawn_modal(&mut commands, font.clone(), id, ModalEntity::Tab);
+                let entity = spawn_modal(&mut commands, id, ModalEntity::Tab);
                 commands
-                    .entity(static_state.main_panel.unwrap())
+                    .entity(main_panel_query.single())
                     .add_child(entity);
             }
             Interaction::Hovered => {}
