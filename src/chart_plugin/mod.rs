@@ -9,7 +9,6 @@ use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos, ArrowType}
 use crate::canvas::arrow::events::{CreateArrow, RedrawArrow};
 use crate::resources::AppState;
 use crate::resources::LoadRequest;
-use crate::resources::StaticState;
 use crate::utils::ReflectableUuid;
 use std::time::Duration;
 use uuid::Uuid;
@@ -109,7 +108,6 @@ pub struct BlinkTimer {
 impl Plugin for ChartPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiState>();
-        app.init_resource::<StaticState>();
         app.init_resource::<AppState>();
 
         app.register_type::<VeloNode>();
@@ -273,17 +271,15 @@ fn update_rectangle_position(
 fn create_new_rectangle(
     mut commands: Commands,
     mut events: EventReader<AddRect>,
-    state: ResMut<StaticState>,
     mut ui_state: ResMut<UiState>,
+    main_panel_query: Query<Entity, With<MainPanel>>,
 ) {
     for event in events.iter() {
-        let font = state.font.as_ref().unwrap().clone();
         *ui_state = UiState::default();
         ui_state.entity_to_edit = Some(ReflectableUuid(event.node.id));
         let entity = spawn_node(
             &mut commands,
             NodeMeta {
-                font,
                 size: (event.node.width, event.node.height),
                 id: ReflectableUuid(event.node.id),
                 image: event.image.clone(),
@@ -295,7 +291,7 @@ fn create_new_rectangle(
                 z_index: event.node.z_index,
             },
         );
-        commands.entity(state.main_panel.unwrap()).add_child(entity);
+        commands.entity(main_panel_query.single()).add_child(entity);
     }
 }
 
