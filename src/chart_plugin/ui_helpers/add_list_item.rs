@@ -83,6 +83,7 @@ pub fn add_list_item(commands: &mut Commands, id: ReflectableUuid, name: String)
     let del_button = commands
         .spawn((
             ButtonBundle {
+                visibility: Visibility::Hidden,
                 background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
                 style: Style {
                     size: Size::new(Val::Percent(10.), Val::Percent(100.)),
