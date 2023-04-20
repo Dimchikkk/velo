@@ -332,7 +332,7 @@ pub fn new_doc_handler(
                 });
                 app_state.current_document = Some(doc_id);
                 commands.insert_resource(LoadRequest {
-                    doc_id: None,
+                    doc_id: Some(doc_id),
                     drop_last_checkpoint: false,
                 });
                 let button = add_list_item(&mut commands, doc_id, name);

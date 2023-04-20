@@ -73,6 +73,7 @@ pub fn add_tab(commands: &mut Commands, name: String, id: ReflectableUuid) -> En
         .spawn((
             ButtonBundle {
                 background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
+                visibility: Visibility::Hidden,
                 style: Style {
                     size: Size::new(Val::Percent(10.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
