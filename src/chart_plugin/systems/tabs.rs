@@ -2,9 +2,10 @@ use std::{collections::VecDeque, time::Duration};
 
 use bevy::prelude::*;
 
+use bevy::window::PrimaryWindow;
 use uuid::Uuid;
 
-use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, ModalEntity, SelectedTab};
+use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, SelectedTab};
 use super::MainPanel;
 use crate::components::Tab;
 use crate::resources::{AppState, LoadRequest, SaveRequest};
@@ -144,7 +145,9 @@ pub fn delete_tab_handler(
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
+    let window = windows.single();
     for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
@@ -161,7 +164,7 @@ pub fn delete_tab_handler(
                     return;
                 }
                 ui_state.modal_id = Some(id);
-                let entity = spawn_modal(&mut commands, id, ModalEntity::Tab);
+                let entity = spawn_modal(&mut commands, window, id, super::ModalAction::DeleteTab);
                 commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}

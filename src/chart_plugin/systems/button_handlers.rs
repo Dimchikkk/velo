@@ -9,8 +9,8 @@ use crate::{get_timestamp, AddRect, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
-    DocList, DocListItemButton, EditableText, GenericButton, ModalEntity, NewDoc, SaveDoc,
-    TextManipulation, TextManipulationAction, TextPosMode, Tooltip, VeloNode,
+    DocList, DocListItemButton, EditableText, GenericButton, NewDoc, SaveDoc, TextManipulation,
+    TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
 use super::{MainPanel, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
@@ -380,7 +380,9 @@ pub fn delete_doc_handler(
     mut ui_state: ResMut<UiState>,
     app_state: Res<AppState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
+    let window = windows.single();
     for interaction in &mut delete_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
@@ -390,7 +392,12 @@ pub fn delete_doc_handler(
                 let id = ReflectableUuid(Uuid::new_v4());
                 *ui_state = UiState::default();
                 ui_state.modal_id = Some(id);
-                let entity = spawn_modal(&mut commands, id, ModalEntity::Document);
+                let entity = spawn_modal(
+                    &mut commands,
+                    window,
+                    id,
+                    super::ModalAction::DeleteDocument,
+                );
                 commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}
