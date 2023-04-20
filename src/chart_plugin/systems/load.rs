@@ -8,12 +8,12 @@ use bevy::{
 
 use super::{
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
-    HighlightEvent, VeloNodeContainer,
+    HighlightEvent, MainPanel, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::canvas::arrow::events::CreateArrow;
 use crate::components::Doc;
-use crate::resources::{AppState, LoadRequest, StaticState};
+use crate::resources::{AppState, LoadRequest};
 use crate::utils::ReflectableUuid;
 use crate::{JsonNode, UiState, MAX_SAVED_DOCS_IN_MEMORY};
 use bevy_pkv::PkvStore;
@@ -34,7 +34,6 @@ pub fn load_json(
     mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
     request: Res<LoadRequest>,
     mut app_state: ResMut<AppState>,
-    static_state: ResMut<StaticState>,
     mut ui_state: ResMut<UiState>,
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
@@ -43,12 +42,11 @@ pub fn load_json(
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
     mut events: EventWriter<HighlightEvent>,
+    main_panel_query: Query<Entity, With<MainPanel>>,
 ) {
     *ui_state = UiState::default();
 
     let bottom_panel = bottom_panel.single_mut();
-
-    let font = static_state.font.as_ref().unwrap().clone();
 
     #[allow(unused)]
     for (entity, mut visibility) in &mut old_arrows.iter_mut() {
@@ -94,7 +92,7 @@ pub fn load_json(
 
     let mut tabs = vec![];
     for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter() {
-        let tab_view = add_tab(&mut commands, font.clone(), tab.name.clone(), tab.id);
+        let tab_view = add_tab(&mut commands, tab.name.clone(), tab.id);
         tabs.push(tab_view);
     }
     commands.entity(bottom_panel).insert_children(0, &tabs);
@@ -147,7 +145,6 @@ pub fn load_json(
                 let entity = spawn_node(
                     &mut commands,
                     NodeMeta {
-                        font: font.clone(),
                         size: (json_node.width, json_node.height),
                         id: ReflectableUuid(json_node.id),
                         image: image.clone(),
@@ -159,9 +156,7 @@ pub fn load_json(
                         z_index: json_node.z_index,
                     },
                 );
-                commands
-                    .entity(static_state.main_panel.unwrap())
-                    .add_child(entity);
+                commands.entity(main_panel_query.single()).add_child(entity);
             }
 
             let arrows = json["arrows"].as_array_mut().unwrap();

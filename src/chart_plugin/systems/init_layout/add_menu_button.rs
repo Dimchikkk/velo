@@ -6,7 +6,6 @@ use crate::chart_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip};
 pub fn add_menu_button(
     commands: &mut Commands,
     aseet_server: &Res<AssetServer>,
-    font: Handle<Font>,
     name: String,
     component: impl Component,
 ) -> Entity {
@@ -55,7 +54,7 @@ pub fn add_menu_button(
                     GenericButton,
                 ))
                 .with_children(|builder| {
-                    builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
+                    builder.spawn((get_tooltip(text.to_string(), 14.), Tooltip));
                 })
                 .id();
             commands.entity(top).add_child(button);
@@ -104,12 +103,12 @@ pub fn add_menu_button(
                     GenericButton,
                 ))
                 .with_children(|builder| {
-                    builder.spawn((get_tooltip(font.clone(), name, 14.), Tooltip));
+                    builder.spawn((get_tooltip(name, 14.), Tooltip));
 
                     let text_style = TextStyle {
-                        font: font.clone(),
                         font_size: 64.0,
                         color: Color::BLACK,
+                        ..default()
                     };
                     let text = Text {
                         sections: vec![TextSection {

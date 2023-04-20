@@ -8,7 +8,7 @@ use super::ui_helpers::{
     MainPanel, Menu, NewDoc, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
 };
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
-use crate::resources::{AppState, StaticState};
+use crate::resources::AppState;
 use crate::{BlinkTimer, TextPos};
 
 #[path = "add_arrow.rs"]
@@ -45,16 +45,13 @@ use add_list::*;
 
 pub fn init_layout(
     mut commands: Commands,
-    mut static_state: ResMut<StaticState>,
     mut app_state: ResMut<AppState>,
     asset_server: Res<AssetServer>,
     mut pkv: ResMut<PkvStore>,
 ) {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
     commands.insert_resource(BlinkTimer {
         timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
     });
-    static_state.font = Some(font.clone());
     let bottom_panel = commands
         .spawn((
             NodeBundle {
@@ -78,22 +75,10 @@ pub fn init_layout(
             BottomPanel,
         ))
         .id();
-    let add_tab = add_menu_button(
-        &mut commands,
-        &asset_server,
-        font.clone(),
-        "New Tab".to_string(),
-        AddTab,
-    );
+    let add_tab = add_menu_button(&mut commands, &asset_server, "New Tab".to_string(), AddTab);
     commands.entity(bottom_panel).add_child(add_tab);
 
-    let docs = add_list(
-        bottom_panel,
-        &mut commands,
-        &mut app_state,
-        &mut pkv,
-        font.clone(),
-    );
+    let docs = add_list(bottom_panel, &mut commands, &mut app_state, &mut pkv);
 
     let root_ui = commands
         .spawn((
@@ -135,17 +120,10 @@ pub fn init_layout(
     let new_doc = add_menu_button(
         &mut commands,
         &asset_server,
-        font.clone(),
         "New Document".to_string(),
         NewDoc,
     );
-    let save_doc = add_menu_button(
-        &mut commands,
-        &asset_server,
-        font.clone(),
-        "Save".to_string(),
-        SaveDoc,
-    );
+    let save_doc = add_menu_button(&mut commands, &asset_server, "Save".to_string(), SaveDoc);
     commands.entity(menu).add_child(save_doc);
     commands.entity(menu).add_child(new_doc);
 
@@ -255,7 +233,6 @@ pub fn init_layout(
     let rectangle_creation = add_new_delete_rec(
         &mut commands,
         &asset_server,
-        font.clone(),
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Add,
         },
@@ -281,7 +258,6 @@ pub fn init_layout(
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Front,
         },
-        font.clone(),
     );
     let back = add_front_back(
         &mut commands,
@@ -289,7 +265,6 @@ pub fn init_layout(
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Back,
         },
-        font.clone(),
     );
     commands.entity(fron_back).add_child(front);
     commands.entity(fron_back).add_child(back);
@@ -339,7 +314,6 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::Line,
         },
-        font.clone(),
     );
     let arrow2 = add_arrow(
         &mut commands,
@@ -347,7 +321,6 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::Arrow,
         },
-        font.clone(),
     );
     let arrow3 = add_arrow(
         &mut commands,
@@ -355,7 +328,6 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::DoubleArrow,
         },
-        font.clone(),
     );
     let arrow4 = add_arrow(
         &mut commands,
@@ -363,7 +335,6 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::ParallelLine,
         },
-        font.clone(),
     );
     let arrow5 = add_arrow(
         &mut commands,
@@ -371,7 +342,6 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::ParallelArrow,
         },
-        font.clone(),
     );
     let arrow6 = add_arrow(
         &mut commands,
@@ -379,7 +349,6 @@ pub fn init_layout(
         ArrowMode {
             arrow_type: ArrowType::ParallelDoubleArrow,
         },
-        font.clone(),
     );
     commands.entity(arrow_modes).add_child(arrow1);
     commands.entity(arrow_modes).add_child(arrow2);
@@ -459,7 +428,6 @@ pub fn init_layout(
         TextManipulationAction {
             action_type: TextManipulation::Cut,
         },
-        font.clone(),
     );
 
     #[cfg(not(target_arch = "wasm32"))]
@@ -470,7 +438,6 @@ pub fn init_layout(
             TextManipulationAction {
                 action_type: TextManipulation::Copy,
             },
-            font.clone(),
         );
         let paste = add_text_manipulation(
             &mut commands,
@@ -478,7 +445,6 @@ pub fn init_layout(
             TextManipulationAction {
                 action_type: TextManipulation::Paste,
             },
-            font.clone(),
         );
         let open_all_links = add_text_manipulation(
             &mut commands,
@@ -486,7 +452,6 @@ pub fn init_layout(
             TextManipulationAction {
                 action_type: TextManipulation::OpenAllLinks,
             },
-            font,
         );
         commands.entity(text_manipulation).add_child(copy);
         commands.entity(text_manipulation).add_child(paste);
@@ -509,6 +474,4 @@ pub fn init_layout(
     commands.entity(main_bottom).add_child(right_panel);
     commands.entity(root_ui).add_child(menu);
     commands.entity(root_ui).add_child(main_bottom);
-
-    static_state.main_panel = Some(main_panel);
 }

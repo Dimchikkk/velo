@@ -9,7 +9,6 @@ pub fn add_front_back(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     button_action: ButtonAction,
-    font: Handle<Font>,
 ) -> Entity {
     let (image, text) = if button_action.button_type == ButtonTypes::Front {
         (asset_server.load("front.png"), "Move to front")
@@ -61,7 +60,7 @@ pub fn add_front_back(
             GenericButton,
         ))
         .with_children(|builder| {
-            builder.spawn((get_tooltip(font, text.to_string(), 14.), Tooltip));
+            builder.spawn((get_tooltip(text.to_string(), 14.), Tooltip));
         })
         .id();
     commands.entity(top).add_child(button);
