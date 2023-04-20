@@ -186,7 +186,7 @@ pub fn modal_keyboard_input_system(
                         commands.insert_resource(LoadRequest {
                             doc_id: None,
                             drop_last_checkpoint: false,
-                        });                        
+                        });
                         commands.entity(entity).despawn_recursive();
                         ui_state.modal_id = None;
                     }
