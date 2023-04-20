@@ -41,7 +41,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                     size: Size::new(item_meta.size.0, item_meta.size.1),
                     ..default()
                 },
-                background_color: Color::BLACK.with_a(0.5).into(),
+                // background_color: Color::BLACK.with_a(0.5).into(),
                 ..default()
             },
             VeloNodeContainer { id: item_meta.id },
@@ -61,7 +61,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
         .with_children(|builder| {
             builder.spawn((
                 create_arrow_marker(50.0, 0., 0., 0.),
-                BorderColor(Color::BLACK),
+                BorderColor(Color::BLUE.with_a(0.5)),
                 ArrowConnect {
                     pos: ArrowConnectPos::Top,
                     id: item_meta.id,
@@ -69,7 +69,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
             ));
             builder.spawn((
                 create_arrow_marker(0., 0., 50., 0.),
-                BorderColor(Color::BLACK),
+                BorderColor(Color::BLUE.with_a(0.5)),
                 ArrowConnect {
                     pos: ArrowConnectPos::Left,
                     id: item_meta.id,
@@ -77,7 +77,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
             ));
             builder.spawn((
                 create_arrow_marker(50., 0., 100., 0.),
-                BorderColor(Color::BLACK),
+                BorderColor(Color::BLUE.with_a(0.5)),
                 ArrowConnect {
                     pos: ArrowConnectPos::Bottom,
                     id: item_meta.id,
@@ -85,7 +85,7 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
             ));
             builder.spawn((
                 create_arrow_marker(100., 0., 50., 0.),
-                BorderColor(Color::BLACK),
+                BorderColor(Color::BLUE.with_a(0.5)),
                 ArrowConnect {
                     pos: ArrowConnectPos::Right,
                     id: item_meta.id,
