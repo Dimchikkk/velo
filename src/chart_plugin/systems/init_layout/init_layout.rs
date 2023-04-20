@@ -8,7 +8,7 @@ use super::ui_helpers::{
     MainPanel, Menu, NewDoc, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
 };
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
-use crate::resources::{AppState};
+use crate::resources::AppState;
 use crate::{BlinkTimer, TextPos};
 
 #[path = "add_arrow.rs"]
@@ -75,20 +75,10 @@ pub fn init_layout(
             BottomPanel,
         ))
         .id();
-    let add_tab = add_menu_button(
-        &mut commands,
-        &asset_server,
-        "New Tab".to_string(),
-        AddTab,
-    );
+    let add_tab = add_menu_button(&mut commands, &asset_server, "New Tab".to_string(), AddTab);
     commands.entity(bottom_panel).add_child(add_tab);
 
-    let docs = add_list(
-        bottom_panel,
-        &mut commands,
-        &mut app_state,
-        &mut pkv,
-    );
+    let docs = add_list(bottom_panel, &mut commands, &mut app_state, &mut pkv);
 
     let root_ui = commands
         .spawn((
@@ -133,12 +123,7 @@ pub fn init_layout(
         "New Document".to_string(),
         NewDoc,
     );
-    let save_doc = add_menu_button(
-        &mut commands,
-        &asset_server,
-        "Save".to_string(),
-        SaveDoc,
-    );
+    let save_doc = add_menu_button(&mut commands, &asset_server, "Save".to_string(), SaveDoc);
     commands.entity(menu).add_child(save_doc);
     commands.entity(menu).add_child(new_doc);
 

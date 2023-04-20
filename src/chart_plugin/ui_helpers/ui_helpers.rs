@@ -38,7 +38,7 @@ pub fn add_rectangle_txt(text: String) -> TextBundle {
     let text_style = TextStyle {
         font_size: 18.0,
         color: Color::BLACK,
-         ..default()
+        ..default()
     };
     TextBundle::from_section(text, text_style).with_style(Style {
         position_type: PositionType::Relative,
@@ -194,10 +194,7 @@ pub fn get_sections(text: String) -> (Vec<TextSection>, Vec<bool>) {
     (sections, is_link)
 }
 
-pub fn create_rectangle_txt(
-    text: String,
-    max_size: Option<(Val, Val)>,
-) -> TextBundle {
+pub fn create_rectangle_txt(text: String, max_size: Option<(Val, Val)>) -> TextBundle {
     let text = Text {
         sections: get_sections(text).0,
         alignment: TextAlignment::Left,

@@ -8,7 +8,7 @@ use bevy::{
 
 use super::{
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
-    HighlightEvent, VeloNodeContainer, MainPanel,
+    HighlightEvent, MainPanel, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::canvas::arrow::events::CreateArrow;
@@ -156,9 +156,7 @@ pub fn load_json(
                         z_index: json_node.z_index,
                     },
                 );
-                commands
-                    .entity(main_panel_query.single())
-                    .add_child(entity);
+                commands.entity(main_panel_query.single()).add_child(entity);
             }
 
             let arrows = json["arrows"].as_array_mut().unwrap();
