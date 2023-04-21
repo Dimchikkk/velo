@@ -17,7 +17,18 @@ opt-level = 3
 opt-level = 'z'
 
 [dependencies]
-bevy = "0.10.1"
+bevy = { version = "0.10.1", default-features = false, features = [
+  "bevy_asset",
+  "bevy_core_pipeline",
+  "bevy_render",
+  "bevy_scene",
+  "bevy_sprite",
+  "bevy_text",
+  "bevy_ui",
+  "bevy_winit",
+  "png",
+  "x11"
+] }
 bevy_prototype_lyon = "0.8.0"
 base64 = "0.21.0"
 serde_json = "1.0.94"
