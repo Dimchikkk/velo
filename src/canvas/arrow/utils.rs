@@ -17,7 +17,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             ..default()
         },
         arrow_meta,
-        Stroke::new(Color::BLACK, 1.0),
+        Stroke::new(Color::BLACK, 1.5),
     ));
 }
 fn parallel_arrow_mid(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> (Vec2, Vec2) {
