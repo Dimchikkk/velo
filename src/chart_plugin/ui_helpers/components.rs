@@ -49,22 +49,12 @@ pub struct ScrollingList {
 }
 
 #[derive(Component)]
-pub struct SelectedTabTextInput {
-    pub id: ReflectableUuid,
-}
-
-#[derive(Component)]
 pub struct DocListItemContainer {
     pub id: ReflectableUuid,
 }
 
 #[derive(Component)]
 pub struct DocListItemButton {
-    pub id: ReflectableUuid,
-}
-
-#[derive(Component)]
-pub struct DocListItemText {
     pub id: ReflectableUuid,
 }
 
