@@ -10,7 +10,7 @@ use bevy::{
 
 use crate::utils::ReflectableUuid;
 
-use super::{DeleteDoc, DocListItemButton, DocListItemContainer, DocListItemText, GenericButton};
+use super::{DeleteDoc, DocListItemButton, DocListItemContainer, EditableText, GenericButton};
 
 pub fn add_list_item(commands: &mut Commands, id: ReflectableUuid, name: String) -> Entity {
     let root = commands
@@ -76,7 +76,7 @@ pub fn add_list_item(commands: &mut Commands, id: ReflectableUuid, name: String)
                 },
                 ..default()
             },
-            DocListItemText { id },
+            EditableText { id },
             Label,
         ))
         .id();
