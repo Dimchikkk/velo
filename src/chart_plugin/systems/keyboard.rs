@@ -234,10 +234,13 @@ pub fn insert_from_clipboard(
         for (mut text, editable_text) in &mut query.iter_mut() {
             if Some(editable_text.id) == state.entity_to_edit {
                 let mut str = "".to_string();
-                for section in text.sections.iter_mut() {
+                let mut text_copy = text.clone();
+                text_copy.sections.pop();
+                for section in text_copy.sections.iter_mut() {
                     str = format!("{}{}", str, section.value.clone());
                 }
                 text.sections = get_sections(format!("{}{}", str, clipboard_text)).0;
+                text.sections.last_mut().unwrap().value = " ".to_string();
             }
         }
     }
