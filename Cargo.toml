@@ -27,7 +27,7 @@ bevy = { version = "0.10.1", default-features = false, features = [
   "bevy_ui",
   "bevy_winit",
   "png",
-  "x11"
+  "x11",
 ] }
 bevy_prototype_lyon = "0.8.0"
 base64 = "0.21.0"
@@ -41,12 +41,16 @@ bevy_pkv = { git = "https://github.com/johanhelsing/bevy_pkv.git", default-featu
   "bevy",
   "rocksdb",
 ] }
+ehttp = "0.1.0"
+async-channel = "1.8"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 arboard = "3.2.0"
 open = "4.0.1"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
 
-[target.'cfg(target_arch="wasm32")'.dependencies]
+[target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.7"
 js-sys = "0.3.61"
+web-sys = { version = "0.3.61", default-features = false, features = ["Window", "Location"] }
+url = "2.3.1"
