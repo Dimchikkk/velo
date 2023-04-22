@@ -109,7 +109,6 @@ pub fn save_json(
     } else {
         app_state.current_document.unwrap()
     };
-
     if app_state.docs.contains_key(&doc_id) {
         app_state.current_document = Some(doc_id);
     } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
@@ -134,12 +133,22 @@ pub fn save_json(
                 if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
                     tab.checkpoints.pop_front();
                 }
+                if let Some(last) = tab.checkpoints.back() {
+                    if last == &json.to_string() {
+                        break;
+                    }
+                }
                 tab.checkpoints.push_back(json.to_string());
                 break;
             }
         } else if tab.is_active {
             if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
                 tab.checkpoints.pop_front();
+            }
+            if let Some(last) = tab.checkpoints.back() {
+                if last == &json.to_string() {
+                    break;
+                }
             }
             tab.checkpoints.push_back(json.to_string());
             break;
@@ -175,5 +184,11 @@ pub fn save_json(
             pkv.set("names", &names).unwrap();
         }
         pkv.set("last_saved", &doc_id).unwrap();
+    }
+
+    if let Some(path) = request.path.clone() {
+        let current_doc = app_state.docs.get(&doc_id).unwrap().clone();
+        std::fs::write(path, serde_json::to_string_pretty(&current_doc).unwrap())
+            .expect("Error saving current document to file")
     }
 }

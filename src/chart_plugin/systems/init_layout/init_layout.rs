@@ -7,6 +7,7 @@ use super::ui_helpers::{
     self, AddTab, BottomPanel, ButtonAction, LeftPanel, LeftPanelControls, LeftPanelExplorer,
     MainPanel, Menu, NewDoc, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
 };
+use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
 use crate::resources::AppState;
 use crate::{BlinkTimer, TextPos};
@@ -49,6 +50,13 @@ pub fn init_layout(
     asset_server: Res<AssetServer>,
     mut pkv: ResMut<PkvStore>,
 ) {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let (tx, rx) = async_channel::bounded(1);
+        commands.insert_resource(CommChannels { tx, rx });
+    }
+
+    let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
     commands.insert_resource(BlinkTimer {
         timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
     });
@@ -75,7 +83,7 @@ pub fn init_layout(
             BottomPanel,
         ))
         .id();
-    let add_tab = add_menu_button(&mut commands, &asset_server, "New Tab".to_string(), AddTab);
+    let add_tab = add_menu_button(&mut commands, "New Tab".to_string(), &icon_font, AddTab);
     commands.entity(bottom_panel).add_child(add_tab);
 
     let docs = add_list(bottom_panel, &mut commands, &mut app_state, &mut pkv);
@@ -119,13 +127,45 @@ pub fn init_layout(
         .id();
     let new_doc = add_menu_button(
         &mut commands,
-        &asset_server,
         "New Document".to_string(),
+        &icon_font,
         NewDoc,
     );
-    let save_doc = add_menu_button(&mut commands, &asset_server, "Save".to_string(), SaveDoc);
-    commands.entity(menu).add_child(save_doc);
+    let save_doc = add_menu_button(
+        &mut commands,
+        "Save Document".to_string(),
+        &icon_font,
+        SaveDoc,
+    );
+    #[cfg(not(target_arch = "wasm32"))]
+    let export_file = add_menu_button(
+        &mut commands,
+        "Export To File".to_string(),
+        &icon_font,
+        ExportToFile,
+    );
+    #[cfg(not(target_arch = "wasm32"))]
+    let import_file = add_menu_button(
+        &mut commands,
+        "Import From File".to_string(),
+        &icon_font,
+        ImportFromFile,
+    );
+    #[cfg(not(target_arch = "wasm32"))]
+    let import_url = add_menu_button(
+        &mut commands,
+        "Import From URL".to_string(),
+        &icon_font,
+        ImportFromUrl,
+    );
     commands.entity(menu).add_child(new_doc);
+    commands.entity(menu).add_child(save_doc);
+    #[cfg(not(target_arch = "wasm32"))]
+    commands.entity(menu).add_child(export_file);
+    #[cfg(not(target_arch = "wasm32"))]
+    commands.entity(menu).add_child(import_file);
+    #[cfg(not(target_arch = "wasm32"))]
+    commands.entity(menu).add_child(import_url);
 
     let main_bottom = commands
         .spawn(NodeBundle {
