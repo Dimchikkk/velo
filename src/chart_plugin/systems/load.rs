@@ -11,7 +11,7 @@ use super::{
     HighlightEvent, MainPanel, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::ArrowMeta;
-use crate::canvas::arrow::events::CreateArrow;
+use crate::canvas::arrow::events::CreateArrowEvent;
 use crate::components::Doc;
 use crate::resources::{AppState, LoadRequest};
 use crate::utils::ReflectableUuid;
@@ -37,7 +37,7 @@ pub fn load_json(
     mut ui_state: ResMut<UiState>,
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
-    mut create_arrow: EventWriter<CreateArrow>,
+    mut create_arrow: EventWriter<CreateArrowEvent>,
     mut selected_tabs_query: Query<Entity, With<TabContainer>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
@@ -45,7 +45,6 @@ pub fn load_json(
     main_panel_query: Query<Entity, With<MainPanel>>,
 ) {
     *ui_state = UiState::default();
-
     let bottom_panel = bottom_panel.single_mut();
 
     #[allow(unused)]
@@ -162,7 +161,7 @@ pub fn load_json(
             let arrows = json["arrows"].as_array_mut().unwrap();
             for arrow in arrows.iter() {
                 let arrow_meta: ArrowMeta = serde_json::from_value(arrow.clone()).unwrap();
-                create_arrow.send(CreateArrow {
+                create_arrow.send(CreateArrowEvent {
                     start: arrow_meta.start,
                     end: arrow_meta.end,
                     arrow_type: arrow_meta.arrow_type,

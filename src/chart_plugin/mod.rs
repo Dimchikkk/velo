@@ -1,3 +1,4 @@
+use async_channel::{Receiver, Sender};
 use bevy::{
     prelude::*,
     text::BreakLineOn,
@@ -6,11 +7,11 @@ use bevy::{
 use serde::{Deserialize, Serialize};
 
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos, ArrowType};
-use crate::canvas::arrow::events::{CreateArrow, RedrawArrow};
+use crate::canvas::arrow::events::{CreateArrowEvent, RedrawArrowEvent};
 use crate::resources::AppState;
 use crate::resources::LoadRequest;
 use crate::utils::ReflectableUuid;
-use std::time::Duration;
+use std::{time::Duration};
 use uuid::Uuid;
 #[path = "ui_helpers/ui_helpers.rs"]
 pub mod ui_helpers;
@@ -45,9 +46,15 @@ use doc_list::*;
 
 pub struct ChartPlugin;
 
-pub struct AddRect {
+pub struct AddRectEvent {
     pub node: JsonNode,
     pub image: Option<UiImage>,
+}
+
+#[derive(Resource, Clone)]
+pub struct CommChannels {
+    pub tx: Sender<String>,
+    pub rx: Receiver<String>,
 }
 
 pub struct HighlightEvent;
@@ -92,10 +99,10 @@ pub const MAX_SAVED_DOCS_IN_MEMORY: i32 = 7;
 #[derive(Resource, Default)]
 pub struct UiState {
     pub modal_id: Option<ReflectableUuid>,
-    pub arrow_type: ArrowType,
     pub entity_to_edit: Option<ReflectableUuid>,
     pub tab_to_edit: Option<ReflectableUuid>,
     pub doc_to_edit: Option<ReflectableUuid>,
+    pub arrow_type: ArrowType,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
@@ -121,12 +128,14 @@ impl Plugin for ChartPlugin {
 
         app.register_type::<BreakLineOn>();
 
-        app.add_event::<AddRect>();
-        app.add_event::<CreateArrow>();
-        app.add_event::<RedrawArrow>();
+        app.add_event::<AddRectEvent>();
+        app.add_event::<CreateArrowEvent>();
+        app.add_event::<RedrawArrowEvent>();
         app.add_event::<HighlightEvent>();
 
         app.add_startup_system(init_layout);
+        #[cfg(target_arch = "wasm32")]
+        app.add_startup_system(load_from_url);
 
         app.add_systems((
             rec_button_handlers,
@@ -173,6 +182,10 @@ impl Plugin for ChartPlugin {
             button_generic_handler,
             selected_tab_handler,
             higlight_event_handler,
+            export_to_file,
+            import_from_file,
+            import_from_url,
+            load_doc_handler,
         ));
     }
 }
@@ -246,7 +259,7 @@ fn update_rectangle_position(
     mut node_position: Query<(&mut Style, &VeloNodeContainer), With<VeloNodeContainer>>,
     state: Res<UiState>,
     mut query: Query<(&Style, &LeftPanel), Without<VeloNodeContainer>>,
-    mut events: EventWriter<RedrawArrow>,
+    mut events: EventWriter<RedrawArrowEvent>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let primary_window = windows.single();
@@ -261,7 +274,7 @@ fn update_rectangle_position(
                 if let Val::Px(element_height) = style.size.height {
                     style.position.bottom = Val::Px(event.position.y - element_height / 2.);
                 }
-                events.send(RedrawArrow { id: top.id });
+                events.send(RedrawArrowEvent { id: top.id });
             }
         }
     }
@@ -269,7 +282,7 @@ fn update_rectangle_position(
 
 fn create_new_rectangle(
     mut commands: Commands,
-    mut events: EventReader<AddRect>,
+    mut events: EventReader<AddRectEvent>,
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
 ) {
@@ -341,6 +354,33 @@ fn higlight_event_handler(
                 *delete_tab_visibility = Visibility::Hidden;
                 bg_color.0 = Color::rgba(0.8, 0.8, 0.8, 0.5)
             }
+        }
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn load_from_url(mut commands: Commands) {
+    let (tx, rx) = async_channel::bounded(1);
+    commands.insert_resource(CommChannels { tx: tx.clone(), rx });
+    let href = web_sys::window().unwrap().location().href().unwrap();
+    let url = url::Url::parse(href.as_str()).unwrap();
+    let query_pairs: std::collections::HashMap<_, _> = url.query_pairs().into_owned().collect();
+    if let Some(url) = query_pairs.get("document") {
+        let pool = bevy::tasks::IoTaskPool::get();
+        let mut finder = linkify::LinkFinder::new();
+        finder.kinds(&[linkify::LinkKind::Url]);
+        let links: Vec<_> = finder.links(url).collect();
+        if links.len() == 1 {
+            let url = links.first().unwrap().as_str().to_owned();
+            let cc = tx.clone();
+            let task = pool.spawn(async move {
+                let request = ehttp::Request::get(url);
+                ehttp::fetch(request, move |result| {
+                    let json_string = result.unwrap().text().unwrap();
+                    cc.try_send(json_string).unwrap();
+                });
+            });
+            task.detach();
         }
     }
 }

@@ -2,7 +2,10 @@ use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
 
-use super::{add_rectangle_txt, ModalAction, ModalCancel, ModalConfirm, ModalTop};
+use super::{
+    add_rectangle_txt, create_rectangle_txt, EditableText, ModalAction, ModalCancel, ModalConfirm,
+    ModalTop,
+};
 use crate::utils::ReflectableUuid;
 pub fn spawn_modal(
     commands: &mut Commands,
@@ -12,6 +15,12 @@ pub fn spawn_modal(
 ) -> Entity {
     let width = 350.;
     let height = 250.;
+    let default_value = match modal_action {
+        ModalAction::SaveToFile => "./velo.json".to_string(),
+        ModalAction::LoadFromFile => "./velo.json".to_string(),
+        ModalAction::LoadFromUrl => "https://<path-to-velo.json>".to_string(),
+        _ => "".to_string(),
+    };
     let top = commands
         .spawn((
             NodeBundle {
@@ -93,45 +102,105 @@ pub fn spawn_modal(
                 });
         })
         .id();
-    let delete_tab = commands
-        .spawn(NodeBundle {
-            style: Style {
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                size: Size {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(50.),
-                },
-                ..default()
-            },
-            ..default()
-        })
-        .with_children(|builder: &mut ChildBuilder| {
-            builder
-                .spawn(ButtonBundle {
+
+    let modal_dynamic = match modal_action {
+        ModalAction::SaveToFile | ModalAction::LoadFromFile | ModalAction::LoadFromUrl => {
+            commands
+                .spawn(NodeBundle {
                     style: Style {
-                        justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
-                        // overflow: Overflow::Hidden,
+                        justify_content: JustifyContent::SpaceAround,
+                        size: Size {
+                            width: Val::Percent(100.),
+                            height: Val::Percent(50.),
+                        },
                         ..default()
                     },
                     ..default()
                 })
-                .with_children(|builder| {
-                    builder.spawn(add_rectangle_txt(format!(
-                        "Are you sure you want to {}?",
-                        modal_action
-                    )));
-                });
-        })
-        .id();
-    let delete_document = delete_tab;
-    let modal_dynamic = match modal_action {
-        ModalAction::SaveToFile => todo!(),
-        ModalAction::LoadFromFile => todo!(),
-        ModalAction::LoadFromUrl => todo!(),
-        ModalAction::DeleteDocument => delete_document,
-        ModalAction::DeleteTab => delete_tab,
+                .with_children(|builder: &mut ChildBuilder| {
+                    builder
+                        .spawn(ButtonBundle {
+                            style: Style {
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                margin: UiRect {
+                                    left: Val::Px(20.),
+                                    ..default()
+                                },
+                                size: Size {
+                                    width: Val::Px(50.),
+                                    height: Val::Percent(30.),
+                                },
+                                ..default()
+                            },
+                            ..default()
+                        })
+                        .with_children(|builder| {
+                            builder.spawn(add_rectangle_txt(modal_action.to_string()));
+                        });
+                    builder
+                        .spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    justify_content: JustifyContent::Start,
+                                    align_items: AlignItems::Center,
+                                    border: UiRect::all(Val::Px(1.)),
+                                    size: Size {
+                                        width: Val::Px(220.),
+                                        height: Val::Percent(30.),
+                                    },
+                                    padding: UiRect::all(Val::Px(5.)),
+                                    // overflow: Overflow::Hidden,
+                                    ..default()
+                                },
+                                ..default()
+                            },
+                            BorderColor(Color::BLACK),
+                        ))
+                        .with_children(|builder| {
+                            builder.spawn((
+                                create_rectangle_txt(default_value, None),
+                                EditableText { id },
+                            ));
+                        });
+                })
+                .id()
+        }
+        ModalAction::DeleteDocument | ModalAction::DeleteTab => {
+            commands
+                .spawn(NodeBundle {
+                    style: Style {
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        size: Size {
+                            width: Val::Percent(100.),
+                            height: Val::Percent(50.),
+                        },
+                        ..default()
+                    },
+                    ..default()
+                })
+                .with_children(|builder: &mut ChildBuilder| {
+                    builder
+                        .spawn(ButtonBundle {
+                            style: Style {
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                // overflow: Overflow::Hidden,
+                                ..default()
+                            },
+                            ..default()
+                        })
+                        .with_children(|builder| {
+                            builder.spawn(add_rectangle_txt(format!(
+                                "Are you sure you want to {}?",
+                                modal_action
+                            )));
+                        });
+                })
+                .id()
+        }
     };
     let modal = commands
         .spawn((

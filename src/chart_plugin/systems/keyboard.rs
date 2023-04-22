@@ -10,7 +10,7 @@ use image::*;
 use std::convert::TryInto;
 use uuid::Uuid;
 
-use crate::{AddRect, BlinkTimer, UiState};
+use crate::{AddRectEvent, BlinkTimer, UiState};
 
 use super::ui_helpers::{get_sections, EditableText};
 use crate::resources::{AppState, LoadRequest, SaveRequest};
@@ -18,10 +18,10 @@ use crate::resources::{AppState, LoadRequest, SaveRequest};
 pub fn keyboard_input_system(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
-    app_state: Res<AppState>,
+    mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     mut char_evr: EventReader<ReceivedCharacter>,
-    mut events: EventWriter<AddRect>,
+    mut events: EventWriter<AddRectEvent>,
     input: Res<Input<KeyCode>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut deleting: Local<bool>,
@@ -47,11 +47,13 @@ pub fn keyboard_input_system(
         commands.insert_resource(SaveRequest {
             doc_id: Some(app_state.current_document.unwrap()),
             tab_id: None,
+            path: None,
         });
     } else if command && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveRequest {
             doc_id: None,
             tab_id: None,
+            path: None,
         });
     } else if command && input.just_pressed(KeyCode::L) {
         commands.insert_resource(LoadRequest {
@@ -62,6 +64,7 @@ pub fn keyboard_input_system(
         if ui_state.entity_to_edit.is_some()
             || ui_state.doc_to_edit.is_some()
             || ui_state.tab_to_edit.is_some()
+            || ui_state.modal_id.is_some()
         {
             blink_timer.timer.unpause();
         } else {
@@ -82,9 +85,13 @@ pub fn keyboard_input_system(
                     continue;
                 }
             }
-            if Some(editable_text.id) == ui_state.entity_to_edit
-                || Some(editable_text.id) == ui_state.tab_to_edit
-                || Some(editable_text.id) == ui_state.doc_to_edit
+            if vec![
+                ui_state.entity_to_edit,
+                ui_state.tab_to_edit,
+                ui_state.doc_to_edit,
+                ui_state.modal_id,
+            ]
+            .contains(&Some(editable_text.id))
             {
                 let mut str = "".to_string();
                 let mut text_copy = text.clone();
@@ -100,7 +107,7 @@ pub fn keyboard_input_system(
                 };
                 *deleting = is_del_mode;
                 if str != current_str {
-                    text.sections = get_sections(str).0;
+                    text.sections = get_sections(str.clone()).0;
                 }
                 if blink_timer.timer.finished() {
                     text.sections.last_mut().unwrap().value =
@@ -109,6 +116,18 @@ pub fn keyboard_input_system(
                         } else {
                             "|".to_string()
                         };
+                }
+                if let Some(doc_id) = ui_state.doc_to_edit {
+                    let mut doc = app_state.docs.get_mut(&doc_id).unwrap();
+                    doc.name = str.clone();
+                }
+                if let Some(tab_id) = ui_state.tab_to_edit {
+                    if let Some(doc_id) = app_state.current_document {
+                        let doc = app_state.docs.get_mut(&doc_id).unwrap();
+                        if let Some(tab) = doc.tabs.iter_mut().find(|x| x.id == tab_id) {
+                            tab.name = str.clone();
+                        }
+                    }
                 }
             } else {
                 text.sections.last_mut().unwrap().value = " ".to_string();
@@ -145,7 +164,7 @@ pub fn insert_from_clipboard(
     images: &mut ResMut<Assets<Image>>,
     state: &mut ResMut<UiState>,
     query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
-    events: &mut EventWriter<AddRect>,
+    events: &mut EventWriter<AddRectEvent>,
     scale_factor: f64,
 ) {
     use crate::JsonNode;
@@ -191,7 +210,7 @@ pub fn insert_from_clipboard(
             TextureFormat::Rgba8UnormSrgb,
         );
         let image = images.add(resized_image);
-        events.send(AddRect {
+        events.send(AddRectEvent {
             node: JsonNode {
                 id: Uuid::new_v4(),
                 node_type: crate::NodeType::Rect,
