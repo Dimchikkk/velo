@@ -23,6 +23,7 @@ pub fn list_item_click(
                     commands.insert_resource(SaveRequest {
                         doc_id: Some(state.current_document.unwrap()),
                         tab_id: None,
+                        path: None,
                     });
                     state.current_document = Some(doc_list_item.id);
                     commands.insert_resource(LoadRequest {

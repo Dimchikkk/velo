@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use uuid::Uuid;
 
-use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, SelectedTab};
+use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
 use crate::components::Tab;
 use crate::resources::{AppState, LoadRequest, SaveRequest};
@@ -15,8 +15,8 @@ use crate::{get_timestamp, UiState};
 pub fn selected_tab_handler(
     mut commands: Commands,
     mut interaction_query: Query<
-        (&Interaction, &SelectedTab),
-        (Changed<Interaction>, With<SelectedTab>),
+        (&Interaction, &TabButton),
+        (Changed<Interaction>, With<TabButton>),
     >,
     mut state: ResMut<AppState>,
 ) {
@@ -38,6 +38,7 @@ pub fn selected_tab_handler(
                         commands.insert_resource(SaveRequest {
                             doc_id: None,
                             tab_id: Some(tab.id),
+                            path: None,
                         });
                     }
                 }
@@ -78,6 +79,7 @@ pub fn add_tab_handler(
                         commands.insert_resource(SaveRequest {
                             doc_id: None,
                             tab_id: Some(tab.id),
+                            path: None,
                         });
                     }
                     tab.is_active = false;
@@ -102,8 +104,8 @@ pub fn add_tab_handler(
 
 pub fn rename_tab_handler(
     mut interaction_query: Query<
-        (&Interaction, &SelectedTab),
-        (Changed<Interaction>, With<SelectedTab>),
+        (&Interaction, &TabButton),
+        (Changed<Interaction>, With<TabButton>),
     >,
     mut ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,

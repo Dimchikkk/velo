@@ -31,10 +31,24 @@ pub struct DocList;
 pub struct SaveDoc;
 
 #[derive(Component)]
+pub struct ExportToFile;
+
+#[derive(Component)]
+pub struct ImportFromFile;
+
+#[derive(Component)]
+pub struct ImportFromUrl;
+
+#[derive(Component)]
 pub struct DeleteDoc;
 
 #[derive(Component)]
-pub struct SelectedTab {
+pub struct TabButton {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component)]
+pub struct TabText {
     pub id: ReflectableUuid,
 }
 
@@ -155,9 +169,9 @@ impl std::fmt::Display for ModalAction {
         match self {
             ModalAction::DeleteDocument => write!(f, "delete document"),
             ModalAction::DeleteTab => write!(f, "delete tab"),
-            ModalAction::LoadFromFile => write!(f, "load from file"),
-            ModalAction::LoadFromUrl => write!(f, "load from url"),
-            ModalAction::SaveToFile => write!(f, "save to file"),
+            ModalAction::LoadFromFile => write!(f, "Load from file:"),
+            ModalAction::LoadFromUrl => write!(f, "Load from URL:"),
+            ModalAction::SaveToFile => write!(f, "Save to file:"),
         }
     }
 }

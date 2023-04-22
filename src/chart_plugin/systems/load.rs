@@ -11,13 +11,12 @@ use super::{
     HighlightEvent, MainPanel, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::ArrowMeta;
-use crate::canvas::arrow::events::CreateArrow;
+use crate::canvas::arrow::events::CreateArrowEvent;
 use crate::components::Doc;
 use crate::resources::{AppState, LoadRequest};
 use crate::utils::ReflectableUuid;
 use crate::{JsonNode, UiState, MAX_SAVED_DOCS_IN_MEMORY};
 use bevy_pkv::PkvStore;
-#[cfg(not(target_arch = "wasm32"))]
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
@@ -37,7 +36,7 @@ pub fn load_json(
     mut ui_state: ResMut<UiState>,
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
-    mut create_arrow: EventWriter<CreateArrow>,
+    mut create_arrow: EventWriter<CreateArrowEvent>,
     mut selected_tabs_query: Query<Entity, With<TabContainer>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
@@ -45,7 +44,6 @@ pub fn load_json(
     main_panel_query: Query<Entity, With<MainPanel>>,
 ) {
     *ui_state = UiState::default();
-
     let bottom_panel = bottom_panel.single_mut();
 
     #[allow(unused)]
@@ -118,26 +116,21 @@ pub fn load_json(
                         let image_bytes = general_purpose::STANDARD
                             .decode(image.as_str().unwrap().as_bytes())
                             .unwrap();
-                        #[cfg(not(target_arch = "wasm32"))]
-                        {
-                            let img = load_from_memory_with_format(&image_bytes, ImageFormat::Png)
-                                .unwrap();
-                            let size: Extent3d = Extent3d {
-                                width: img.width(),
-                                height: img.height(),
-                                ..Default::default()
-                            };
-                            let image = Image::new(
-                                size,
-                                TextureDimension::D2,
-                                img.into_bytes(),
-                                TextureFormat::Rgba8UnormSrgb,
-                            );
-                            let image_handle = res_images.add(image);
-                            Some(image_handle.into())
-                        }
-                        #[cfg(target_arch = "wasm32")]
-                        None
+                        let img =
+                            load_from_memory_with_format(&image_bytes, ImageFormat::Png).unwrap();
+                        let size: Extent3d = Extent3d {
+                            width: img.width(),
+                            height: img.height(),
+                            ..Default::default()
+                        };
+                        let image = Image::new(
+                            size,
+                            TextureDimension::D2,
+                            img.into_bytes(),
+                            TextureFormat::Rgba8UnormSrgb,
+                        );
+                        let image_handle = res_images.add(image);
+                        Some(image_handle.into())
                     }
                     None => None,
                 };
@@ -162,7 +155,7 @@ pub fn load_json(
             let arrows = json["arrows"].as_array_mut().unwrap();
             for arrow in arrows.iter() {
                 let arrow_meta: ArrowMeta = serde_json::from_value(arrow.clone()).unwrap();
-                create_arrow.send(CreateArrow {
+                create_arrow.send(CreateArrowEvent {
                     start: arrow_meta.start,
                     end: arrow_meta.end,
                     arrow_type: arrow_meta.arrow_type,

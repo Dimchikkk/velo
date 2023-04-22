@@ -2,6 +2,7 @@ use crate::components::Doc;
 use crate::utils::ReflectableUuid;
 use bevy::prelude::*;
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 #[derive(Resource, Default)]
 pub struct AppState {
@@ -13,6 +14,7 @@ pub struct AppState {
 pub struct SaveRequest {
     pub doc_id: Option<ReflectableUuid>, // None means current doc
     pub tab_id: Option<ReflectableUuid>, // None means save to active tab
+    pub path: Option<PathBuf>,           // Save current document to file
 }
 
 #[derive(Resource, Debug)]
