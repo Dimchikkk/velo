@@ -17,7 +17,6 @@ use crate::resources::{AppState, LoadRequest};
 use crate::utils::ReflectableUuid;
 use crate::{JsonNode, UiState, MAX_SAVED_DOCS_IN_MEMORY};
 use bevy_pkv::PkvStore;
-#[cfg(not(target_arch = "wasm32"))]
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
@@ -117,26 +116,21 @@ pub fn load_json(
                         let image_bytes = general_purpose::STANDARD
                             .decode(image.as_str().unwrap().as_bytes())
                             .unwrap();
-                        #[cfg(not(target_arch = "wasm32"))]
-                        {
-                            let img = load_from_memory_with_format(&image_bytes, ImageFormat::Png)
-                                .unwrap();
-                            let size: Extent3d = Extent3d {
-                                width: img.width(),
-                                height: img.height(),
-                                ..Default::default()
-                            };
-                            let image = Image::new(
-                                size,
-                                TextureDimension::D2,
-                                img.into_bytes(),
-                                TextureFormat::Rgba8UnormSrgb,
-                            );
-                            let image_handle = res_images.add(image);
-                            Some(image_handle.into())
-                        }
-                        #[cfg(target_arch = "wasm32")]
-                        None
+                        let img =
+                            load_from_memory_with_format(&image_bytes, ImageFormat::Png).unwrap();
+                        let size: Extent3d = Extent3d {
+                            width: img.width(),
+                            height: img.height(),
+                            ..Default::default()
+                        };
+                        let image = Image::new(
+                            size,
+                            TextureDimension::D2,
+                            img.into_bytes(),
+                            TextureFormat::Rgba8UnormSrgb,
+                        );
+                        let image_handle = res_images.add(image);
+                        Some(image_handle.into())
                     }
                     None => None,
                 };

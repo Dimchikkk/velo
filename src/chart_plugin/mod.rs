@@ -11,7 +11,7 @@ use crate::canvas::arrow::events::{CreateArrowEvent, RedrawArrowEvent};
 use crate::resources::AppState;
 use crate::resources::LoadRequest;
 use crate::utils::ReflectableUuid;
-use std::{time::Duration};
+use std::time::Duration;
 use uuid::Uuid;
 #[path = "ui_helpers/ui_helpers.rs"]
 pub mod ui_helpers;
