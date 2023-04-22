@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::utils::ReflectableUuid;
 
-use super::{DeleteTab, EditableText, GenericButton, SelectedTab, TabContainer};
+use super::{DeleteTab, EditableText, GenericButton, TabButton, TabContainer};
 
 pub fn add_tab(commands: &mut Commands, name: String, id: ReflectableUuid) -> Entity {
     let root = commands
@@ -33,7 +33,7 @@ pub fn add_tab(commands: &mut Commands, name: String, id: ReflectableUuid) -> En
                 ..default()
             },
             GenericButton,
-            SelectedTab { id },
+            TabButton { id },
         ))
         .id();
     let tab_label = commands

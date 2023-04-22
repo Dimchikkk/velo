@@ -5,14 +5,14 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::{get_timestamp, AddRect, JsonNode, JsonNodeText, NodeType, UiState};
+use crate::{get_timestamp, AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
     DocList, DocListItemButton, EditableText, GenericButton, NewDoc, SaveDoc, TextManipulation,
     TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
-use super::{MainPanel, VeloNodeContainer};
+use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadRequest, SaveRequest};
@@ -20,7 +20,7 @@ use crate::utils::ReflectableUuid;
 
 pub fn rec_button_handlers(
     mut commands: Commands,
-    mut events: EventWriter<AddRect>,
+    mut events: EventWriter<AddRectEvent>,
     mut interaction_query: Query<
         (&Interaction, &ButtonAction),
         (Changed<Interaction>, With<ButtonAction>),
@@ -35,7 +35,7 @@ pub fn rec_button_handlers(
         match *interaction {
             Interaction::Clicked => match button_action.button_type {
                 super::ui_helpers::ButtonTypes::Add => {
-                    events.send(AddRect {
+                    events.send(AddRectEvent {
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Rect,
@@ -194,7 +194,15 @@ pub fn text_manipulation(
 
                 match text_manipulation.action_type {
                     TextManipulation::Cut => {
-                        if let Some(id) = ui_state.entity_to_edit {
+                        if let Some(id) = vec![
+                            ui_state.entity_to_edit,
+                            ui_state.tab_to_edit,
+                            ui_state.doc_to_edit,
+                            ui_state.modal_id,
+                        ]
+                        .into_iter()
+                        .find_map(|x| x)
+                        {
                             for (mut text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
@@ -221,8 +229,6 @@ pub fn text_manipulation(
                                             },
                                         },
                                     ];
-                                    #[cfg(not(target_arch = "wasm32"))]
-                                    clipboard.set_text(str).unwrap()
                                 }
                             }
                         }
@@ -232,7 +238,14 @@ pub fn text_manipulation(
                         #[cfg(not(target_arch = "wasm32"))]
                         if let Ok(clipboard_text) = clipboard.get_text() {
                             for (mut text, editable_text) in editable_text.iter_mut() {
-                                if Some(editable_text.id) == ui_state.entity_to_edit {
+                                if vec![
+                                    ui_state.entity_to_edit,
+                                    ui_state.tab_to_edit,
+                                    ui_state.doc_to_edit,
+                                    ui_state.modal_id,
+                                ]
+                                .contains(&Some(editable_text.id))
+                                {
                                     let mut str = "".to_string();
                                     let mut text_sections = text.sections.clone();
                                     text_sections.pop();
@@ -246,7 +259,15 @@ pub fn text_manipulation(
                         }
                     }
                     TextManipulation::Copy => {
-                        if let Some(id) = ui_state.entity_to_edit {
+                        if let Some(id) = vec![
+                            ui_state.entity_to_edit,
+                            ui_state.tab_to_edit,
+                            ui_state.doc_to_edit,
+                            ui_state.modal_id,
+                        ]
+                        .into_iter()
+                        .find_map(|x| x)
+                        {
                             for (text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
@@ -262,7 +283,15 @@ pub fn text_manipulation(
                         }
                     }
                     TextManipulation::OpenAllLinks => {
-                        if let Some(id) = ui_state.entity_to_edit {
+                        if let Some(id) = vec![
+                            ui_state.entity_to_edit,
+                            ui_state.tab_to_edit,
+                            ui_state.doc_to_edit,
+                            ui_state.modal_id,
+                        ]
+                        .into_iter()
+                        .find_map(|x| x)
+                        {
                             for (text, node) in editable_text.iter_mut() {
                                 if node.id == id {
                                     let mut str = "".to_string();
@@ -329,6 +358,7 @@ pub fn new_doc_handler(
                 commands.insert_resource(SaveRequest {
                     doc_id: Some(app_state.current_document.unwrap()),
                     tab_id: None,
+                    path: None,
                 });
                 app_state.current_document = Some(doc_id);
                 commands.insert_resource(LoadRequest {
@@ -417,7 +447,79 @@ pub fn save_doc_handler(
                 commands.insert_resource(SaveRequest {
                     doc_id: Some(state.current_document.unwrap()),
                     tab_id: None,
+                    path: None,
                 });
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+pub fn export_to_file(
+    mut commands: Commands,
+    mut query: Query<&Interaction, (Changed<Interaction>, With<ExportToFile>)>,
+    mut ui_state: ResMut<UiState>,
+    main_panel_query: Query<Entity, With<MainPanel>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+) {
+    let window = windows.single();
+    for interaction in &mut query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                let id = ReflectableUuid(Uuid::new_v4());
+                *ui_state = UiState::default();
+                ui_state.modal_id = Some(id);
+                let entity = spawn_modal(&mut commands, window, id, super::ModalAction::SaveToFile);
+                commands.entity(main_panel_query.single()).add_child(entity);
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+pub fn import_from_file(
+    mut commands: Commands,
+    mut query: Query<&Interaction, (Changed<Interaction>, With<ImportFromFile>)>,
+    mut ui_state: ResMut<UiState>,
+    main_panel_query: Query<Entity, With<MainPanel>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+) {
+    let window = windows.single();
+    for interaction in &mut query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                let id = ReflectableUuid(Uuid::new_v4());
+                *ui_state = UiState::default();
+                ui_state.modal_id = Some(id);
+                let entity =
+                    spawn_modal(&mut commands, window, id, super::ModalAction::LoadFromFile);
+                commands.entity(main_panel_query.single()).add_child(entity);
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+pub fn import_from_url(
+    mut commands: Commands,
+    mut query: Query<&Interaction, (Changed<Interaction>, With<ImportFromUrl>)>,
+    mut ui_state: ResMut<UiState>,
+    main_panel_query: Query<Entity, With<MainPanel>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+) {
+    let window = windows.single();
+    for interaction in &mut query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                let id = ReflectableUuid(Uuid::new_v4());
+                *ui_state = UiState::default();
+                ui_state.modal_id = Some(id);
+                let entity =
+                    spawn_modal(&mut commands, window, id, super::ModalAction::LoadFromUrl);
+                commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}
             Interaction::None => {}
