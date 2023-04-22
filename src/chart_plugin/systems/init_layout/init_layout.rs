@@ -326,7 +326,7 @@ pub fn init_layout(
         Color::rgb(251. / 255., 232. / 255., 166. / 255.),
     );
     let color2 = add_color(&mut commands, Color::WHITE);
-    let color3 = add_color(&mut commands, Color::RED);
+    let color3 = add_color(&mut commands, Color::ORANGE_RED);
     let color4 = add_color(&mut commands, Color::GREEN);
     let color5 = add_color(&mut commands, Color::GRAY);
 

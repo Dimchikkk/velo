@@ -63,7 +63,7 @@ pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
         (JustifyContent::FlexEnd, AlignItems::FlexEnd) => TextPos::BottomRight,
         (JustifyContent::FlexStart, AlignItems::FlexEnd) => TextPos::BottomLeft,
         (JustifyContent::Center, AlignItems::Center) => TextPos::Center,
-        _ => TextPos::Center,
+        _ => panic!("Invalid style! {:?}", style),
     }
 }
 
@@ -201,12 +201,7 @@ pub fn create_rectangle_txt(text: String, max_size: Option<(Val, Val)>) -> TextB
         linebreak_behaviour: BreakLineOn::WordBoundary,
     };
     let mut text_bundle_style = Style {
-        padding: UiRect {
-            left: Val::Px(5.),
-            right: Val::Px(5.),
-            top: Val::Px(5.),
-            bottom: Val::Px(5.),
-        },
+        padding: UiRect::all(Val::Px(10.)),
         ..default()
     };
     if let Some((x, y)) = max_size {
