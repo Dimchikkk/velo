@@ -4,7 +4,7 @@
 
 ** Demo
 
-This app is primarily designed for native desktop platforms, and its WebAssembly (wasm) target has a limited feature set that's best suited for quick document sharing and editing, open on Chrome Desktop to get the full experience:
+This app is primarily designed for native desktop platforms, and its WebAssembly (wasm) target has a limited feature set. wasm target is best suited for quick document sharing and editing, currently only landscape mode is supported (tested on Chrome):
 
 [[https://staffengineer.github.io/velo][https://staffengineer.github.io/velo]]
 
