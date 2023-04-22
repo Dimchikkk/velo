@@ -2,7 +2,6 @@ use base64::{engine::general_purpose, Engine};
 use bevy::prelude::*;
 
 use bevy_pkv::PkvStore;
-#[cfg(not(target_arch = "wasm32"))]
 use image::*;
 
 use serde_json::json;
@@ -39,8 +38,9 @@ pub fn save_json(
             &Children,
             &ZIndex,
             &Parent,
+            &Style,
         ),
-        With<VeloNode>,
+        (With<VeloNode>, Without<VeloNodeContainer>),
     >,
     arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
     request: Res<SaveRequest>,
@@ -54,11 +54,10 @@ pub fn save_json(
         "arrows": [],
     });
     let json_images = json["images"].as_object_mut().unwrap();
-    for (rect, image, _, _, _, _) in rec_query.iter() {
+    for (rect, image, _, _, _, _, _) in rec_query.iter() {
         if let Some(image) = images.get(&image.texture) {
             if let Ok(img) = image.clone().try_into_dynamic() {
                 let mut image_data: Vec<u8> = Vec::new();
-                #[cfg(not(target_arch = "wasm32"))]
                 img.write_to(&mut Cursor::new(&mut image_data), ImageOutputFormat::Png)
                     .unwrap();
                 let res_base64 = general_purpose::STANDARD.encode(image_data);
@@ -68,10 +67,15 @@ pub fn save_json(
     }
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
-    for (rect, _, bg_color, children, z_index, parent) in rec_query.iter() {
+    for (rect, _, bg_color, children, z_index, parent, test_pos_style) in rec_query.iter() {
         let text = text_query.get(children[children.len() - 1]).unwrap();
-        let text = text.sections[0].value.clone();
-        let style = rec_container_query.get(parent.get()).unwrap();
+        let mut str = "".to_string();
+        let mut text_copy = text.clone();
+        text_copy.sections.pop();
+        for section in text_copy.sections.iter() {
+            str = format!("{}{}", str, section.value.clone());
+        }
+        let style: &Style = rec_container_query.get(parent.get()).unwrap();
         let left = style.position.left;
         let bottom = style.position.bottom;
         let size = style.size;
@@ -89,8 +93,8 @@ pub fn save_json(
             height: size.height,
             bg_color,
             text: JsonNodeText {
-                text,
-                pos: style_to_pos((style.justify_content, style.align_items)),
+                text: str,
+                pos: style_to_pos((test_pos_style.justify_content, test_pos_style.align_items)),
             },
             z_index,
             tags: vec![],
@@ -109,7 +113,6 @@ pub fn save_json(
     } else {
         app_state.current_document.unwrap()
     };
-
     if app_state.docs.contains_key(&doc_id) {
         app_state.current_document = Some(doc_id);
     } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
@@ -134,12 +137,22 @@ pub fn save_json(
                 if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
                     tab.checkpoints.pop_front();
                 }
+                if let Some(last) = tab.checkpoints.back() {
+                    if last == &json.to_string() {
+                        break;
+                    }
+                }
                 tab.checkpoints.push_back(json.to_string());
                 break;
             }
         } else if tab.is_active {
             if (tab.checkpoints.len() as i32) > MAX_CHECKPOINTS {
                 tab.checkpoints.pop_front();
+            }
+            if let Some(last) = tab.checkpoints.back() {
+                if last == &json.to_string() {
+                    break;
+                }
             }
             tab.checkpoints.push_back(json.to_string());
             break;
@@ -175,5 +188,11 @@ pub fn save_json(
             pkv.set("names", &names).unwrap();
         }
         pkv.set("last_saved", &doc_id).unwrap();
+    }
+
+    if let Some(path) = request.path.clone() {
+        let current_doc = app_state.docs.get(&doc_id).unwrap().clone();
+        std::fs::write(path, serde_json::to_string_pretty(&current_doc).unwrap())
+            .expect("Error saving current document to file")
     }
 }

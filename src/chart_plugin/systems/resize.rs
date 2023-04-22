@@ -1,6 +1,6 @@
 use super::{
     ui_helpers::{EditableText, ResizeMarker},
-    RedrawArrow, VeloNode, VeloNodeContainer,
+    RedrawArrowEvent, VeloNode, VeloNodeContainer,
 };
 use crate::UiState;
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
@@ -50,13 +50,13 @@ pub fn resize_entity_end(
         (&EditableText, &mut Style),
         (With<EditableText>, Without<VeloNodeContainer>),
     >,
-    mut events: EventWriter<RedrawArrow>,
+    mut events: EventWriter<RedrawArrowEvent>,
 ) {
     for event in mouse_motion_events.iter() {
         if let Some((id, resize_marker)) = state.entity_to_resize {
             for (rectangle, mut button_style) in &mut rectangle_query {
                 if id == rectangle.id {
-                    events.send(RedrawArrow { id });
+                    events.send(RedrawArrowEvent { id });
                     #[allow(unused)]
                     let mut delta = event.delta;
                     #[cfg(target_arch = "wasm32")]

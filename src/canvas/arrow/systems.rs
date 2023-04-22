@@ -3,7 +3,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 // use super::utils::{build_arrow, create_arrow};
 use super::components::{ArrowConnect, ArrowMeta};
 // use crate::states::{AppState, MainCamera, RedrawArrow};
-use super::events::{CreateArrow, RedrawArrow};
+use super::events::{CreateArrowEvent, RedrawArrowEvent};
 use super::utils::{build_arrow, create_arrow, get_pos};
 use crate::chart_plugin::UiState;
 use crate::components::MainCamera;
@@ -15,7 +15,7 @@ pub fn create_arrow_start(
         (Changed<Interaction>, With<ArrowConnect>),
     >,
     mut state: ResMut<UiState>,
-    mut create_arrow: EventWriter<CreateArrow>,
+    mut create_arrow: EventWriter<CreateArrowEvent>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let mut primary_window = windows.single_mut();
@@ -27,7 +27,7 @@ pub fn create_arrow_start(
                         continue;
                     }
                     state.arrow_to_draw_start = None;
-                    create_arrow.send(CreateArrow {
+                    create_arrow.send(CreateArrowEvent {
                         start: start_arrow,
                         end: *arrow_connect,
                         arrow_type: state.arrow_type,
@@ -49,7 +49,7 @@ pub fn create_arrow_start(
 
 pub fn create_arrow_end(
     mut commands: Commands,
-    mut events: EventReader<CreateArrow>,
+    mut events: EventReader<CreateArrowEvent>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
     windows: Query<&Window, With<PrimaryWindow>>,
@@ -83,7 +83,7 @@ pub fn create_arrow_end(
     }
 }
 pub fn redraw_arrows(
-    mut redraw_arrow: EventReader<RedrawArrow>,
+    mut redraw_arrow: EventReader<RedrawArrowEvent>,
     mut arrow_query: Query<(&mut Path, &mut ArrowMeta), With<ArrowMeta>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
