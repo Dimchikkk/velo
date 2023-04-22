@@ -4,7 +4,9 @@
 
 ** Demo
 
-This app is primarily designed for native desktop platforms, and its WebAssembly (wasm) target has a limited feature set that's best suited for quick document sharing and editing. For now, desktop landscape mode is the only supported orientation (tested on Chrome):
+This app is primarily designed for native desktop platforms, and its WebAssembly (wasm) target has a limited feature set that's best suited for quick document sharing and editing, open on Chrome Desktop to get the full experience:
+
+[[https://staffengineer.github.io/velo][https://staffengineer.github.io/velo]]
 
 [[https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a6139b3dc88775d3f181757d40f976e0/raw/830180e88e32cabbf1ac038c30a788389a4ece4d/velo.json][https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a6139b3dc88775d3f181757d40f976e0/raw/830180e88e32cabbf1ac038c30a788389a4ece4d/velo.json]]
 
@@ -30,7 +32,8 @@ At work, I frequently rely on lucid.app to brainstorm ideas with my colleagues o
 
 ** Run
 
-Tested only on MacOS, should work on Linux and Windows as well
+Native:
+
 #+BEGIN_SRC sh
 cargo r 
 #+END_SRC
