@@ -97,6 +97,7 @@ pub fn load_doc_handler(
     mut app_state: ResMut<AppState>,
     doc_list_query: Query<Entity, With<DocList>>,
     comm_channels: Res<CommChannels>,
+    asset_server: Res<AssetServer>,
 ) {
     if comm_channels.rx.is_empty() {
         return;
@@ -116,6 +117,7 @@ pub fn load_doc_handler(
     });
     let button = add_list_item(
         &mut commands,
+        &asset_server,
         import_document.id,
         import_document.name.clone(),
     );
