@@ -3,8 +3,8 @@ use bevy_ui_borders::BorderColor;
 use bevy::prelude::*;
 
 use super::{
-    add_rectangle_txt, create_rectangle_txt, EditableText, ModalAction, ModalCancel, ModalConfirm,
-    ModalTop,
+    add_rectangle_txt, create_rectangle_txt, EditableText, GenericButton, ModalAction, ModalCancel,
+    ModalConfirm, ModalTop,
 };
 use crate::utils::ReflectableUuid;
 pub fn spawn_modal(
@@ -52,7 +52,7 @@ pub fn spawn_modal(
                 align_items: AlignItems::Center,
                 size: Size {
                     width: Val::Percent(100.),
-                    height: Val::Percent(50.),
+                    height: Val::Percent(30.),
                 },
                 justify_content: JustifyContent::SpaceAround,
                 ..default()
@@ -63,6 +63,8 @@ pub fn spawn_modal(
             builder
                 .spawn((
                     ButtonBundle {
+                        background_color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0)
+                            .into(),
                         style: Style {
                             justify_content: JustifyContent::Center,
                             border: UiRect::all(Val::Px(1.)),
@@ -74,17 +76,31 @@ pub fn spawn_modal(
                         ..default()
                     },
                     BorderColor(Color::BLACK),
+                    GenericButton,
                     ModalConfirm {
                         id,
                         action: modal_action.clone(),
                     },
                 ))
                 .with_children(|builder| {
-                    builder.spawn(add_rectangle_txt(" Ok ".to_string()));
+                    let text_style = TextStyle {
+                        font_size: 18.0,
+                        color: Color::rgb(1., 1., 1.),
+                        ..default()
+                    };
+
+                    builder.spawn(
+                        TextBundle::from_section(" Ok ", text_style).with_style(Style {
+                            position_type: PositionType::Relative,
+                            ..default()
+                        }),
+                    );
                 });
             builder
                 .spawn((
                     ButtonBundle {
+                        background_color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0)
+                            .into(),
                         style: Style {
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
@@ -94,11 +110,23 @@ pub fn spawn_modal(
                         },
                         ..default()
                     },
+                    GenericButton,
                     BorderColor(Color::BLACK),
                     ModalCancel { id },
                 ))
                 .with_children(|builder| {
-                    builder.spawn(add_rectangle_txt("Cancel".to_string()));
+                    let text_style = TextStyle {
+                        font_size: 18.0,
+                        color: Color::rgb(1., 1., 1.),
+                        ..default()
+                    };
+
+                    builder.spawn(TextBundle::from_section("Cancel", text_style).with_style(
+                        Style {
+                            position_type: PositionType::Relative,
+                            ..default()
+                        },
+                    ));
                 });
         })
         .id();
@@ -112,7 +140,7 @@ pub fn spawn_modal(
                         justify_content: JustifyContent::SpaceAround,
                         size: Size {
                             width: Val::Percent(100.),
-                            height: Val::Percent(50.),
+                            height: Val::Percent(70.),
                         },
                         ..default()
                     },
@@ -148,7 +176,7 @@ pub fn spawn_modal(
                                     border: UiRect::all(Val::Px(1.)),
                                     size: Size {
                                         width: Val::Px(220.),
-                                        height: Val::Percent(30.),
+                                        height: Val::Px(35.),
                                     },
                                     padding: UiRect::all(Val::Px(5.)),
                                     // overflow: Overflow::Hidden,
