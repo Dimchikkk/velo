@@ -18,7 +18,7 @@ pub fn add_menu_button(
         _ => panic!("Unknown menu button tooltip label: {}", label),
     };
     let color = match label.as_str() {
-        "New Tab" => Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0),
+        "New Tab" => Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0),
         _ => Color::rgb(0.0 / 255.0, 150.0 / 255.0, 136.0 / 255.0),
     };
     let top = commands
