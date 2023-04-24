@@ -8,7 +8,7 @@ use bevy_pkv::PkvStore;
 use linkify::{LinkFinder, LinkKind};
 
 use super::ui_helpers::{DocListItemContainer, ModalCancel, ModalConfirm, ModalTop};
-use super::{add_list_item, CommChannels, DocList, EditableText, ModalAction};
+use super::{add_list_item, CommChannels, DeleteDoc, DocList, EditableText, ModalAction};
 use crate::components::Doc;
 use crate::resources::{AppState, LoadRequest, SaveRequest};
 use crate::utils::ReflectableUuid;
@@ -98,6 +98,7 @@ pub fn load_doc_handler(
     doc_list_query: Query<Entity, With<DocList>>,
     comm_channels: Res<CommChannels>,
     asset_server: Res<AssetServer>,
+    mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
 ) {
     if comm_channels.rx.is_empty() {
         return;
@@ -120,6 +121,7 @@ pub fn load_doc_handler(
         &asset_server,
         import_document.id,
         import_document.name.clone(),
+        true,
     );
     commands.entity(doc_list_query.single()).add_child(button);
 
@@ -131,6 +133,13 @@ pub fn load_doc_handler(
         drop_last_checkpoint: false,
         doc_id: Some(import_document.id),
     });
+    for (mut visibility, doc) in delete_doc.iter_mut() {
+        if doc.id == import_document.id {
+            *visibility = Visibility::Visible;
+        } else {
+            *visibility = Visibility::Hidden;
+        }
+    }
 }
 
 pub fn confirm_modal(
