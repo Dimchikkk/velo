@@ -361,12 +361,9 @@ fn hide_delete(
         let current_doc = app_state.current_document.unwrap();
         if let Some(doc) = app_state.docs.get_mut(&current_doc) {
             let active_tab = doc.tabs.iter().find(|x| x.is_active).unwrap();
-            info!("active tab {:?}", active_tab.name);
             if tab.id == active_tab.id {
-                info!("showing delete tab {}", active_tab.name);
                 *visibility = Visibility::Visible;
             } else {
-                info!("hiding delete tab {:?}", tab.id);
                 *visibility = Visibility::Hidden;
             }
         }
