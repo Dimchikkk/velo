@@ -332,10 +332,7 @@ pub fn init_layout(
             ..default()
         },))
         .id();
-    let color1 = add_color(
-        &mut commands,
-        Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0),
-    );
+    let color1 = add_color(&mut commands, Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0));
     let color2 = add_color(
         &mut commands,
         Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
