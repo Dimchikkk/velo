@@ -55,7 +55,10 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                 item_meta.text_pos,
             ),
             VeloNode { id: item_meta.id },
-            Outline::all(Color::BLACK, Val::Px(1.)),
+            Outline::all(
+                Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0),
+                Val::Px(1.),
+            ),
         ))
         .with_children(|builder| {
             builder.spawn((

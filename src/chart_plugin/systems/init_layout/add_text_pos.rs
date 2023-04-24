@@ -33,13 +33,7 @@ pub fn add_text_pos(
     let button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::Rgba {
-                    red: 1.,
-                    green: 1.,
-                    blue: 1.,
-                    alpha: 0.5,
-                }
-                .into(),
+                background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
                 image: image.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
