@@ -8,7 +8,7 @@ use bevy::{
 
 use super::{
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
-    LoadFinishedEvent, MainPanel, VeloNodeContainer,
+    MainPanel, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::canvas::arrow::events::CreateArrowEvent;
@@ -40,7 +40,6 @@ pub fn load_json(
     mut selected_tabs_query: Query<Entity, With<TabContainer>>,
     mut bottom_panel: Query<Entity, With<BottomPanel>>,
     pkv: ResMut<PkvStore>,
-    mut events: EventWriter<LoadFinishedEvent>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     asset_server: Res<AssetServer>,
 ) {
@@ -91,7 +90,13 @@ pub fn load_json(
 
     let mut tabs = vec![];
     for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter() {
-        let tab_view = add_tab(&mut commands, &asset_server, tab.name.clone(), tab.id);
+        let tab_view = add_tab(
+            &mut commands,
+            &asset_server,
+            tab.name.clone(),
+            tab.id,
+            tab.is_active,
+        );
         tabs.push(tab_view);
     }
     commands.entity(bottom_panel).insert_children(0, &tabs);
@@ -165,5 +170,4 @@ pub fn load_json(
             break;
         }
     }
-    events.send(LoadFinishedEvent);
 }

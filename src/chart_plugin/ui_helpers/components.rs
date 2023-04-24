@@ -16,9 +16,7 @@ pub struct Menu;
 pub struct AddTab;
 
 #[derive(Component)]
-pub struct DeleteTab {
-    pub id: ReflectableUuid,
-}
+pub struct DeleteTab;
 
 #[derive(Component)]
 pub struct Tooltip;
