@@ -12,10 +12,17 @@ use crate::utils::ReflectableUuid;
 
 use super::{DeleteDoc, DocListItemButton, DocListItemContainer, EditableText, GenericButton};
 
-pub fn add_list_item(commands: &mut Commands, id: ReflectableUuid, name: String) -> Entity {
+pub fn add_list_item(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+    id: ReflectableUuid,
+    name: String,
+) -> Entity {
+    let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
     let root = commands
         .spawn((
             ButtonBundle {
+                background_color: Color::rgb(205.0 / 255.0, 220.0 / 255.0, 57.0 / 255.0).into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
@@ -26,14 +33,14 @@ pub fn add_list_item(commands: &mut Commands, id: ReflectableUuid, name: String)
             },
             GenericButton,
             DocListItemContainer { id },
-            BorderColor(Color::GRAY),
+            BorderColor(Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0)),
             AccessibilityNode(NodeBuilder::new(Role::ListItem)),
         ))
         .id();
     let doc_button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
+                background_color: Color::rgb(205.0 / 255.0, 220.0 / 255.0, 57.0 / 255.0).into(),
                 style: Style {
                     size: Size::new(Val::Percent(90.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
@@ -84,8 +91,14 @@ pub fn add_list_item(commands: &mut Commands, id: ReflectableUuid, name: String)
         .spawn((
             ButtonBundle {
                 visibility: Visibility::Hidden,
-                background_color: Color::rgba(0.8, 0.8, 0.8, 0.5).into(),
+                background_color: Color::rgb(205.0 / 255.0, 220.0 / 255.0, 57.0 / 255.0).into(),
                 style: Style {
+                    margin: UiRect {
+                        left: Val::Px(3.),
+                        right: Val::Px(3.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(0.),
+                    },
                     size: Size::new(Val::Percent(10.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
                     padding: UiRect::all(Val::Px(5.)),
@@ -93,29 +106,20 @@ pub fn add_list_item(commands: &mut Commands, id: ReflectableUuid, name: String)
                 },
                 ..default()
             },
-            DeleteDoc,
+            DeleteDoc { id },
             GenericButton,
         ))
         .id();
     let del_label = commands
         .spawn((
             TextBundle {
-                style: Style {
-                    margin: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(5.),
-                        top: Val::Px(0.),
-                        bottom: Val::Px(0.),
-                    },
-                    ..default()
-                },
                 text: Text {
                     sections: vec![TextSection {
-                        value: "x".to_string(),
+                        value: "\u{e14c}".to_string(),
                         style: TextStyle {
                             font_size: 24.,
                             color: Color::BLACK,
-                            ..default()
+                            font: icon_font,
                         },
                     }],
                     ..default()

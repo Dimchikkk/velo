@@ -16,7 +16,9 @@ pub struct Menu;
 pub struct AddTab;
 
 #[derive(Component)]
-pub struct DeleteTab;
+pub struct DeleteTab {
+    pub id: ReflectableUuid,
+}
 
 #[derive(Component)]
 pub struct Tooltip;
@@ -40,7 +42,9 @@ pub struct ImportFromFile;
 pub struct ImportFromUrl;
 
 #[derive(Component)]
-pub struct DeleteDoc;
+pub struct DeleteDoc {
+    pub id: ReflectableUuid,
+}
 
 #[derive(Component)]
 pub struct TabButton {

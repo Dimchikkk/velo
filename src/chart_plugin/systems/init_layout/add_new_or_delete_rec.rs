@@ -1,10 +1,10 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, text::BreakLineOn};
 
 use crate::chart_plugin::ui_helpers::{get_tooltip, ButtonAction, GenericButton, Tooltip};
 
 pub fn add_new_delete_rec(
     commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
+    icon_font: &Handle<Font>,
     create_component: ButtonAction,
     delete_component: ButtonAction,
 ) -> Entity {
@@ -36,7 +36,7 @@ pub fn add_new_delete_rec(
     let new_rec = commands
         .spawn((
             ButtonBundle {
-                image: asset_server.load("rec-add.png").into(),
+                background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
@@ -57,6 +57,32 @@ pub fn add_new_delete_rec(
         ))
         .with_children(|builder| {
             builder.spawn((get_tooltip("New Rectangle".to_string(), 14.), Tooltip));
+
+            let text_style = TextStyle {
+                font_size: 30.0,
+                color: Color::BLACK,
+                font: icon_font.clone(),
+            };
+            let text = Text {
+                sections: vec![TextSection {
+                    value: "\u{eb54}".to_string(),
+                    style: text_style,
+                }],
+                alignment: TextAlignment::Left,
+                linebreak_behaviour: BreakLineOn::WordBoundary,
+            };
+            let text_bundle_style = Style {
+                position_type: PositionType::Absolute,
+                padding: UiRect::all(Val::Px(5.)),
+                margin: UiRect::all(Val::Px(3.)),
+                ..default()
+            };
+
+            builder.spawn(TextBundle {
+                text,
+                style: text_bundle_style,
+                ..default()
+            });
         })
         .id();
     let top_del = commands
@@ -75,7 +101,7 @@ pub fn add_new_delete_rec(
     let del_rec = commands
         .spawn((
             ButtonBundle {
-                image: asset_server.load("rec-del.png").into(),
+                background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
@@ -96,6 +122,32 @@ pub fn add_new_delete_rec(
         ))
         .with_children(|builder| {
             builder.spawn((get_tooltip("Delete Rectangle".to_string(), 14.), Tooltip));
+
+            let text_style = TextStyle {
+                font_size: 30.0,
+                color: Color::BLACK,
+                font: icon_font.clone(),
+            };
+            let text = Text {
+                sections: vec![TextSection {
+                    value: "\u{e872}".to_string(),
+                    style: text_style,
+                }],
+                alignment: TextAlignment::Left,
+                linebreak_behaviour: BreakLineOn::WordBoundary,
+            };
+            let text_bundle_style = Style {
+                position_type: PositionType::Absolute,
+                padding: UiRect::all(Val::Px(5.)),
+                margin: UiRect::all(Val::Px(3.)),
+                ..default()
+            };
+
+            builder.spawn(TextBundle {
+                text,
+                style: text_bundle_style,
+                ..default()
+            });
         })
         .id();
     commands.entity(top_new).add_child(new_rec);

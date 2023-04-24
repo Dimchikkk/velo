@@ -6,7 +6,7 @@
 
 This app is primarily designed for native desktop platforms, and its WebAssembly (wasm) target has a limited feature set. wasm target is best suited for quick document sharing and editing, currently only landscape mode is supported (tested on Chrome):
 
-[[https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a6139b3dc88775d3f181757d40f976e0/raw/674eb1b13be6e33c5418125659064ec3c75e33ba/velo.json][https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a6139b3dc88775d3f181757d40f976e0/raw/674eb1b13be6e33c5418125659064ec3c75e33ba/velo.json]]
+[[https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a6139b3dc88775d3f181757d40f976e0/raw/470df8d8213c03afd11c5d8b4902a20154c34dc7/velo.json][https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a6139b3dc88775d3f181757d40f976e0/raw/470df8d8213c03afd11c5d8b4902a20154c34dc7/velo.json]]
 
 ** Inspiration  
 At work, I frequently rely on lucid.app to brainstorm ideas with my colleagues or by myself. Typically, I share my ideas by sending either the diagrams themselves or screenshots of them. While I tend to stick with simple features like rectangles and arrows, I've been contemplating the idea of creating a similar tool in Rust. Not only would it allow me to learn the language, but it would also be an enjoyable project to work on.

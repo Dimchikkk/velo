@@ -133,12 +133,12 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
 pub fn get_sections(text: String) -> (Vec<TextSection>, Vec<bool>) {
     let text_style = TextStyle {
         font_size: 18.0,
-        color: Color::BLACK,
+        color: Color::rgb(33.0 / 255.0, 33.0 / 255.0, 33.0 / 255.0),
         ..default()
     };
     let link_style = TextStyle {
         font_size: 18.0,
-        color: Color::BLUE,
+        color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0),
         ..default()
     };
     let mut finder = LinkFinder::new();

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_ui_borders::BorderColor;
 use std::time::Duration;
 
 use bevy_pkv::PkvStore;
@@ -63,8 +64,9 @@ pub fn init_layout(
     let bottom_panel = commands
         .spawn((
             NodeBundle {
-                background_color: Color::rgba(0.29, 0.0, 0.51, 0.5).into(),
+                background_color: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0).into(),
                 style: Style {
+                    border: UiRect::all(Val::Px(1.0)),
                     position_type: PositionType::Absolute,
                     position: UiRect {
                         left: Val::Percent(0.),
@@ -81,12 +83,19 @@ pub fn init_layout(
                 ..default()
             },
             BottomPanel,
+            BorderColor(Color::rgb(204.0 / 255.0, 204.0 / 255.0, 204.0 / 255.0)),
         ))
         .id();
     let add_tab = add_menu_button(&mut commands, "New Tab".to_string(), &icon_font, AddTab);
     commands.entity(bottom_panel).add_child(add_tab);
 
-    let docs = add_list(bottom_panel, &mut commands, &mut app_state, &mut pkv);
+    let docs = add_list(
+        bottom_panel,
+        &mut commands,
+        &asset_server,
+        &mut app_state,
+        &mut pkv,
+    );
 
     let root_ui = commands
         .spawn((
@@ -112,16 +121,21 @@ pub fn init_layout(
     let menu = commands
         .spawn((
             NodeBundle {
-                background_color: Color::rgb(0.64, 0.64, 0.64).into(),
+                background_color: Color::rgb(245.0 / 255.0, 245.0 / 255.0, 245.0 / 255.0).into(),
                 style: Style {
-                    border: UiRect::all(Val::Px(2.0)),
+                    border: UiRect::all(Val::Px(1.0)),
                     size: Size::new(Val::Percent(100.0), Val::Percent(5.)),
+                    padding: UiRect {
+                        left: Val::Px(10.),
+                        ..default()
+                    },
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Start,
                     ..default()
                 },
                 ..default()
             },
+            BorderColor(Color::rgb(200.0 / 255.0, 200.0 / 255.0, 200.0 / 255.0)),
             Menu,
         ))
         .id();
@@ -181,13 +195,9 @@ pub fn init_layout(
     let left_panel = commands
         .spawn((
             NodeBundle {
-                background_color: BackgroundColor(Color::Rgba {
-                    red: 192. / 255.,
-                    green: 192. / 255.,
-                    blue: 192. / 255.,
-                    alpha: 0.5,
-                }),
+                background_color: Color::rgb(224.0 / 255.0, 224.0 / 255.0, 224.0 / 255.0).into(),
                 style: Style {
+                    border: UiRect::all(Val::Px(1.0)),
                     size: Size::new(Val::Percent(15.), Val::Percent(100.)),
                     align_items: AlignItems::Start,
                     flex_direction: FlexDirection::Column,
@@ -196,6 +206,7 @@ pub fn init_layout(
                 },
                 ..default()
             },
+            BorderColor(Color::rgb(192.0 / 255.0, 192.0 / 255.0, 192.0 / 255.0)),
             LeftPanel,
         ))
         .id();
@@ -272,7 +283,7 @@ pub fn init_layout(
 
     let rectangle_creation = add_new_delete_rec(
         &mut commands,
-        &asset_server,
+        &icon_font,
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Add,
         },
@@ -321,14 +332,23 @@ pub fn init_layout(
             ..default()
         },))
         .id();
-    let color1 = add_color(
+    let color1 = add_color(&mut commands, Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0));
+    let color2 = add_color(
         &mut commands,
-        Color::rgb(251. / 255., 232. / 255., 166. / 255.),
+        Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
     );
-    let color2 = add_color(&mut commands, Color::WHITE);
-    let color3 = add_color(&mut commands, Color::ORANGE_RED);
-    let color4 = add_color(&mut commands, Color::GREEN);
-    let color5 = add_color(&mut commands, Color::GRAY);
+    let color3 = add_color(
+        &mut commands,
+        Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
+    );
+    let color4 = add_color(
+        &mut commands,
+        Color::rgb(207.0 / 255.0, 226.0 / 255.0, 243.0 / 255.0),
+    );
+    let color5 = add_color(
+        &mut commands,
+        Color::rgb(245.0 / 255.0, 222.0 / 255.0, 179.0 / 255.0),
+    );
 
     commands.entity(color_picker).add_child(color1);
     commands.entity(color_picker).add_child(color2);
