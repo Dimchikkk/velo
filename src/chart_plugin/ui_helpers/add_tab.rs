@@ -96,7 +96,7 @@ pub fn add_tab(
                 ..default()
             },
             GenericButton,
-            DeleteTab,
+            DeleteTab { id },
         ))
         .id();
     let del_label = commands

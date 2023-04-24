@@ -343,36 +343,31 @@ fn resize_notificator(mut commands: Commands, resize_event: Res<Events<WindowRes
 
 fn hide_delete(
     mut app_state: ResMut<AppState>,
-    mut docs: Query<(&DocListItemContainer, &Children), With<DocListItemContainer>>,
-    mut tabs: Query<
-        (&TabContainer, &Children),
-        (With<TabContainer>, Without<DocListItemContainer>),
-    >,
-    mut delete_tab: Query<&mut Visibility, With<DeleteTab>>,
-    mut delete_doc: Query<&mut Visibility, (With<DeleteDoc>, Without<DeleteTab>)>,
+    mut delete_doc: Query<(&mut Visibility, &DeleteDoc), (With<DeleteDoc>, Without<DeleteTab>)>,
     mut events: EventReader<LoadFinishedEvent>,
+    mut delete_tab: Query<(&mut Visibility, &DeleteTab), Changed<DeleteTab>>,
 ) {
     for _ in events.iter() {
         let current_doc = app_state.current_document.unwrap();
-
-        for (container, children) in &mut docs.iter_mut() {
-            let mut delete_doc_visibility = delete_doc.get_mut(children[1]).unwrap();
-            if current_doc == container.id {
-                *delete_doc_visibility = Visibility::Visible;
+        for (mut visibility, doc) in delete_doc.iter_mut() {
+            if doc.id == current_doc {
+                *visibility = Visibility::Visible;
             } else {
-                *delete_doc_visibility = Visibility::Hidden;
+                *visibility = Visibility::Hidden;
             }
         }
-
+    }
+    for (mut visibility, tab) in delete_tab.iter_mut() {
+        let current_doc = app_state.current_document.unwrap();
         if let Some(doc) = app_state.docs.get_mut(&current_doc) {
-            let tab = doc.tabs.iter().find(|x| x.is_active).unwrap();
-            for (container, children) in &mut tabs.iter_mut() {
-                let mut delete_tab_visibility = delete_tab.get_mut(children[1]).unwrap();
-                if tab.id == container.id {
-                    *delete_tab_visibility = Visibility::Visible;
-                } else {
-                    *delete_tab_visibility = Visibility::Hidden;
-                }
+            let active_tab = doc.tabs.iter().find(|x| x.is_active).unwrap();
+            info!("active tab {:?}", active_tab.name);
+            if tab.id == active_tab.id {
+                info!("showing delete tab {}", active_tab.name);
+                *visibility = Visibility::Visible;
+            } else {
+                info!("hiding delete tab {:?}", tab.id);
+                *visibility = Visibility::Hidden;
             }
         }
     }

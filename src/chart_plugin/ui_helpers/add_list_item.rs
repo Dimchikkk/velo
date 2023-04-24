@@ -106,7 +106,7 @@ pub fn add_list_item(
                 },
                 ..default()
             },
-            DeleteDoc,
+            DeleteDoc { id },
             GenericButton,
         ))
         .id();
