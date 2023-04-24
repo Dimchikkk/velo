@@ -47,7 +47,7 @@ pub fn rec_button_handlers(
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
                             },
-                            bg_color: Color::WHITE,
+                            bg_color: Color::rgb(1.0, 1.0, 1.0),
                             tags: vec![],
                             z_index: 0,
                         },
@@ -324,6 +324,7 @@ pub fn new_doc_handler(
     mut new_doc_query: Query<&Interaction, (Changed<Interaction>, With<NewDoc>)>,
     mut doc_list_query: Query<Entity, With<DocList>>,
     mut app_state: ResMut<AppState>,
+    asset_server: Res<AssetServer>,
 ) {
     for interaction in &mut new_doc_query.iter_mut() {
         match *interaction {
@@ -365,7 +366,7 @@ pub fn new_doc_handler(
                     doc_id: Some(doc_id),
                     drop_last_checkpoint: false,
                 });
-                let button = add_list_item(&mut commands, doc_id, name);
+                let button = add_list_item(&mut commands, &asset_server, doc_id, name);
                 let doc_list = doc_list_query.single_mut();
                 commands.entity(doc_list).add_child(button);
             }
@@ -542,7 +543,7 @@ pub fn button_generic_handler(
             Interaction::Clicked => {}
             Interaction::Hovered => {
                 primary_window.cursor.icon = CursorIcon::Hand;
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
                 for (mut visibility, parent) in tooltips_query.iter_mut() {
                     if parent.get() == entity {
                         *visibility = Visibility::Visible;
@@ -551,7 +552,7 @@ pub fn button_generic_handler(
             }
             Interaction::None => {
                 primary_window.cursor.icon = CursorIcon::Default;
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.5);
+                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
                 for (mut visibility, parent) in tooltips_query.iter_mut() {
                     if parent.get() == entity {
                         *visibility = Visibility::Hidden;

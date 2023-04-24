@@ -17,6 +17,10 @@ pub fn add_menu_button(
         "Import From URL" => "\u{e902}",
         _ => panic!("Unknown menu button tooltip label: {}", label),
     };
+    let color = match label.as_str() {
+        "New Tab" => Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0),
+        _ => Color::rgb(0.0 / 255.0, 150.0 / 255.0, 136.0 / 255.0),
+    };
     let top = commands
         .spawn(NodeBundle {
             background_color: Color::BLACK.with_a(0.1).into(),
@@ -38,7 +42,7 @@ pub fn add_menu_button(
     let button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(0.8, 0.8, 0.8).into(),
+                background_color: color.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,

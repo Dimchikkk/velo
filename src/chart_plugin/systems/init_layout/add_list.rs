@@ -19,6 +19,7 @@ use crate::utils::ReflectableUuid;
 pub fn add_list(
     bottom_panel: Entity,
     commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
     state: &mut ResMut<AppState>,
     pkv: &mut ResMut<PkvStore>,
 ) -> Entity {
@@ -39,7 +40,7 @@ pub fn add_list(
                 overflow: Overflow::Hidden,
                 ..default()
             },
-            background_color: Color::rgba(1.0, 1.0, 1.0, 0.5).into(),
+            background_color: Color::rgb(212.0 / 255.0, 225.0 / 255.0, 87.0 / 255.0).into(),
             ..default()
         })
         .id();
@@ -66,7 +67,7 @@ pub fn add_list(
 
         for key in keys {
             let name = names.get(key).unwrap();
-            let button = add_list_item(commands, *key, name.clone());
+            let button = add_list_item(commands, asset_server, *key, name.clone());
             commands.entity(node).add_child(button);
         }
     } else {
@@ -89,9 +90,9 @@ pub fn add_list(
                 tags: vec![],
             },
         );
-        let button = add_list_item(commands, doc_id, name);
+        let button = add_list_item(commands, asset_server, doc_id, name);
         state.current_document = Some(doc_id);
-        let tab_view = add_tab(commands, tab_name, tab_id);
+        let tab_view = add_tab(commands, asset_server, tab_name, tab_id);
         commands.entity(bottom_panel).add_child(tab_view);
         commands.entity(node).add_child(button);
     }
