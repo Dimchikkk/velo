@@ -67,7 +67,13 @@ pub fn add_list(
 
         for key in keys {
             let name = names.get(key).unwrap();
-            let button = add_list_item(commands, asset_server, *key, name.clone());
+            let button = add_list_item(
+                commands,
+                asset_server,
+                *key,
+                name.clone(),
+                state.current_document == Some(*key),
+            );
             commands.entity(node).add_child(button);
         }
     } else {
@@ -90,9 +96,9 @@ pub fn add_list(
                 tags: vec![],
             },
         );
-        let button = add_list_item(commands, asset_server, doc_id, name);
+        let button = add_list_item(commands, asset_server, doc_id, name, true);
         state.current_document = Some(doc_id);
-        let tab_view = add_tab(commands, asset_server, tab_name, tab_id);
+        let tab_view = add_tab(commands, asset_server, tab_name, tab_id, true);
         commands.entity(bottom_panel).add_child(tab_view);
         commands.entity(node).add_child(button);
     }

@@ -17,6 +17,7 @@ pub fn add_list_item(
     asset_server: &Res<AssetServer>,
     id: ReflectableUuid,
     name: String,
+    is_current: bool,
 ) -> Entity {
     let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
     let root = commands
@@ -90,7 +91,11 @@ pub fn add_list_item(
     let del_button = commands
         .spawn((
             ButtonBundle {
-                visibility: Visibility::Hidden,
+                visibility: if is_current {
+                    Visibility::Visible
+                } else {
+                    Visibility::Hidden
+                },
                 background_color: Color::rgb(205.0 / 255.0, 220.0 / 255.0, 57.0 / 255.0).into(),
                 style: Style {
                     margin: UiRect {
