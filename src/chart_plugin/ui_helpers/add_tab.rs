@@ -9,6 +9,7 @@ pub fn add_tab(
     asset_server: &Res<AssetServer>,
     name: String,
     id: ReflectableUuid,
+    is_active: bool,
 ) -> Entity {
     let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
     let root = commands
@@ -80,7 +81,11 @@ pub fn add_tab(
         .spawn((
             ButtonBundle {
                 background_color: Color::rgb(1., 193.0 / 255.0, 7.0 / 255.0).into(),
-                visibility: Visibility::Hidden,
+                visibility: if is_active {
+                    Visibility::Visible
+                } else {
+                    Visibility::Hidden
+                },
                 style: Style {
                     margin: UiRect {
                         left: Val::Px(3.),
@@ -96,7 +101,7 @@ pub fn add_tab(
                 ..default()
             },
             GenericButton,
-            DeleteTab { id },
+            DeleteTab,
         ))
         .id();
     let del_label = commands

@@ -58,9 +58,6 @@ pub struct CommChannels {
     pub rx: Receiver<String>,
 }
 
-pub struct LoadFinishedEvent;
-pub struct EntitySelectedEvent;
-
 #[derive(Serialize, Deserialize)]
 pub enum NodeType {
     Rect,
@@ -133,8 +130,6 @@ impl Plugin for ChartPlugin {
         app.add_event::<AddRectEvent>();
         app.add_event::<CreateArrowEvent>();
         app.add_event::<RedrawArrowEvent>();
-        app.add_event::<LoadFinishedEvent>();
-        app.add_event::<EntitySelectedEvent>();
 
         app.add_startup_system(init_layout);
         #[cfg(target_arch = "wasm32")]
@@ -184,12 +179,10 @@ impl Plugin for ChartPlugin {
         app.add_systems((
             button_generic_handler,
             selected_tab_handler,
-            hide_delete,
             export_to_file,
             import_from_file,
             import_from_url,
             load_doc_handler,
-            change_node_outline,
         ));
     }
 }
@@ -209,11 +202,11 @@ pub fn get_timestamp() -> f64 {
 
 fn set_focused_entity(
     mut interaction_query: Query<(&Interaction, &VeloNode), (Changed<Interaction>, With<VeloNode>)>,
+    mut outline_query: Query<(&mut Outline, &VeloNode), With<VeloNode>>,
     mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
     mut holding_time: Local<(Duration, Option<ReflectableUuid>)>,
-    mut events: EventWriter<EntitySelectedEvent>,
 ) {
     let mut window = windows.single_mut();
     for (interaction, rectangle) in &mut interaction_query {
@@ -224,7 +217,15 @@ fn set_focused_entity(
                 state.entity_to_edit = Some(rectangle.id);
                 let now_ms = get_timestamp();
                 *holding_time = (Duration::from_millis(now_ms as u64), Some(rectangle.id));
-                events.send(EntitySelectedEvent);
+                for (mut outline, node) in &mut outline_query.iter_mut() {
+                    if node.id == rectangle.id {
+                        outline.color = Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
+                        outline.thickness = UiRect::all(Val::Px(1.5));
+                    } else {
+                        outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                        outline.thickness = UiRect::all(Val::Px(1.));
+                    }
+                }
             }
             Interaction::Hovered => {
                 if state.hold_entity.is_none() && state.entity_to_edit.is_none() {
@@ -286,24 +287,6 @@ fn update_rectangle_position(
     }
 }
 
-fn change_node_outline(
-    mut query: Query<(&mut Outline, &VeloNode), With<VeloNode>>,
-    ui_state: Res<UiState>,
-    mut events: EventReader<EntitySelectedEvent>,
-) {
-    for _ in events.iter() {
-        for (mut outline, node) in &mut query.iter_mut() {
-            if Some(node.id) == ui_state.entity_to_edit {
-                outline.color = Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
-                outline.thickness = UiRect::all(Val::Px(1.5));
-            } else {
-                outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
-                outline.thickness = UiRect::all(Val::Px(1.));
-            }
-        }
-    }
-}
-
 fn create_new_rectangle(
     mut commands: Commands,
     mut events: EventReader<AddRectEvent>,
@@ -338,35 +321,6 @@ fn resize_notificator(mut commands: Commands, resize_event: Res<Events<WindowRes
             doc_id: None,
             drop_last_checkpoint: false,
         });
-    }
-}
-
-fn hide_delete(
-    mut app_state: ResMut<AppState>,
-    mut delete_doc: Query<(&mut Visibility, &DeleteDoc), (With<DeleteDoc>, Without<DeleteTab>)>,
-    mut events: EventReader<LoadFinishedEvent>,
-    mut delete_tab: Query<(&mut Visibility, &DeleteTab), Changed<DeleteTab>>,
-) {
-    for _ in events.iter() {
-        let current_doc = app_state.current_document.unwrap();
-        for (mut visibility, doc) in delete_doc.iter_mut() {
-            if doc.id == current_doc {
-                *visibility = Visibility::Visible;
-            } else {
-                *visibility = Visibility::Hidden;
-            }
-        }
-    }
-    for (mut visibility, tab) in delete_tab.iter_mut() {
-        let current_doc = app_state.current_document.unwrap();
-        if let Some(doc) = app_state.docs.get_mut(&current_doc) {
-            let active_tab = doc.tabs.iter().find(|x| x.is_active).unwrap();
-            if tab.id == active_tab.id {
-                *visibility = Visibility::Visible;
-            } else {
-                *visibility = Visibility::Hidden;
-            }
-        }
     }
 }
 

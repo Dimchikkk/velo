@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
 };
 
-use super::ui_helpers::ScrollingList;
+use super::{ui_helpers::ScrollingList, DeleteDoc};
 use crate::chart_plugin::ui_helpers::DocListItemButton;
 
 use crate::resources::{AppState, LoadRequest, SaveRequest};
@@ -15,6 +15,7 @@ pub fn list_item_click(
     >,
     mut state: ResMut<AppState>,
     mut commands: Commands,
+    mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
 ) {
     for (interaction, doc_list_item) in &mut interaction_query.iter_mut() {
         match *interaction {
@@ -30,6 +31,13 @@ pub fn list_item_click(
                         doc_id: Some(doc_list_item.id),
                         drop_last_checkpoint: false,
                     });
+                    for (mut visibility, doc) in delete_doc.iter_mut() {
+                        if doc.id == doc_list_item.id {
+                            *visibility = Visibility::Visible;
+                        } else {
+                            *visibility = Visibility::Hidden;
+                        }
+                    }
                 }
             }
             Interaction::Hovered => {}

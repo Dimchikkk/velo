@@ -8,7 +8,7 @@ use bevy_pkv::PkvStore;
 use linkify::{LinkFinder, LinkKind};
 
 use super::ui_helpers::{DocListItemContainer, ModalCancel, ModalConfirm, ModalTop};
-use super::{add_list_item, CommChannels, DocList, EditableText, ModalAction};
+use super::{add_list_item, CommChannels, DeleteDoc, DocList, EditableText, ModalAction};
 use crate::components::Doc;
 use crate::resources::{AppState, LoadRequest, SaveRequest};
 use crate::utils::ReflectableUuid;
@@ -98,6 +98,7 @@ pub fn load_doc_handler(
     doc_list_query: Query<Entity, With<DocList>>,
     comm_channels: Res<CommChannels>,
     asset_server: Res<AssetServer>,
+    mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
 ) {
     if comm_channels.rx.is_empty() {
         return;
@@ -120,6 +121,7 @@ pub fn load_doc_handler(
         &asset_server,
         import_document.id,
         import_document.name.clone(),
+        true,
     );
     commands.entity(doc_list_query.single()).add_child(button);
 
@@ -131,6 +133,13 @@ pub fn load_doc_handler(
         drop_last_checkpoint: false,
         doc_id: Some(import_document.id),
     });
+    for (mut visibility, doc) in delete_doc.iter_mut() {
+        if doc.id == import_document.id {
+            *visibility = Visibility::Visible;
+        } else {
+            *visibility = Visibility::Hidden;
+        }
+    }
 }
 
 pub fn confirm_modal(
@@ -220,10 +229,55 @@ pub fn confirm_modal(
     if input.just_pressed(KeyCode::Return) {
         for (entity, path_modal_top) in query_top.iter() {
             if Some(path_modal_top.id) == ui_state.modal_id {
+                for (text, editable_text) in query_path.iter_mut() {
+                    if editable_text.id == path_modal_top.id {
+                        match path_modal_top.action {
+                            ModalAction::SaveToFile => {
+                                commands.insert_resource(SaveRequest {
+                                    doc_id: None,
+                                    tab_id: None,
+                                    path: Some(PathBuf::from(text.sections[0].value.trim())),
+                                });
+                                break;
+                            }
+                            ModalAction::LoadFromFile => {
+                                if let Ok(path) =
+                                    canonicalize(PathBuf::from(text.sections[0].value.trim()))
+                                {
+                                    let json = std::fs::read_to_string(path)
+                                        .expect("Error reading document from file");
+                                    let cc = comm_channels.tx.clone();
+                                    cc.try_send(json).unwrap()
+                                }
+                            }
+                            ModalAction::LoadFromUrl => {
+                                let pool = IoTaskPool::get();
+                                let url = text.sections[0].value.trim();
+                                let mut finder = LinkFinder::new();
+                                finder.kinds(&[LinkKind::Url]);
+                                let links: Vec<_> = finder.links(url).collect();
+                                if links.len() == 1 {
+                                    let url = links.first().unwrap().as_str().to_owned();
+                                    let cc = comm_channels.tx.clone();
+                                    let task = pool.spawn(async move {
+                                        let request = ehttp::Request::get(url);
+                                        ehttp::fetch(request, move |result| {
+                                            let json_string = result.unwrap().text().unwrap();
+                                            cc.try_send(json_string).unwrap();
+                                        });
+                                    });
+                                    task.detach();
+                                }
+                            }
+                            ModalAction::DeleteDocument => {}
+                            ModalAction::DeleteTab => {}
+                        }
+                    }
+                }
                 match path_modal_top.action {
-                    ModalAction::SaveToFile => todo!(),
-                    ModalAction::LoadFromFile => todo!(),
-                    ModalAction::LoadFromUrl => todo!(),
+                    ModalAction::SaveToFile => {}
+                    ModalAction::LoadFromFile => {}
+                    ModalAction::LoadFromUrl => {}
                     ModalAction::DeleteDocument => {
                         delete_doc(
                             &mut app_state,
@@ -234,9 +288,9 @@ pub fn confirm_modal(
                     }
                     ModalAction::DeleteTab => delete_tab(&mut app_state, &mut commands),
                 }
-                commands.entity(entity).despawn_recursive();
-                ui_state.modal_id = None;
             }
+            commands.entity(entity).despawn_recursive();
+            ui_state.modal_id = None;
         }
     }
 }
