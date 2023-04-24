@@ -366,7 +366,7 @@ pub fn new_doc_handler(
                     doc_id: Some(doc_id),
                     drop_last_checkpoint: false,
                 });
-                let button = add_list_item(&mut commands, &asset_server, doc_id, name);
+                let button = add_list_item(&mut commands, &asset_server, doc_id, name, true);
                 let doc_list = doc_list_query.single_mut();
                 commands.entity(doc_list).add_child(button);
             }
