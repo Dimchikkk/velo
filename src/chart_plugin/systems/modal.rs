@@ -229,10 +229,55 @@ pub fn confirm_modal(
     if input.just_pressed(KeyCode::Return) {
         for (entity, path_modal_top) in query_top.iter() {
             if Some(path_modal_top.id) == ui_state.modal_id {
+                for (text, editable_text) in query_path.iter_mut() {
+                    if editable_text.id == path_modal_top.id {
+                        match path_modal_top.action {
+                            ModalAction::SaveToFile => {
+                                commands.insert_resource(SaveRequest {
+                                    doc_id: None,
+                                    tab_id: None,
+                                    path: Some(PathBuf::from(text.sections[0].value.trim())),
+                                });
+                                break;
+                            }
+                            ModalAction::LoadFromFile => {
+                                if let Ok(path) =
+                                    canonicalize(PathBuf::from(text.sections[0].value.trim()))
+                                {
+                                    let json = std::fs::read_to_string(path)
+                                        .expect("Error reading document from file");
+                                    let cc = comm_channels.tx.clone();
+                                    cc.try_send(json).unwrap()
+                                }
+                            }
+                            ModalAction::LoadFromUrl => {
+                                let pool = IoTaskPool::get();
+                                let url = text.sections[0].value.trim();
+                                let mut finder = LinkFinder::new();
+                                finder.kinds(&[LinkKind::Url]);
+                                let links: Vec<_> = finder.links(url).collect();
+                                if links.len() == 1 {
+                                    let url = links.first().unwrap().as_str().to_owned();
+                                    let cc = comm_channels.tx.clone();
+                                    let task = pool.spawn(async move {
+                                        let request = ehttp::Request::get(url);
+                                        ehttp::fetch(request, move |result| {
+                                            let json_string = result.unwrap().text().unwrap();
+                                            cc.try_send(json_string).unwrap();
+                                        });
+                                    });
+                                    task.detach();
+                                }
+                            }
+                            ModalAction::DeleteDocument => {}
+                            ModalAction::DeleteTab => {}
+                        }
+                    }
+                }
                 match path_modal_top.action {
-                    ModalAction::SaveToFile => todo!(),
-                    ModalAction::LoadFromFile => todo!(),
-                    ModalAction::LoadFromUrl => todo!(),
+                    ModalAction::SaveToFile => {}
+                    ModalAction::LoadFromFile => {}
+                    ModalAction::LoadFromUrl => {}
                     ModalAction::DeleteDocument => {
                         delete_doc(
                             &mut app_state,
@@ -243,9 +288,9 @@ pub fn confirm_modal(
                     }
                     ModalAction::DeleteTab => delete_tab(&mut app_state, &mut commands),
                 }
-                commands.entity(entity).despawn_recursive();
-                ui_state.modal_id = None;
             }
+            commands.entity(entity).despawn_recursive();
+            ui_state.modal_id = None;
         }
     }
 }
