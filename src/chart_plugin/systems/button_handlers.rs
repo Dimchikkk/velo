@@ -2,7 +2,8 @@ use std::{collections::VecDeque, time::Duration};
 
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use serde_json::json;
+use serde::Serialize;
+use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::{get_timestamp, AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
@@ -12,7 +13,7 @@ use super::ui_helpers::{
     DocList, DocListItemButton, EditableText, GenericButton, NewDoc, SaveDoc, TextManipulation,
     TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
-use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, VeloNodeContainer};
+use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadRequest, SaveRequest};
@@ -489,6 +490,76 @@ pub fn set_window_property(mut app_state: ResMut<AppState>) {
         let velo_var = wasm_bindgen::JsValue::from("velo");
         let state = wasm_bindgen::JsValue::from(value);
         js_sys::Reflect::set(&window, &velo_var, &state).unwrap();
+    }
+}
+
+#[derive(Serialize)]
+struct GistFile {
+    content: String,
+}
+
+#[derive(Serialize)]
+struct GistCreateRequest {
+    description: String,
+    public: bool,
+    files: std::collections::HashMap<String, GistFile>,
+}
+
+pub fn shared_doc_handler(
+    app_state: Res<AppState>,
+    mut query: Query<&Interaction, (Changed<Interaction>, With<ShareDoc>)>,
+) {
+    for interaction in &mut query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                if let Some(doc_id) = app_state.current_document {
+                    let current_doc = app_state.docs.get(&doc_id).unwrap().clone();
+                    let contents = serde_json::to_string_pretty(&current_doc).unwrap();
+                    let mut files = std::collections::HashMap::new();
+                    let filename = "velo.json";
+                    let file = GistFile {
+                        content: contents.to_string(),
+                    };
+                    files.insert(filename.to_string(), file);
+
+                    let request = GistCreateRequest {
+                        description: "Velo Document".to_string(),
+                        public: true,
+                        files,
+                    };
+
+                    let mut request = ehttp::Request::post(
+                        "https://api.github.com/gists",
+                        serde_json::to_string_pretty(&request).unwrap(),
+                    );
+                    request.headers.insert(
+                        "Accept".to_string(),
+                        "application/vnd.github.v3+json".to_string(),
+                    );
+                    request.headers.insert(
+                        "Authorization".to_string(),
+                        format!("token {}", app_state.github_token.as_ref().unwrap()),
+                    );
+                    #[cfg(not(target_arch = "wasm32"))]
+                    let mut clipboard = arboard::Clipboard::new().unwrap();
+                    ehttp::fetch(request, move |result| {
+                        let res_string = result.unwrap().text().unwrap();
+                        let res_json: Value = serde_json::from_str(res_string.as_str()).unwrap();
+                        let files: Value = res_json["files"].clone();
+                        let velo = files["velo.json"].clone();
+                        #[cfg(not(target_arch = "wasm32"))]
+                        clipboard
+                            .set_text(format!(
+                                "https://staffengineer.github.io/velo?document={}",
+                                velo["raw_url"].to_string().replace("\"", "")
+                            ))
+                            .unwrap();
+                    });
+                }
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
     }
 }
 
