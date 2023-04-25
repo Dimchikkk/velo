@@ -34,6 +34,9 @@ pub struct SaveDoc;
 pub struct ExportToFile;
 
 #[derive(Component)]
+pub struct SetWindowProperty;
+
+#[derive(Component)]
 pub struct ImportFromFile;
 
 #[derive(Component)]

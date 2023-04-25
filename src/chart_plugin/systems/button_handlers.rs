@@ -480,6 +480,18 @@ pub fn export_to_file(
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+pub fn set_window_property(mut app_state: ResMut<AppState>) {
+    if let Some(doc_id) = app_state.current_document {
+        let current_doc = app_state.docs.get(&doc_id).unwrap().clone();
+        let value = serde_json::to_string_pretty(&current_doc).unwrap();
+        let window = wasm_bindgen::JsValue::from(web_sys::window().unwrap());
+        let velo_var = wasm_bindgen::JsValue::from("velo");
+        let state = wasm_bindgen::JsValue::from(value);
+        js_sys::Reflect::set(&window, &velo_var, &state).unwrap();
+    }
+}
+
 pub fn import_from_file(
     mut commands: Commands,
     mut query: Query<&Interaction, (Changed<Interaction>, With<ImportFromFile>)>,
