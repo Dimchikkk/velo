@@ -183,6 +183,8 @@ impl Plugin for ChartPlugin {
             import_from_file,
             import_from_url,
             load_doc_handler,
+            #[cfg(target_arch = "wasm32")]
+            set_window_property,
         ));
     }
 }
