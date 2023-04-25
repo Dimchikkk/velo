@@ -8,7 +8,7 @@ use super::ui_helpers::{
     self, AddTab, BottomPanel, ButtonAction, LeftPanel, LeftPanelControls, LeftPanelExplorer,
     MainPanel, Menu, NewDoc, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
 };
-use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl};
+use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
 use crate::resources::AppState;
 use crate::{BlinkTimer, TextPos};
@@ -187,6 +187,15 @@ pub fn init_layout(
     commands.entity(menu).add_child(import_file);
     #[cfg(not(target_arch = "wasm32"))]
     commands.entity(menu).add_child(import_url);
+    if app_state.github_token.is_some() {
+        let share_doc = add_menu_button(
+            &mut commands,
+            "Share Document (copy URL to clipboard)".to_string(),
+            &icon_font,
+            ShareDoc,
+        );
+        commands.entity(menu).add_child(share_doc);
+    }
     #[cfg(target_arch = "wasm32")]
     commands.entity(menu).add_child(set_window_prop);
 
