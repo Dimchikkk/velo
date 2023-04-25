@@ -326,6 +326,7 @@ pub fn new_doc_handler(
     mut doc_list_query: Query<Entity, With<DocList>>,
     mut app_state: ResMut<AppState>,
     asset_server: Res<AssetServer>,
+    mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
 ) {
     for interaction in &mut new_doc_query.iter_mut() {
         match *interaction {
@@ -368,6 +369,13 @@ pub fn new_doc_handler(
                     drop_last_checkpoint: false,
                 });
                 let button = add_list_item(&mut commands, &asset_server, doc_id, name, true);
+                for (mut visibility, doc) in delete_doc.iter_mut() {
+                    if doc.id == doc_id {
+                        *visibility = Visibility::Visible;
+                    } else {
+                        *visibility = Visibility::Hidden;
+                    }
+                }
                 let doc_list = doc_list_query.single_mut();
                 commands.entity(doc_list).add_child(button);
             }
