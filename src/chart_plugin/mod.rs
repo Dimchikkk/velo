@@ -12,7 +12,7 @@ use crate::canvas::arrow::events::{CreateArrowEvent, RedrawArrowEvent};
 use crate::resources::AppState;
 use crate::resources::LoadRequest;
 use crate::utils::ReflectableUuid;
-use std::time::Duration;
+use std::{fs, path::PathBuf, time::Duration};
 use uuid::Uuid;
 #[path = "ui_helpers/ui_helpers.rs"]
 pub mod ui_helpers;
@@ -111,6 +111,12 @@ pub struct UiState {
 pub struct BlinkTimer {
     timer: Timer,
 }
+
+#[derive(Debug, Default)]
+struct Config {
+    github_access_token: Option<String>,
+}
+
 impl Plugin for ChartPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiState>();
@@ -131,9 +137,10 @@ impl Plugin for ChartPlugin {
         app.add_event::<CreateArrowEvent>();
         app.add_event::<RedrawArrowEvent>();
 
-        app.add_startup_system(init_layout);
+        #[cfg(not(target_arch = "wasm32"))]
+        app.add_startup_systems((init, init_layout).chain());
         #[cfg(target_arch = "wasm32")]
-        app.add_startup_system(load_from_url);
+        app.add_startup_systems((load_from_url, init_layout));
 
         app.add_systems((
             rec_button_handlers,
@@ -185,6 +192,7 @@ impl Plugin for ChartPlugin {
             load_doc_handler,
             #[cfg(target_arch = "wasm32")]
             set_window_property,
+            shared_doc_handler,
         ));
     }
 }
@@ -351,4 +359,27 @@ fn load_from_url(mut commands: Commands) {
             task.detach();
         }
     }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn init(mut app_state: ResMut<AppState>) {
+    let config = read_config_file().unwrap_or_default();
+    if let Some(github_token) = &config.github_access_token {
+        app_state.github_token = Some(github_token.clone());
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn read_config_file() -> Option<Config> {
+    let home_dir = std::env::var("HOME").ok()?;
+    let config_file_path = PathBuf::from(&home_dir).join(".velo.toml");
+    let config_str = fs::read_to_string(config_file_path).ok()?;
+    let config_value: toml::Value = toml::from_str(&config_str).ok()?;
+    let mut config = Config::default();
+    if let Some(token) = config_value.get("github_access_token") {
+        if let Some(token_str) = token.as_str() {
+            config.github_access_token = Some(token_str.to_owned());
+        }
+    }
+    Some(config)
 }

@@ -8,6 +8,7 @@ use std::path::PathBuf;
 pub struct AppState {
     pub current_document: Option<ReflectableUuid>,
     pub docs: HashMap<ReflectableUuid, Doc>,
+    pub github_token: Option<String>,
 }
 
 #[derive(Resource, Debug)]
