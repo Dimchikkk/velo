@@ -43,6 +43,9 @@ pub struct ImportFromFile;
 pub struct ImportFromUrl;
 
 #[derive(Component)]
+pub struct ShareDoc;
+
+#[derive(Component)]
 pub struct DeleteDoc {
     pub id: ReflectableUuid,
 }
