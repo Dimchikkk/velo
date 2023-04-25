@@ -2918,6 +2918,7 @@ dependencies = [
  "serde_json",
  "url",
  "uuid",
+ "wasm-bindgen",
  "web-sys",
 ]
 
