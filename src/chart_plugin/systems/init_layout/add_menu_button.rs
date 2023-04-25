@@ -15,6 +15,7 @@ pub fn add_menu_button(
         "Export To File" => "\u{e2c6}",
         "Import From File" => "\u{e255}",
         "Import From URL" => "\u{e902}",
+        "Save document to window.velo" => "\u{e866}",
         _ => panic!("Unknown menu button tooltip label: {}", label),
     };
     let color = match label.as_str() {

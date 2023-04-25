@@ -172,6 +172,13 @@ pub fn init_layout(
         &icon_font,
         ImportFromUrl,
     );
+    #[cfg(target_arch = "wasm32")]
+    let set_window_prop = add_menu_button(
+        &mut commands,
+        "Save document to window.velo".to_string(),
+        &icon_font,
+        super::SetWindowProperty,
+    );
     commands.entity(menu).add_child(new_doc);
     commands.entity(menu).add_child(save_doc);
     #[cfg(not(target_arch = "wasm32"))]
@@ -180,6 +187,8 @@ pub fn init_layout(
     commands.entity(menu).add_child(import_file);
     #[cfg(not(target_arch = "wasm32"))]
     commands.entity(menu).add_child(import_url);
+    #[cfg(target_arch = "wasm32")]
+    commands.entity(menu).add_child(set_window_prop);
 
     let main_bottom = commands
         .spawn(NodeBundle {
