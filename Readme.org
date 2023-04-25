@@ -27,7 +27,7 @@ At work, I frequently rely on lucid.app to brainstorm ideas with my colleagues o
 - tabs support
 - documents support
 - load app state from url
-- ability to create sharable url of the document using "Share Document" button (.velo.toml should be created in user home directory containing GitHub access token with "gist" scope):
+- ability to create sharable url of the document using "Share Document" button (`.velo.toml` should be created in user home directory containing GitHub access token with "gist" scope):
 
 #+BEGIN_SRC toml
 github_access_token = "<github_access_token>"
