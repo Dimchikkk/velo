@@ -551,7 +551,7 @@ pub fn shared_doc_handler(
                         clipboard
                             .set_text(format!(
                                 "https://staffengineer.github.io/velo?document={}",
-                                velo["raw_url"].to_string().replace("\"", "")
+                                velo["raw_url"].to_string().replace('\"', "")
                             ))
                             .unwrap();
                     });
