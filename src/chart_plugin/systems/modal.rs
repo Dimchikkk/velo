@@ -40,6 +40,7 @@ fn delete_doc(
     commands: &mut Commands,
     pkv: &mut ResMut<PkvStore>,
     query_container: &mut Query<(Entity, &DocListItemContainer), With<DocListItemContainer>>,
+    delete_doc: &mut Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
 ) {
     let current_document = app_state.current_document.unwrap();
     let id_to_remove = current_document;
@@ -59,6 +60,13 @@ fn delete_doc(
         doc_id: None,
         drop_last_checkpoint: false,
     });
+    for (mut visibility, doc) in delete_doc.iter_mut() {
+        if doc.id == app_state.current_document.unwrap() {
+            *visibility = Visibility::Visible;
+        } else {
+            *visibility = Visibility::Hidden;
+        }
+    }
     remove_from_storage(pkv, id_to_remove, app_state.current_document.unwrap());
 }
 
@@ -156,6 +164,7 @@ pub fn confirm_modal(
     input: Res<Input<KeyCode>>,
     mut query_path: Query<(&Text, &EditableText), With<EditableText>>,
     comm_channels: Res<CommChannels>,
+    mut delete_doc_query: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
 ) {
     for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
@@ -216,6 +225,7 @@ pub fn confirm_modal(
                                 &mut commands,
                                 &mut pkv,
                                 &mut query_container,
+                                &mut delete_doc_query,
                             );
                         }
                         ModalAction::DeleteTab => delete_tab(&mut app_state, &mut commands),
@@ -284,6 +294,7 @@ pub fn confirm_modal(
                             &mut commands,
                             &mut pkv,
                             &mut query_container,
+                            &mut delete_doc_query,
                         );
                     }
                     ModalAction::DeleteTab => delete_tab(&mut app_state, &mut commands),
