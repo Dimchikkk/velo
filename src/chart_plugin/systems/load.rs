@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use base64::{engine::general_purpose, Engine};
 use bevy::{
     prelude::*,
@@ -7,44 +5,85 @@ use bevy::{
 };
 
 use super::{
+    load_doc_to_memory,
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
     MainPanel, VeloNodeContainer,
 };
-use crate::canvas::arrow::components::ArrowMeta;
 use crate::canvas::arrow::events::CreateArrowEvent;
-use crate::components::Doc;
-use crate::resources::{AppState, LoadRequest};
+use crate::{canvas::arrow::components::ArrowMeta, resources::LoadTabRequest};
+
+use crate::resources::{AppState, LoadDocRequest};
 use crate::utils::ReflectableUuid;
-use crate::{JsonNode, UiState, MAX_SAVED_DOCS_IN_MEMORY};
+use crate::{JsonNode, UiState};
 use bevy_pkv::PkvStore;
 use image::{load_from_memory_with_format, ImageFormat};
 use serde_json::Value;
 
-pub fn should_load(request: Option<Res<LoadRequest>>) -> bool {
+pub fn should_load_doc(request: Option<Res<LoadDocRequest>>) -> bool {
     request.is_some()
 }
 
-pub fn remove_load_request(world: &mut World) {
-    world.remove_resource::<LoadRequest>().unwrap();
+pub fn should_load_tab(request: Option<Res<LoadTabRequest>>) -> bool {
+    request.is_some()
 }
 
-pub fn load_json(
+pub fn remove_load_tab_request(world: &mut World) {
+    world.remove_resource::<LoadTabRequest>().unwrap();
+}
+
+pub fn remove_load_doc_request(world: &mut World) {
+    world.remove_resource::<LoadDocRequest>().unwrap();
+}
+
+pub fn load_doc(
+    request: Res<LoadDocRequest>,
+    mut app_state: ResMut<AppState>,
+    mut commands: Commands,
+    mut bottom_panel: Query<Entity, With<BottomPanel>>,
+    mut pkv: ResMut<PkvStore>,
+    asset_server: Res<AssetServer>,
+    mut tabs_query: Query<Entity, With<TabContainer>>,
+) {
+    let bottom_panel = bottom_panel.single_mut();
+    let doc_id = request.doc_id;
+    load_doc_to_memory(doc_id, &mut app_state, &mut pkv);
+
+    let mut tabs = vec![];
+    for entity in tabs_query.iter_mut() {
+        commands.entity(entity).despawn_recursive();
+    }
+    for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter() {
+        let tab_view: Entity = add_tab(
+            &mut commands,
+            &asset_server,
+            tab.name.clone(),
+            tab.id,
+            tab.is_active,
+        );
+        tabs.push(tab_view);
+        if tab.is_active {
+            commands.insert_resource(LoadTabRequest {
+                doc_id,
+                tab_id: tab.id,
+                drop_last_checkpoint: false,
+            });
+        }
+    }
+    commands.entity(bottom_panel).insert_children(0, &tabs);
+}
+
+pub fn load_tab(
     old_nodes: Query<Entity, With<VeloNodeContainer>>,
     mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
-    request: Res<LoadRequest>,
+    request: Res<LoadTabRequest>,
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrowEvent>,
-    mut selected_tabs_query: Query<Entity, With<TabContainer>>,
-    mut bottom_panel: Query<Entity, With<BottomPanel>>,
-    pkv: ResMut<PkvStore>,
     main_panel_query: Query<Entity, With<MainPanel>>,
-    asset_server: Res<AssetServer>,
 ) {
     *ui_state = UiState::default();
-    let bottom_panel = bottom_panel.single_mut();
 
     #[allow(unused)]
     for (entity, mut visibility) in &mut old_arrows.iter_mut() {
@@ -60,49 +99,10 @@ pub fn load_json(
     for entity in old_nodes.iter() {
         commands.entity(entity).despawn_recursive();
     }
-    for entity in selected_tabs_query.iter_mut() {
-        commands.entity(entity).despawn_recursive();
-    }
 
-    let doc_id = if request.doc_id.is_some() {
-        request.doc_id.unwrap()
-    } else {
-        app_state.current_document.unwrap()
-    };
-
-    if app_state.docs.contains_key(&doc_id) {
-        app_state.current_document = Some(doc_id);
-    } else if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
-        if docs.contains_key(&doc_id) {
-            while (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
-                let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
-                app_state.docs.remove(&keys[0]);
-            }
-            app_state
-                .docs
-                .insert(doc_id, docs.get(&doc_id).unwrap().clone());
-            app_state.current_document = Some(doc_id);
-        } else {
-            panic!("Document not found in pkv");
-        }
-    }
-    let doc_id = app_state.current_document.unwrap();
-
-    let mut tabs = vec![];
-    for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter() {
-        let tab_view = add_tab(
-            &mut commands,
-            &asset_server,
-            tab.name.clone(),
-            tab.id,
-            tab.is_active,
-        );
-        tabs.push(tab_view);
-    }
-    commands.entity(bottom_panel).insert_children(0, &tabs);
-
+    let doc_id = request.doc_id;
     for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter_mut() {
-        if tab.is_active {
+        if tab.id == request.tab_id {
             if tab.checkpoints.is_empty() {
                 break;
             }

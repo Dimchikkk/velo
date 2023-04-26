@@ -6,7 +6,7 @@ use bevy::{
 use super::{ui_helpers::ScrollingList, DeleteDoc};
 use crate::chart_plugin::ui_helpers::DocListItemButton;
 
-use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
 
 pub fn list_item_click(
     mut interaction_query: Query<
@@ -21,15 +21,13 @@ pub fn list_item_click(
         match *interaction {
             Interaction::Clicked => {
                 if Some(doc_list_item.id) != state.current_document {
-                    commands.insert_resource(SaveRequest {
-                        doc_id: Some(state.current_document.unwrap()),
-                        tab_id: None,
+                    commands.insert_resource(SaveDocRequest {
+                        doc_id: state.current_document.unwrap(),
                         path: None,
                     });
                     state.current_document = Some(doc_list_item.id);
-                    commands.insert_resource(LoadRequest {
-                        doc_id: Some(doc_list_item.id),
-                        drop_last_checkpoint: false,
+                    commands.insert_resource(LoadDocRequest {
+                        doc_id: doc_list_item.id,
                     });
                     for (mut visibility, doc) in delete_doc.iter_mut() {
                         if doc.id == doc_list_item.id {
