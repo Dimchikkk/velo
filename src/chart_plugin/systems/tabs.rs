@@ -8,17 +8,18 @@ use uuid::Uuid;
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
 use crate::components::Tab;
-use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::resources::{AppState, LoadDocRequest, LoadTabRequest, SaveTabRequest};
 use crate::utils::ReflectableUuid;
 use crate::{get_timestamp, UiState};
 
-pub fn selected_tab_handler(
+pub fn select_tab_handler(
     mut commands: Commands,
     mut interaction_query: Query<
         (&Interaction, &TabButton),
         (Changed<Interaction>, With<TabButton>),
     >,
     mut state: ResMut<AppState>,
+    mut delete_tab: Query<(&mut Visibility, &DeleteTab), With<DeleteTab>>,
 ) {
     for (interaction, selected_tab) in &mut interaction_query {
         match *interaction {
@@ -31,14 +32,13 @@ pub fn selected_tab_handler(
                     .tabs
                     .iter_mut()
                 {
+                    if tab.is_active && tab.id == selected_tab.id {
+                        return;
+                    }
                     if tab.is_active {
-                        if tab.id == selected_tab.id {
-                            return;
-                        }
-                        commands.insert_resource(SaveRequest {
-                            doc_id: None,
-                            tab_id: Some(tab.id),
-                            path: None,
+                        commands.insert_resource(SaveTabRequest {
+                            tab_id: tab.id,
+                            doc_id: current_document,
                         });
                     }
                 }
@@ -52,10 +52,19 @@ pub fn selected_tab_handler(
                     tab.is_active = tab.id == selected_tab.id;
                 }
 
-                commands.insert_resource(LoadRequest {
-                    doc_id: None,
+                commands.insert_resource(LoadTabRequest {
+                    doc_id: current_document,
+                    tab_id: selected_tab.id,
                     drop_last_checkpoint: false,
                 });
+
+                for (mut visibility, tab) in delete_tab.iter_mut() {
+                    if tab.id == selected_tab.id {
+                        *visibility = Visibility::Visible;
+                    } else {
+                        *visibility = Visibility::Hidden;
+                    }
+                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -66,20 +75,19 @@ pub fn selected_tab_handler(
 pub fn add_tab_handler(
     mut commands: Commands,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<AddTab>)>,
-    mut state: ResMut<AppState>,
+    mut app_state: ResMut<AppState>,
 ) {
     for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let tab_id = ReflectableUuid(Uuid::new_v4());
-                let current_document = state.current_document.unwrap();
-                let tabs = &mut state.docs.get_mut(&current_document).unwrap().tabs;
+                let current_document = app_state.current_document.unwrap();
+                let tabs = &mut app_state.docs.get_mut(&current_document).unwrap().tabs;
                 for tab in tabs.iter_mut() {
                     if tab.is_active {
-                        commands.insert_resource(SaveRequest {
-                            doc_id: None,
-                            tab_id: Some(tab.id),
-                            path: None,
+                        commands.insert_resource(SaveTabRequest {
+                            tab_id: tab.id,
+                            doc_id: current_document,
                         });
                     }
                     tab.is_active = false;
@@ -91,9 +99,8 @@ pub fn add_tab_handler(
                     checkpoints: VecDeque::new(),
                     is_active: true,
                 });
-                commands.insert_resource(LoadRequest {
-                    doc_id: None,
-                    drop_last_checkpoint: false,
+                commands.insert_resource(LoadDocRequest {
+                    doc_id: app_state.current_document.unwrap(),
                 });
             }
             Interaction::Hovered => {}

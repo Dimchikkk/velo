@@ -1,7 +1,9 @@
+use std::collections::HashMap;
 use std::{collections::VecDeque, time::Duration};
 
 use bevy::{prelude::*, window::PrimaryWindow};
 
+use bevy_pkv::PkvStore;
 use serde::Serialize;
 use serde_json::{json, Value};
 use uuid::Uuid;
@@ -13,10 +15,13 @@ use super::ui_helpers::{
     DocList, DocListItemButton, EditableText, GenericButton, NewDoc, SaveDoc, TextManipulation,
     TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
-use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
+use super::{
+    load_doc_to_memory, ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc,
+    VeloNodeContainer,
+};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, Tab};
-use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
 use crate::utils::ReflectableUuid;
 
 pub fn rec_button_handlers(
@@ -358,24 +363,20 @@ pub fn new_doc_handler(
                         tags: vec![],
                     },
                 );
-                commands.insert_resource(SaveRequest {
-                    doc_id: Some(app_state.current_document.unwrap()),
-                    tab_id: None,
+                commands.insert_resource(SaveDocRequest {
+                    doc_id: app_state.current_document.unwrap(),
                     path: None,
                 });
                 app_state.current_document = Some(doc_id);
-                commands.insert_resource(LoadRequest {
-                    doc_id: Some(doc_id),
-                    drop_last_checkpoint: false,
-                });
-                let button = add_list_item(&mut commands, &asset_server, doc_id, name, true);
-                for (mut visibility, doc) in delete_doc.iter_mut() {
-                    if doc.id == doc_id {
-                        *visibility = Visibility::Visible;
-                    } else {
-                        *visibility = Visibility::Hidden;
-                    }
-                }
+                commands.insert_resource(LoadDocRequest { doc_id });
+                let button = add_list_item(
+                    &mut commands,
+                    Some(&mut delete_doc),
+                    &asset_server,
+                    doc_id,
+                    name,
+                    true,
+                );
                 let doc_list = doc_list_query.single_mut();
                 commands.entity(doc_list).add_child(button);
             }
@@ -418,16 +419,32 @@ pub fn delete_doc_handler(
     mut commands: Commands,
     mut delete_doc_query: Query<&Interaction, (Changed<Interaction>, With<DeleteDoc>)>,
     mut ui_state: ResMut<UiState>,
-    app_state: Res<AppState>,
+    mut app_state: ResMut<AppState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    pkv: Res<PkvStore>,
 ) {
     let window = windows.single();
     for interaction in &mut delete_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                if app_state.docs.len() < 2 {
-                    return;
+                if app_state.docs.len() == 1 {
+                    if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+                        if docs.len() > 1 {
+                            for (id, doc) in docs.iter() {
+                                if app_state.docs.len() != 1 {
+                                    break;
+                                }
+                                app_state.docs.insert(*id, doc.clone());
+                            }
+                        } else {
+                            // do not allow deletion if there is less than two docs
+                            return;
+                        }
+                    } else {
+                        // do not allow deletion if there is less than two docs
+                        return;
+                    }
                 }
                 let id = ReflectableUuid(Uuid::new_v4());
                 *ui_state = UiState::default();
@@ -454,9 +471,8 @@ pub fn save_doc_handler(
     for interaction in &mut save_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                commands.insert_resource(SaveRequest {
-                    doc_id: Some(state.current_document.unwrap()),
-                    tab_id: None,
+                commands.insert_resource(SaveDocRequest {
+                    doc_id: state.current_document.unwrap(),
                     path: None,
                 });
             }
@@ -490,8 +506,9 @@ pub fn export_to_file(
 }
 
 #[cfg(target_arch = "wasm32")]
-pub fn set_window_property(mut app_state: ResMut<AppState>) {
+pub fn set_window_property(mut app_state: ResMut<AppState>, mut pkv: ResMut<PkvStore>) {
     if let Some(doc_id) = app_state.current_document {
+        load_doc_to_memory(doc_id, &mut app_state, &mut pkv);
         let current_doc = app_state.docs.get(&doc_id).unwrap().clone();
         let value = serde_json::to_string_pretty(&current_doc).unwrap();
         let window = wasm_bindgen::JsValue::from(web_sys::window().unwrap());
@@ -514,13 +531,15 @@ struct GistCreateRequest {
 }
 
 pub fn shared_doc_handler(
-    app_state: Res<AppState>,
+    mut app_state: ResMut<AppState>,
     mut query: Query<&Interaction, (Changed<Interaction>, With<ShareDoc>)>,
+    mut pkv: ResMut<PkvStore>,
 ) {
     for interaction in &mut query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
                 if let Some(doc_id) = app_state.current_document {
+                    load_doc_to_memory(doc_id, &mut app_state, &mut pkv);
                     let current_doc = app_state.docs.get(&doc_id).unwrap().clone();
                     let contents = serde_json::to_string_pretty(&current_doc).unwrap();
                     let mut files = std::collections::HashMap::new();
