@@ -36,7 +36,7 @@ pub fn add_list(
                 overflow: Overflow::Hidden,
                 ..default()
             },
-            background_color: Color::rgb(212.0 / 255.0, 225.0 / 255.0, 87.0 / 255.0).into(),
+            background_color: Color::rgb(158., 158., 158.).into(),
             ..default()
         })
         .id();

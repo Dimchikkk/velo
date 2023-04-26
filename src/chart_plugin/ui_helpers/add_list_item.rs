@@ -34,7 +34,7 @@ pub fn add_list_item(
     let root = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(205.0 / 255.0, 220.0 / 255.0, 57.0 / 255.0).into(),
+                background_color: Color::rgb(255., 242., 230.).into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
@@ -52,7 +52,7 @@ pub fn add_list_item(
     let doc_button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(205.0 / 255.0, 220.0 / 255.0, 57.0 / 255.0).into(),
+                background_color: Color::rgb(255., 242., 230.).into(),
                 style: Style {
                     size: Size::new(Val::Percent(90.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
@@ -107,7 +107,7 @@ pub fn add_list_item(
                 } else {
                     Visibility::Hidden
                 },
-                background_color: Color::rgb(205.0 / 255.0, 220.0 / 255.0, 57.0 / 255.0).into(),
+                background_color: Color::rgb(255., 242., 230.).into(),
                 style: Style {
                     margin: UiRect {
                         left: Val::Px(3.),
