@@ -1,4 +1,5 @@
 use bevy::{prelude::*, text::BreakLineOn};
+use bevy_ui_borders::BorderColor;
 
 use crate::chart_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip};
 
@@ -24,22 +25,26 @@ pub fn add_menu_button(
         _ => Color::rgb(0.0 / 255.0, 150.0 / 255.0, 136.0 / 255.0),
     };
     let top = commands
-        .spawn(NodeBundle {
-            background_color: Color::BLACK.with_a(0.1).into(),
-            style: Style {
-                flex_direction: FlexDirection::Column,
-                align_self: AlignSelf::Stretch,
-                margin: UiRect {
-                    left: Val::Px(10.),
-                    right: Val::Px(10.),
-                    top: Val::Px(3.),
-                    bottom: Val::Px(2.),
+        .spawn((
+            NodeBundle {
+                background_color: Color::BLACK.with_a(0.1).into(),
+                style: Style {
+                    flex_direction: FlexDirection::Column,
+                    align_self: AlignSelf::Stretch,
+                    border: UiRect::all(Val::Px(1.)),
+                    margin: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(10.),
+                        top: Val::Px(3.),
+                        bottom: Val::Px(3.),
+                    },
+                    size: Size::new(Val::Percent(2.3), Val::Percent(85.)),
+                    ..default()
                 },
-                size: Size::new(Val::Percent(2.5), Val::Percent(90.)),
                 ..default()
             },
-            ..default()
-        })
+            BorderColor(Color::BLACK),
+        ))
         .id();
     let button = commands
         .spawn((
