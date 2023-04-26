@@ -11,13 +11,12 @@ use bevy_pkv::PkvStore;
 use uuid::Uuid;
 
 use super::ui_helpers::ScrollingList;
-use crate::chart_plugin::ui_helpers::{add_list_item, add_tab, DocList};
+use crate::chart_plugin::ui_helpers::{add_list_item, DocList};
 use crate::components::{Doc, Tab};
-use crate::resources::{AppState, LoadRequest};
+use crate::resources::{AppState, LoadDocRequest};
 use crate::utils::ReflectableUuid;
 
 pub fn add_list(
-    bottom_panel: Entity,
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     state: &mut ResMut<AppState>,
@@ -25,10 +24,7 @@ pub fn add_list(
 ) -> Entity {
     if let Ok(last_saved) = pkv.get::<ReflectableUuid>("last_saved") {
         state.current_document = Some(last_saved);
-        commands.insert_resource(LoadRequest {
-            doc_id: Some(last_saved),
-            drop_last_checkpoint: false,
-        });
+        commands.insert_resource(LoadDocRequest { doc_id: last_saved });
     }
 
     let top = commands
@@ -69,6 +65,7 @@ pub fn add_list(
             let name = names.get(key).unwrap();
             let button = add_list_item(
                 commands,
+                None,
                 asset_server,
                 *key,
                 name.clone(),
@@ -81,7 +78,7 @@ pub fn add_list(
         let tab_name: String = "Tab 1".to_string();
         let tabs = vec![Tab {
             id: tab_id,
-            name: tab_name.clone(),
+            name: tab_name,
             checkpoints: VecDeque::new(),
             is_active: true,
         }];
@@ -96,11 +93,10 @@ pub fn add_list(
                 tags: vec![],
             },
         );
-        let button = add_list_item(commands, asset_server, doc_id, name, true);
+        let button = add_list_item(commands, None, asset_server, doc_id, name, true);
         state.current_document = Some(doc_id);
-        let tab_view = add_tab(commands, asset_server, tab_name, tab_id, true);
-        commands.entity(bottom_panel).add_child(tab_view);
         commands.entity(node).add_child(button);
+        commands.insert_resource(LoadDocRequest { doc_id });
     }
     commands.entity(top).add_child(node);
     top

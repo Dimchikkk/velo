@@ -10,10 +10,13 @@ use image::*;
 use std::convert::TryInto;
 use uuid::Uuid;
 
-use crate::{AddRectEvent, BlinkTimer, UiState};
+use crate::{
+    resources::{LoadTabRequest, SaveTabRequest},
+    AddRectEvent, BlinkTimer, UiState,
+};
 
 use super::ui_helpers::{get_sections, EditableText};
-use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::resources::{AppState, SaveDocRequest};
 
 pub fn keyboard_input_system(
     mut commands: Commands,
@@ -44,22 +47,29 @@ pub fn keyboard_input_system(
             scale_factor,
         );
     } else if command && shift && input.just_pressed(KeyCode::S) {
-        commands.insert_resource(SaveRequest {
-            doc_id: Some(app_state.current_document.unwrap()),
-            tab_id: None,
+        commands.insert_resource(SaveDocRequest {
+            doc_id: app_state.current_document.unwrap(),
             path: None,
         });
     } else if command && input.just_pressed(KeyCode::S) {
-        commands.insert_resource(SaveRequest {
-            doc_id: None,
-            tab_id: None,
-            path: None,
-        });
+        if let Some(current_doc) = app_state.docs.get(&app_state.current_document.unwrap()) {
+            if let Some(active_tab) = current_doc.tabs.iter().find(|t| t.is_active) {
+                commands.insert_resource(SaveTabRequest {
+                    doc_id: app_state.current_document.unwrap(),
+                    tab_id: active_tab.id,
+                });
+            }
+        }
     } else if command && input.just_pressed(KeyCode::L) {
-        commands.insert_resource(LoadRequest {
-            doc_id: None,
-            drop_last_checkpoint: true,
-        });
+        if let Some(current_doc) = app_state.docs.get(&app_state.current_document.unwrap()) {
+            if let Some(active_tab) = current_doc.tabs.iter().find(|t| t.is_active) {
+                commands.insert_resource(LoadTabRequest {
+                    doc_id: app_state.current_document.unwrap(),
+                    tab_id: active_tab.id,
+                    drop_last_checkpoint: true,
+                });
+            }
+        }
     } else {
         if ui_state.entity_to_edit.is_some()
             || ui_state.doc_to_edit.is_some()

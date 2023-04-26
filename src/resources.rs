@@ -12,16 +12,27 @@ pub struct AppState {
 }
 
 #[derive(Resource, Debug)]
-pub struct SaveRequest {
-    pub doc_id: Option<ReflectableUuid>, // None means current doc
-    pub tab_id: Option<ReflectableUuid>, // None means save to active tab
-    pub path: Option<PathBuf>,           // Save current document to file
+pub struct SaveDocRequest {
+    pub doc_id: ReflectableUuid,
+    pub path: Option<PathBuf>, // Save current document to file
 }
 
 #[derive(Resource, Debug)]
-pub struct LoadRequest {
-    pub doc_id: Option<ReflectableUuid>, // None means current doc
-    pub drop_last_checkpoint: bool,      // Useful for undo functionality
+pub struct SaveTabRequest {
+    pub doc_id: ReflectableUuid,
+    pub tab_id: ReflectableUuid,
+}
+
+#[derive(Resource, Debug)]
+pub struct LoadDocRequest {
+    pub doc_id: ReflectableUuid,
+}
+
+#[derive(Resource, Debug)]
+pub struct LoadTabRequest {
+    pub doc_id: ReflectableUuid,
+    pub tab_id: ReflectableUuid,
+    pub drop_last_checkpoint: bool, // Useful for undo functionality
 }
 
 #[derive(Resource)]
