@@ -4,15 +4,22 @@ use bevy::{
     text::BreakLineOn,
     window::{PrimaryWindow, WindowResized},
 };
+use bevy_pkv::PkvStore;
 use bevy_ui_borders::Outline;
 use serde::{Deserialize, Serialize};
 
-use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos, ArrowType};
-use crate::canvas::arrow::events::{CreateArrowEvent, RedrawArrowEvent};
 use crate::resources::AppState;
-use crate::resources::LoadRequest;
+
 use crate::utils::ReflectableUuid;
-use std::{fs, path::PathBuf, time::Duration};
+use crate::{
+    canvas::arrow::components::{ArrowConnect, ArrowConnectPos, ArrowType},
+    components::Doc,
+};
+use crate::{
+    canvas::arrow::events::{CreateArrowEvent, RedrawArrowEvent},
+    resources::LoadTabRequest,
+};
+use std::{collections::HashMap, fs, path::PathBuf, time::Duration};
 use uuid::Uuid;
 #[path = "ui_helpers/ui_helpers.rs"]
 pub mod ui_helpers;
@@ -155,15 +162,27 @@ impl Plugin for ChartPlugin {
         ));
 
         app.add_systems(
-            (save_json, remove_save_request)
+            (save_doc, remove_save_doc_request)
                 .chain()
-                .distributive_run_if(should_save),
+                .distributive_run_if(should_save_doc),
         );
 
         app.add_systems(
-            (load_json, remove_load_request)
+            (save_tab, remove_save_tab_request)
                 .chain()
-                .distributive_run_if(should_load),
+                .distributive_run_if(should_save_tab),
+        );
+
+        app.add_systems(
+            (load_doc, remove_load_doc_request)
+                .chain()
+                .distributive_run_if(should_load_doc),
+        );
+
+        app.add_systems(
+            (load_tab, remove_load_tab_request)
+                .chain()
+                .distributive_run_if(should_load_tab),
         );
 
         app.add_systems((
@@ -185,7 +204,7 @@ impl Plugin for ChartPlugin {
 
         app.add_systems((
             button_generic_handler,
-            selected_tab_handler,
+            select_tab_handler,
             export_to_file,
             import_from_file,
             import_from_url,
@@ -324,13 +343,22 @@ fn create_new_rectangle(
     }
 }
 
-fn resize_notificator(mut commands: Commands, resize_event: Res<Events<WindowResized>>) {
+fn resize_notificator(
+    mut commands: Commands,
+    resize_event: Res<Events<WindowResized>>,
+    app_state: Res<AppState>,
+) {
     let mut reader = resize_event.get_reader();
     for _ in reader.iter(&resize_event) {
-        commands.insert_resource(LoadRequest {
-            doc_id: None,
-            drop_last_checkpoint: false,
-        });
+        if let Some(current_doc) = app_state.docs.get(&app_state.current_document.unwrap()) {
+            if let Some(active_tab) = current_doc.tabs.iter().find(|t| t.is_active) {
+                commands.insert_resource(LoadTabRequest {
+                    doc_id: current_doc.id,
+                    tab_id: active_tab.id,
+                    drop_last_checkpoint: false,
+                });
+            }
+        }
     }
 }
 
@@ -382,4 +410,27 @@ fn read_config_file() -> Option<Config> {
         }
     }
     Some(config)
+}
+
+pub fn load_doc_to_memory(
+    doc_id: ReflectableUuid,
+    app_state: &mut ResMut<AppState>,
+    pkv: &mut ResMut<PkvStore>,
+) {
+    if app_state.docs.contains_key(&doc_id) {
+        return;
+    }
+    if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+        if docs.contains_key(&doc_id) {
+            let keys = app_state.docs.keys().cloned().collect::<Vec<_>>();
+            while (app_state.docs.len() as i32) >= MAX_SAVED_DOCS_IN_MEMORY {
+                app_state.docs.remove(&keys[0]);
+            }
+            app_state
+                .docs
+                .insert(doc_id, docs.get(&doc_id).unwrap().clone());
+        } else {
+            panic!("Document not found in pkv");
+        }
+    }
 }

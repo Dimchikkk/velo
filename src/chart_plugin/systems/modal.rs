@@ -10,7 +10,7 @@ use linkify::{LinkFinder, LinkKind};
 use super::ui_helpers::{DocListItemContainer, ModalCancel, ModalConfirm, ModalTop};
 use super::{add_list_item, CommChannels, DeleteDoc, DocList, EditableText, ModalAction};
 use crate::components::Doc;
-use crate::resources::{AppState, LoadRequest, SaveRequest};
+use crate::resources::{AppState, LoadDocRequest, LoadTabRequest, SaveDocRequest};
 use crate::utils::ReflectableUuid;
 use crate::UiState;
 
@@ -47,18 +47,19 @@ fn delete_doc(
     for (entity, button) in query_container.iter_mut() {
         if button.id == id_to_remove {
             commands.entity(entity).despawn_recursive();
+            break;
         }
     }
     app_state.docs.remove(&current_document);
+    remove_from_storage(pkv, id_to_remove, app_state.current_document.unwrap());
     for (_, button) in query_container.iter_mut() {
         if button.id != id_to_remove {
             app_state.current_document = Some(button.id);
             break;
         }
     }
-    commands.insert_resource(LoadRequest {
-        doc_id: None,
-        drop_last_checkpoint: false,
+    commands.insert_resource(LoadDocRequest {
+        doc_id: app_state.current_document.unwrap(),
     });
     for (mut visibility, doc) in delete_doc.iter_mut() {
         if doc.id == app_state.current_document.unwrap() {
@@ -67,7 +68,6 @@ fn delete_doc(
             *visibility = Visibility::Hidden;
         }
     }
-    remove_from_storage(pkv, id_to_remove, app_state.current_document.unwrap());
 }
 
 fn delete_tab(app_state: &mut ResMut<AppState>, commands: &mut Commands) {
@@ -94,8 +94,9 @@ fn delete_tab(app_state: &mut ResMut<AppState>, commands: &mut Commands) {
         .last_mut()
         .unwrap();
     last_tab.is_active = true;
-    commands.insert_resource(LoadRequest {
-        doc_id: None,
+    commands.insert_resource(LoadTabRequest {
+        doc_id: current_document,
+        tab_id: last_tab.id,
         drop_last_checkpoint: false,
     });
 }
@@ -107,6 +108,7 @@ pub fn load_doc_handler(
     comm_channels: Res<CommChannels>,
     asset_server: Res<AssetServer>,
     mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
+    pkv: Res<PkvStore>,
 ) {
     if comm_channels.rx.is_empty() {
         return;
@@ -116,38 +118,28 @@ pub fn load_doc_handler(
         .try_recv()
         .expect("Failed to receive document string");
     let import_document: Doc = serde_json::from_str(&r).expect("Failed to deserialize document");
-    if app_state.docs.contains_key(&import_document.id) {
-        return;
+    if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+        if docs.contains_key(&import_document.id) {
+            return;
+        }
     }
-    commands.insert_resource(SaveRequest {
-        doc_id: Some(app_state.current_document.unwrap()),
-        tab_id: None,
-        path: None,
-    });
     let button = add_list_item(
         &mut commands,
+        Some(&mut delete_doc),
         &asset_server,
         import_document.id,
         import_document.name.clone(),
         true,
     );
-    commands.entity(doc_list_query.single()).add_child(button);
 
+    commands.entity(doc_list_query.single()).add_child(button);
     app_state
         .docs
         .insert(import_document.id, import_document.clone());
     app_state.current_document = Some(import_document.id);
-    commands.insert_resource(LoadRequest {
-        drop_last_checkpoint: false,
-        doc_id: Some(import_document.id),
+    commands.insert_resource(LoadDocRequest {
+        doc_id: import_document.id,
     });
-    for (mut visibility, doc) in delete_doc.iter_mut() {
-        if doc.id == import_document.id {
-            *visibility = Visibility::Visible;
-        } else {
-            *visibility = Visibility::Hidden;
-        }
-    }
 }
 
 pub fn confirm_modal(
@@ -174,9 +166,8 @@ pub fn confirm_modal(
                         if editable_text.id == path_modal_top.id {
                             match path_modal_confirm.action {
                                 ModalAction::SaveToFile => {
-                                    commands.insert_resource(SaveRequest {
-                                        doc_id: None,
-                                        tab_id: None,
+                                    commands.insert_resource(SaveDocRequest {
+                                        doc_id: app_state.current_document.unwrap(),
                                         path: Some(PathBuf::from(text.sections[0].value.trim())),
                                     });
                                     break;
@@ -243,9 +234,8 @@ pub fn confirm_modal(
                     if editable_text.id == path_modal_top.id {
                         match path_modal_top.action {
                             ModalAction::SaveToFile => {
-                                commands.insert_resource(SaveRequest {
-                                    doc_id: None,
-                                    tab_id: None,
+                                commands.insert_resource(SaveDocRequest {
+                                    doc_id: app_state.current_document.unwrap(),
                                     path: Some(PathBuf::from(text.sections[0].value.trim())),
                                 });
                                 break;
