@@ -8,7 +8,9 @@ use bevy_pkv::PkvStore;
 use linkify::{LinkFinder, LinkKind};
 
 use super::ui_helpers::{DocListItemContainer, ModalCancel, ModalConfirm, ModalTop};
-use super::{add_list_item, CommChannels, DeleteDoc, DocList, EditableText, ModalAction};
+use super::{
+    add_list_item, CommChannels, DeleteDoc, DocList, EditableText, ModalAction, TabContainer,
+};
 use crate::components::Doc;
 use crate::resources::{AppState, LoadDocRequest, LoadTabRequest, SaveDocRequest};
 use crate::utils::ReflectableUuid;
@@ -40,7 +42,6 @@ fn delete_doc(
     commands: &mut Commands,
     pkv: &mut ResMut<PkvStore>,
     query_container: &mut Query<(Entity, &DocListItemContainer), With<DocListItemContainer>>,
-    delete_doc: &mut Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
 ) {
     let current_document = app_state.current_document.unwrap();
     let id_to_remove = current_document;
@@ -61,17 +62,28 @@ fn delete_doc(
     commands.insert_resource(LoadDocRequest {
         doc_id: app_state.current_document.unwrap(),
     });
-    for (mut visibility, doc) in delete_doc.iter_mut() {
-        if doc.id == app_state.current_document.unwrap() {
-            *visibility = Visibility::Visible;
-        } else {
-            *visibility = Visibility::Hidden;
-        }
-    }
 }
 
-fn delete_tab(app_state: &mut ResMut<AppState>, commands: &mut Commands) {
+fn delete_tab(
+    app_state: &mut ResMut<AppState>,
+    commands: &mut Commands,
+    query_container: &mut Query<(Entity, &TabContainer), With<TabContainer>>,
+) {
     let current_document = app_state.current_document.unwrap();
+    let tab_to_remove = app_state
+        .docs
+        .get_mut(&current_document)
+        .unwrap()
+        .tabs
+        .iter()
+        .find(|x| x.is_active)
+        .unwrap();
+    for (entity, tab) in query_container.iter_mut() {
+        if tab.id == tab_to_remove.id {
+            commands.entity(entity).despawn_recursive();
+            break;
+        }
+    }
     let index = app_state
         .docs
         .get_mut(&current_document)
@@ -151,12 +163,15 @@ pub fn confirm_modal(
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
-    mut query_container: Query<(Entity, &DocListItemContainer), With<DocListItemContainer>>,
+    mut doc_list_query_container: Query<
+        (Entity, &DocListItemContainer),
+        With<DocListItemContainer>,
+    >,
+    mut tab_query_container: Query<(Entity, &TabContainer), With<TabContainer>>,
     mut pkv: ResMut<PkvStore>,
     input: Res<Input<KeyCode>>,
     mut query_path: Query<(&Text, &EditableText), With<EditableText>>,
     comm_channels: Res<CommChannels>,
-    mut delete_doc_query: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
 ) {
     for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
@@ -215,11 +230,12 @@ pub fn confirm_modal(
                                 &mut app_state,
                                 &mut commands,
                                 &mut pkv,
-                                &mut query_container,
-                                &mut delete_doc_query,
+                                &mut doc_list_query_container,
                             );
                         }
-                        ModalAction::DeleteTab => delete_tab(&mut app_state, &mut commands),
+                        ModalAction::DeleteTab => {
+                            delete_tab(&mut app_state, &mut commands, &mut tab_query_container)
+                        }
                     }
                 }
                 commands.entity(entity).despawn_recursive();
@@ -283,11 +299,12 @@ pub fn confirm_modal(
                             &mut app_state,
                             &mut commands,
                             &mut pkv,
-                            &mut query_container,
-                            &mut delete_doc_query,
+                            &mut doc_list_query_container,
                         );
                     }
-                    ModalAction::DeleteTab => delete_tab(&mut app_state, &mut commands),
+                    ModalAction::DeleteTab => {
+                        delete_tab(&mut app_state, &mut commands, &mut tab_query_container)
+                    }
                 }
             }
             commands.entity(entity).despawn_recursive();
