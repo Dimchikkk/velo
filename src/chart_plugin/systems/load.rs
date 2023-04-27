@@ -7,7 +7,7 @@ use bevy::{
 use super::{
     load_doc_to_memory,
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
-    MainPanel, VeloNodeContainer,
+    DeleteDoc, DeleteTab, MainPanel, VeloNodeContainer,
 };
 use crate::canvas::arrow::events::CreateArrowEvent;
 use crate::{canvas::arrow::components::ArrowMeta, resources::LoadTabRequest};
@@ -43,9 +43,17 @@ pub fn load_doc(
     mut pkv: ResMut<PkvStore>,
     asset_server: Res<AssetServer>,
     mut tabs_query: Query<Entity, With<TabContainer>>,
+    mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
 ) {
     let bottom_panel = bottom_panel.single_mut();
     let doc_id = request.doc_id;
+    for (mut visibility, doc) in delete_doc.iter_mut() {
+        if doc.id == doc_id {
+            *visibility = Visibility::Visible;
+        } else {
+            *visibility = Visibility::Hidden;
+        }
+    }
     load_doc_to_memory(doc_id, &mut app_state, &mut pkv);
 
     let mut tabs = vec![];
@@ -82,6 +90,7 @@ pub fn load_tab(
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrowEvent>,
     main_panel_query: Query<Entity, With<MainPanel>>,
+    mut delete_tab: Query<(&mut Visibility, &DeleteTab), (With<DeleteTab>, Without<ArrowMeta>)>,
 ) {
     *ui_state = UiState::default();
 
@@ -101,6 +110,13 @@ pub fn load_tab(
     }
 
     let doc_id = request.doc_id;
+    for (mut visibility, tab) in delete_tab.iter_mut() {
+        if tab.id == request.tab_id {
+            *visibility = Visibility::Visible;
+        } else {
+            *visibility = Visibility::Hidden;
+        }
+    }
     for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter_mut() {
         if tab.id == request.tab_id {
             if tab.checkpoints.is_empty() {
