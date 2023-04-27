@@ -361,7 +361,7 @@ mod tests {
         assert!(saved_docs.get(&doc_id).unwrap().tabs[0].is_active);
         // Check that the tags were saved to the PKV store
         let saved_tags: HashMap<ReflectableUuid, Vec<String>> = pkv.get("tags").unwrap();
-        let expected_tags = existing_tags.clone();
+        let expected_tags = existing_tags;
         assert_eq!(saved_tags.get(&doc_id).unwrap(), &expected_tags);
         // Check that the name was saved to the PKV store
         let saved_names: HashMap<ReflectableUuid, String> = pkv.get("names").unwrap();
