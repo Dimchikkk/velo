@@ -224,7 +224,7 @@ mod tests {
         PkvStore::new("test", "test").clear().unwrap();
         app.insert_resource(PkvStore::new("test", "test"));
         app.insert_resource(app_state);
-        
+
         // Run systems
         app.update();
 
@@ -236,7 +236,10 @@ mod tests {
         assert_eq!(saved_docs.get(&doc_id).unwrap().tabs[0].is_active, true);
         // Check that the tags were saved to the PKV store
         let saved_tags: HashMap<ReflectableUuid, Vec<String>> = pkv.get("tags").unwrap();
-        assert_eq!(saved_tags.get(&doc_id).unwrap(), &vec!["test_tag".to_string()]);
+        assert_eq!(
+            saved_tags.get(&doc_id).unwrap(),
+            &vec!["test_tag".to_string()]
+        );
         // Check that the name was saved to the PKV store
         let saved_names: HashMap<ReflectableUuid, String> = pkv.get("names").unwrap();
         assert_eq!(saved_names.get(&doc_id).unwrap(), "test_doc");
