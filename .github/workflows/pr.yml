@@ -3,8 +3,8 @@ on:
   pull_request: null
 name: pr checks
 
-concurrency: 
-  group: ${{ github.head_ref }}
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
