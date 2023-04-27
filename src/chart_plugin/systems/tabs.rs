@@ -19,7 +19,6 @@ pub fn select_tab_handler(
         (Changed<Interaction>, With<TabButton>),
     >,
     mut state: ResMut<AppState>,
-    mut delete_tab: Query<(&mut Visibility, &DeleteTab), With<DeleteTab>>,
 ) {
     for (interaction, selected_tab) in &mut interaction_query {
         match *interaction {
@@ -57,14 +56,6 @@ pub fn select_tab_handler(
                     tab_id: selected_tab.id,
                     drop_last_checkpoint: false,
                 });
-
-                for (mut visibility, tab) in delete_tab.iter_mut() {
-                    if tab.id == selected_tab.id {
-                        *visibility = Visibility::Visible;
-                    } else {
-                        *visibility = Visibility::Hidden;
-                    }
-                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
