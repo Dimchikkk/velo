@@ -3,7 +3,6 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
-use uuid::Uuid;
 
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
@@ -71,7 +70,7 @@ pub fn add_tab_handler(
     for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                let tab_id = ReflectableUuid(Uuid::new_v4());
+                let tab_id = ReflectableUuid::generate();
                 let current_document = app_state.current_document.unwrap();
                 let tabs = &mut app_state.docs.get_mut(&current_document).unwrap().tabs;
                 for tab in tabs.iter_mut() {
@@ -151,7 +150,7 @@ pub fn delete_tab_handler(
     for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                let id = ReflectableUuid(Uuid::new_v4());
+                let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
                 let current_document = app_state.current_document.unwrap();
                 let tabs_len = app_state
