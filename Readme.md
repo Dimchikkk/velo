@@ -62,7 +62,7 @@ Wasm:
 cargo r --target wasm32-unknown-unknown
 ```
 
-To create executable with icon (tested only on MacOS):
+To create app bundle with icon (tested only on MacOS):
 
 ```sh
 cargo install cargo-bundle
