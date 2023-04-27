@@ -55,3 +55,20 @@ jobs:
       - name: Clippy
         run: cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments -D
           warnings
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: cargo test
