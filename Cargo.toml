@@ -59,3 +59,8 @@ url = "2.3.1"
 
 [dev-dependencies]
 tempfile = "3.5.0"
+
+[package.metadata.bundle]
+name = "velo"
+identifier = "com.rust.velo"
+icon = ["128x128.icns"]
