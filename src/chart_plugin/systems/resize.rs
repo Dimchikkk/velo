@@ -130,21 +130,24 @@ pub fn resize_entity_end(
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::utils::ReflectableUuid;
+#[test]
+fn test_resize_entity_end() {
+    // Set up a test app with the necessary resources and entities
+    let mut app = App::new();
+    let entity_id = crate::utils::ReflectableUuid::generate();
 
-    use super::*;
-
-    #[test]
-    fn test_resize_entity_end() {
-        // Set up a test app with the necessary resources and entities
-        let mut app = App::new();
-        let entity_id = ReflectableUuid::generate();
+    // Test all ResizeMarkers
+    for &marker in &[
+        ResizeMarker::TopLeft,
+        ResizeMarker::TopRight,
+        ResizeMarker::BottomLeft,
+        ResizeMarker::BottomRight,
+    ] {
         app.insert_resource(UiState {
-            entity_to_resize: Some((entity_id, ResizeMarker::TopLeft)),
+            entity_to_resize: Some((entity_id, marker)),
             ..default()
         });
+
         app.add_event::<MouseMotion>();
         app.add_event::<RedrawArrowEvent>();
         app.world
@@ -177,10 +180,31 @@ mod tests {
         let (_velo_node_container, style) = app
             .world
             .query::<(&VeloNodeContainer, &mut Style)>()
-            .single(&app.world);
+            .iter_mut(&mut app.world)
+            .last()
+            .unwrap();
 
-        assert_eq!(style.size.width, Val::Px(90.0));
-        assert_eq!(style.size.height, Val::Px(95.0));
-        assert_eq!(style.position.left, Val::Px(10.0));
+        match marker {
+            ResizeMarker::TopLeft => {
+                assert_eq!(style.size.width, Val::Px(90.0));
+                assert_eq!(style.size.height, Val::Px(95.0));
+                assert_eq!(style.position.left, Val::Px(10.0));
+            }
+            ResizeMarker::TopRight => {
+                assert_eq!(style.size.width, Val::Px(120.0));
+                assert_eq!(style.size.height, Val::Px(90.0));
+            }
+            ResizeMarker::BottomLeft => {
+                assert_eq!(style.size.width, Val::Px(70.0));
+                assert_eq!(style.size.height, Val::Px(115.0));
+                assert_eq!(style.position.left, Val::Px(30.0));
+                assert_eq!(style.position.bottom, Val::Px(-15.0));
+            }
+            ResizeMarker::BottomRight => {
+                assert_eq!(style.size.width, Val::Px(140.0));
+                assert_eq!(style.size.height, Val::Px(120.0));
+                assert_eq!(style.position.bottom, Val::Px(-20.0));
+            }
+        }
     }
 }
