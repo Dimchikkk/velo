@@ -2,6 +2,11 @@
 on:
   pull_request: null
 name: pr checks
+
+concurrency: 
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   check-default:
     name: Check default
