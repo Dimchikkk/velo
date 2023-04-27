@@ -336,9 +336,9 @@ pub fn new_doc_handler(
     for interaction in &mut new_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let doc_id = ReflectableUuid(Uuid::new_v4());
+                let doc_id = ReflectableUuid::generate();
                 let name = "Untitled".to_string();
-                let tab_id = ReflectableUuid(Uuid::new_v4());
+                let tab_id = ReflectableUuid::generate();
                 let mut checkpoints = VecDeque::new();
                 checkpoints.push_back(
                     json!({
@@ -446,7 +446,7 @@ pub fn delete_doc_handler(
                         return;
                     }
                 }
-                let id = ReflectableUuid(Uuid::new_v4());
+                let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
@@ -493,7 +493,7 @@ pub fn export_to_file(
     for interaction in &mut query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let id = ReflectableUuid(Uuid::new_v4());
+                let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(&mut commands, window, id, super::ModalAction::SaveToFile);
@@ -601,7 +601,7 @@ pub fn import_from_file(
     for interaction in &mut query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let id = ReflectableUuid(Uuid::new_v4());
+                let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
                 ui_state.modal_id = Some(id);
                 let entity =
@@ -625,7 +625,7 @@ pub fn import_from_url(
     for interaction in &mut query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                let id = ReflectableUuid(Uuid::new_v4());
+                let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
                 ui_state.modal_id = Some(id);
                 let entity =

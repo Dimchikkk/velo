@@ -328,9 +328,9 @@ fn remove_from_storage(
             pkv.set("tags", &tags).unwrap();
         }
     }
-    if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-        if tags.remove(&id_to_remove).is_some() {
-            pkv.set("names", &tags).unwrap();
+    if let Ok(mut names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
+        if names.remove(&id_to_remove).is_some() {
+            pkv.set("names", &names).unwrap();
         }
     }
     if let Ok(last_saved) = pkv.get::<ReflectableUuid>("last_saved") {
