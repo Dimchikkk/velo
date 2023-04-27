@@ -129,3 +129,58 @@ pub fn resize_entity_end(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::utils::ReflectableUuid;
+
+    use super::*;
+
+    #[test]
+    fn test_resize_entity_end() {
+        // Set up a test app with the necessary resources and entities
+        let mut app = App::new();
+        let entity_id = ReflectableUuid::generate();
+        app.insert_resource(UiState {
+            entity_to_resize: Some((entity_id, ResizeMarker::TopLeft)),
+            ..default()
+        });
+        app.add_event::<MouseMotion>();
+        app.add_event::<RedrawArrowEvent>();
+        app.world
+            .resource_mut::<Events<MouseMotion>>()
+            .send(MouseMotion {
+                delta: Vec2::new(10.0, 5.0),
+            });
+
+        app.add_system(resize_entity_end);
+
+        app.world
+            .spawn(NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Px(100.0), Val::Px(100.0)),
+                    position: UiRect {
+                        left: Val::Px(0.0),
+                        bottom: Val::Px(0.0),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+                ..Default::default()
+            })
+            .insert(VeloNodeContainer { id: entity_id });
+
+        // Run the app
+        app.update();
+
+        // Check that the size and position of the rectangle have been updated correctly
+        let (_velo_node_container, style) = app
+            .world
+            .query::<(&VeloNodeContainer, &mut Style)>()
+            .single(&app.world);
+
+        assert_eq!(style.size.width, Val::Px(90.0));
+        assert_eq!(style.size.height, Val::Px(95.0));
+        assert_eq!(style.position.left, Val::Px(10.0));
+    }
+}

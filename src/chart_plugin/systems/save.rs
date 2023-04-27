@@ -233,7 +233,7 @@ mod tests {
         let pkv = app.world.resource::<PkvStore>();
         let saved_docs: HashMap<ReflectableUuid, Doc> = pkv.get("docs").unwrap();
         assert_eq!(saved_docs.get(&doc_id).unwrap().name, "test_doc");
-        assert_eq!(saved_docs.get(&doc_id).unwrap().tabs[0].is_active, true);
+        assert!(saved_docs.get(&doc_id).unwrap().tabs[0].is_active);
         // Check that the tags were saved to the PKV store
         let saved_tags: HashMap<ReflectableUuid, Vec<String>> = pkv.get("tags").unwrap();
         assert_eq!(
@@ -249,6 +249,6 @@ mod tests {
         let file_contents = std::fs::read_to_string(temp_file_path).unwrap();
         let saved_doc: Doc = serde_json::from_str(&file_contents).unwrap();
         assert_eq!(saved_doc.name, "test_doc");
-        assert_eq!(saved_doc.tabs[0].is_active, true);
+        assert!(saved_doc.tabs[0].is_active);
     }
 }
