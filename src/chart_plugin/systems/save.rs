@@ -66,7 +66,9 @@ pub fn save_doc(
         pkv.set("tags", &tags).unwrap();
     } else {
         let doc = app_state.docs.get(&doc_id).unwrap();
-        pkv.set("tags", &doc.tags).unwrap();
+        let mut tags = HashMap::new();
+        tags.insert(doc.id, doc.tags.clone());
+        pkv.set("tags", &tags).unwrap();
     }
     if let Ok(mut names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
         let doc = app_state.docs.get(&doc_id).unwrap();
@@ -182,5 +184,68 @@ pub fn save_tab(
             tab.checkpoints.push_back(json.to_string());
             break;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::tempdir;
+
+    #[test]
+    fn test_save_doc() {
+        // Setup
+        let mut app = App::new();
+        app.add_system(save_doc);
+        let temp_dir = tempdir().unwrap();
+        let temp_file_path = temp_dir.path().join("test_doc.json");
+        let doc_id = ReflectableUuid::generate();
+        let tab_id = ReflectableUuid::generate();
+        let mut app_state = AppState::default();
+        app_state.docs.insert(
+            doc_id,
+            Doc {
+                id: doc_id,
+                name: "test_doc".to_string(),
+                tags: vec!["test_tag".to_string()],
+                tabs: vec![crate::components::Tab {
+                    id: tab_id,
+                    is_active: true,
+                    name: "Test tab".to_string(),
+                    checkpoints: std::collections::VecDeque::new(),
+                }],
+            },
+        );
+        let request = SaveDocRequest {
+            doc_id,
+            path: Some(temp_file_path.clone()),
+        };
+        app.insert_resource(request);
+        PkvStore::new("test", "test").clear().unwrap();
+        app.insert_resource(PkvStore::new("test", "test"));
+        app.insert_resource(app_state);
+        
+        // Run systems
+        app.update();
+
+        // Assertions
+        // Check that the document was saved to the PKV store
+        let pkv = app.world.resource::<PkvStore>();
+        let saved_docs: HashMap<ReflectableUuid, Doc> = pkv.get("docs").unwrap();
+        assert_eq!(saved_docs.get(&doc_id).unwrap().name, "test_doc");
+        assert_eq!(saved_docs.get(&doc_id).unwrap().tabs[0].is_active, true);
+        // Check that the tags were saved to the PKV store
+        let saved_tags: HashMap<ReflectableUuid, Vec<String>> = pkv.get("tags").unwrap();
+        assert_eq!(saved_tags.get(&doc_id).unwrap(), &vec!["test_tag".to_string()]);
+        // Check that the name was saved to the PKV store
+        let saved_names: HashMap<ReflectableUuid, String> = pkv.get("names").unwrap();
+        assert_eq!(saved_names.get(&doc_id).unwrap(), "test_doc");
+        // Check that the last_saved field was updated in the PKV store
+        assert_eq!(pkv.get::<ReflectableUuid>("last_saved").unwrap(), doc_id);
+        // Check that the file was saved to the correct path
+        let file_contents = std::fs::read_to_string(temp_file_path).unwrap();
+        let saved_doc: Doc = serde_json::from_str(&file_contents).unwrap();
+        assert_eq!(saved_doc.name, "test_doc");
+        assert_eq!(saved_doc.tabs[0].is_active, true);
     }
 }

@@ -8,7 +8,6 @@ use bevy::{
     prelude::*,
 };
 use bevy_pkv::PkvStore;
-use uuid::Uuid;
 
 use super::ui_helpers::ScrollingList;
 use crate::chart_plugin::ui_helpers::{add_list_item, DocList};
@@ -74,7 +73,7 @@ pub fn add_list(
             commands.entity(node).add_child(button);
         }
     } else {
-        let tab_id = ReflectableUuid(Uuid::new_v4());
+        let tab_id = ReflectableUuid::generate();
         let tab_name: String = "Tab 1".to_string();
         let tabs = vec![Tab {
             id: tab_id,
@@ -82,7 +81,7 @@ pub fn add_list(
             checkpoints: VecDeque::new(),
             is_active: true,
         }];
-        let doc_id = ReflectableUuid(Uuid::new_v4());
+        let doc_id = ReflectableUuid::generate();
         let name = "Untitled".to_string();
         state.docs.insert(
             doc_id,
