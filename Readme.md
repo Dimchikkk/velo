@@ -62,6 +62,13 @@ Wasm:
 cargo r --target wasm32-unknown-unknown
 ```
 
+To create app bundle with icon (tested only on MacOS):
+
+```sh
+cargo install cargo-bundle
+cargo bundle
+```
+
 ## Pre-commit actions
 
 ```sh
