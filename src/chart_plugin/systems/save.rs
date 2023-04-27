@@ -238,7 +238,10 @@ mod tests {
         assert_eq!(saved_docs.get(&doc_id).unwrap().name, "test_doc");
         assert!(saved_docs.get(&doc_id).unwrap().tabs[0].is_active);
         let saved_tags: HashMap<ReflectableUuid, Vec<String>> = pkv.get("tags").unwrap();
-        assert_eq!(saved_tags.get(&doc_id).unwrap(), &vec!["test_tag".to_string()]);
+        assert_eq!(
+            saved_tags.get(&doc_id).unwrap(),
+            &vec!["test_tag".to_string()]
+        );
         let saved_names: HashMap<ReflectableUuid, String> = pkv.get("names").unwrap();
         assert_eq!(saved_names.get(&doc_id).unwrap(), "test_doc");
         assert_eq!(pkv.get::<ReflectableUuid>("last_saved").unwrap(), doc_id);
@@ -295,7 +298,10 @@ mod tests {
         assert_eq!(saved_docs.get(&doc_id).unwrap().name, "test_doc");
         assert!(saved_docs.get(&doc_id).unwrap().tabs[0].is_active);
         let saved_tags: HashMap<ReflectableUuid, Vec<String>> = pkv.get("tags").unwrap();
-        assert_eq!(saved_tags.get(&doc_id).unwrap(), &vec!["test_tag_1".to_string()]);
+        assert_eq!(
+            saved_tags.get(&doc_id).unwrap(),
+            &vec!["test_tag_1".to_string()]
+        );
         let saved_names: HashMap<ReflectableUuid, String> = pkv.get("names").unwrap();
         assert_eq!(saved_names.get(&doc_id).unwrap(), "test_doc");
         assert_eq!(pkv.get::<ReflectableUuid>("last_saved").unwrap(), doc_id);
