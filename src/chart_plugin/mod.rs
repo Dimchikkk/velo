@@ -249,7 +249,7 @@ fn set_focused_entity(
                 for (mut outline, node) in &mut outline_query.iter_mut() {
                     if node.id == rectangle.id {
                         outline.color = Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
-                        outline.thickness = UiRect::all(Val::Px(1.5));
+                        outline.thickness = UiRect::all(Val::Px(2.));
                     } else {
                         outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
                         outline.thickness = UiRect::all(Val::Px(1.));
