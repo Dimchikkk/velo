@@ -17,9 +17,15 @@ pub fn add_tab(
             NodeBundle {
                 background_color: Color::rgb(1., 193.0 / 255.0, 7.0 / 255.0).into(),
                 style: Style {
-                    size: Size::new(Val::Px(80.), Val::Px(30.)),
+                    size: Size::new(Val::Percent(8.), Val::Percent(90.)),
                     justify_content: JustifyContent::Center,
-                    margin: UiRect::all(Val::Px(10.)),
+                    align_items: AlignItems::Center,
+                    margin: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(10.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(0.),
+                    },
                     ..default()
                 },
                 ..default()
@@ -95,7 +101,7 @@ pub fn add_tab(
                     },
                     size: Size::new(Val::Percent(10.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
-                    padding: UiRect::all(Val::Px(5.)),
+                    align_items: AlignItems::Center,
                     ..default()
                 },
                 ..default()
