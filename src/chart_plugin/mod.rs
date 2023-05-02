@@ -1,7 +1,7 @@
 use async_channel::{Receiver, Sender};
 use bevy::{
     prelude::*,
-    text::BreakLineOn,
+    text::{BreakLineOn, PositionedGlyph, TextLayoutInfo},
     window::{PrimaryWindow, WindowResized},
 };
 use bevy_pkv::PkvStore;
@@ -200,6 +200,7 @@ impl Plugin for ChartPlugin {
             delete_doc_handler,
             save_doc_handler,
             keyboard_input_system,
+            clickable_links,
         ));
 
         app.add_systems((
@@ -219,6 +220,86 @@ impl Plugin for ChartPlugin {
 #[cfg(target_arch = "wasm32")]
 pub fn get_timestamp() -> f64 {
     js_sys::Date::now()
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn open_url_in_new_tab(url: &str) -> Result<(), wasm_bindgen::prelude::JsValue> {
+    use wasm_bindgen::prelude::*;
+    use web_sys::window;
+
+    let window = window().ok_or_else(|| JsValue::from_str("Failed to get window object"))?;
+    let new_window: Option<web_sys::Window> = window.open_with_url_and_target(url, "_blank")?;
+    new_window.unwrap().focus()?;
+    Ok(())
+}
+
+fn clickable_links(
+    mut primary_window: Query<&mut Window, With<PrimaryWindow>>,
+    mut editable_text_query: Query<
+        (
+            &Node,
+            &GlobalTransform,
+            &mut Text,
+            &TextLayoutInfo,
+            &EditableText,
+        ),
+        With<EditableText>,
+    >,
+    mut interaction_query: Query<(&Interaction, &VeloNode), (Changed<Interaction>, With<VeloNode>)>,
+    ui_state: Res<UiState>,
+) {
+    if ui_state.hold_entity.is_some() {
+        return;
+    }
+    let mut primary_window = primary_window.iter_mut().next().unwrap();
+    let scale_factor = primary_window.scale_factor() as f32;
+
+    if let Some(cursor_position) = primary_window.cursor_position() {
+        let window_height = primary_window.height();
+        let pos = Vec2::new(cursor_position.x, window_height - cursor_position.y);
+        for (node, transform, text, text_layout_info, editable_text) in
+            editable_text_query.iter_mut()
+        {
+            let mut str = "".to_string();
+            let mut text_copy = text.clone();
+            for section in text_copy.sections.iter_mut() {
+                str = format!("{}{}", str, section.value.clone());
+            }
+            let sections = get_sections(str);
+
+            let offset = transform.translation().truncate() - 0.5 * node.size();
+            for PositionedGlyph {
+                position,
+                section_index,
+                size,
+                ..
+            } in &text_layout_info.glyphs
+            {
+                let rect = bevy::math::Rect::from_center_size(
+                    offset + *position / scale_factor,
+                    *size / scale_factor,
+                );
+                if rect.contains(pos) {
+                    if sections.1[*section_index] {
+                        primary_window.cursor.icon = CursorIcon::Default;
+                        for (interaction, rectangle) in &mut interaction_query {
+                            if rectangle.id != editable_text.id {
+                                continue;
+                            }
+                            if *interaction == Interaction::Clicked {
+                                #[cfg(not(target_arch = "wasm32"))]
+                                open::that(text.sections[*section_index].value.clone()).unwrap();
+                                #[cfg(target_arch = "wasm32")]
+                                open_url_in_new_tab(&text.sections[*section_index].value).unwrap();
+                            }
+                        }
+                    } else {
+                        primary_window.cursor.icon = CursorIcon::Text;
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
