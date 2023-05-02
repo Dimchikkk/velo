@@ -281,7 +281,7 @@ fn clickable_links(
                 );
                 if rect.contains(pos) {
                     if sections.1[*section_index] {
-                        primary_window.cursor.icon = CursorIcon::Default;
+                        primary_window.cursor.icon = CursorIcon::Hand;
                         for (interaction, rectangle) in &mut interaction_query {
                             if rectangle.id != editable_text.id {
                                 continue;
