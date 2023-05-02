@@ -288,35 +288,6 @@ pub fn text_manipulation(
                             }
                         }
                     }
-                    TextManipulation::OpenAllLinks => {
-                        if let Some(id) = vec![
-                            ui_state.entity_to_edit,
-                            ui_state.tab_to_edit,
-                            ui_state.doc_to_edit,
-                            ui_state.modal_id,
-                        ]
-                        .into_iter()
-                        .find_map(|x| x)
-                        {
-                            for (text, node) in editable_text.iter_mut() {
-                                if node.id == id {
-                                    let mut str = "".to_string();
-                                    let mut text_sections = text.sections.clone();
-                                    text_sections.pop();
-                                    for section in text_sections.iter() {
-                                        str = format!("{}{}", str, section.value.clone());
-                                    }
-                                    let (sections, is_link) = get_sections(str);
-                                    for (i, section) in sections.iter().enumerate() {
-                                        if is_link[i] {
-                                            #[cfg(not(target_arch = "wasm32"))]
-                                            open::that(section.value.clone()).unwrap();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
             Interaction::Hovered => {}
