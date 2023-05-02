@@ -96,7 +96,6 @@ pub enum TextManipulation {
     Cut,
     Paste,
     Copy,
-    OpenAllLinks,
 }
 
 #[derive(Component)]

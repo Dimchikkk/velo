@@ -518,16 +518,8 @@ pub fn init_layout(
                 action_type: TextManipulation::Paste,
             },
         );
-        let open_all_links = add_text_manipulation(
-            &mut commands,
-            &asset_server,
-            TextManipulationAction {
-                action_type: TextManipulation::OpenAllLinks,
-            },
-        );
         commands.entity(text_manipulation).add_child(copy);
         commands.entity(text_manipulation).add_child(paste);
-        commands.entity(text_manipulation).add_child(open_all_links);
     }
     commands.entity(text_manipulation).add_child(cut);
 
