@@ -35,8 +35,8 @@ enjoyable project to work on.
 -   change background color of rectangle
 -   move rectangle to front/back
 -   positioning text in rectangle
--   buttons to cut/copy/paste text in rectangle and open all links in
-    rectangle
+-   buttons to cut/copy/paste text
+-   clickable links
 -   tabs support
 -   documents support
 -   load app state from url
