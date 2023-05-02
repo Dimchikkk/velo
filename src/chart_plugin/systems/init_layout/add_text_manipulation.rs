@@ -17,10 +17,6 @@ pub fn add_text_manipulation(
             "Paste text from clipboard",
         ),
         TextManipulation::Copy => (asset_server.load("copy-text.png"), "Copy text to clipboard"),
-        TextManipulation::OpenAllLinks => (
-            asset_server.load("open-all-links.png"),
-            "Open all links in text",
-        ),
     };
     let top = commands
         .spawn(NodeBundle {
