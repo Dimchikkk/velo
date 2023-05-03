@@ -21,6 +21,6 @@ pub fn set_default_font(
     }
 }
 pub fn setup_font(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("fonts/iosevka-regular.ttf");
+    let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
     commands.insert_resource(FontHandle(font));
 }
