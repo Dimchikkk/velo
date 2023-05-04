@@ -3,7 +3,7 @@ name = "velo"
 license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
-readme = "Readme.org"
+readme = "Readme.md"
 version = "0.1.3"
 edition = "2021"
 publish = false
@@ -16,6 +16,11 @@ opt-level = 3
 
 [profile.release]
 opt-level = 'z'
+
+[workspace]
+members = [
+    "crates/bevy-markdown",
+]
 
 [dependencies]
 bevy = { version = "0.10.1", default-features = false, features = [
@@ -45,6 +50,7 @@ bevy_pkv = { git = "https://github.com/johanhelsing/bevy_pkv.git", default-featu
 ehttp = "0.1.0"
 async-channel = "1.8"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
+bevy-markdown = { path = "crates/bevy-markdown" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 arboard = "3.2.0"

@@ -1,0 +1,29 @@
+[package]
+name = "bevy-markdown"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+description = "Bevy markdown renderer"
+repository = "https://github.com/StaffEngineer/velo.git"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+markdown = "1.0.0-alpha.9"
+bevy = { version = "0.10.1", default-features = false, features = [
+  "bevy_asset",
+  "bevy_core_pipeline",
+  "bevy_render",
+  "bevy_scene",
+  "bevy_sprite",
+  "bevy_text",
+  "bevy_ui",
+  "bevy_winit",
+  "png",
+  "x11",
+] }
+uuid = { version = "1.3.0", default-features = false, features = ["v4", "js"] }
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+insta = "1.29.0"

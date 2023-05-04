@@ -1,3 +1,4 @@
+use bevy_markdown::{render_bevy_markdown, BevyMarkdown};
 use bevy_ui_borders::{BorderColor, Outline};
 
 use bevy::prelude::*;
@@ -6,7 +7,7 @@ use crate::TextPos;
 
 use super::{
     create_arrow_marker, create_rectangle_btn, create_rectangle_txt, create_resize_marker,
-    EditableText, ResizeMarker, VeloNode, VeloNodeContainer,
+    BevyMarkdownView, EditableText, ResizeMarker, VeloNode, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
 use crate::utils::ReflectableUuid;
@@ -22,9 +23,14 @@ pub struct NodeMeta {
     pub tags: Vec<String>,
     pub text_pos: TextPos,
     pub z_index: i32,
+    pub is_active: bool,
 }
 
-pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
+pub fn spawn_node(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+    item_meta: NodeMeta,
+) -> Entity {
     let top = commands
         .spawn((
             NodeBundle {
@@ -60,58 +66,105 @@ pub fn spawn_node(commands: &mut Commands, item_meta: NodeMeta) -> Entity {
                 Val::Px(1.),
             ),
         ))
-        .with_children(|builder| {
-            builder.spawn((
-                create_arrow_marker(50.0, 0., 0., 0.),
-                BorderColor(Color::BLUE.with_a(0.5)),
-                ArrowConnect {
-                    pos: ArrowConnectPos::Top,
-                    id: item_meta.id,
-                },
-            ));
-            builder.spawn((
-                create_arrow_marker(0., 0., 50., 0.),
-                BorderColor(Color::BLUE.with_a(0.5)),
-                ArrowConnect {
-                    pos: ArrowConnectPos::Left,
-                    id: item_meta.id,
-                },
-            ));
-            builder.spawn((
-                create_arrow_marker(50., 0., 100., 0.),
-                BorderColor(Color::BLUE.with_a(0.5)),
-                ArrowConnect {
-                    pos: ArrowConnectPos::Bottom,
-                    id: item_meta.id,
-                },
-            ));
-            builder.spawn((
-                create_arrow_marker(100., 0., 50., 0.),
-                BorderColor(Color::BLUE.with_a(0.5)),
-                ArrowConnect {
-                    pos: ArrowConnectPos::Right,
-                    id: item_meta.id,
-                },
-            ));
-            builder.spawn((create_resize_marker(0., 0., 0., 0.), ResizeMarker::TopLeft));
-            builder.spawn((
-                create_resize_marker(100., 0., 0., 0.),
-                ResizeMarker::TopRight,
-            ));
-            builder.spawn((
-                create_resize_marker(100., 0., 100., 0.),
-                ResizeMarker::BottomRight,
-            ));
-            builder.spawn((
-                create_resize_marker(0., 0., 100., 0.),
-                ResizeMarker::BottomLeft,
-            ));
-            builder.spawn((
-                create_rectangle_txt(item_meta.text, Some(item_meta.size)),
-                EditableText { id: item_meta.id },
-            ));
-        })
         .id();
+    let arrow_marker1 = commands
+        .spawn((
+            create_arrow_marker(50.0, 0., 0., 0.),
+            BorderColor(Color::BLUE.with_a(0.5)),
+            ArrowConnect {
+                pos: ArrowConnectPos::Top,
+                id: item_meta.id,
+            },
+        ))
+        .id();
+    let arrow_marker2 = commands
+        .spawn((
+            create_arrow_marker(0., 0., 50., 0.),
+            BorderColor(Color::BLUE.with_a(0.5)),
+            ArrowConnect {
+                pos: ArrowConnectPos::Left,
+                id: item_meta.id,
+            },
+        ))
+        .id();
+    let arrow_marker3 = commands
+        .spawn((
+            create_arrow_marker(50., 0., 100., 0.),
+            BorderColor(Color::BLUE.with_a(0.5)),
+            ArrowConnect {
+                pos: ArrowConnectPos::Bottom,
+                id: item_meta.id,
+            },
+        ))
+        .id();
+    let arrow_marker4 = commands
+        .spawn((
+            create_arrow_marker(100., 0., 50., 0.),
+            BorderColor(Color::BLUE.with_a(0.5)),
+            ArrowConnect {
+                pos: ArrowConnectPos::Right,
+                id: item_meta.id,
+            },
+        ))
+        .id();
+    let resize_marker1 = commands
+        .spawn((create_resize_marker(0., 0., 0., 0.), ResizeMarker::TopLeft))
+        .id();
+    let resize_marker2 = commands
+        .spawn((
+            create_resize_marker(100., 0., 0., 0.),
+            ResizeMarker::TopRight,
+        ))
+        .id();
+    let resize_marker3 = commands
+        .spawn((
+            create_resize_marker(100., 0., 100., 0.),
+            ResizeMarker::BottomRight,
+        ))
+        .id();
+    let resize_marker4 = commands
+        .spawn((
+            create_resize_marker(0., 0., 100., 0.),
+            ResizeMarker::BottomLeft,
+        ))
+        .id();
+    let text = match item_meta.is_active {
+        true => commands
+            .spawn((
+                create_rectangle_txt(item_meta.text.clone(), Some(item_meta.size)),
+                EditableText { id: item_meta.id },
+            ))
+            .id(),
+        false => {
+            let bevy_markdown = BevyMarkdown {
+                text: item_meta.text.clone(),
+                regular_font: Some(asset_server.load("fonts/SourceCodePro-Regular.ttf")),
+                bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
+                italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
+                semi_bold_italic_font: Some(
+                    asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
+                ),
+                max_size: Some(item_meta.size),
+            };
+            let entity = render_bevy_markdown(commands, bevy_markdown).unwrap();
+            commands
+                .get_entity(entity)
+                .unwrap()
+                .insert(BevyMarkdownView { id: item_meta.id });
+            entity
+        }
+    };
+
+    commands.entity(button).add_child(arrow_marker1);
+    commands.entity(button).add_child(arrow_marker2);
+    commands.entity(button).add_child(arrow_marker3);
+    commands.entity(button).add_child(arrow_marker4);
+    commands.entity(button).add_child(resize_marker1);
+    commands.entity(button).add_child(resize_marker2);
+    commands.entity(button).add_child(resize_marker3);
+    commands.entity(button).add_child(resize_marker4);
+    commands.entity(button).add_child(text);
+
     commands.entity(top).add_child(button);
     top
 }
