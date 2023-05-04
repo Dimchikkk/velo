@@ -213,6 +213,7 @@ impl Plugin for ChartPlugin {
             #[cfg(target_arch = "wasm32")]
             set_window_property,
             shared_doc_handler,
+            entity_to_edit_changed,
         ));
     }
 }
@@ -310,9 +311,44 @@ pub fn get_timestamp() -> f64 {
     duration.as_millis() as f64
 }
 
+fn entity_to_edit_changed(
+    ui_state: Res<UiState>,
+    mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
+    mut outline_query: Query<(&mut Outline, &VeloNode), With<VeloNode>>,
+    mut markdown_node_query: Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
+    mut commands: Commands,
+) {
+    // on entity_to_edit changed
+    // if entity_to_edit is some
+        // get all text from markdown view
+        // create editable text, insert to velonode
+        // remove markdown view
+    // if entity_to_edit is none
+        // get all text from editable text
+        // create markdown view, insert to velonode
+        // remove editable text
+    // TODO: serialize 
+    if ui_state.is_changed() {
+        if ui_state.entity_to_edit != *last_entity_to_edit {
+            println!("entity_to_edit changed");
+            *last_entity_to_edit = ui_state.entity_to_edit;
+            if ui_state.entity_to_edit.is_some() {
+                for (mut outline, node) in &mut outline_query.iter_mut() {
+                    if node.id == ui_state.entity_to_edit.unwrap() {
+                        outline.color = Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
+                        outline.thickness = UiRect::all(Val::Px(2.));
+                    } else {
+                        outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                        outline.thickness = UiRect::all(Val::Px(1.));
+                    }
+                }
+            }
+        }
+    }
+}
+
 fn set_focused_entity(
     mut interaction_query: Query<(&Interaction, &VeloNode), (Changed<Interaction>, With<VeloNode>)>,
-    mut outline_query: Query<(&mut Outline, &VeloNode), With<VeloNode>>,
     mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
@@ -327,15 +363,6 @@ fn set_focused_entity(
                 state.entity_to_edit = Some(rectangle.id);
                 let now_ms = get_timestamp();
                 *holding_time = (Duration::from_millis(now_ms as u64), Some(rectangle.id));
-                for (mut outline, node) in &mut outline_query.iter_mut() {
-                    if node.id == rectangle.id {
-                        outline.color = Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
-                        outline.thickness = UiRect::all(Val::Px(2.));
-                    } else {
-                        outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
-                        outline.thickness = UiRect::all(Val::Px(1.));
-                    }
-                }
             }
             Interaction::Hovered => {
                 if state.hold_entity.is_none() && state.entity_to_edit.is_none() {
@@ -402,12 +429,14 @@ fn create_new_rectangle(
     mut events: EventReader<AddRectEvent>,
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
+    asset_server: Res<AssetServer>,
 ) {
     for event in events.iter() {
         *ui_state = UiState::default();
         ui_state.entity_to_edit = Some(ReflectableUuid(event.node.id));
         let entity = spawn_node(
             &mut commands,
+            &asset_server,
             NodeMeta {
                 size: (event.node.width, event.node.height),
                 id: ReflectableUuid(event.node.id),
@@ -418,6 +447,7 @@ fn create_new_rectangle(
                 text_pos: event.node.text.pos.clone(),
                 tags: event.node.tags.clone(),
                 z_index: event.node.z_index,
+                is_active: true,
             },
         );
         commands.entity(main_panel_query.single()).add_child(entity);
