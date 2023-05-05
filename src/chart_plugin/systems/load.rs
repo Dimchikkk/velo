@@ -168,7 +168,6 @@ pub fn load_tab(
                         text: json_node.text.text.clone(),
                         bg_color: json_node.bg_color,
                         position: (json_node.left, json_node.bottom),
-                        tags: json_node.tags,
                         text_pos: json_node.text.pos,
                         z_index: json_node.z_index,
                         is_active: false,
