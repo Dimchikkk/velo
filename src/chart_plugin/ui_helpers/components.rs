@@ -147,6 +147,13 @@ pub struct ButtonAction {
 pub struct EditableText {
     pub id: ReflectableUuid,
 }
+
+#[derive(Component, Default, Reflect)]
+#[reflect(Component)]
+pub struct RawText {
+    pub id: ReflectableUuid,
+}
+
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
 pub struct BevyMarkdownView {
