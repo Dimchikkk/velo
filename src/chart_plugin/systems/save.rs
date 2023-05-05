@@ -7,8 +7,8 @@ use image::*;
 use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
-use super::ui_helpers::{EditableText, VeloNode};
-use super::{load_doc_to_memory, VeloNodeContainer};
+use super::ui_helpers::VeloNode;
+use super::{load_doc_to_memory, RawText, VeloNodeContainer};
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::components::Doc;
 use crate::resources::SaveDocRequest;
@@ -100,7 +100,6 @@ pub fn save_tab(
             &VeloNode,
             &UiImage,
             &BackgroundColor,
-            &Children,
             &ZIndex,
             &Parent,
             &Style,
@@ -110,7 +109,7 @@ pub fn save_tab(
     arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
     request: Res<SaveTabRequest>,
     mut app_state: ResMut<AppState>,
-    text_query: Query<&mut Text, With<EditableText>>,
+    text_query: Query<(&mut Text, &RawText), With<RawText>>,
 ) {
     let mut json = json!({
         "images": {},
@@ -118,7 +117,7 @@ pub fn save_tab(
         "arrows": [],
     });
     let json_images = json["images"].as_object_mut().unwrap();
-    for (rect, image, _, _, _, _, _) in rec_query.iter() {
+    for (rect, image, _, _, _, _) in rec_query.iter() {
         if let Some(image) = images.get(&image.texture) {
             if let Ok(img) = image.clone().try_into_dynamic() {
                 let mut image_data: Vec<u8> = Vec::new();
@@ -131,38 +130,43 @@ pub fn save_tab(
     }
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
-    for (rect, _, bg_color, children, z_index, parent, test_pos_style) in rec_query.iter() {
-        let text = text_query.get(children[children.len() - 1]).unwrap();
-        let mut str = "".to_string();
-        let mut text_copy = text.clone();
-        text_copy.sections.pop();
-        for section in text_copy.sections.iter() {
-            str = format!("{}{}", str, section.value.clone());
+    for (rect, _, bg_color, z_index, parent, test_pos_style) in rec_query.iter() {
+        for (text, editable_text) in text_query.iter() {
+            if rect.id == editable_text.id {
+                let mut str = "".to_string();
+                let mut text_copy = text.clone();
+                text_copy.sections.pop();
+                for section in text_copy.sections.iter() {
+                    str = format!("{}{}", str, section.value.clone());
+                }
+                let style: &Style = rec_container_query.get(parent.get()).unwrap();
+                let left = style.position.left;
+                let bottom = style.position.bottom;
+                let size = style.size;
+                let bg_color = bg_color.0;
+                let z_index = match *z_index {
+                    ZIndex::Local(v) => v,
+                    _ => -1,
+                };
+                json_nodes.push(json!(JsonNode {
+                    node_type: crate::NodeType::Rect,
+                    id: rect.id.0,
+                    left,
+                    bottom,
+                    width: size.width,
+                    height: size.height,
+                    bg_color,
+                    text: JsonNodeText {
+                        text: str,
+                        pos: style_to_pos((
+                            test_pos_style.justify_content,
+                            test_pos_style.align_items
+                        )),
+                    },
+                    z_index,
+                }));
+            }
         }
-        let style: &Style = rec_container_query.get(parent.get()).unwrap();
-        let left = style.position.left;
-        let bottom = style.position.bottom;
-        let size = style.size;
-        let bg_color = bg_color.0;
-        let z_index = match *z_index {
-            ZIndex::Local(v) => v,
-            _ => -1,
-        };
-        json_nodes.push(json!(JsonNode {
-            node_type: crate::NodeType::Rect,
-            id: rect.id.0,
-            left,
-            bottom,
-            width: size.width,
-            height: size.height,
-            bg_color,
-            text: JsonNodeText {
-                text: str,
-                pos: style_to_pos((test_pos_style.justify_content, test_pos_style.align_items)),
-            },
-            z_index,
-            tags: vec![],
-        }));
     }
 
     let json_arrows = json["arrows"].as_array_mut().unwrap();

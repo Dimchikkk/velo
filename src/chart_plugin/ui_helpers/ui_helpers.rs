@@ -212,7 +212,9 @@ pub fn create_rectangle_txt(
     if let Some((x, y)) = max_size {
         text_bundle_style.max_size = Size::new(x, y);
     };
-    if !is_active {
+    if is_active {
+        text_bundle_style.display = Display::Flex;
+    } else {
         text_bundle_style.display = Display::None;
     }
     TextBundle {
