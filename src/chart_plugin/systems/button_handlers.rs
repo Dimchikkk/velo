@@ -54,7 +54,6 @@ pub fn rec_button_handlers(
                                 pos: crate::TextPos::Center,
                             },
                             bg_color: Color::rgb(1.0, 1.0, 1.0),
-                            tags: vec![],
                             z_index: 0,
                         },
                         image: None,

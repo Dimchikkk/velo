@@ -233,7 +233,6 @@ pub fn insert_from_clipboard(
                     pos: crate::TextPos::Center,
                 },
                 bg_color: Color::WHITE,
-                tags: vec![],
                 z_index: 0,
             },
             image: Some(image.into()),

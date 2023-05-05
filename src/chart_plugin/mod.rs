@@ -96,7 +96,6 @@ pub struct JsonNode {
     pub height: Val,
     pub text: JsonNodeText,
     pub bg_color: Color,
-    pub tags: Vec<String>,
     pub z_index: i32,
 }
 
@@ -214,8 +213,14 @@ impl Plugin for ChartPlugin {
             #[cfg(target_arch = "wasm32")]
             set_window_property,
             shared_doc_handler,
-            entity_to_edit_changed,
         ));
+        app.add_system(
+            entity_to_edit_changed
+                .before(save_doc)
+                .before(save_doc)
+                .before(load_tab)
+                .before(load_doc),
+        );
     }
 }
 
@@ -321,81 +326,32 @@ fn entity_to_edit_changed(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
-    // TODO: serialize links mapping on component for clickable links
-    if ui_state.is_changed() {
-        if ui_state.entity_to_edit != *last_entity_to_edit {
-            match ui_state.entity_to_edit {
-                Some(entity_to_edit) => {
-                    // change border for selected node
-                    {
-                        for (mut outline, node, _) in &mut velo_node_query.iter_mut() {
-                            if node.id == entity_to_edit {
-                                outline.color =
-                                    Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
-                                outline.thickness = UiRect::all(Val::Px(2.));
-                            } else {
-                                outline.color =
-                                    Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
-                                outline.thickness = UiRect::all(Val::Px(1.));
-                            }
-                        }
-                    }
-                    // hide raw text and have markdown view for all nodes (except selected)
-                    {
-                        for (text, mut style, raw_text, parent) in
-                            &mut raw_text_node_query.iter_mut()
-                        {
-                            if raw_text.id == entity_to_edit {
-                                style.display = Display::Flex;
-                                continue;
-                            }
-                            if style.display == Display::None {
-                                continue;
-                            }
-                            style.display = Display::None;
-                            let mut str = "".to_string();
-                            let mut text_copy = text.clone();
-                            text_copy.sections.pop();
-                            for section in text_copy.sections.iter() {
-                                str = format!("{}{}", str, section.value.clone());
-                            }
-                            str += " ";
-                            let bevy_markdown = BevyMarkdown {
-                                text: str,
-                                regular_font: Some(
-                                    asset_server.load("fonts/SourceCodePro-Regular.ttf"),
-                                ),
-                                bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-                                italic_font: Some(
-                                    asset_server.load("fonts/SourceCodePro-Italic.ttf"),
-                                ),
-                                semi_bold_italic_font: Some(
-                                    asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-                                ),
-                                max_size: Some((style.max_size.width, style.max_size.height)),
-                            };
-                            let markdown_text =
-                                spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
-                            commands
-                                .get_entity(markdown_text)
-                                .unwrap()
-                                .insert(BevyMarkdownView { id: raw_text.id });
-                            let (_, _, entity) = velo_node_query.get(parent.get()).unwrap();
-                            commands.entity(entity).add_child(markdown_text);
-                        }
-                    }
-                    // remove markdown view for selected node
-                    {
-                        for (entity, node) in &mut markdown_text_node_query.iter_mut() {
-                            if node.id == entity_to_edit {
-                                commands.entity(entity).despawn_recursive();
-                                break;
-                            }
+    if ui_state.is_changed() && ui_state.entity_to_edit != *last_entity_to_edit {
+        match ui_state.entity_to_edit {
+            Some(entity_to_edit) => {
+                // change border for selected node
+                {
+                    for (mut outline, node, _) in &mut velo_node_query.iter_mut() {
+                        if node.id == entity_to_edit {
+                            outline.color =
+                                Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
+                            outline.thickness = UiRect::all(Val::Px(2.));
+                        } else {
+                            outline.color =
+                                Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                            outline.thickness = UiRect::all(Val::Px(1.));
                         }
                     }
                 }
-                None => {
-                    for (text, mut style, raw_text, parent) in &mut raw_text_node_query.iter_mut() {
+                // hide raw text and have markdown view for all nodes (except selected)
+                {
+                    for (text, mut style, raw_text, parent) in
+                        &mut raw_text_node_query.iter_mut()
+                    {
+                        if raw_text.id == entity_to_edit {
+                            style.display = Display::Flex;
+                            continue;
+                        }
                         if style.display == Display::None {
                             continue;
                         }
@@ -406,14 +362,15 @@ fn entity_to_edit_changed(
                         for section in text_copy.sections.iter() {
                             str = format!("{}{}", str, section.value.clone());
                         }
-                        str += " ";
                         let bevy_markdown = BevyMarkdown {
                             text: str,
                             regular_font: Some(
                                 asset_server.load("fonts/SourceCodePro-Regular.ttf"),
                             ),
                             bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-                            italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
+                            italic_font: Some(
+                                asset_server.load("fonts/SourceCodePro-Italic.ttf"),
+                            ),
                             semi_bold_italic_font: Some(
                                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
                             ),
@@ -429,9 +386,50 @@ fn entity_to_edit_changed(
                         commands.entity(entity).add_child(markdown_text);
                     }
                 }
+                // remove markdown view for selected node
+                {
+                    for (entity, node) in &mut markdown_text_node_query.iter_mut() {
+                        if node.id == entity_to_edit {
+                            commands.entity(entity).despawn_recursive();
+                            break;
+                        }
+                    }
+                }
             }
-            *last_entity_to_edit = ui_state.entity_to_edit;
+            None => {
+                for (text, mut style, raw_text, parent) in &mut raw_text_node_query.iter_mut() {
+                    if style.display == Display::None {
+                        continue;
+                    }
+                    style.display = Display::None;
+                    let mut str = "".to_string();
+                    let mut text_copy = text.clone();
+                    text_copy.sections.pop();
+                    for section in text_copy.sections.iter() {
+                        str = format!("{}{}", str, section.value.clone());
+                    }
+                    let bevy_markdown = BevyMarkdown {
+                        text: str,
+                        regular_font: Some(TextStyle::default().font),
+                        bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
+                        italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
+                        semi_bold_italic_font: Some(
+                            asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
+                        ),
+                        max_size: Some((style.max_size.width, style.max_size.height)),
+                    };
+                    let markdown_text =
+                        spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
+                    commands
+                        .get_entity(markdown_text)
+                        .unwrap()
+                        .insert(BevyMarkdownView { id: raw_text.id });
+                    let (_, _, entity) = velo_node_query.get(parent.get()).unwrap();
+                    commands.entity(entity).add_child(markdown_text);
+                }
+            }
         }
+        *last_entity_to_edit = ui_state.entity_to_edit;
     }
 }
 
@@ -533,7 +531,6 @@ fn create_new_rectangle(
                 bg_color: event.node.bg_color,
                 position: (event.node.left, event.node.bottom),
                 text_pos: event.node.text.pos.clone(),
-                tags: event.node.tags.clone(),
                 z_index: event.node.z_index,
                 is_active: true,
             },
