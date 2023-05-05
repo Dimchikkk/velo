@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -24,7 +24,7 @@ pub struct BevyMarkdownNode {
     pub link_sections: Vec<Option<String>>,
 }
 
-pub fn render_bevy_markdown(
+pub fn spawn_bevy_markdown(
     commands: &mut Commands,
     bevy_markdown: BevyMarkdown,
 ) -> Result<Entity, Vec<BevyMarkdownError>> {
@@ -142,7 +142,10 @@ pub fn render_bevy_markdown(
                     links.push(link);
                 }
                 let text_bundle_id = Uuid::new_v4();
-                let mut text_bundle_style = Style::default();
+                let mut text_bundle_style = Style {
+                    padding: UiRect::all(Val::Px(10.)),
+                    ..default()
+                };
                 // TODO: main branch of bevy doesn't need setting max_size for wrapping to work
                 if let Some((x, y)) = bevy_markdown.max_size {
                     text_bundle_style.max_size = Size::new(x, y);
@@ -196,7 +199,7 @@ Hello world
             max_size: None,
             text,
         };
-        render_bevy_markdown(&mut commands, bevy_markdown).unwrap();
+        spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
     }
     #[test]
     pub fn test_render_text_style() {

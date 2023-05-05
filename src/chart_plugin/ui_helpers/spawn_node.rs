@@ -1,4 +1,4 @@
-use bevy_markdown::{render_bevy_markdown, BevyMarkdown};
+use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
 use bevy_ui_borders::{BorderColor, Outline};
 
 use bevy::prelude::*;
@@ -7,7 +7,7 @@ use crate::TextPos;
 
 use super::{
     create_arrow_marker, create_rectangle_btn, create_rectangle_txt, create_resize_marker,
-    BevyMarkdownView, EditableText, ResizeMarker, VeloNode, VeloNodeContainer,
+    BevyMarkdownView, EditableText, RawText, ResizeMarker, VeloNode, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
 use crate::utils::ReflectableUuid;
@@ -128,32 +128,30 @@ pub fn spawn_node(
             ResizeMarker::BottomLeft,
         ))
         .id();
-    let text = match item_meta.is_active {
-        true => commands
-            .spawn((
-                create_rectangle_txt(item_meta.text.clone(), Some(item_meta.size)),
-                EditableText { id: item_meta.id },
-            ))
-            .id(),
-        false => {
-            let bevy_markdown = BevyMarkdown {
-                text: item_meta.text.clone(),
-                regular_font: Some(asset_server.load("fonts/SourceCodePro-Regular.ttf")),
-                bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-                italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
-                semi_bold_italic_font: Some(
-                    asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-                ),
-                max_size: Some(item_meta.size),
-            };
-            let entity = render_bevy_markdown(commands, bevy_markdown).unwrap();
-            commands
-                .get_entity(entity)
-                .unwrap()
-                .insert(BevyMarkdownView { id: item_meta.id });
-            entity
-        }
+    let raw_text = commands
+        .spawn((
+            create_rectangle_txt(
+                item_meta.text.clone(),
+                Some(item_meta.size),
+                item_meta.is_active,
+            ),
+            RawText { id: item_meta.id },
+            EditableText { id: item_meta.id },
+        ))
+        .id();
+    let bevy_markdown = BevyMarkdown {
+        text: item_meta.text.clone(),
+        regular_font: Some(asset_server.load("fonts/SourceCodePro-Regular.ttf")),
+        bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
+        italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
+        semi_bold_italic_font: Some(asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf")),
+        max_size: Some(item_meta.size),
     };
+    let markdown_text = spawn_bevy_markdown(commands, bevy_markdown).unwrap();
+    commands
+        .get_entity(markdown_text)
+        .unwrap()
+        .insert(BevyMarkdownView { id: item_meta.id });
 
     commands.entity(button).add_child(arrow_marker1);
     commands.entity(button).add_child(arrow_marker2);
@@ -163,8 +161,10 @@ pub fn spawn_node(
     commands.entity(button).add_child(resize_marker2);
     commands.entity(button).add_child(resize_marker3);
     commands.entity(button).add_child(resize_marker4);
-    commands.entity(button).add_child(text);
-
+    commands.entity(button).add_child(raw_text);
+    if !item_meta.is_active {
+        commands.entity(button).add_child(markdown_text);
+    }
     commands.entity(top).add_child(button);
     top
 }
