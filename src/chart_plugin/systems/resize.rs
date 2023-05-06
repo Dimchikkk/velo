@@ -1,9 +1,10 @@
 use super::{
-    ui_helpers::{EditableText, ResizeMarker},
-    RedrawArrowEvent, VeloNode, VeloNodeContainer,
+    ui_helpers::ResizeMarker, BevyMarkdownView, RawText, RedrawArrowEvent, VeloNode,
+    VeloNodeContainer,
 };
 use crate::UiState;
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
+use bevy_markdown::BevyMarkdownNode;
 
 pub fn resize_entity_start(
     mut interaction_query: Query<
@@ -45,11 +46,31 @@ pub fn resize_entity_start(
 pub fn resize_entity_end(
     mut mouse_motion_events: EventReader<MouseMotion>,
     state: Res<UiState>,
-    mut rectangle_query: Query<(&VeloNodeContainer, &mut Style), With<VeloNodeContainer>>,
-    mut text_input_query: Query<
-        (&EditableText, &mut Style),
-        (With<EditableText>, Without<VeloNodeContainer>),
+    mut rectangle_query: Query<
+        (&VeloNodeContainer, &mut Style),
+        (
+            With<VeloNodeContainer>,
+            Without<RawText>,
+            Without<BevyMarkdownNode>,
+        ),
     >,
+    mut raw_text_input_query: Query<
+        (&RawText, &mut Style),
+        (
+            With<RawText>,
+            Without<VeloNodeContainer>,
+            Without<BevyMarkdownNode>,
+        ),
+    >,
+    mut markdown_text_input_query: Query<
+        (&Parent, &mut Style),
+        (
+            With<BevyMarkdownNode>,
+            Without<VeloNodeContainer>,
+            Without<RawText>,
+        ),
+    >,
+    markdown_view_query: Query<(&BevyMarkdownView, Entity), With<BevyMarkdownView>>,
     mut events: EventWriter<RedrawArrowEvent>,
 ) {
     for event in mouse_motion_events.iter() {
@@ -118,10 +139,20 @@ pub fn resize_entity_end(
                             }
                         }
                     }
-                    for (text, mut text_style) in &mut text_input_query {
+                    for (text, mut text_style) in &mut raw_text_input_query {
                         if text.id == id {
                             text_style.max_size.width = button_style.size.width;
                             text_style.max_size.height = button_style.size.height;
+                        }
+                    }
+                    for (node, entity) in markdown_view_query.iter() {
+                        if node.id == id {
+                            for (parent, mut text_style) in &mut markdown_text_input_query {
+                                if parent.get() == entity {
+                                    text_style.max_size.width = button_style.size.width;
+                                    text_style.max_size.height = button_style.size.height;
+                                }
+                            }
                         }
                     }
                 }

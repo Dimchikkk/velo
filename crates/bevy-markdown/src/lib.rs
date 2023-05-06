@@ -9,7 +9,7 @@ pub struct BevyMarkdown {
     pub bold_font: Option<Handle<Font>>,
     pub italic_font: Option<Handle<Font>>,
     pub semi_bold_italic_font: Option<Handle<Font>>,
-    pub max_size: Option<(Val, Val)>,
+    pub size: Option<(Val, Val)>,
 }
 
 #[derive(Debug)]
@@ -142,15 +142,23 @@ pub fn spawn_bevy_markdown(
                     links.push(link);
                 }
                 let text_bundle_id = Uuid::new_v4();
-                let mut text_bundle_style = Style {
+                let top_style = Style {
                     padding: UiRect::all(Val::Px(10.)),
                     ..default()
                 };
-                // TODO: main branch of bevy doesn't need setting max_size for wrapping to work
-                if let Some((x, y)) = bevy_markdown.max_size {
+                let mut text_bundle_style = Style::default();
+                // Main branch of bevy doesn't need setting max_size for wrapping to work
+                // bevy_markdown will spawn multiple text bundles with more markdown features supported
+                // this is temp solution make wrapping to work
+                if let Some((x, y)) = bevy_markdown.size {
                     text_bundle_style.max_size = Size::new(x, y);
                 }
-                let top = commands.spawn(NodeBundle::default()).id();
+                let top = commands
+                    .spawn(NodeBundle {
+                        style: top_style,
+                        ..default()
+                    })
+                    .id();
                 let text_bundle = commands
                     .spawn((
                         TextBundle {
@@ -196,7 +204,7 @@ Hello world
             bold_font: Some(font.clone()),
             italic_font: Some(font.clone()),
             semi_bold_italic_font: Some(font.clone()),
-            max_size: None,
+            size: None,
             text,
         };
         spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();

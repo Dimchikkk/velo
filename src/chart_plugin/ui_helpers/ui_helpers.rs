@@ -208,7 +208,6 @@ pub fn create_rectangle_txt(
         padding: UiRect::all(Val::Px(10.)),
         ..default()
     };
-    // TODO: main branch of bevy doesn't need setting max_size for wrapping to work
     if let Some((x, y)) = max_size {
         text_bundle_style.max_size = Size::new(x, y);
     };

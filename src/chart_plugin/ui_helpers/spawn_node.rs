@@ -156,7 +156,7 @@ pub fn spawn_node(
             semi_bold_italic_font: Some(
                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
             ),
-            max_size: Some(item_meta.size),
+            size: Some(item_meta.size),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown).unwrap();
         commands
