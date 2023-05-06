@@ -188,7 +188,7 @@ pub fn spawn_modal(
                         ))
                         .with_children(|builder| {
                             builder.spawn((
-                                create_rectangle_txt(default_value, None),
+                                create_rectangle_txt(default_value, None, true),
                                 EditableText { id },
                             ));
                         });
