@@ -39,6 +39,6 @@ impl Plugin for VeloPlugin {
             .add_plugin(CanvasPlugin)
             .add_plugin(ChartPlugin)
             .add_plugin(BordersPlugin)
-            .insert_resource(PkvStore::new("test", "velo"));
+            .insert_resource(PkvStore::new("", "velo"));
     }
 }
