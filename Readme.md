@@ -10,7 +10,7 @@ WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
 mode is supported (tested on Chrome):
 
-[<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/01f42643110893f15646b0c1fda5337d/raw/05e274ff46501c1bd42642d808fb4a9873aa80ad/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/01f42643110893f15646b0c1fda5337d/raw/05e274ff46501c1bd42642d808fb4a9873aa80ad/velo.json)
+[<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/5331112722da65f4fa1db2420bcfd46c/raw/f6b2ff42075ffb943d37d26d3c830b55b9029c60/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/5331112722da65f4fa1db2420bcfd46c/raw/f6b2ff42075ffb943d37d26d3c830b55b9029c60/velo.json)
 
 ## Inspiration
 
@@ -43,6 +43,9 @@ enjoyable project to work on.
 -   ability to create sharable url of the document using \"Share
     Document\" button (**.velo.toml** should be created in user home
     directory containing GitHub access token with \"gist\" scope):
+- initial markdown support
+  - italic/bold text style
+  - links
 
 ```toml
 github_access_token = "<github_access_token>"

@@ -4,7 +4,7 @@ use bevy::{
     text::{BreakLineOn, PositionedGlyph, TextLayoutInfo},
     window::{PrimaryWindow, WindowResized},
 };
-use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
+use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown, BevyMarkdownNode};
 use bevy_pkv::PkvStore;
 use bevy_ui_borders::Outline;
 use serde::{Deserialize, Serialize};
@@ -58,6 +58,11 @@ pub struct ChartPlugin;
 pub struct AddRectEvent {
     pub node: JsonNode,
     pub image: Option<UiImage>,
+}
+
+pub struct SaveStoreEvent {
+    pub doc_id: ReflectableUuid,
+    pub path: Option<PathBuf>, // Save current document to file
 }
 
 #[derive(Resource, Clone)]
@@ -143,6 +148,7 @@ impl Plugin for ChartPlugin {
         app.add_event::<AddRectEvent>();
         app.add_event::<CreateArrowEvent>();
         app.add_event::<RedrawArrowEvent>();
+        app.add_event::<SaveStoreEvent>();
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_startup_systems((init, init_layout).chain());
@@ -213,13 +219,15 @@ impl Plugin for ChartPlugin {
             #[cfg(target_arch = "wasm32")]
             set_window_property,
             shared_doc_handler,
+            save_to_store.after(save_tab),
         ));
         app.add_system(
             entity_to_edit_changed
                 .before(save_doc)
                 .before(save_doc)
                 .before(load_tab)
-                .before(load_doc),
+                .before(load_doc)
+                .before(rec_button_handlers),
         );
     }
 }
@@ -243,16 +251,20 @@ pub fn open_url_in_new_tab(url: &str) -> Result<(), wasm_bindgen::prelude::JsVal
 fn clickable_links(
     mut primary_window: Query<&mut Window, With<PrimaryWindow>>,
     mut editable_text_query: Query<
+        (&Node, &GlobalTransform, &mut Text, &TextLayoutInfo),
+        (With<EditableText>, Without<BevyMarkdownNode>),
+    >,
+    mut markdown_text_query: Query<
         (
             &Node,
             &GlobalTransform,
             &mut Text,
             &TextLayoutInfo,
-            &EditableText,
+            &BevyMarkdownNode,
         ),
-        With<EditableText>,
+        (With<BevyMarkdownNode>, Without<EditableText>),
     >,
-    mut interaction_query: Query<(&Interaction, &VeloNode), (Changed<Interaction>, With<VeloNode>)>,
+    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<VeloNode>)>,
     ui_state: Res<UiState>,
 ) {
     if ui_state.hold_entity.is_some() {
@@ -264,9 +276,7 @@ fn clickable_links(
     if let Some(cursor_position) = primary_window.cursor_position() {
         let window_height = primary_window.height();
         let pos = Vec2::new(cursor_position.x, window_height - cursor_position.y);
-        for (node, transform, text, text_layout_info, editable_text) in
-            editable_text_query.iter_mut()
-        {
+        for (node, transform, text, text_layout_info) in editable_text_query.iter_mut() {
             let mut str = "".to_string();
             let mut text_copy = text.clone();
             for section in text_copy.sections.iter_mut() {
@@ -289,10 +299,7 @@ fn clickable_links(
                 if rect.contains(pos) {
                     if sections.1[*section_index] {
                         primary_window.cursor.icon = CursorIcon::Hand;
-                        for (interaction, rectangle) in &mut interaction_query {
-                            if rectangle.id != editable_text.id {
-                                continue;
-                            }
+                        for interaction in &mut interaction_query {
                             if *interaction == Interaction::Clicked {
                                 #[cfg(not(target_arch = "wasm32"))]
                                 open::that(text.sections[*section_index].value.clone()).unwrap();
@@ -301,7 +308,46 @@ fn clickable_links(
                             }
                         }
                     } else {
-                        primary_window.cursor.icon = CursorIcon::Text;
+                        primary_window.cursor.icon = CursorIcon::Default;
+                    }
+                }
+            }
+        }
+        for (node, transform, text, text_layout_info, markdown_text) in
+            markdown_text_query.iter_mut()
+        {
+            let mut str = "".to_string();
+            let mut text_copy = text.clone();
+            for section in text_copy.sections.iter_mut() {
+                str = format!("{}{}", str, section.value.clone());
+            }
+            let link_sections = markdown_text.link_sections.clone();
+
+            let offset = transform.translation().truncate() - 0.5 * node.size();
+            for PositionedGlyph {
+                position,
+                section_index,
+                size,
+                ..
+            } in &text_layout_info.glyphs
+            {
+                let rect = bevy::math::Rect::from_center_size(
+                    offset + *position / scale_factor,
+                    *size / scale_factor,
+                );
+                if rect.contains(pos) {
+                    if let Some(link) = link_sections[*section_index].clone() {
+                        primary_window.cursor.icon = CursorIcon::Hand;
+                        for interaction in &mut interaction_query {
+                            if *interaction == Interaction::Clicked {
+                                #[cfg(not(target_arch = "wasm32"))]
+                                open::that(link.clone()).unwrap();
+                                #[cfg(target_arch = "wasm32")]
+                                open_url_in_new_tab(link.clone().as_str()).unwrap();
+                            }
+                        }
+                    } else {
+                        primary_window.cursor.icon = CursorIcon::Default;
                     }
                 }
             }
@@ -333,21 +379,17 @@ fn entity_to_edit_changed(
                 {
                     for (mut outline, node, _) in &mut velo_node_query.iter_mut() {
                         if node.id == entity_to_edit {
-                            outline.color =
-                                Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
+                            outline.color = Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
                             outline.thickness = UiRect::all(Val::Px(2.));
                         } else {
-                            outline.color =
-                                Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                            outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
                             outline.thickness = UiRect::all(Val::Px(1.));
                         }
                     }
                 }
                 // hide raw text and have markdown view for all nodes (except selected)
                 {
-                    for (text, mut style, raw_text, parent) in
-                        &mut raw_text_node_query.iter_mut()
-                    {
+                    for (text, mut style, raw_text, parent) in &mut raw_text_node_query.iter_mut() {
                         if raw_text.id == entity_to_edit {
                             style.display = Display::Flex;
                             continue;
@@ -368,13 +410,11 @@ fn entity_to_edit_changed(
                                 asset_server.load("fonts/SourceCodePro-Regular.ttf"),
                             ),
                             bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-                            italic_font: Some(
-                                asset_server.load("fonts/SourceCodePro-Italic.ttf"),
-                            ),
+                            italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
                             semi_bold_italic_font: Some(
                                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
                             ),
-                            max_size: Some((style.max_size.width, style.max_size.height)),
+                            size: Some((style.max_size.width, style.max_size.height)),
                         };
                         let markdown_text =
                             spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
@@ -397,6 +437,13 @@ fn entity_to_edit_changed(
                 }
             }
             None => {
+                // change border
+                {
+                    for (mut outline, _, _) in &mut velo_node_query.iter_mut() {
+                        outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                        outline.thickness = UiRect::all(Val::Px(1.));
+                    }
+                }
                 for (text, mut style, raw_text, parent) in &mut raw_text_node_query.iter_mut() {
                     if style.display == Display::None {
                         continue;
@@ -416,10 +463,9 @@ fn entity_to_edit_changed(
                         semi_bold_italic_font: Some(
                             asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
                         ),
-                        max_size: Some((style.max_size.width, style.max_size.height)),
+                        size: Some((style.max_size.width, style.max_size.height)),
                     };
-                    let markdown_text =
-                        spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
+                    let markdown_text = spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
                     commands
                         .get_entity(markdown_text)
                         .unwrap()

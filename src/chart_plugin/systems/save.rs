@@ -8,7 +8,7 @@ use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
 use super::ui_helpers::VeloNode;
-use super::{load_doc_to_memory, RawText, VeloNodeContainer};
+use super::{load_doc_to_memory, RawText, SaveStoreEvent, VeloNodeContainer};
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::components::Doc;
 use crate::resources::SaveDocRequest;
@@ -37,6 +37,7 @@ pub fn save_doc(
     mut app_state: ResMut<AppState>,
     mut pkv: ResMut<PkvStore>,
     mut commands: Commands,
+    mut events: EventWriter<SaveStoreEvent>,
 ) {
     let doc_id = request.doc_id;
 
@@ -50,45 +51,59 @@ pub fn save_doc(
             });
         }
     }
+    // event is used for running save_tab logic before saving to store
+    events.send(SaveStoreEvent {
+        doc_id,
+        path: request.path.clone(),
+    });
+}
 
-    if let Ok(mut docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
-        docs.insert(doc_id, app_state.docs.get(&doc_id).unwrap().clone());
-        pkv.set("docs", &docs).unwrap();
-    } else {
-        let mut docs = HashMap::new();
-        docs.insert(doc_id, app_state.docs.get(&doc_id).unwrap().clone());
-        pkv.set("docs", &docs).unwrap();
-    }
-    if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, Vec<String>>>("tags") {
-        let doc = app_state.docs.get(&doc_id).unwrap();
-        if let Some(tags) = tags.get_mut(&doc_id) {
-            tags.append(&mut doc.tags.clone());
+pub fn save_to_store(
+    mut pkv: ResMut<PkvStore>,
+    app_state: Res<AppState>,
+    mut events: EventReader<SaveStoreEvent>,
+) {
+    for event in events.iter() {
+        let doc_id = event.doc_id;
+        if let Ok(mut docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
+            docs.insert(doc_id, app_state.docs.get(&doc_id).unwrap().clone());
+            pkv.set("docs", &docs).unwrap();
         } else {
-            tags.insert(doc.id, doc.tags.clone());
+            let mut docs = HashMap::new();
+            docs.insert(doc_id, app_state.docs.get(&doc_id).unwrap().clone());
+            pkv.set("docs", &docs).unwrap();
         }
-        pkv.set("tags", &tags).unwrap();
-    } else {
-        let doc = app_state.docs.get(&doc_id).unwrap();
-        let mut tags = HashMap::new();
-        tags.insert(doc.id, doc.tags.clone());
-        pkv.set("tags", &tags).unwrap();
-    }
-    if let Ok(mut names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-        let doc = app_state.docs.get(&doc_id).unwrap();
-        names.insert(doc.id, doc.name.clone());
-        pkv.set("names", &names).unwrap();
-    } else {
-        let doc = app_state.docs.get(&doc_id).unwrap();
-        let mut names = HashMap::new();
-        names.insert(doc.id, doc.name.clone());
-        pkv.set("names", &names).unwrap();
-    }
-    pkv.set("last_saved", &doc_id).unwrap();
+        if let Ok(mut tags) = pkv.get::<HashMap<ReflectableUuid, Vec<String>>>("tags") {
+            let doc = app_state.docs.get(&doc_id).unwrap();
+            if let Some(tags) = tags.get_mut(&doc_id) {
+                tags.append(&mut doc.tags.clone());
+            } else {
+                tags.insert(doc.id, doc.tags.clone());
+            }
+            pkv.set("tags", &tags).unwrap();
+        } else {
+            let doc = app_state.docs.get(&doc_id).unwrap();
+            let mut tags = HashMap::new();
+            tags.insert(doc.id, doc.tags.clone());
+            pkv.set("tags", &tags).unwrap();
+        }
+        if let Ok(mut names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
+            let doc = app_state.docs.get(&doc_id).unwrap();
+            names.insert(doc.id, doc.name.clone());
+            pkv.set("names", &names).unwrap();
+        } else {
+            let doc = app_state.docs.get(&doc_id).unwrap();
+            let mut names = HashMap::new();
+            names.insert(doc.id, doc.name.clone());
+            pkv.set("names", &names).unwrap();
+        }
+        pkv.set("last_saved", &doc_id).unwrap();
 
-    if let Some(path) = request.path.clone() {
-        let current_doc = app_state.docs.get(&doc_id).unwrap().clone();
-        std::fs::write(path, serde_json::to_string_pretty(&current_doc).unwrap())
-            .expect("Error saving current document to file")
+        if let Some(path) = event.path.clone() {
+            let current_doc = app_state.docs.get(&doc_id).unwrap().clone();
+            std::fs::write(path, serde_json::to_string_pretty(&current_doc).unwrap())
+                .expect("Error saving current document to file")
+        }
     }
 }
 
@@ -204,7 +219,7 @@ mod tests {
     fn test_save_doc1() {
         // Setup
         let mut app = App::new();
-        app.add_system(save_doc);
+        app.add_systems((save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -229,6 +244,7 @@ mod tests {
             path: Some(temp_file_path.clone()),
         };
         app.insert_resource(request);
+        app.add_event::<SaveStoreEvent>();
         PkvStore::new("test", "test").clear().unwrap();
         app.insert_resource(PkvStore::new("test", "test"));
         app.insert_resource(app_state);
@@ -260,7 +276,7 @@ mod tests {
     fn test_save_doc2() {
         // Setup
         let mut app = App::new();
-        app.add_system(save_doc);
+        app.add_systems((save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -290,6 +306,7 @@ mod tests {
         let mut tags = HashMap::new();
         tags.insert(ReflectableUuid::generate(), vec!["test_tag_2".to_string()]);
         pkv.set("tags", &tags).unwrap();
+        app.add_event::<SaveStoreEvent>();
         app.insert_resource(pkv);
         app.insert_resource(app_state);
 
@@ -320,7 +337,7 @@ mod tests {
     fn test_save_doc3() {
         // Setup
         let mut app = App::new();
-        app.add_system(save_doc);
+        app.add_systems((save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -351,6 +368,7 @@ mod tests {
         let mut tags = HashMap::new();
         tags.insert(doc_id, vec!["test_tag_2".to_string()]);
         pkv.set("tags", &tags).unwrap();
+        app.add_event::<SaveStoreEvent>();
         app.insert_resource(pkv);
         app.insert_resource(app_state);
 
