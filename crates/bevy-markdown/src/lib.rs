@@ -45,7 +45,6 @@ pub fn spawn_bevy_markdown(
                                             font: bevy_markdown.regular_font.clone().unwrap(),
                                             font_size: 18.0,
                                             color: Color::BLACK,
-                                            ..default()
                                         },
                                     };
                                     text_sections.push((text_section, None));
@@ -59,7 +58,6 @@ pub fn spawn_bevy_markdown(
                                                     font: bevy_markdown.bold_font.clone().unwrap(),
                                                     font_size: 18.0,
                                                     color: Color::BLACK,
-                                                    ..default()
                                                 },
                                             };
                                             text_sections.push((text_section, None));
@@ -81,7 +79,6 @@ pub fn spawn_bevy_markdown(
                                                         .unwrap(),
                                                     font_size: 18.0,
                                                     color: Color::BLACK,
-                                                    ..default()
                                                 },
                                             };
                                             text_sections.push((text_section, None));
@@ -104,7 +101,6 @@ pub fn spawn_bevy_markdown(
                                                         .unwrap(),
                                                     font_size: 18.0,
                                                     color: Color::BLUE,
-                                                    ..default()
                                                 },
                                             };
                                             text_sections
@@ -132,8 +128,8 @@ pub fn spawn_bevy_markdown(
                     info: format!("unexpected node: {:?}", node),
                 }),
             }
-            if errors.len() > 0 {
-                return Err(errors);
+            if !errors.is_empty() {
+                Err(errors)
             } else {
                 let mut sections = Vec::new();
                 let mut links = Vec::new();
