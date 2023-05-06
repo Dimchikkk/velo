@@ -148,6 +148,18 @@ pub struct EditableText {
     pub id: ReflectableUuid,
 }
 
+#[derive(Component, Default, Reflect)]
+#[reflect(Component)]
+pub struct RawText {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component, Default, Reflect)]
+#[reflect(Component)]
+pub struct BevyMarkdownView {
+    pub id: ReflectableUuid,
+}
+
 #[derive(Component, Copy, Clone, Debug, Reflect, Default)]
 #[reflect(Component)]
 pub enum ResizeMarker {

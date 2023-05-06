@@ -81,6 +81,7 @@ pub fn load_doc(
 }
 
 pub fn load_tab(
+    asset_server: Res<AssetServer>,
     old_nodes: Query<Entity, With<VeloNodeContainer>>,
     mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
     request: Res<LoadTabRequest>,
@@ -159,6 +160,7 @@ pub fn load_tab(
                 // ideally AddRect event should be fired instead of calling spawn_node directly
                 let entity = spawn_node(
                     &mut commands,
+                    &asset_server,
                     NodeMeta {
                         size: (json_node.width, json_node.height),
                         id: ReflectableUuid(json_node.id),
@@ -166,9 +168,9 @@ pub fn load_tab(
                         text: json_node.text.text.clone(),
                         bg_color: json_node.bg_color,
                         position: (json_node.left, json_node.bottom),
-                        tags: json_node.tags,
                         text_pos: json_node.text.pos,
                         z_index: json_node.z_index,
+                        is_active: false,
                     },
                 );
                 commands.entity(main_panel_query.single()).add_child(entity);

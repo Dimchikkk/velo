@@ -37,6 +37,9 @@ pub fn keyboard_input_system(
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
     blink_timer.timer.tick(time.delta());
+    if input.just_pressed(KeyCode::Escape) {
+        ui_state.entity_to_edit = None;
+    }
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(
@@ -233,7 +236,6 @@ pub fn insert_from_clipboard(
                     pos: crate::TextPos::Center,
                 },
                 bg_color: Color::WHITE,
-                tags: vec![],
                 z_index: 0,
             },
             image: Some(image.into()),

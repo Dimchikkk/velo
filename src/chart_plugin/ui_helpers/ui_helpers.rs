@@ -194,7 +194,11 @@ pub fn get_sections(text: String) -> (Vec<TextSection>, Vec<bool>) {
     (sections, is_link)
 }
 
-pub fn create_rectangle_txt(text: String, max_size: Option<(Val, Val)>) -> TextBundle {
+pub fn create_rectangle_txt(
+    text: String,
+    max_size: Option<(Val, Val)>,
+    is_active: bool,
+) -> TextBundle {
     let text = Text {
         sections: get_sections(text).0,
         alignment: TextAlignment::Left,
@@ -206,6 +210,11 @@ pub fn create_rectangle_txt(text: String, max_size: Option<(Val, Val)>) -> TextB
     };
     if let Some((x, y)) = max_size {
         text_bundle_style.max_size = Size::new(x, y);
+    };
+    if is_active {
+        text_bundle_style.display = Display::Flex;
+    } else {
+        text_bundle_style.display = Display::None;
     }
     TextBundle {
         text,
