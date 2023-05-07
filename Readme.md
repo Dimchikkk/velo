@@ -43,13 +43,15 @@ enjoyable project to work on.
 -   ability to create sharable url of the document using \"Share
     Document\" button (**.velo.toml** should be created in user home
     directory containing GitHub access token with \"gist\" scope):
+
+   ```toml
+   github_access_token = "<github_access_token>"
+   ```
+
 - initial markdown support
   - italic/bold text style
   - links
 
-```toml
-github_access_token = "<github_access_token>"
-```
 
 ## Run
 
