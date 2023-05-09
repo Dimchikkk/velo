@@ -145,9 +145,9 @@ pub fn save_tab(
     }
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
-    for (rect, _, bg_color, z_index, parent, test_pos_style) in rec_query.iter() {
+    for (node, _, bg_color, z_index, parent, test_pos_style) in rec_query.iter() {
         for (text, editable_text) in text_query.iter() {
-            if rect.id == editable_text.id {
+            if node.id == editable_text.id {
                 let mut str = "".to_string();
                 let mut text_copy = text.clone();
                 text_copy.sections.pop();
@@ -164,8 +164,8 @@ pub fn save_tab(
                     _ => -1,
                 };
                 json_nodes.push(json!(JsonNode {
-                    node_type: crate::NodeType::Rect,
-                    id: rect.id.0,
+                    node_type: node.node_type.clone(),
+                    id: node.id.0,
                     left,
                     bottom,
                     width: size.width,

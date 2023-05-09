@@ -163,6 +163,7 @@ pub fn load_tab(
                     &asset_server,
                     NodeMeta {
                         size: (json_node.width, json_node.height),
+                        node_type: json_node.node_type,
                         id: ReflectableUuid(json_node.id),
                         image: image.clone(),
                         text: json_node.text.text.clone(),
