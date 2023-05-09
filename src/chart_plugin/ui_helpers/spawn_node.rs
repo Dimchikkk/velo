@@ -171,12 +171,14 @@ pub fn spawn_node(
             regular_font: Some(TextStyle::default().font),
             bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
             italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
+            extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
             semi_bold_italic_font: Some(
                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
             ),
             size: Some(item_meta.size),
         };
-        let markdown_text = spawn_bevy_markdown(commands, bevy_markdown).unwrap();
+        let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
+            .expect("should handle markdown convertion");
         commands
             .get_entity(markdown_text)
             .unwrap()
