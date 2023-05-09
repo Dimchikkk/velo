@@ -71,9 +71,11 @@ pub struct CommChannels {
     pub rx: Receiver<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Reflect, Default, Debug)]
 pub enum NodeType {
+    #[default]
     Rect,
+    Circle,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -227,7 +229,8 @@ impl Plugin for ChartPlugin {
                 .before(save_doc)
                 .before(load_tab)
                 .before(load_doc)
-                .before(rec_button_handlers),
+                .before(rec_button_handlers)
+                .before(create_new_rectangle),
         );
     }
 }
@@ -379,10 +382,21 @@ fn entity_to_edit_changed(
                 {
                     for (mut outline, node, _) in &mut velo_node_query.iter_mut() {
                         if node.id == entity_to_edit {
-                            outline.color = Color::rgb(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0);
+                            outline.color =
+                                Color::rgba(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0, 1.0);
                             outline.thickness = UiRect::all(Val::Px(2.));
                         } else {
-                            outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                            match node.node_type {
+                                NodeType::Rect => {
+                                    outline.color =
+                                        Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                                }
+                                NodeType::Circle => {
+                                    outline.color =
+                                        Color::rgba(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0, 0.);
+                                }
+                            }
+
                             outline.thickness = UiRect::all(Val::Px(1.));
                         }
                     }
@@ -439,8 +453,17 @@ fn entity_to_edit_changed(
             None => {
                 // change border
                 {
-                    for (mut outline, _, _) in &mut velo_node_query.iter_mut() {
-                        outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                    for (mut outline, node, _) in &mut velo_node_query.iter_mut() {
+                        match node.node_type {
+                            NodeType::Rect => {
+                                outline.color =
+                                    Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                            }
+                            NodeType::Circle => {
+                                outline.color =
+                                    Color::rgba(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0, 0.);
+                            }
+                        }
                         outline.thickness = UiRect::all(Val::Px(1.));
                     }
                 }
@@ -572,6 +595,7 @@ fn create_new_rectangle(
             NodeMeta {
                 size: (event.node.width, event.node.height),
                 id: ReflectableUuid(event.node.id),
+                node_type: event.node.node_type.clone(),
                 image: event.image.clone(),
                 text: event.node.text.text.clone(),
                 bg_color: event.node.bg_color,
