@@ -1,4 +1,4 @@
-use crate::utils::ReflectableUuid;
+use crate::{chart_plugin::NodeType, utils::ReflectableUuid};
 use bevy::prelude::*;
 
 use crate::TextPos;
@@ -128,11 +128,13 @@ pub struct VeloNodeContainer {
 #[reflect(Component)]
 pub struct VeloNode {
     pub id: ReflectableUuid,
+    pub node_type: NodeType,
 }
 
 #[derive(PartialEq, Eq)]
 pub enum ButtonTypes {
-    Add,
+    AddRec,
+    AddCircle,
     Del,
     Front,
     Back,

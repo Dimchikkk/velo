@@ -2,10 +2,11 @@ use bevy::{prelude::*, text::BreakLineOn};
 
 use crate::chart_plugin::ui_helpers::{get_tooltip, ButtonAction, GenericButton, Tooltip};
 
-pub fn add_new_delete_rec(
+pub fn node_manipulation(
     commands: &mut Commands,
     icon_font: &Handle<Font>,
-    create_component: ButtonAction,
+    create_rec_component: ButtonAction,
+    create_circle_component: ButtonAction,
     delete_component: ButtonAction,
 ) -> Entity {
     let node = commands
@@ -20,7 +21,7 @@ pub fn add_new_delete_rec(
             ..default()
         })
         .id();
-    let top_new = commands
+    let top_new_rec = commands
         .spawn(NodeBundle {
             background_color: Color::BLACK.with_a(0.5).into(),
             style: Style {
@@ -52,7 +53,7 @@ pub fn add_new_delete_rec(
                 },
                 ..default()
             },
-            create_component,
+            create_rec_component,
             GenericButton,
         ))
         .with_children(|builder| {
@@ -66,6 +67,71 @@ pub fn add_new_delete_rec(
             let text = Text {
                 sections: vec![TextSection {
                     value: "\u{eb54}".to_string(),
+                    style: text_style,
+                }],
+                alignment: TextAlignment::Left,
+                linebreak_behaviour: BreakLineOn::WordBoundary,
+            };
+            let text_bundle_style = Style {
+                position_type: PositionType::Absolute,
+                padding: UiRect::all(Val::Px(5.)),
+                margin: UiRect::all(Val::Px(3.)),
+                ..default()
+            };
+
+            builder.spawn(TextBundle {
+                text,
+                style: text_bundle_style,
+                ..default()
+            });
+        })
+        .id();
+    let top_new_circle = commands
+        .spawn(NodeBundle {
+            background_color: Color::BLACK.with_a(0.5).into(),
+            style: Style {
+                flex_direction: FlexDirection::Column,
+                align_self: AlignSelf::Stretch,
+                margin: UiRect::all(Val::Px(5.)),
+                size: Size::new(Val::Percent(23.), Val::Percent(100.)),
+                ..default()
+            },
+            ..default()
+        })
+        .id();
+    let new_circle = commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
+                style: Style {
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        left: Val::Px(-2.),
+                        right: Val::Px(0.),
+                        top: Val::Px(-2.),
+                        bottom: Val::Px(0.),
+                    },
+                    ..default()
+                },
+                ..default()
+            },
+            create_circle_component,
+            GenericButton,
+        ))
+        .with_children(|builder| {
+            builder.spawn((get_tooltip("New Circle".to_string(), 14.), Tooltip));
+
+            let text_style = TextStyle {
+                font_size: 30.0,
+                color: Color::BLACK,
+                font: icon_font.clone(),
+            };
+            let text = Text {
+                sections: vec![TextSection {
+                    value: "\u{ef4a}".to_string(),
                     style: text_style,
                 }],
                 alignment: TextAlignment::Left,
@@ -150,9 +216,11 @@ pub fn add_new_delete_rec(
             });
         })
         .id();
-    commands.entity(top_new).add_child(new_rec);
+    commands.entity(top_new_circle).add_child(new_circle);
+    commands.entity(top_new_rec).add_child(new_rec);
     commands.entity(top_del).add_child(del_rec);
     commands.entity(node).add_child(top_del);
-    commands.entity(node).add_child(top_new);
+    commands.entity(node).add_child(top_new_circle);
+    commands.entity(node).add_child(top_new_rec);
     node
 }

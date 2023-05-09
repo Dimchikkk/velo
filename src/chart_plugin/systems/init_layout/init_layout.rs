@@ -33,9 +33,9 @@ use add_text_manipulation::*;
 mod add_text_pos;
 use add_text_pos::*;
 
-#[path = "add_new_or_delete_rec.rs"]
-mod add_new_or_delete_rec;
-use add_new_or_delete_rec::*;
+#[path = "node_manipulation.rs"]
+mod node_manipulation;
+use node_manipulation::*;
 
 #[path = "add_menu_button.rs"]
 mod add_menu_button;
@@ -293,11 +293,14 @@ pub fn init_layout(
     commands.entity(left_panel).add_child(left_panel_controls);
     commands.entity(left_panel).add_child(left_panel_explorer);
 
-    let rectangle_creation = add_new_delete_rec(
+    let rectangle_creation = node_manipulation(
         &mut commands,
         &icon_font,
         ButtonAction {
-            button_type: ui_helpers::ButtonTypes::Add,
+            button_type: ui_helpers::ButtonTypes::AddRec,
+        },
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::AddCircle,
         },
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Del,
