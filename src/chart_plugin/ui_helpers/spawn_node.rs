@@ -3,6 +3,7 @@ use bevy_ui_borders::{BorderColor, Outline};
 
 use bevy::prelude::*;
 
+use crate::chart_plugin::NodeType;
 use crate::TextPos;
 
 use super::{
@@ -15,6 +16,7 @@ use crate::utils::ReflectableUuid;
 #[derive(Clone)]
 pub struct NodeMeta {
     pub id: ReflectableUuid,
+    pub node_type: NodeType,
     pub size: (Val, Val),
     pub position: (Val, Val),
     pub text: String,
@@ -51,21 +53,37 @@ pub fn spawn_node(
             VeloNodeContainer { id: item_meta.id },
         ))
         .id();
+    let image = match item_meta.node_type {
+        NodeType::Rect => item_meta.image,
+        NodeType::Circle => {
+            #[cfg(not(target_arch = "wasm32"))]
+            let image = Some(asset_server.load("circle-node.basis").into());
+            #[cfg(target_arch = "wasm32")]
+            let image = Some(asset_server.load("circle-node.png").into());
+            image
+        }
+    };
     let button = commands
         .spawn((
             create_rectangle_btn(
                 item_meta.bg_color,
-                item_meta.image,
+                image,
                 item_meta.z_index,
                 item_meta.text_pos,
             ),
-            VeloNode { id: item_meta.id },
-            Outline::all(
-                Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0),
-                Val::Px(1.),
-            ),
+            VeloNode {
+                id: item_meta.id,
+                node_type: item_meta.node_type.clone(),
+            },
         ))
         .id();
+    let outline_color = match item_meta.node_type {
+        NodeType::Rect => Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0),
+        NodeType::Circle => Color::rgba(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0, 0.),
+    };
+    commands
+        .entity(button)
+        .insert(Outline::all(outline_color, Val::Px(1.)));
     let arrow_marker1 = commands
         .spawn((
             create_arrow_marker(50.0, 0., 0., 0.),
