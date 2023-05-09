@@ -40,15 +40,34 @@ pub fn rec_button_handlers(
     for (interaction, button_action) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => match button_action.button_type {
-                super::ui_helpers::ButtonTypes::Add => {
+                super::ui_helpers::ButtonTypes::AddRec => {
                     events.send(AddRectEvent {
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Rect,
                             left: Val::Px(window.width() / 2. - 200.),
                             bottom: Val::Px(window.height() / 2.),
-                            width: Val::Px(100.0),
-                            height: Val::Px(100.0),
+                            width: Val::Px(128.0),
+                            height: Val::Px(128.0),
+                            text: JsonNodeText {
+                                text: "".to_string(),
+                                pos: crate::TextPos::Center,
+                            },
+                            bg_color: Color::rgb(1.0, 1.0, 1.0),
+                            z_index: 0,
+                        },
+                        image: None,
+                    });
+                }
+                super::ui_helpers::ButtonTypes::AddCircle => {
+                    events.send(AddRectEvent {
+                        node: JsonNode {
+                            id: Uuid::new_v4(),
+                            node_type: NodeType::Circle,
+                            left: Val::Px(window.width() / 2. - 200.),
+                            bottom: Val::Px(window.height() / 2.),
+                            width: Val::Px(128.0),
+                            height: Val::Px(128.0),
                             text: JsonNodeText {
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
@@ -540,17 +559,22 @@ pub fn shared_doc_handler(
                     #[cfg(not(target_arch = "wasm32"))]
                     let mut clipboard = arboard::Clipboard::new().unwrap();
                     ehttp::fetch(request, move |result| {
-                        let res_string = result.unwrap().text().unwrap();
-                        let res_json: Value = serde_json::from_str(res_string.as_str()).unwrap();
-                        let files: Value = res_json["files"].clone();
-                        let velo = files["velo.json"].clone();
-                        #[cfg(not(target_arch = "wasm32"))]
-                        clipboard
-                            .set_text(format!(
-                                "https://staffengineer.github.io/velo?document={}",
-                                velo["raw_url"].to_string().replace('\"', "")
-                            ))
-                            .unwrap();
+                        let response = result.unwrap();
+                        if response.ok {
+                            let res_json: Value =
+                                serde_json::from_str(response.text().unwrap().as_str()).unwrap();
+                            let files: Value = res_json["files"].clone();
+                            let velo = files["velo.json"].clone();
+                            #[cfg(not(target_arch = "wasm32"))]
+                            clipboard
+                                .set_text(format!(
+                                    "https://staffengineer.github.io/velo?document={}",
+                                    velo["raw_url"].to_string().replace('\"', "")
+                                ))
+                                .unwrap();
+                        } else {
+                            error!("Error sharing document: {}", response.status_text);
+                        }
                     });
                 }
             }
