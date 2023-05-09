@@ -23,26 +23,24 @@ would it allow me to learn the language, but it would also be an
 enjoyable project to work on.
 
 ## What\'s implemented:
-
--   add/remove rectangle
--   rectangle resizing
--   rectangle repositioning
--   wrapped text inside rectangles
--   paste screenshot from clipboard
+-   support rectangle/circle nodes
+-   add/remove node
+-   node resizing
+-   node repositioning
+-   wrapped text inside nodes
+-   paste screenshot from clipboard [native target only]
 -   connect nodes with arrows
--   make app snapshot in memory and load from it (command + s\[l\])
+-   make app snapshot in memory and load from it (MacOs: Command + s\[l\])
 -   save app state to db and load from it
--   change background color of rectangle
--   move rectangle to front/back
--   positioning text in rectangle
+-   change background color of nodes
+-   move node to front/back
+-   positioning text inside node
 -   buttons to cut/copy/paste text
--   clickable links
--   tabs support
--   documents support
+-   multiple documents/tabs support
 -   load app state from url
 -   ability to create sharable url of the document using \"Share
     Document\" button (**.velo.toml** should be created in user home
-    directory containing GitHub access token with \"gist\" scope):
+    directory containing GitHub access token with \"gist\" scope) [native target only]:
 
    ```toml
    github_access_token = "<github_access_token>"
@@ -51,9 +49,6 @@ enjoyable project to work on.
 - initial markdown support
   - italic/bold text style
   - links
-- support multiple forms:
-  - rectangle
-  - circle
 
 ## Run
 
