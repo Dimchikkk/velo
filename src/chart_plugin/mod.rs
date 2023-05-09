@@ -428,10 +428,13 @@ fn entity_to_edit_changed(
                             semi_bold_italic_font: Some(
                                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
                             ),
+                            extra_bold_font: Some(
+                                asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
+                            ),
                             size: Some((style.max_size.width, style.max_size.height)),
                         };
-                        let markdown_text =
-                            spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
+                        let markdown_text = spawn_bevy_markdown(&mut commands, bevy_markdown)
+                            .expect("should handle markdown convertion");
                         commands
                             .get_entity(markdown_text)
                             .unwrap()
@@ -485,6 +488,9 @@ fn entity_to_edit_changed(
                         italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
                         semi_bold_italic_font: Some(
                             asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
+                        ),
+                        extra_bold_font: Some(
+                            asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
                         ),
                         size: Some((style.max_size.width, style.max_size.height)),
                     };
