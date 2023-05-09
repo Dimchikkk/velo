@@ -49,6 +49,7 @@ enjoyable project to work on.
 - initial markdown support
   - italic/bold text style
   - links
+  - syntax highlighting
 
 ## Run
 
