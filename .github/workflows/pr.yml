@@ -60,8 +60,8 @@ jobs:
       - name: Clippy
         run: cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments -D
           warnings
-  test:
-    name: Test
+  test-velo:
+    name: Test velo
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -77,9 +77,23 @@ jobs:
 
       - name: Test velo
         run: cargo test
+  test-markdown:
+    name: Test velo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
  
       - name: Test bevy-markdown
-        run: cargo test -p bevy-markdown --lib
+        run: cargo test -p bevy-markdown --lib  
   coverage:
     runs-on: ubuntu-latest
     env:
