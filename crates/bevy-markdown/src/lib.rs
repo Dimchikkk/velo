@@ -46,11 +46,11 @@ pub fn spawn_bevy_markdown(
                 markdown::mdast::Node::Root(root) => {
                     root.children.iter().for_each(|child| match child {
                         markdown::mdast::Node::Code(code) => {
-                            let lang = code.lang.as_ref().unwrap();
+                            let default_lang = "rs".to_string();
+                            let lang = code.lang.as_ref().unwrap_or(&default_lang);
                             let syntax = vec![
                                 ps.find_syntax_by_name(lang.as_str()),
                                 ps.find_syntax_by_extension(lang.as_str()),
-                                ps.find_syntax_by_extension("rs"),
                             ]
                             .iter()
                             .find(|&o| o.is_some())
@@ -127,6 +127,19 @@ pub fn spawn_bevy_markdown(
                         }
                         markdown::mdast::Node::Paragraph(paragraph) => {
                             paragraph.children.iter().for_each(|child| match child {
+                                markdown::mdast::Node::Break(_break) => {
+                                    text_sections.push((
+                                        TextSection {
+                                            value: "\n".to_string(),
+                                            style: TextStyle {
+                                                font: bevy_markdown.regular_font.clone().unwrap(),
+                                                font_size: 18.0,
+                                                color: Color::BLACK,
+                                            },
+                                        },
+                                        None,
+                                    ));
+                                }
                                 markdown::mdast::Node::Text(text) => {
                                     let text_section = TextSection {
                                         value: text.value.clone(),
@@ -274,29 +287,22 @@ mod tests {
 
     use crate::*;
 
-    fn test_render_text_style_system(mut commands: Commands, asset_server: Res<AssetServer>) {
-        let text = "**bold1**
-__bold2__
-*italic1*
-_italic2_
-Hello world
-[link](https://example.com)
-    "
-        .to_string();
-        let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
-        let bevy_markdown = BevyMarkdown {
-            regular_font: Some(font.clone()),
-            bold_font: Some(font.clone()),
-            italic_font: Some(font.clone()),
-            semi_bold_italic_font: Some(font.clone()),
-            extra_bold_font: Some(font.clone()),
-            size: None,
-            text,
-        };
-        spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
-    }
-    #[test]
-    pub fn test_render_text_style() {
+    fn test_bevymarkdown(input: String, test_name: String) {
+        let test_render_text_style_system =
+            move |mut commands: Commands, asset_server: Res<AssetServer>| {
+                let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
+                let bevy_markdown = BevyMarkdown {
+                    regular_font: Some(font.clone()),
+                    bold_font: Some(font.clone()),
+                    italic_font: Some(font.clone()),
+                    semi_bold_italic_font: Some(font.clone()),
+                    extra_bold_font: Some(font.clone()),
+                    size: None,
+                    text: input.clone(),
+                };
+                spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
+            };
+
         let mut app = App::new();
         app.add_plugin(TaskPoolPlugin::default());
         app.add_plugin(AssetPlugin::default());
@@ -306,16 +312,35 @@ Hello world
 
         let mut text_nodes_query = app.world.query::<&Text>();
         for node in text_nodes_query.iter(&app.world) {
-            insta::assert_debug_snapshot!(node.clone());
+            insta::assert_debug_snapshot!(
+                format!("{}_{}", test_name.clone(), "node"),
+                node.clone()
+            );
         }
         let mut bevy_markdown_query = app.world.query::<&BevyMarkdownNode>();
         for node in bevy_markdown_query.iter(&app.world) {
-            insta::assert_debug_snapshot!(node.link_sections.clone());
+            insta::assert_debug_snapshot!(
+                format!("{}_{}", test_name.clone(), "links"),
+                node.link_sections.clone()
+            );
         }
     }
 
-    fn test_render_code_system(mut commands: Commands, asset_server: Res<AssetServer>) {
-        let text = "My rust code:
+    #[test]
+    pub fn test_render_text_style() {
+        let input = "**bold1**  
+__bold2__
+*italic1*
+_italic2_
+Hello world
+[link](https://example.com)
+    ";
+        test_bevymarkdown(input.to_string(), "test_render_text_style".to_string());
+    }
+
+    #[test]
+    pub fn test_render_code() {
+        let input = "My rust code:
 
 ```rs
 fn main() {
@@ -324,30 +349,15 @@ fn main() {
 ```
     "
         .to_string();
-        let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
-        let bevy_markdown = BevyMarkdown {
-            regular_font: Some(font.clone()),
-            bold_font: Some(font.clone()),
-            italic_font: Some(font.clone()),
-            extra_bold_font: Some(font.clone()),
-            semi_bold_italic_font: Some(font.clone()),
-            size: None,
-            text,
-        };
-        spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
+        test_bevymarkdown(input.to_string(), "test_render_code".to_string());
     }
+
     #[test]
-    pub fn test_render_code() {
-        let mut app = App::new();
-        app.add_plugin(TaskPoolPlugin::default());
-        app.add_plugin(AssetPlugin::default());
-        app.add_system(test_render_code_system);
-
-        app.update();
-
-        let mut text_nodes_query = app.world.query::<&Text>();
-        for node in text_nodes_query.iter(&app.world) {
-            insta::assert_debug_snapshot!(node.clone());
-        }
+    pub fn test_render_break() {
+        let input = "Hello world  
+hello world
+    "
+        .to_string();
+        test_bevymarkdown(input.to_string(), "test_render_break".to_string());
     }
 }
