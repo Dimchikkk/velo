@@ -78,7 +78,7 @@ jobs:
       - name: Test velo
         run: cargo test
   test-markdown:
-    name: Test velo
+    name: Test markdown
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
