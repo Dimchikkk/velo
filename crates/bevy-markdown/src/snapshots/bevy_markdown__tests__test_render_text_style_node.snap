@@ -1,6 +1,6 @@
 ---
 source: crates/bevy-markdown/src/lib.rs
-assertion_line: 208
+assertion_line: 302
 expression: node.clone()
 ---
 Text {
