@@ -8,21 +8,18 @@ use serde::Serialize;
 use serde_json::{json, Value};
 use uuid::Uuid;
 
-use crate::{get_timestamp, AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
+use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
     DocList, DocListItemButton, EditableText, GenericButton, NewDoc, SaveDoc, TextManipulation,
     TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
-use super::{
-    load_doc_to_memory, ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc,
-    VeloNodeContainer,
-};
+use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
-use crate::utils::ReflectableUuid;
+use crate::utils::{get_timestamp, load_doc_to_memory, ReflectableUuid};
 
 pub fn rec_button_handlers(
     mut commands: Commands,

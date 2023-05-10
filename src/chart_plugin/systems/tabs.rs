@@ -8,8 +8,8 @@ use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
 use crate::components::Tab;
 use crate::resources::{AppState, LoadDocRequest, LoadTabRequest, SaveTabRequest};
-use crate::utils::ReflectableUuid;
-use crate::{get_timestamp, UiState};
+use crate::utils::{get_timestamp, ReflectableUuid};
+use crate::UiState;
 
 pub fn select_tab_handler(
     mut commands: Commands,
