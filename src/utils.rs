@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 use bevy_pkv::PkvStore;
 
-use crate::{chart_plugin::MAX_SAVED_DOCS_IN_MEMORY, components::Doc};
+use crate::{components::Doc, ui_plugin::MAX_SAVED_DOCS_IN_MEMORY};
 
 #[derive(Clone, Reflect, Default, Debug, Copy, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[reflect_value]
