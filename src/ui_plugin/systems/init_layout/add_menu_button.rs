@@ -1,7 +1,7 @@
 use bevy::{prelude::*, text::BreakLineOn};
 use bevy_ui_borders::BorderColor;
 
-use crate::chart_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip};
+use crate::ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip};
 
 pub fn add_menu_button(
     commands: &mut Commands,

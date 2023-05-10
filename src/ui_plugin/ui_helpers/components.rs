@@ -1,4 +1,4 @@
-use crate::{chart_plugin::NodeType, utils::ReflectableUuid};
+use crate::{ui_plugin::NodeType, utils::ReflectableUuid};
 use bevy::prelude::*;
 
 use crate::TextPos;
