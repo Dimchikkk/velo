@@ -1,6 +1,6 @@
 ---
 source: crates/bevy-markdown/src/lib.rs
-assertion_line: 212
+assertion_line: 306
 expression: node.link_sections.clone()
 ---
 [
@@ -12,7 +12,17 @@ expression: node.link_sections.clone()
     None,
     None,
     None,
-    Some(
-        "https://example.com",
-    ),
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
 ]
