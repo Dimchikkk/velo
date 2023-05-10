@@ -5,12 +5,11 @@ use bevy::{
 };
 
 use super::{
-    load_doc_to_memory,
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
     DeleteDoc, DeleteTab, MainPanel, VeloNodeContainer,
 };
-use crate::canvas::arrow::events::CreateArrowEvent;
 use crate::{canvas::arrow::components::ArrowMeta, resources::LoadTabRequest};
+use crate::{canvas::arrow::events::CreateArrowEvent, utils::load_doc_to_memory};
 
 use crate::resources::{AppState, LoadDocRequest};
 use crate::utils::ReflectableUuid;
