@@ -5,8 +5,8 @@ use super::components::{ArrowConnect, ArrowMeta};
 // use crate::states::{AppState, MainCamera, RedrawArrow};
 use super::events::{CreateArrowEvent, RedrawArrowEvent};
 use super::utils::{build_arrow, create_arrow, get_pos};
-use crate::ui_plugin::UiState;
 use crate::components::MainCamera;
+use crate::ui_plugin::UiState;
 use bevy_prototype_lyon::prelude::Path;
 
 pub fn create_arrow_start(
