@@ -10,7 +10,7 @@ use bevy::{
 use bevy_pkv::PkvStore;
 
 use super::ui_helpers::ScrollingList;
-use crate::chart_plugin::ui_helpers::{add_list_item, DocList};
+use crate::ui_plugin::ui_helpers::{add_list_item, DocList};
 use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadDocRequest};
 use crate::utils::ReflectableUuid;

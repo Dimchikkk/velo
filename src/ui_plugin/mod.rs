@@ -59,7 +59,7 @@ use update_rectangle_position::*;
 mod create_new_node;
 use create_new_node::*;
 
-pub struct ChartPlugin;
+pub struct UiPlugin;
 
 pub struct AddRectEvent {
     pub node: JsonNode,
@@ -132,7 +132,7 @@ pub struct BlinkTimer {
     timer: Timer,
 }
 
-impl Plugin for ChartPlugin {
+impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiState>();
         app.init_resource::<AppState>();
