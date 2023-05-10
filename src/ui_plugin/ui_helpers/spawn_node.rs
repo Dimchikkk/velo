@@ -3,7 +3,7 @@ use bevy_ui_borders::{BorderColor, Outline};
 
 use bevy::prelude::*;
 
-use crate::chart_plugin::NodeType;
+use crate::ui_plugin::NodeType;
 use crate::TextPos;
 
 use super::{

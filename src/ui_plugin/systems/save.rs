@@ -14,7 +14,7 @@ use crate::components::Doc;
 use crate::resources::SaveDocRequest;
 use crate::resources::{AppState, SaveTabRequest};
 use crate::utils::{load_doc_to_memory, ReflectableUuid};
-use crate::{chart_plugin::ui_helpers::style_to_pos, JsonNode, JsonNodeText, MAX_CHECKPOINTS};
+use crate::{ui_plugin::ui_helpers::style_to_pos, JsonNode, JsonNodeText, MAX_CHECKPOINTS};
 
 pub fn should_save_doc(request: Option<Res<SaveDocRequest>>) -> bool {
     request.is_some()
