@@ -50,6 +50,7 @@ enjoyable project to work on.
   - italic/bold text style
   - links
   - syntax highlighting
+- particles effect [native target only]
 
 ## Run
 

@@ -64,6 +64,8 @@ bevy = { version = "0.10.1", default-features = false, features = [ "basis-unive
 arboard = "3.2.0"
 open = "4.0.1"
 toml = "0.7.3"
+bevy_hanabi = { version = "0.6", default-features = false, features = [ "2d" ] }
+rand = "0.8.5"
 
 [dev-dependencies]
 tempfile = "3.5.0"
