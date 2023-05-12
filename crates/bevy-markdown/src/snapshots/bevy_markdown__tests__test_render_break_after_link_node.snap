@@ -44,7 +44,7 @@ Text {
             },
         },
         TextSection {
-            value: "]]",
+            value: "]",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
                 font_size: 18.0,
