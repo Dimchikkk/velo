@@ -110,7 +110,7 @@ pub fn spawn_bevy_markdown(
                             }
                             text_sections.push((
                                 TextSection {
-                                    value: "\n\n".to_string(),
+                                    value: "\n".to_string(),
                                     style: TextStyle {
                                         font: bevy_markdown.regular_font.clone().unwrap(),
                                         font_size: 18.0,
@@ -126,6 +126,17 @@ pub fn spawn_bevy_markdown(
                             ));
                         }
                         markdown::mdast::Node::Paragraph(paragraph) => {
+                            text_sections.push((
+                                TextSection {
+                                    value: "\n".to_string(),
+                                    style: TextStyle {
+                                        font: bevy_markdown.regular_font.clone().unwrap(),
+                                        font_size: 18.0,
+                                        color: Color::BLACK,
+                                    },
+                                },
+                                None,
+                            ));
                             paragraph.children.iter().for_each(|child| match child {
                                 markdown::mdast::Node::Break(_break) => {
                                     text_sections.push((
@@ -359,5 +370,18 @@ hello world
     "
         .to_string();
         test_bevymarkdown(input.to_string(), "test_render_break".to_string());
+    }
+
+    #[test]
+    pub fn test_render_break_after_link() {
+        let input = "(link)[https://example.com]]   
+
+hello world
+    "
+        .to_string();
+        test_bevymarkdown(
+            input.to_string(),
+            "test_render_break_after_link".to_string(),
+        );
     }
 }
