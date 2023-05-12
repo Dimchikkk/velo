@@ -24,7 +24,7 @@ pub fn clickable_links(
         (With<BevyMarkdownNode>, Without<EditableText>),
     >,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<VeloNode>)>,
-    ui_state: Res<UiState>,
+    mut ui_state: ResMut<UiState>,
 ) {
     if ui_state.hold_entity.is_some() {
         return;
@@ -103,6 +103,7 @@ pub fn clickable_links(
                                 open::that(link.clone()).unwrap();
                                 #[cfg(target_arch = "wasm32")]
                                 open_url_in_new_tab(link.clone().as_str()).unwrap();
+                                ui_state.entity_to_edit = None;
                             }
                         }
                     } else {
