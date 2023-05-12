@@ -374,7 +374,7 @@ hello world
 
     #[test]
     pub fn test_render_break_after_link() {
-        let input = "(link)[https://example.com]]   
+        let input = "(link)[https://example.com]   
 
 hello world
     "
