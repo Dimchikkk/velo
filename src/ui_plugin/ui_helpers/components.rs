@@ -27,6 +27,9 @@ pub struct Tooltip;
 pub struct NewDoc;
 
 #[derive(Component)]
+pub struct ParticlesEffect;
+
+#[derive(Component)]
 pub struct DocList;
 
 #[derive(Component)]

@@ -5,6 +5,9 @@ use std::collections::VecDeque;
 #[derive(Component)]
 pub struct MainCamera;
 
+#[derive(Component)]
+pub struct EffectsCamera;
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Tab {
     pub is_active: bool,
