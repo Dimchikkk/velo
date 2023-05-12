@@ -164,7 +164,6 @@ impl Plugin for UiPlugin {
             create_new_node,
             resize_entity_start,
             resize_entity_end,
-            set_focused_entity,
             cancel_modal,
             confirm_modal,
             resize_notificator,
@@ -209,7 +208,6 @@ impl Plugin for UiPlugin {
             delete_doc_handler,
             save_doc_handler,
             keyboard_input_system,
-            clickable_links,
         ));
 
         app.add_systems((
@@ -222,10 +220,13 @@ impl Plugin for UiPlugin {
             #[cfg(target_arch = "wasm32")]
             set_window_property,
             shared_doc_handler,
-            save_to_store.after(save_tab),
             #[cfg(not(target_arch = "wasm32"))]
             particles_effect,
+            save_to_store.after(save_tab),
         ));
+
+        app.add_systems((set_focused_entity, clickable_links).chain());
+
         app.add_system(
             entity_to_edit_changed
                 .before(save_doc)
