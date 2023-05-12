@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::{collections::VecDeque, time::Duration};
 
+use bevy::render::view::RenderLayers;
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use bevy_pkv::PkvStore;
@@ -12,12 +13,12 @@ use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     add_list_item, get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
-    DocList, DocListItemButton, EditableText, GenericButton, NewDoc, SaveDoc, TextManipulation,
-    TextManipulationAction, TextPosMode, Tooltip, VeloNode,
+    DocList, DocListItemButton, EditableText, GenericButton, NewDoc, ParticlesEffect, SaveDoc,
+    TextManipulation, TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
-use crate::components::{Doc, Tab};
+use crate::components::{Doc, EffectsCamera, Tab};
 use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
 use crate::utils::{get_timestamp, load_doc_to_memory, ReflectableUuid};
 
@@ -660,6 +661,98 @@ pub fn button_generic_handler(
                     }
                 }
             }
+        }
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn particles_effect(
+    mut query: Query<&Interaction, (Changed<Interaction>, With<ParticlesEffect>)>,
+    mut commands: Commands,
+    mut effects: ResMut<Assets<bevy_hanabi::EffectAsset>>,
+    mut effects_camera: Query<&mut Camera, With<EffectsCamera>>,
+    mut effects_query: Query<(&Name, Entity)>,
+) {
+    use bevy_hanabi::prelude::*;
+    use rand::Rng;
+
+    for interaction in &mut query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                if effects_camera.single_mut().is_active {
+                    effects_camera.single_mut().is_active = false;
+                    for (name, entity) in effects_query.iter_mut() {
+                        if name.as_str() == "effect:2d" {
+                            commands.entity(entity).despawn_recursive();
+                        }
+                    }
+                } else {
+                    effects_camera.single_mut().is_active = true;
+                    let mut gradient = Gradient::new();
+                    let mut rng = rand::thread_rng();
+                    gradient.add_key(
+                        0.0,
+                        Vec4::new(
+                            rng.gen_range(0.0..1.0),
+                            rng.gen_range(0.0..1.0),
+                            rng.gen_range(0.0..1.0),
+                            1.0,
+                        ),
+                    );
+                    gradient.add_key(
+                        1.0,
+                        Vec4::new(
+                            rng.gen_range(0.0..1.0),
+                            rng.gen_range(0.0..1.0),
+                            rng.gen_range(0.0..1.0),
+                            0.0,
+                        ),
+                    );
+
+                    let mut size_gradient1 = Gradient::new();
+                    size_gradient1.add_key(0.0, Vec2::splat(0.008));
+                    size_gradient1.add_key(0.3, Vec2::splat(0.012));
+                    size_gradient1.add_key(1.0, Vec2::splat(0.0));
+
+                    let spawner = Spawner::rate(rng.gen_range(10.0..300.0).into());
+                    let effect = effects.add(
+                        EffectAsset {
+                            name: "Effect".into(),
+                            capacity: 32768,
+                            spawner,
+                            ..Default::default()
+                        }
+                        .init(InitPositionCircleModifier {
+                            center: Vec3::ZERO,
+                            axis: Vec3::Z,
+                            radius: 0.0001,
+                            dimension: ShapeDimension::Surface,
+                        })
+                        .init(InitVelocityCircleModifier {
+                            center: Vec3::ZERO,
+                            axis: Vec3::Z,
+                            speed: Value::Uniform((0.05, 0.1)),
+                        })
+                        .init(InitLifetimeModifier {
+                            lifetime: Value::Uniform((5., 10.)),
+                        })
+                        .render(SizeOverLifetimeModifier {
+                            gradient: size_gradient1,
+                        })
+                        .render(ColorOverLifetimeModifier { gradient }),
+                    );
+
+                    commands
+                        .spawn(ParticleEffectBundle {
+                            effect: ParticleEffect::new(effect),
+                            ..default()
+                        })
+                        .insert(Name::new("effect:2d"))
+                        .insert(RenderLayers::layer(2));
+                }
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }

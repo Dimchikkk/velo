@@ -223,6 +223,8 @@ impl Plugin for UiPlugin {
             set_window_property,
             shared_doc_handler,
             save_to_store.after(save_tab),
+            #[cfg(not(target_arch = "wasm32"))]
+            particles_effect,
         ));
         app.add_system(
             entity_to_edit_changed
