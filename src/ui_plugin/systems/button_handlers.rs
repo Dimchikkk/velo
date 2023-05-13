@@ -744,3 +744,72 @@ pub fn particles_effect(
         }
     }
 }
+
+#[test]
+fn test_change_color_pallete() {
+    use bevy::ecs::event::Events;
+
+    // Set up a test app with the necessary resources and entities
+    let mut app = App::new();
+    let entity_id = crate::utils::ReflectableUuid::generate();
+
+    app.insert_resource(UiState {
+        entity_to_edit: Some(entity_id),
+        ..default()
+    });
+    app.add_event::<Interaction>();
+    app.add_event::<ChangeColor>();
+
+    app.add_system(change_color_pallete);
+
+    app.world
+        .spawn(NodeBundle {
+            style: Style {
+                size: Size::new(Val::Px(100.0), Val::Px(100.0)),
+                position: UiRect {
+                    left: Val::Px(0.0),
+                    bottom: Val::Px(0.0),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(Interaction::Clicked)
+        .insert(ChangeColor { color: Color::RED });
+    app.world
+        .spawn(NodeBundle {
+            background_color: BackgroundColor(Color::BLUE),
+            style: Style {
+                size: Size::new(Val::Px(100.0), Val::Px(100.0)),
+                position: UiRect {
+                    left: Val::Px(0.0),
+                    bottom: Val::Px(0.0),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(VeloNode {
+            id: entity_id,
+            node_type: default(),
+        });
+
+    app.world
+        .resource_mut::<Events<Interaction>>()
+        .send(Interaction::Clicked);
+    app.world
+        .resource_mut::<Events<ChangeColor>>()
+        .send(ChangeColor { color: Color::RED });
+
+    app.update();
+
+    let (bg_color, _) = app
+        .world
+        .query::<(&BackgroundColor, With<VeloNode>)>()
+        .iter_mut(&mut app.world)
+        .last()
+        .unwrap();
+    assert_eq!(bg_color.0, Color::RED);
+}
