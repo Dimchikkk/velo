@@ -19,7 +19,7 @@ use super::{
     load_doc_to_memory, ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc,
     VeloNodeContainer,
 };
-use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
+use crate::canvas::arrow::components::{ArrowMeta, ArrowMode, ArrowType};
 use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
 use crate::utils::ReflectableUuid;
@@ -639,6 +639,79 @@ pub fn button_generic_handler(
                         *visibility = Visibility::Hidden;
                     }
                 }
+            }
+        }
+    }
+}
+
+#[test]
+fn test_change_color_pallete() {
+    use bevy::ecs::event::Events;
+
+    // Set up a test app with the necessary resources and entities
+    let mut app = App::new();
+    let entity_id = crate::utils::ReflectableUuid::generate();
+
+    for &interaction in &[
+        Interaction::Clicked,
+        Interaction::None,
+        Interaction::Hovered
+    ] {
+        app.insert_resource(UiState {
+            entity_to_edit: Some(entity_id),
+            ..default()
+        });
+        app.add_event::<Interaction>();
+        app.add_event::<ChangeColor>();
+
+        app.add_system(change_color_pallete);
+
+        app.world
+            .spawn(NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Px(100.0), Val::Px(100.0)),
+                    position: UiRect {
+                        left: Val::Px(0.0),
+                        bottom: Val::Px(0.0),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+                ..Default::default()
+            })
+            .insert(interaction)
+            .insert(ChangeColor {
+                color: Color::RED, 
+            });
+
+        app.world
+            .resource_mut::<Events<Interaction>>()
+            .send(interaction);
+        app.world
+            .resource_mut::<Events<ChangeColor>>()
+            .send(ChangeColor {
+                color: Color::RED,
+            });
+
+
+        app.update();
+
+        let bg_color = app
+            .world
+            .query::<&BackgroundColor>()
+            .iter_mut(&mut app.world)
+            .last()
+            .unwrap();
+
+        match interaction {
+            Interaction::Clicked => {
+                assert_eq!(bg_color.0, Color::RED);
+            }
+            Interaction::Hovered => {
+                assert_eq!(bg_color.0, Color::default());
+            }
+            Interaction::None => {
+                assert_eq!(bg_color.0, Color::default());
             }
         }
     }
