@@ -259,7 +259,7 @@ pub fn handle_inline_styling(
                 bevy_markdown,
                 text_sections,
                 errors,
-                applied_style | InlineStyleType::Strong as u8,
+                applied_style,
                 Some(Color::BLUE),
                 force_size,
                 &Some(link.url.clone()),
