@@ -24,14 +24,14 @@ enum InlineStyleType {
     Strong = 0x01,
     Emphasis = 0x02,
     StrongEmphasis = 0x03,
-    StrikeThrough = 0x04,
-    StrikeBold = 0x05,
-    StrikeItalic = 0x06,
-    StrikeBoldItalic = 0x07,
+    // StrikeThrough = 0x04,
+    // StrikeBold = 0x05,
+    // StrikeItalic = 0x06,
+    // StrikeBoldItalic = 0x07,
     None = 0x00,
 }
 
-pub fn get_header_size_from_depth(val: u8) -> f32 {
+pub fn get_header_font_size(val: u8) -> f32 {
     match val {
         1 => 30.0,
         2 => 27.0,
@@ -44,15 +44,16 @@ pub fn get_header_size_from_depth(val: u8) -> f32 {
 }
 
 impl InlineStyleType {
+    #[inline]
     pub fn from_u8(style_code: u8) -> Self {
         match style_code {
             0x01 => InlineStyleType::Strong,
             0x02 => InlineStyleType::Emphasis,
             0x03 => InlineStyleType::StrongEmphasis,
-            0x04 => InlineStyleType::StrikeThrough,
-            0x05 => InlineStyleType::StrikeBold,
-            0x06 => InlineStyleType::StrikeItalic,
-            0x07 => InlineStyleType::StrikeBoldItalic,
+            // 0x04 => InlineStyleType::StrikeThrough,
+            // 0x05 => InlineStyleType::StrikeBold,
+            // 0x06 => InlineStyleType::StrikeItalic,
+            // 0x07 => InlineStyleType::StrikeBoldItalic,
             _ => InlineStyleType::None,
         }
     }
@@ -72,9 +73,9 @@ pub struct BevyMarkdownNode {
 
 pub fn get_resultant_style(
     bevy_markdown: &BevyMarkdown,
-    style_stack: u8,
+    style_mask: u8,
 ) -> bevy::prelude::Handle<bevy::prelude::Font> {
-    match InlineStyleType::from_u8(style_stack) {
+    match InlineStyleType::from_u8(style_mask) {
         InlineStyleType::Strong => bevy_markdown.bold_font.clone().unwrap(),
         InlineStyleType::Emphasis => bevy_markdown.italic_font.clone().unwrap(),
         InlineStyleType::StrongEmphasis => bevy_markdown.semi_bold_italic_font.clone().unwrap(),
@@ -90,58 +91,48 @@ pub fn handle_block_styling(
 ) -> Result<(), Vec<BevyMarkdownError>> {
     match node {
         markdown::mdast::Node::Heading(header) => {
-            text_sections.push((
-                TextSection {
-                    value: "\n".to_string(),
-                    style: TextStyle {
-                        font: bevy_markdown.regular_font.clone().unwrap(),
-                        font_size: 18.0,
-                        color: Color::BLACK,
+            if text_sections.len() > 0 {
+                text_sections.push((
+                    TextSection {
+                        value: "\n".to_string(),
+                        style: TextStyle {
+                            font: bevy_markdown.regular_font.clone().unwrap(),
+                            font_size: 18.0,
+                            color: Color::BLACK,
+                        },
                     },
-                },
-                None,
-            ));
-            header.children.iter().for_each(|child| match child {
-                markdown::mdast::Node::Link(_) => {
-                    let _ = handle_inline_styling(
-                        &child,
-                        &bevy_markdown,
-                        text_sections,
-                        errors,
-                        InlineStyleType::Strong as u8,
-                        None,
-                        Some(get_header_size_from_depth(header.depth)),
-                        &None,
-                    );
-                }
-                _ => {
-                    let _ = handle_inline_styling(
-                        &child,
-                        &bevy_markdown,
-                        text_sections,
-                        errors,
-                        InlineStyleType::Strong as u8,
-                        None,
-                        Some(get_header_size_from_depth(header.depth)),
-                        &None,
-                    );
-                }
+                    None,
+                ));
+            }
+            header.children.iter().for_each(|child| {
+                let _ = handle_inline_styling(
+                    &child,
+                    &bevy_markdown,
+                    text_sections,
+                    errors,
+                    InlineStyleType::Strong as u8,
+                    None,
+                    Some(get_header_font_size(header.depth)),
+                    &None,
+                );
             });
         }
         markdown::mdast::Node::Paragraph(paragraph) => {
-            text_sections.push((
-                TextSection {
-                    value: "\n".to_string(),
-                    style: TextStyle {
-                        font: bevy_markdown.regular_font.clone().unwrap(),
-                        font_size: 18.0,
-                        color: Color::BLACK,
+            if text_sections.len() > 0 {
+                text_sections.push((
+                    TextSection {
+                        value: "\n".to_string(),
+                        style: TextStyle {
+                            font: bevy_markdown.regular_font.clone().unwrap(),
+                            font_size: 18.0,
+                            color: Color::BLACK,
+                        },
                     },
-                },
-                None,
-            ));
+                    None,
+                ));
+            }
             paragraph.children.iter().for_each(|child| match child {
-                markdown::mdast::Node::Break(_break) => {
+                markdown::mdast::Node::Break(_) => {
                     text_sections.push((
                         TextSection {
                             value: "\n".to_string(),
@@ -214,8 +205,8 @@ pub fn handle_inline_styling(
                     } else {
                         18.0
                     },
-                    color: if let Some(c) = force_color {
-                        c
+                    color: if let Some(color) = force_color {
+                        color
                     } else {
                         Color::GRAY
                     },
@@ -257,8 +248,8 @@ pub fn handle_inline_styling(
                     } else {
                         18.0
                     },
-                    color: if let Some(c) = force_color {
-                        c
+                    color: if let Some(color) = force_color {
+                        color
                     } else {
                         Color::BLACK
                     },
