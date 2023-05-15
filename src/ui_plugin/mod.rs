@@ -58,6 +58,8 @@ use update_rectangle_position::*;
 #[path = "systems/create_new_node.rs"]
 mod create_new_node;
 use create_new_node::*;
+#[path = "systems/search.rs"]
+mod search;
 
 pub struct UiPlugin;
 
