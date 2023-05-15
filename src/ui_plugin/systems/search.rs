@@ -7,11 +7,13 @@ use tantivy::schema::*;
 use tantivy::Index;
 
 pub fn initialize_tantivy_index(dir: PathBuf) -> tantivy::Index {
-    let mut schema_builder = Schema::builder();
-    schema_builder.add_text_field("text", TEXT | STORED);
-    schema_builder.add_text_field("id", STRING | STORED);
-    let schema = schema_builder.build();
-    Index::open_in_dir(dir.clone()).unwrap_or_else(|_| Index::create_in_dir(dir, schema).unwrap())
+    Index::open_in_dir(dir.clone()).unwrap_or_else(|_| {
+        let mut schema_builder = Schema::builder();
+        schema_builder.add_text_field("text", TEXT | STORED);
+        schema_builder.add_text_field("id", STRING | STORED);
+        let schema = schema_builder.build();
+        Index::create_in_dir(dir, schema).unwrap()
+    })
 }
 
 pub fn update_tantivy_index(index: &Index, id: String, text: &str) -> tantivy::Result<()> {
