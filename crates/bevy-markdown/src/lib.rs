@@ -91,19 +91,17 @@ pub fn handle_block_styling(
 ) -> Result<(), Vec<BevyMarkdownError>> {
     match node {
         markdown::mdast::Node::Heading(header) => {
-            if text_sections.len() > 0 {
-                text_sections.push((
-                    TextSection {
-                        value: "\n".to_string(),
-                        style: TextStyle {
-                            font: bevy_markdown.regular_font.clone().unwrap(),
-                            font_size: 18.0,
-                            color: Color::BLACK,
-                        },
+            text_sections.push((
+                TextSection {
+                    value: "\n".to_string(),
+                    style: TextStyle {
+                        font: bevy_markdown.regular_font.clone().unwrap(),
+                        font_size: 18.0,
+                        color: Color::BLACK,
                     },
-                    None,
-                ));
-            }
+                },
+                None,
+            ));
             header.children.iter().for_each(|child| {
                 let _ = handle_inline_styling(
                     &child,
@@ -118,19 +116,17 @@ pub fn handle_block_styling(
             });
         }
         markdown::mdast::Node::Paragraph(paragraph) => {
-            if text_sections.len() > 0 {
-                text_sections.push((
-                    TextSection {
-                        value: "\n".to_string(),
-                        style: TextStyle {
-                            font: bevy_markdown.regular_font.clone().unwrap(),
-                            font_size: 18.0,
-                            color: Color::BLACK,
-                        },
+            text_sections.push((
+                TextSection {
+                    value: "\n".to_string(),
+                    style: TextStyle {
+                        font: bevy_markdown.regular_font.clone().unwrap(),
+                        font_size: 18.0,
+                        color: Color::BLACK,
                     },
-                    None,
-                ));
-            }
+                },
+                None,
+            ));
             paragraph.children.iter().for_each(|child| match child {
                 markdown::mdast::Node::Break(_) => {
                     text_sections.push((
@@ -486,6 +482,32 @@ mod tests {
                 node.link_sections.clone()
             );
         }
+    }
+
+    #[test]
+    pub fn test_render_text_complicated() {
+        let input = "**bold1** normal text
+**Bold again* and then italic*
+[Inner links **can be styled*too***](https://google.com)
+    ";
+        test_bevymarkdown(
+            input.to_string(),
+            "test_render_text_style_complicated".to_string(),
+        );
+    }
+
+    #[test]
+    pub fn test_render_text_with_header() {
+        let input = "# Header 1
+## Header 2
+### Header 3
+#### Some header 4 *as well* italicised
+##### another header [*redirecting to google*](https://google.com)
+";
+        test_bevymarkdown(
+            input.to_string(),
+            "test_render_text_style_header".to_string(),
+        );
     }
 
     #[test]
