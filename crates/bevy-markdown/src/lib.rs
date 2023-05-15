@@ -487,7 +487,7 @@ mod tests {
     #[test]
     pub fn test_render_text_complicated() {
         let input = "**bold1** normal text
-**Bold again* and then italic*
+**Italic* and then italic again*
 [Inner links **can be styled*too***](https://google.com)
     ";
         test_bevymarkdown(
