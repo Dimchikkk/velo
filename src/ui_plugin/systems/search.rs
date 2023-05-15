@@ -6,7 +6,7 @@ use tantivy::ReloadPolicy;
 use tantivy::schema::*;
 use tantivy::Index;
 
-pub fn initialize_tantivy_index(dir: PathBuf) -> tantivy::Index {
+pub fn initialize_search_index(dir: PathBuf) -> tantivy::Index {
     Index::open_in_dir(dir.clone()).unwrap_or_else(|_| {
         let mut schema_builder = Schema::builder();
         schema_builder.add_text_field("text", TEXT | STORED);
@@ -16,7 +16,7 @@ pub fn initialize_tantivy_index(dir: PathBuf) -> tantivy::Index {
     })
 }
 
-pub fn update_tantivy_index(index: &Index, id: String, text: &str) -> tantivy::Result<()> {
+pub fn update_search_index(index: &Index, id: String, text: &str) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;
 
     let term = tantivy::Term::from_field_text(index.schema().get_field("id").unwrap(), &id);
@@ -79,13 +79,13 @@ mod tests {
         let temp_dir = TempDir::new().expect("Failed to create temporary directory");
 
         // Initialize the index using the temporary directory
-        let index = initialize_tantivy_index(temp_dir.path().to_path_buf());
+        let index = initialize_search_index(temp_dir.path().to_path_buf());
         let id1 = Uuid::new_v4().to_string();
         let text1 = "apple";
         let id2 = Uuid::new_v4().to_string();
         let text2 = "banana";
-        update_tantivy_index(&index, id1.clone(), text1).unwrap();
-        update_tantivy_index(&index, id2, text2).unwrap();
+        update_search_index(&index, id1.clone(), text1).unwrap();
+        update_search_index(&index, id2, text2).unwrap();
 
         // Perform fuzzy search and assert the results
         let query = "appla";
