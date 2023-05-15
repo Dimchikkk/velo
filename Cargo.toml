@@ -66,6 +66,8 @@ open = "4.0.1"
 toml = "0.7.3"
 bevy_hanabi = { version = "0.6", default-features = false, features = [ "2d" ] }
 rand = "0.8.5"
+tantivy = "0.19.2"
+directories = "5.0"
 
 [dev-dependencies]
 tempfile = "3.5.0"
