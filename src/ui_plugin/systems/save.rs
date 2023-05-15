@@ -109,8 +109,8 @@ pub fn save_to_store(
 
 pub fn save_tab(
     images: Res<Assets<Image>>,
-    rec_container_query: Query<&Style, With<VeloNodeContainer>>,
-    rec_query: Query<
+    node_container_query: Query<&Style, With<VeloNodeContainer>>,
+    node_query: Query<
         (
             &VeloNode,
             &UiImage,
@@ -132,7 +132,7 @@ pub fn save_tab(
         "arrows": [],
     });
     let json_images = json["images"].as_object_mut().unwrap();
-    for (rect, image, _, _, _, _) in rec_query.iter() {
+    for (rect, image, _, _, _, _) in node_query.iter() {
         if let Some(image) = images.get(&image.texture) {
             if let Ok(img) = image.clone().try_into_dynamic() {
                 let mut image_data: Vec<u8> = Vec::new();
@@ -145,7 +145,7 @@ pub fn save_tab(
     }
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
-    for (node, _, bg_color, z_index, parent, test_pos_style) in rec_query.iter() {
+    for (node, _, bg_color, z_index, parent, test_pos_style) in node_query.iter() {
         for (text, editable_text) in text_query.iter() {
             if node.id == editable_text.id {
                 let mut str = "".to_string();
@@ -154,7 +154,7 @@ pub fn save_tab(
                 for section in text_copy.sections.iter() {
                     str = format!("{}{}", str, section.value.clone());
                 }
-                let style: &Style = rec_container_query.get(parent.get()).unwrap();
+                let style: &Style = node_container_query.get(parent.get()).unwrap();
                 let left = style.position.left;
                 let bottom = style.position.bottom;
                 let size = style.size;
