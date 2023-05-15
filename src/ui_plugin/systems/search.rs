@@ -11,10 +11,7 @@ pub fn initialize_tantivy_index(dir: PathBuf) -> tantivy::Index {
     schema_builder.add_text_field("text", TEXT | STORED);
     schema_builder.add_text_field("id", STRING | STORED);
     let schema = schema_builder.build();
-    match Index::open_in_dir(dir.clone()) {
-        Ok(index) => index,
-        Err(_) => Index::create_in_dir(dir, schema).unwrap(),
-    }
+    Index::open_in_dir(dir.clone()).unwrap_or_else(|_| Index::create_in_dir(dir, schema).unwrap())
 }
 
 pub fn update_tantivy_index(index: &Index, id: String, text: &str) -> tantivy::Result<()> {
@@ -53,7 +50,7 @@ pub fn fuzzy_search(index: &Index, query: &str) -> tantivy::Result<Vec<String>> 
     let top_docs = searcher
         .search(&query, &(TopDocs::with_limit(MAX_SEARCH_RESULTS)))
         .unwrap();
-    let document_ids: Vec<String> = top_docs
+    let ids: Vec<String> = top_docs
         .iter()
         .map(|(_, doc_address)| {
             let doc = searcher.doc(*doc_address).unwrap();
@@ -61,12 +58,11 @@ pub fn fuzzy_search(index: &Index, query: &str) -> tantivy::Result<Vec<String>> 
             id_value.as_text().unwrap().to_owned()
         })
         .collect();
-    Ok(document_ids)
+    Ok(ids)
 }
 
 #[cfg(test)]
 mod tests {
-    
 
     use std::fs;
 
