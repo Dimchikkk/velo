@@ -143,8 +143,8 @@ pub fn load_doc_handler(
         import_document.name.clone(),
         true,
     );
-
     commands.entity(doc_list_query.single()).add_child(button);
+
     app_state
         .docs
         .insert(import_document.id, import_document.clone());
