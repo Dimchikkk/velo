@@ -104,8 +104,8 @@ pub fn handle_block_styling(
             ));
             header.children.iter().for_each(|child| {
                 let _ = handle_inline_styling(
-                    &child,
-                    &bevy_markdown,
+                    child,
+                    bevy_markdown,
                     text_sections,
                     errors,
                     InlineStyleType::Strong as u8,
@@ -158,8 +158,8 @@ pub fn handle_block_styling(
                 | markdown::mdast::Node::Delete(_)
                 | markdown::mdast::Node::Link(_) => {
                     let _ = handle_inline_styling(
-                        &child,
-                        &bevy_markdown,
+                        child,
+                        bevy_markdown,
                         text_sections,
                         errors,
                         InlineStyleType::None as u8,
@@ -219,7 +219,7 @@ pub fn handle_inline_styling(
                 applied_style | InlineStyleType::Emphasis as u8,
                 force_color,
                 force_size,
-                &force_data,
+                force_data,
             );
         }),
         markdown::mdast::Node::Strong(strong) => strong.children.iter().for_each(|child| {
@@ -231,14 +231,14 @@ pub fn handle_inline_styling(
                 applied_style | InlineStyleType::Strong as u8,
                 force_color,
                 force_size,
-                &force_data,
+                force_data,
             );
         }),
         markdown::mdast::Node::Text(text) => {
             let text_section = TextSection {
                 value: text.value.clone(),
                 style: TextStyle {
-                    font: get_resultant_style(bevy_markdown, applied_style as u8),
+                    font: get_resultant_style(bevy_markdown, applied_style),
                     font_size: if let Some(size) = force_size {
                         size
                     } else {
