@@ -16,7 +16,7 @@ pub struct NodeSearchMeta {
 pub fn initialize_search_index(dir: PathBuf) -> tantivy::Index {
     Index::open_in_dir(dir.clone()).unwrap_or_else(|_| {
         let mut schema_builder = Schema::builder();
-        schema_builder.add_text_field("text", TEXT | STORED);
+        schema_builder.add_text_field("text", TEXT);
         schema_builder.add_text_field("doc_id", STRING | STORED);
         schema_builder.add_text_field("tab_id", STRING | STORED);
         schema_builder.add_text_field("node_id", STRING | STORED);
