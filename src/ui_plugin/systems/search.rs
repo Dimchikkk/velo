@@ -1,3 +1,5 @@
+use bevy::prelude::ResMut;
+use std::collections::HashMap;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
 use tantivy::query::FuzzyTermQuery;
@@ -7,11 +9,27 @@ use tantivy::schema::*;
 use tantivy::Index;
 use uuid::Uuid;
 
+use crate::resources::AppState;
+use crate::utils::ReflectableUuid;
+pub struct SearchIndexState {
+    pub index: Index,
+    pub deleted_tabs: Vec<ReflectableUuid>,
+    pub updated_nodes: HashMap<NodeSearchLocation, String>,
+}
+
 #[derive(Eq, PartialEq, Hash)]
 pub struct NodeSearchLocation {
     pub doc_id: Uuid,
     pub tab_id: Uuid,
     pub node_id: Uuid,
+}
+
+pub fn init_search_index(mut app_state: ResMut<AppState>) {
+    app_state.search_index = Some(SearchIndexState {
+        index: initialize_search_index(PathBuf::from("search_index")),
+        deleted_tabs: vec![],
+        updated_nodes: HashMap::new(),
+    });
 }
 
 pub fn initialize_search_index(dir: PathBuf) -> tantivy::Index {
@@ -26,7 +44,11 @@ pub fn initialize_search_index(dir: PathBuf) -> tantivy::Index {
     })
 }
 
-pub fn update_search_index(index: &Index, meta: NodeSearchLocation, text: &str) -> tantivy::Result<()> {
+pub fn update_search_index(
+    index: &Index,
+    meta: NodeSearchLocation,
+    text: &str,
+) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;
 
     let term = tantivy::Term::from_field_text(
@@ -185,8 +207,26 @@ mod tests {
         let tab_id = Uuid::new_v4();
         let text_1 = "example text 1";
         let text_2 = "example text 2";
-        update_search_index(&index, NodeSearchLocation { doc_id, tab_id, node_id: Uuid::new_v4() }, text_1).unwrap();
-        update_search_index(&index, NodeSearchLocation { doc_id, tab_id, node_id: Uuid::new_v4() }, text_2).unwrap();
+        update_search_index(
+            &index,
+            NodeSearchLocation {
+                doc_id,
+                tab_id,
+                node_id: Uuid::new_v4(),
+            },
+            text_1,
+        )
+        .unwrap();
+        update_search_index(
+            &index,
+            NodeSearchLocation {
+                doc_id,
+                tab_id,
+                node_id: Uuid::new_v4(),
+            },
+            text_2,
+        )
+        .unwrap();
 
         // Clear the tab from the index
         clear_tab_index(&index, &tab_id).unwrap();
@@ -198,7 +238,9 @@ mod tests {
         assert_eq!(result.len(), 0);
 
         // Clean up the temporary directory
-        temp_dir.close().expect("Failed to remove temporary directory");
+        temp_dir
+            .close()
+            .expect("Failed to remove temporary directory");
     }
 
     #[test]
@@ -211,8 +253,26 @@ mod tests {
         let doc_id = Uuid::new_v4();
         let text_1 = "example text 1";
         let text_2 = "example text 2";
-        update_search_index(&index, NodeSearchLocation { doc_id, tab_id: Uuid::new_v4(), node_id: Uuid::new_v4() }, text_1).unwrap();
-        update_search_index(&index, NodeSearchLocation { doc_id, tab_id: Uuid::new_v4(), node_id: Uuid::new_v4() }, text_2).unwrap();
+        update_search_index(
+            &index,
+            NodeSearchLocation {
+                doc_id,
+                tab_id: Uuid::new_v4(),
+                node_id: Uuid::new_v4(),
+            },
+            text_1,
+        )
+        .unwrap();
+        update_search_index(
+            &index,
+            NodeSearchLocation {
+                doc_id,
+                tab_id: Uuid::new_v4(),
+                node_id: Uuid::new_v4(),
+            },
+            text_2,
+        )
+        .unwrap();
 
         // Clear the document from the index
         clear_doc_index(&index, &doc_id).unwrap();
@@ -224,6 +284,8 @@ mod tests {
         assert_eq!(result.len(), 0);
 
         // Clean up the temporary directory
-        temp_dir.close().expect("Failed to remove temporary directory");
+        temp_dir
+            .close()
+            .expect("Failed to remove temporary directory");
     }
 }
