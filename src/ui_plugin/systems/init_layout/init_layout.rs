@@ -50,6 +50,10 @@ use add_list::*;
 mod add_effect;
 use add_effect::*;
 
+#[path = "add_search_box.rs"]
+mod add_search_box;
+use add_search_box::*;
+
 pub fn init_layout(
     mut commands: Commands,
     mut app_state: ResMut<AppState>,
@@ -279,11 +283,13 @@ pub fn init_layout(
             LeftPanelControls,
         ))
         .id();
+    let search_box = add_search_box(&mut commands);
     let left_panel_explorer = commands
         .spawn((
             NodeBundle {
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(60.)),
+                    flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()
@@ -293,6 +299,7 @@ pub fn init_layout(
             LeftPanelExplorer,
         ))
         .id();
+    commands.entity(left_panel_explorer).add_child(search_box);
     commands.entity(left_panel_explorer).add_child(docs);
 
     commands.entity(left_panel).add_child(left_panel_controls);

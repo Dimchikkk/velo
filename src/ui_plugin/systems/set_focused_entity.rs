@@ -13,11 +13,11 @@ pub fn set_focused_entity(
     buttons: Res<Input<MouseButton>>,
     mut holding_time: Local<(Duration, Option<ReflectableUuid>)>,
 ) {
-    let mut window = windows.single_mut();
+    let mut primary_window = windows.single_mut();
     for (interaction, rectangle) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                window.cursor.icon = CursorIcon::Text;
+                primary_window.cursor.icon = CursorIcon::Text;
                 *state = UiState::default();
                 state.entity_to_edit = Some(rectangle.id);
                 let now_ms = get_timestamp();
@@ -25,20 +25,20 @@ pub fn set_focused_entity(
             }
             Interaction::Hovered => {
                 if state.hold_entity.is_none() && state.entity_to_edit.is_none() {
-                    window.cursor.icon = CursorIcon::Default;
+                    primary_window.cursor.icon = CursorIcon::Hand;
                 }
                 if state.entity_to_edit.is_some() {
-                    window.cursor.icon = CursorIcon::Text;
+                    primary_window.cursor.icon = CursorIcon::Text;
                 }
             }
             Interaction::None => {
-                window.cursor.icon = CursorIcon::Default;
+                primary_window.cursor.icon = CursorIcon::Default;
             }
         }
     }
 
     if state.hold_entity.is_some() {
-        window.cursor.icon = CursorIcon::Move;
+        primary_window.cursor.icon = CursorIcon::Move;
     }
 
     let now_ms = get_timestamp();
