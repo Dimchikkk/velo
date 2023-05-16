@@ -169,6 +169,7 @@ pub fn spawn_node(
         let bevy_markdown = BevyMarkdown {
             text: item_meta.text.clone(),
             regular_font: Some(TextStyle::default().font),
+            code_font: Some(TextStyle::default().font),
             bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
             italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
             extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
