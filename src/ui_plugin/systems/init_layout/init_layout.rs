@@ -94,7 +94,7 @@ pub fn init_layout(
     let add_tab = add_menu_button(&mut commands, "New Tab".to_string(), &icon_font, AddTab);
     commands.entity(bottom_panel).add_child(add_tab);
 
-    let docs = add_list(&mut commands, &asset_server, &mut app_state, &mut pkv);
+    let docs = add_list(&mut commands, &mut app_state, &mut pkv);
 
     let root_ui = commands
         .spawn((

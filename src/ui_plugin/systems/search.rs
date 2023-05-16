@@ -1,5 +1,6 @@
 use bevy::prelude::ResMut;
 use std::collections::HashMap;
+use std::path::Path;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
 use tantivy::query::FuzzyTermQuery;
@@ -25,8 +26,14 @@ pub struct NodeSearchLocation {
 }
 
 pub fn init_search_index(mut app_state: ResMut<AppState>) {
+    let dirs = directories::ProjectDirs::from("", "test", "velo");
+    let path = match dirs.as_ref() {
+        Some(dirs) => dirs.data_dir(),
+        None => Path::new("."),
+    }
+    .to_path_buf();
     app_state.search_index = Some(SearchIndexState {
-        index: initialize_search_index(PathBuf::from("search_index")),
+        index: initialize_search_index(path),
         deleted_tabs: vec![],
         updated_nodes: HashMap::new(),
     });
