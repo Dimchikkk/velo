@@ -29,7 +29,7 @@ pub fn add_list(
         .spawn(NodeBundle {
             style: Style {
                 flex_direction: FlexDirection::Column,
-                align_self: AlignSelf::Stretch,
+                // align_self: AlignSelf::Stretch,
                 size: Size::new(Val::Percent(80.), Val::Percent(80.)),
                 overflow: Overflow::Hidden,
                 ..default()

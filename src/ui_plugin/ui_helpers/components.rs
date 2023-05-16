@@ -59,14 +59,17 @@ pub struct DeleteDoc {
 pub struct TabButton {
     pub id: ReflectableUuid,
 }
-
 #[derive(Component)]
-pub struct TabText {
+pub struct TabContainer {
     pub id: ReflectableUuid,
 }
 
 #[derive(Component)]
-pub struct TabContainer {
+pub struct SearchButton {
+    pub id: ReflectableUuid,
+}
+#[derive(Component)]
+pub struct SearchContainer {
     pub id: ReflectableUuid,
 }
 
