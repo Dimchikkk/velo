@@ -58,8 +58,12 @@ use update_rectangle_position::*;
 #[path = "systems/create_new_node.rs"]
 mod create_new_node;
 use create_new_node::*;
+#[cfg(not(target_arch = "wasm32"))]
 #[path = "systems/search.rs"]
+#[cfg(not(target_arch = "wasm32"))]
 mod search;
+#[cfg(not(target_arch = "wasm32"))]
+pub use search::*;
 
 pub struct UiPlugin;
 
@@ -156,9 +160,10 @@ impl Plugin for UiPlugin {
         app.add_event::<SaveStoreEvent>();
 
         #[cfg(not(target_arch = "wasm32"))]
-        app.add_startup_systems((read_native_config, init_layout).chain());
+        app.add_startup_systems((read_native_config, init_search_index).before(init_layout));
         #[cfg(target_arch = "wasm32")]
-        app.add_startup_systems((load_from_url, init_layout));
+        app.add_startup_system(load_from_url.before(init_layout));
+        app.add_startup_system(init_layout);
 
         app.add_systems((
             rec_button_handlers,
