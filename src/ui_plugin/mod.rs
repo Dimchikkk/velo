@@ -64,6 +64,9 @@ use create_new_node::*;
 mod search;
 #[cfg(not(target_arch = "wasm32"))]
 pub use search::*;
+#[path = "systems/doc_list_ui_changed.rs"]
+mod doc_list_ui_changed;
+use doc_list_ui_changed::*;
 
 pub struct UiPlugin;
 
@@ -76,6 +79,8 @@ pub struct SaveStoreEvent {
     pub doc_id: ReflectableUuid,
     pub path: Option<PathBuf>, // Save current document to file
 }
+
+pub struct UpdateDeleteDocBtnEvent;
 
 #[derive(Resource, Clone)]
 pub struct CommChannels {
@@ -158,6 +163,7 @@ impl Plugin for UiPlugin {
         app.add_event::<CreateArrowEvent>();
         app.add_event::<RedrawArrowEvent>();
         app.add_event::<SaveStoreEvent>();
+        app.add_event::<UpdateDeleteDocBtnEvent>();
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_startup_systems((read_native_config, init_search_index).before(init_layout));
@@ -216,6 +222,7 @@ impl Plugin for UiPlugin {
             save_doc_handler,
             keyboard_input_system,
         ));
+        app.add_systems((doc_list_del_button_update, doc_list_ui_changed).chain());
 
         app.add_systems((
             button_generic_handler,

@@ -41,7 +41,7 @@ impl Plugin for VeloPlugin {
             .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)
             .add_plugin(BordersPlugin)
-            .insert_resource(PkvStore::new("", "velo"));
+            .insert_resource(PkvStore::new("test", "velo"));
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_plugin(HanabiPlugin);
