@@ -64,6 +64,7 @@ pub fn entity_to_edit_changed(
                             regular_font: Some(
                                 asset_server.load("fonts/SourceCodePro-Regular.ttf"),
                             ),
+                            code_font: Some(TextStyle::default().font),
                             bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
                             italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
                             semi_bold_italic_font: Some(
@@ -125,6 +126,7 @@ pub fn entity_to_edit_changed(
                     let bevy_markdown = BevyMarkdown {
                         text: str,
                         regular_font: Some(TextStyle::default().font),
+                        code_font: Some(TextStyle::default().font),
                         bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
                         italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
                         semi_bold_italic_font: Some(
