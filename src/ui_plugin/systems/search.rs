@@ -58,7 +58,7 @@ pub fn update_search_index(index: &Index, meta: NodeSearchMeta, text: &str) -> t
 
 const MAX_SEARCH_RESULTS: usize = 1000;
 
-pub fn clear_node(index: &Index, node_id: &Uuid) -> tantivy::Result<()> {
+pub fn clear_node_index(index: &Index, node_id: &Uuid) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;
 
     let term = tantivy::Term::from_field_text(
@@ -72,7 +72,7 @@ pub fn clear_node(index: &Index, node_id: &Uuid) -> tantivy::Result<()> {
     Ok(())
 }
 
-pub fn clear_tab(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
+pub fn clear_tab_index(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;
 
     let term = tantivy::Term::from_field_text(
@@ -86,7 +86,7 @@ pub fn clear_tab(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
     Ok(())
 }
 
-pub fn clear_doc(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
+pub fn clear_doc_index(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;
 
     let term = tantivy::Term::from_field_text(
@@ -199,7 +199,7 @@ mod tests {
         update_search_index(&index, NodeSearchMeta { doc_id: Uuid::new_v4(), tab_id: Uuid::new_v4(), node_id }, text).unwrap();
 
         // Clear the node from the index
-        clear_node(&index, &node_id).unwrap();
+        clear_node_index(&index, &node_id).unwrap();
 
         // Perform a search and assert that the node is not found
         let query = "example";
@@ -226,7 +226,7 @@ mod tests {
         update_search_index(&index, NodeSearchMeta { doc_id, tab_id, node_id: Uuid::new_v4() }, text_2).unwrap();
 
         // Clear the tab from the index
-        clear_tab(&index, &tab_id).unwrap();
+        clear_tab_index(&index, &tab_id).unwrap();
 
         // Perform a search and assert that the tab is not found
         let query = "example";
@@ -252,7 +252,7 @@ mod tests {
         update_search_index(&index, NodeSearchMeta { doc_id, tab_id: Uuid::new_v4(), node_id: Uuid::new_v4() }, text_2).unwrap();
 
         // Clear the document from the index
-        clear_doc(&index, &doc_id).unwrap();
+        clear_doc_index(&index, &doc_id).unwrap();
 
         // Perform a search and assert that the document is not found
         let query = "example";
