@@ -14,7 +14,49 @@ pub struct BevyMarkdown {
     pub italic_font: Option<Handle<Font>>,
     pub semi_bold_italic_font: Option<Handle<Font>>,
     pub extra_bold_font: Option<Handle<Font>>,
+    pub code_font: Option<Handle<Font>>,
     pub size: Option<(Val, Val)>,
+}
+
+#[repr(u8)]
+#[derive(Clone)]
+enum InlineStyleType {
+    Strong = 0x01,
+    Emphasis = 0x02,
+    StrongEmphasis = 0x03,
+    // StrikeThrough = 0x04,
+    // StrikeBold = 0x05,
+    // StrikeItalic = 0x06,
+    // StrikeBoldItalic = 0x07,
+    None = 0x00,
+}
+
+pub fn get_header_font_size(val: u8) -> f32 {
+    match val {
+        1 => 30.0,
+        2 => 27.0,
+        3 => 24.0,
+        4 => 21.0,
+        5 => 18.0,
+        6 => 15.0,
+        _ => 15.0,
+    }
+}
+
+impl InlineStyleType {
+    #[inline]
+    pub fn from_u8(style_code: u8) -> Self {
+        match style_code {
+            0x01 => InlineStyleType::Strong,
+            0x02 => InlineStyleType::Emphasis,
+            0x03 => InlineStyleType::StrongEmphasis,
+            // 0x04 => InlineStyleType::StrikeThrough,
+            // 0x05 => InlineStyleType::StrikeBold,
+            // 0x06 => InlineStyleType::StrikeItalic,
+            // 0x07 => InlineStyleType::StrikeBoldItalic,
+            _ => InlineStyleType::None,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -27,6 +69,209 @@ pub enum BevyMarkdownError {
 pub struct BevyMarkdownNode {
     pub id: Uuid,
     pub link_sections: Vec<Option<String>>,
+}
+
+pub fn get_resultant_style(
+    bevy_markdown: &BevyMarkdown,
+    style_mask: u8,
+) -> bevy::prelude::Handle<bevy::prelude::Font> {
+    match InlineStyleType::from_u8(style_mask) {
+        InlineStyleType::Strong => bevy_markdown.bold_font.clone().unwrap(),
+        InlineStyleType::Emphasis => bevy_markdown.italic_font.clone().unwrap(),
+        InlineStyleType::StrongEmphasis => bevy_markdown.semi_bold_italic_font.clone().unwrap(),
+        _ => bevy_markdown.regular_font.clone().unwrap(),
+    }
+}
+
+pub fn handle_block_styling(
+    node: &markdown::mdast::Node,
+    bevy_markdown: &BevyMarkdown,
+    text_sections: &mut Vec<(TextSection, Option<String>)>,
+    errors: &mut Vec<BevyMarkdownError>,
+) -> Result<(), Vec<BevyMarkdownError>> {
+    match node {
+        markdown::mdast::Node::Heading(header) => {
+            text_sections.push((
+                TextSection {
+                    value: "\n".to_string(),
+                    style: TextStyle {
+                        font: bevy_markdown.regular_font.clone().unwrap(),
+                        font_size: 18.0,
+                        color: Color::BLACK,
+                    },
+                },
+                None,
+            ));
+            header.children.iter().for_each(|child| {
+                let _ = handle_inline_styling(
+                    child,
+                    bevy_markdown,
+                    text_sections,
+                    errors,
+                    InlineStyleType::Strong as u8,
+                    None,
+                    Some(get_header_font_size(header.depth)),
+                    &None,
+                );
+            });
+        }
+        markdown::mdast::Node::Paragraph(paragraph) => {
+            text_sections.push((
+                TextSection {
+                    value: "\n".to_string(),
+                    style: TextStyle {
+                        font: bevy_markdown.regular_font.clone().unwrap(),
+                        font_size: 18.0,
+                        color: Color::BLACK,
+                    },
+                },
+                None,
+            ));
+            paragraph.children.iter().for_each(|child| match child {
+                markdown::mdast::Node::Break(_) => {
+                    text_sections.push((
+                        TextSection {
+                            value: "\n".to_string(),
+                            style: TextStyle {
+                                font: bevy_markdown.regular_font.clone().unwrap(),
+                                font_size: 18.0,
+                                color: Color::BLACK,
+                            },
+                        },
+                        None,
+                    ));
+                }
+                markdown::mdast::Node::Text(text) => {
+                    let text_section = TextSection {
+                        value: text.value.clone(),
+                        style: TextStyle {
+                            font: bevy_markdown.regular_font.clone().unwrap(),
+                            font_size: 18.0,
+                            color: Color::BLACK,
+                        },
+                    };
+                    text_sections.push((text_section, None));
+                }
+                markdown::mdast::Node::Strong(_)
+                | markdown::mdast::Node::Emphasis(_)
+                | markdown::mdast::Node::InlineCode(_)
+                | markdown::mdast::Node::Delete(_)
+                | markdown::mdast::Node::Link(_) => {
+                    let _ = handle_inline_styling(
+                        child,
+                        bevy_markdown,
+                        text_sections,
+                        errors,
+                        InlineStyleType::None as u8,
+                        None,
+                        None,
+                        &None,
+                    );
+                }
+                node => errors.push(BevyMarkdownError::Transform {
+                    info: format!("{:?} node is not implemented for paragraph", node),
+                }),
+            });
+        }
+        _ => errors.push(BevyMarkdownError::Transform {
+            info: "nesting is not implemented".to_string(),
+        }),
+    }
+    Ok(())
+}
+
+pub fn handle_inline_styling(
+    node: &markdown::mdast::Node,
+    bevy_markdown: &BevyMarkdown,
+    text_sections: &mut Vec<(TextSection, Option<String>)>,
+    errors: &mut Vec<BevyMarkdownError>,
+    applied_style: u8,
+    force_color: Option<Color>,
+    force_size: Option<f32>,
+    force_data: &Option<String>,
+) -> Result<(), Vec<BevyMarkdownError>> {
+    match node {
+        markdown::mdast::Node::InlineCode(code) => {
+            let text_section = TextSection {
+                value: code.value.clone(),
+                style: TextStyle {
+                    font: bevy_markdown.code_font.clone().unwrap(),
+                    font_size: if let Some(size) = force_size {
+                        size
+                    } else {
+                        18.0
+                    },
+                    color: if let Some(color) = force_color {
+                        color
+                    } else {
+                        Color::GRAY
+                    },
+                },
+            };
+            text_sections.push((text_section, force_data.clone()));
+        }
+        markdown::mdast::Node::Emphasis(emphasis) => emphasis.children.iter().for_each(|child| {
+            let _ = handle_inline_styling(
+                child,
+                bevy_markdown,
+                text_sections,
+                errors,
+                applied_style | InlineStyleType::Emphasis as u8,
+                force_color,
+                force_size,
+                force_data,
+            );
+        }),
+        markdown::mdast::Node::Strong(strong) => strong.children.iter().for_each(|child| {
+            let _ = handle_inline_styling(
+                child,
+                bevy_markdown,
+                text_sections,
+                errors,
+                applied_style | InlineStyleType::Strong as u8,
+                force_color,
+                force_size,
+                force_data,
+            );
+        }),
+        markdown::mdast::Node::Text(text) => {
+            let text_section = TextSection {
+                value: text.value.clone(),
+                style: TextStyle {
+                    font: get_resultant_style(bevy_markdown, applied_style),
+                    font_size: if let Some(size) = force_size {
+                        size
+                    } else {
+                        18.0
+                    },
+                    color: if let Some(color) = force_color {
+                        color
+                    } else {
+                        Color::BLACK
+                    },
+                },
+            };
+            text_sections.push((text_section, force_data.clone()));
+        }
+        markdown::mdast::Node::Link(link) => link.children.iter().for_each(|child| {
+            let _ = handle_inline_styling(
+                child,
+                bevy_markdown,
+                text_sections,
+                errors,
+                applied_style,
+                Some(Color::BLUE),
+                force_size,
+                &Some(link.url.clone()),
+            );
+        }),
+        _ => {
+            errors.push(BevyMarkdownError::Transform {
+                info: "nesting is not implemented".to_string(),
+            });
+        }
+    }
+    Ok(())
 }
 
 pub fn spawn_bevy_markdown(
@@ -125,112 +370,13 @@ pub fn spawn_bevy_markdown(
                                 None,
                             ));
                         }
-                        markdown::mdast::Node::Paragraph(paragraph) => {
-                            text_sections.push((
-                                TextSection {
-                                    value: "\n".to_string(),
-                                    style: TextStyle {
-                                        font: bevy_markdown.regular_font.clone().unwrap(),
-                                        font_size: 18.0,
-                                        color: Color::BLACK,
-                                    },
-                                },
-                                None,
-                            ));
-                            paragraph.children.iter().for_each(|child| match child {
-                                markdown::mdast::Node::Break(_break) => {
-                                    text_sections.push((
-                                        TextSection {
-                                            value: "\n".to_string(),
-                                            style: TextStyle {
-                                                font: bevy_markdown.regular_font.clone().unwrap(),
-                                                font_size: 18.0,
-                                                color: Color::BLACK,
-                                            },
-                                        },
-                                        None,
-                                    ));
-                                }
-                                markdown::mdast::Node::Text(text) => {
-                                    let text_section = TextSection {
-                                        value: text.value.clone(),
-                                        style: TextStyle {
-                                            font: bevy_markdown.regular_font.clone().unwrap(),
-                                            font_size: 18.0,
-                                            color: Color::BLACK,
-                                        },
-                                    };
-                                    text_sections.push((text_section, None));
-                                }
-                                markdown::mdast::Node::Strong(strong) => {
-                                    strong.children.iter().for_each(|child| match child {
-                                        markdown::mdast::Node::Text(text) => {
-                                            let text_section = TextSection {
-                                                value: text.value.clone(),
-                                                style: TextStyle {
-                                                    font: bevy_markdown.bold_font.clone().unwrap(),
-                                                    font_size: 18.0,
-                                                    color: Color::BLACK,
-                                                },
-                                            };
-                                            text_sections.push((text_section, None));
-                                        }
-                                        _ => errors.push(BevyMarkdownError::Transform {
-                                            info: "nesting in bold is not implemented".to_string(),
-                                        }),
-                                    });
-                                }
-                                markdown::mdast::Node::Emphasis(emphasis) => {
-                                    emphasis.children.iter().for_each(|child| match child {
-                                        markdown::mdast::Node::Text(text) => {
-                                            let text_section = TextSection {
-                                                value: text.value.clone(),
-                                                style: TextStyle {
-                                                    font: bevy_markdown
-                                                        .italic_font
-                                                        .clone()
-                                                        .unwrap(),
-                                                    font_size: 18.0,
-                                                    color: Color::BLACK,
-                                                },
-                                            };
-                                            text_sections.push((text_section, None));
-                                        }
-                                        _ => errors.push(BevyMarkdownError::Transform {
-                                            info: "nesting in italic is not implemented"
-                                                .to_string(),
-                                        }),
-                                    });
-                                }
-                                markdown::mdast::Node::Link(link) => {
-                                    link.children.iter().for_each(|child| match child {
-                                        markdown::mdast::Node::Text(text) => {
-                                            let text_section = TextSection {
-                                                value: text.value.clone(),
-                                                style: TextStyle {
-                                                    font: bevy_markdown
-                                                        .semi_bold_italic_font
-                                                        .clone()
-                                                        .unwrap(),
-                                                    font_size: 18.0,
-                                                    color: Color::BLUE,
-                                                },
-                                            };
-                                            text_sections
-                                                .push((text_section, Some(link.url.clone())));
-                                        }
-                                        _ => errors.push(BevyMarkdownError::Transform {
-                                            info: "nesting in link is not implemented".to_string(),
-                                        }),
-                                    });
-                                }
-                                node => errors.push(BevyMarkdownError::Transform {
-                                    info: format!(
-                                        "{:?} node is not implemented for paragraph",
-                                        node
-                                    ),
-                                }),
-                            });
+                        markdown::mdast::Node::Heading(_) | markdown::mdast::Node::Paragraph(_) => {
+                            let _ = handle_block_styling(
+                                child,
+                                &bevy_markdown,
+                                &mut text_sections,
+                                &mut errors,
+                            );
                         }
                         node => errors.push(BevyMarkdownError::Transform {
                             info: format!("{:?} node is not implemented for root", node),
@@ -308,6 +454,7 @@ mod tests {
                     italic_font: Some(font.clone()),
                     semi_bold_italic_font: Some(font.clone()),
                     extra_bold_font: Some(font.clone()),
+                    code_font: Some(font.clone()),
                     size: None,
                     text: input.clone(),
                 };
@@ -335,6 +482,32 @@ mod tests {
                 node.link_sections.clone()
             );
         }
+    }
+
+    #[test]
+    pub fn test_render_text_complicated() {
+        let input = "**bold1** normal text
+**Italic* and then italic again*
+[Inner links **can be styled*too***](https://google.com)
+    ";
+        test_bevymarkdown(
+            input.to_string(),
+            "test_render_text_style_complicated".to_string(),
+        );
+    }
+
+    #[test]
+    pub fn test_render_text_with_header() {
+        let input = "# Header 1
+## Header 2
+### Header 3
+#### Some header 4 *as well* italicised
+##### another header [*redirecting to google*](https://google.com)
+";
+        test_bevymarkdown(
+            input.to_string(),
+            "test_render_text_style_header".to_string(),
+        );
     }
 
     #[test]
