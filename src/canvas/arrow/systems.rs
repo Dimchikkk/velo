@@ -7,7 +7,7 @@ use super::events::{CreateArrowEvent, RedrawArrowEvent};
 use super::utils::{build_arrow, create_arrow, get_pos};
 use crate::chart_plugin::UiState;
 use crate::components::MainCamera;
-use bevy_prototype_lyon::prelude::Path;
+//use bevy_prototype_lyon::prelude::Path;
 
 pub fn create_arrow_start(
     mut interaction_query: Query<
@@ -48,7 +48,8 @@ pub fn create_arrow_start(
 }
 
 pub fn create_arrow_end(
-    mut commands: Commands,
+    mut gizmos:Gizmos,
+    _commands: Commands,
     mut events: EventReader<CreateArrowEvent>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
@@ -68,7 +69,7 @@ pub fn create_arrow_end(
             }
             if let (Some(start), Some(end)) = (start, end) {
                 create_arrow(
-                    &mut commands,
+                    &mut gizmos,
                     start,
                     end,
                     ArrowMeta {
@@ -83,8 +84,9 @@ pub fn create_arrow_end(
     }
 }
 pub fn redraw_arrows(
+    mut gizmos: Gizmos,
     mut redraw_arrow: EventReader<RedrawArrowEvent>,
-    mut arrow_query: Query<(&mut Path, &mut ArrowMeta), With<ArrowMeta>>,
+    mut arrow_query: Query<&mut ArrowMeta, With<ArrowMeta>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
     windows: Query<&Window, With<PrimaryWindow>>,
@@ -92,7 +94,7 @@ pub fn redraw_arrows(
     let primary_window = windows.single();
     let (camera, camera_transform) = camera_q.single();
     for event in redraw_arrow.iter() {
-        for (mut path, mut arrow) in arrow_query.iter_mut() {
+        for mut arrow in arrow_query.iter_mut() {
             if arrow.start.id == event.id || arrow.end.id == event.id {
                 let (arrow_hold_vec, arrow_move_vec): (Vec<_>, Vec<_>) = arrow_markers
                     .iter()
@@ -115,7 +117,7 @@ pub fn redraw_arrows(
                     };
                     arrow.start = *start_pos;
                     arrow.end = *end_pos;
-                    *path = build_arrow(start, end, *arrow);
+                    build_arrow(&mut gizmos, start, end, *arrow);
                 }
             }
         }

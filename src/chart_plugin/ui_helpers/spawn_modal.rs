@@ -29,12 +29,11 @@ pub fn spawn_modal(
                     flex_direction: FlexDirection::Column,
                     align_self: AlignSelf::Stretch,
                     position_type: PositionType::Absolute,
-                    position: UiRect {
+            
                         left: Val::Px(window.width() / 2. - 250.),
                         bottom: Val::Px(window.height() / 2. - 50.),
-                        ..default()
-                    },
-                    size: Size::new(Val::Px(width), Val::Px(height)),
+               
+                    width: Val::Px(width), height:Val::Px(height),
                     ..default()
                 },
                 background_color: Color::BLACK.with_a(0.5).into(),
@@ -50,10 +49,8 @@ pub fn spawn_modal(
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size {
                     width: Val::Percent(100.),
                     height: Val::Percent(30.),
-                },
                 justify_content: JustifyContent::SpaceAround,
                 ..default()
             },
@@ -70,7 +67,7 @@ pub fn spawn_modal(
                             border: UiRect::all(Val::Px(1.)),
                             align_items: AlignItems::Center,
                             padding: UiRect::all(Val::Px(5.)),
-                            // overflow: Overflow::Hidden,
+                            // //overflow: Overflow::Hidden,
                             ..default()
                         },
                         ..default()
@@ -138,10 +135,9 @@ pub fn spawn_modal(
                     style: Style {
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::SpaceAround,
-                        size: Size {
+                        
                             width: Val::Percent(100.),
                             height: Val::Percent(70.),
-                        },
                         ..default()
                     },
                     ..default()
@@ -156,10 +152,9 @@ pub fn spawn_modal(
                                     left: Val::Px(20.),
                                     ..default()
                                 },
-                                size: Size {
+                                
                                     width: Val::Px(50.),
                                     height: Val::Percent(30.),
-                                },
                                 ..default()
                             },
                             ..default()
@@ -174,12 +169,12 @@ pub fn spawn_modal(
                                     justify_content: JustifyContent::Start,
                                     align_items: AlignItems::Center,
                                     border: UiRect::all(Val::Px(1.)),
-                                    size: Size {
+                                    
                                         width: Val::Px(220.),
                                         height: Val::Px(35.),
-                                    },
+                                    
                                     padding: UiRect::all(Val::Px(5.)),
-                                    // overflow: Overflow::Hidden,
+                                    // //overflow: Overflow::Hidden,
                                     ..default()
                                 },
                                 ..default()
@@ -201,10 +196,10 @@ pub fn spawn_modal(
                     style: Style {
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
-                        size: Size {
+                        
                             width: Val::Percent(100.),
                             height: Val::Percent(50.),
-                        },
+
                         ..default()
                     },
                     ..default()
@@ -215,7 +210,7 @@ pub fn spawn_modal(
                             style: Style {
                                 justify_content: JustifyContent::Center,
                                 align_items: AlignItems::Center,
-                                // overflow: Overflow::Hidden,
+                                // //overflow: Overflow::Hidden,
                                 ..default()
                             },
                             ..default()
@@ -238,14 +233,14 @@ pub fn spawn_modal(
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     border: UiRect::all(Val::Px(1.)),
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),height:Val::Percent(100.),
                     position_type: PositionType::Absolute,
-                    position: UiRect {
+            
                         left: Val::Px(-3.),
                         right: Val::Px(0.),
                         top: Val::Px(-3.),
                         bottom: Val::Px(0.),
-                    },
+               
                     flex_direction: FlexDirection::Column,
                     ..default()
                 },

@@ -5,20 +5,21 @@ mod resources;
 mod systems;
 mod utils;
 use bevy::{prelude::*, window::PresentMode};
-use bevy_embedded_assets::EmbeddedAssetPlugin;
+//use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_pkv::PkvStore;
 use bevy_ui_borders::BordersPlugin;
 use canvas::CanvasPlugin;
 use chart_plugin::*;
 use resources::FontHandle;
 use systems::*;
+
 pub struct VeloPlugin;
 impl Plugin for VeloPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_camera)
-            .add_startup_system(setup_background)
-            .add_startup_system(setup_font)
-            .add_system(set_default_font.run_if(resource_exists::<FontHandle>()))
+       app.add_systems(Startup,setup_camera)
+            .add_systems(Startup,setup_background)
+            .add_systems(Startup,setup_font)
+            .add_systems(Startup,set_default_font.run_if(resource_exists::<FontHandle>()))
             .add_plugins(
                 DefaultPlugins
                     .set(WindowPlugin {
@@ -34,7 +35,7 @@ impl Plugin for VeloPlugin {
                         ..default()
                     })
                     .build()
-                    .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
+  //                  .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
             )
             .add_plugin(CanvasPlugin)
             .add_plugin(ChartPlugin)

@@ -155,9 +155,10 @@ pub fn save_tab(
                     str = format!("{}{}", str, section.value.clone());
                 }
                 let style: &Style = rec_container_query.get(parent.get()).unwrap();
-                let left = style.position.left;
-                let bottom = style.position.bottom;
-                let size = style.size;
+                let left = style.left;
+                let bottom = style.bottom;
+                let width = style.width;
+                let height= style.height;
                 let bg_color = bg_color.0;
                 let z_index = match *z_index {
                     ZIndex::Local(v) => v,
@@ -168,8 +169,8 @@ pub fn save_tab(
                     id: node.id.0,
                     left,
                     bottom,
-                    width: size.width,
-                    height: size.height,
+                    width,
+                    height,
                     bg_color,
                     text: JsonNodeText {
                         text: str,
@@ -219,7 +220,7 @@ mod tests {
     fn test_save_doc1() {
         // Setup
         let mut app = App::new();
-        app.add_systems((save_doc, save_to_store.after(save_doc)));
+        app.add_systems(Update,(save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -276,7 +277,7 @@ mod tests {
     fn test_save_doc2() {
         // Setup
         let mut app = App::new();
-        app.add_systems((save_doc, save_to_store.after(save_doc)));
+        app.add_systems(Update,(save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -337,7 +338,7 @@ mod tests {
     fn test_save_doc3() {
         // Setup
         let mut app = App::new();
-        app.add_systems((save_doc, save_to_store.after(save_doc)));
+        app.add_systems(Update,(save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();

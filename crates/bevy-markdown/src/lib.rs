@@ -146,9 +146,9 @@ pub fn spawn_bevy_markdown(
                 // Main branch of bevy doesn't need setting max_size for wrapping to work
                 // bevy_markdown will spawn multiple text bundles with more markdown features supported
                 // this is temp solution make wrapping to work
-                if let Some((x, y)) = bevy_markdown.size {
-                    text_bundle_style.max_size = Size::new(x, y);
-                }
+                // if let Some((x, y)) = bevy_markdown.size {
+                //     text_bundle_style.max_size = Size::new(x, y);
+                // }
                 let top = commands
                     .spawn(NodeBundle {
                         style: top_style,

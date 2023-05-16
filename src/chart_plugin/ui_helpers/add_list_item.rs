@@ -36,7 +36,7 @@ pub fn add_list_item(
             ButtonBundle {
                 background_color: Color::rgb(255., 242., 230.).into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),height:Val::Percent(100.),
                     justify_content: JustifyContent::Center,
                     border: UiRect::all(Val::Px(1.)),
                     ..default()
@@ -54,7 +54,7 @@ pub fn add_list_item(
             ButtonBundle {
                 background_color: Color::rgb(255., 242., 230.).into(),
                 style: Style {
-                    size: Size::new(Val::Percent(90.), Val::Percent(100.)),
+                    width: Val::Percent(90.),height:Val::Percent(100.),
                     justify_content: JustifyContent::Center,
                     padding: UiRect::all(Val::Px(5.)),
                     ..default()
@@ -115,7 +115,7 @@ pub fn add_list_item(
                         top: Val::Px(0.),
                         bottom: Val::Px(0.),
                     },
-                    size: Size::new(Val::Percent(10.), Val::Percent(100.)),
+                    width: Val::Percent(10.),height:Val::Percent(100.),
                     justify_content: JustifyContent::Center,
                     padding: UiRect::all(Val::Px(5.)),
                     ..default()

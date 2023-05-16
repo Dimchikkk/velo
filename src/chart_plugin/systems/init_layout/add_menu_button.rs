@@ -36,7 +36,8 @@ pub fn add_menu_button(
                             top: Val::Px(3.),
                             ..default()
                         },
-                        size: Size::new(Val::Percent(2.3), Val::Percent(85.)),
+                        width:Val::Percent(2.3),
+                        height: Val::Percent(85.),
                         ..default()
                     },
                     ..default()
@@ -48,10 +49,10 @@ pub fn add_menu_button(
                         background_color: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0)
                             .into(),
                         style: Style {
-                            size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                            width:Val::Percent(100.),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
-                            // overflow: Overflow::Hidden,
+                            // //overflow: Overflow::Hidden,
                             ..default()
                         },
                         ..default()
@@ -71,7 +72,7 @@ pub fn add_menu_button(
                             style: text_style,
                         }],
                         alignment: TextAlignment::Left,
-                        linebreak_behaviour: BreakLineOn::WordBoundary,
+                        linebreak_behavior: BreakLineOn::WordBoundary,
                     };
 
                     builder.spawn(TextBundle { text, ..default() });
@@ -95,7 +96,9 @@ pub fn add_menu_button(
                                 top: Val::Px(3.),
                                 bottom: Val::Px(3.),
                             },
-                            size: Size::new(Val::Percent(2.3), Val::Percent(85.)),
+                            width:
+                                Val::Percent(2.3), 
+                            height:Val::Percent(85.),
                             ..default()
                         },
                         ..default()
@@ -109,17 +112,17 @@ pub fn add_menu_button(
                         background_color: Color::rgb(0.0 / 255.0, 150.0 / 255.0, 136.0 / 255.0)
                             .into(),
                         style: Style {
-                            size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                            width:Val::Percent(100.),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
                             position_type: PositionType::Absolute,
-                            position: UiRect {
+       
                                 left: Val::Px(-2.),
                                 right: Val::Px(0.),
                                 top: Val::Px(-2.),
                                 bottom: Val::Px(0.),
-                            },
-                            // overflow: Overflow::Hidden,
+         
+                            // //overflow: Overflow::Hidden,
                             ..default()
                         },
                         ..default()
@@ -141,7 +144,7 @@ pub fn add_menu_button(
                             style: text_style,
                         }],
                         alignment: TextAlignment::Left,
-                        linebreak_behaviour: BreakLineOn::WordBoundary,
+                        linebreak_behavior: BreakLineOn::WordBoundary,
                     };
                     let text_bundle_style = Style {
                         position_type: PositionType::Absolute,

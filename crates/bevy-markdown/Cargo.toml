@@ -10,7 +10,7 @@ edition = "2021"
 
 [dependencies]
 markdown = "1.0.0-alpha.9"
-bevy = { version = "0.10.1", default-features = false, features = [
+bevy ={git = "https://github.com/bevyengine/bevy",rev = "1da726e" ,default-features = false, features = [
   "bevy_asset",
   "bevy_core_pipeline",
   "bevy_render",

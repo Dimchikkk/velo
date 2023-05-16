@@ -25,9 +25,13 @@ pub use add_list_item::*;
 fn get_marker_style(position: UiRect, size: f32) -> Style {
     Style {
         position_type: PositionType::Absolute,
-        position,
+        top:position.top,
+        bottom:position.bottom,
+        left:position.left,
+        right:position.right,
         border: UiRect::all(Val::Px(1.)),
-        size: Size::new(Val::Px(size), Val::Px(size)),
+        width: Val::Px(size), 
+        height:Val::Px(size),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         ..default()
@@ -79,7 +83,7 @@ fn create_rectangle_btn(
         z_index: ZIndex::Local(z_index),
         style: Style {
             position_type: PositionType::Absolute,
-            size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+            width: Val::Percent(100.),height:Val::Percent(100.),
             // position: UiRect {
             //     left: Val::Px(-3.),
             //     right: Val::Px(0.),
@@ -88,7 +92,7 @@ fn create_rectangle_btn(
             // },
             justify_content,
             align_items,
-            // overflow: Overflow::Hidden,
+            // //overflow: Overflow::Hidden,
             ..default()
         },
         ..default()
@@ -202,14 +206,15 @@ pub fn create_rectangle_txt(
     let text = Text {
         sections: get_sections(text).0,
         alignment: TextAlignment::Left,
-        linebreak_behaviour: BreakLineOn::WordBoundary,
+        linebreak_behavior: BreakLineOn::WordBoundary,
     };
     let mut text_bundle_style = Style {
         padding: UiRect::all(Val::Px(10.)),
         ..default()
     };
     if let Some((x, y)) = max_size {
-        text_bundle_style.max_size = Size::new(x, y);
+        text_bundle_style.max_width=x;
+        text_bundle_style.max_height=y;
     };
     if is_active {
         text_bundle_style.display = Display::Flex;
@@ -234,15 +239,15 @@ pub fn get_tooltip(text: String, size: f32) -> TextBundle {
             },
         }],
         alignment: TextAlignment::Left,
-        linebreak_behaviour: BreakLineOn::WordBoundary,
+        linebreak_behavior: BreakLineOn::WordBoundary,
     };
     let text_bundle_style = Style {
-        position: UiRect {
+   
             left: Val::Px(0.),
             right: Val::Px(0.),
             top: Val::Px(30.),
             bottom: Val::Px(0.),
-        },
+   
         padding: UiRect {
             left: Val::Px(5.),
             right: Val::Px(5.),

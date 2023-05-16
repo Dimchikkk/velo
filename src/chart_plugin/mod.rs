@@ -153,11 +153,11 @@ impl Plugin for ChartPlugin {
         app.add_event::<SaveStoreEvent>();
 
         #[cfg(not(target_arch = "wasm32"))]
-        app.add_startup_systems((init, init_layout).chain());
+        app.add_systems(Startup,(init, init_layout));
         #[cfg(target_arch = "wasm32")]
-        app.add_startup_systems((load_from_url, init_layout));
+        app.add_systems(Startup,(load_from_url, init_layout));
 
-        app.add_systems((
+        app.add_systems(Update,(
             rec_button_handlers,
             update_rectangle_position,
             create_new_rectangle,
@@ -169,31 +169,31 @@ impl Plugin for ChartPlugin {
             resize_notificator,
         ));
 
-        app.add_systems(
-            (save_doc, remove_save_doc_request)
-                .chain()
-                .distributive_run_if(should_save_doc),
-        );
+       app.add_systems(Update,
+           (save_doc, remove_save_doc_request)
+               .chain()
+               .distributive_run_if(should_save_doc),
+       );
 
-        app.add_systems(
-            (save_tab, remove_save_tab_request)
-                .chain()
-                .distributive_run_if(should_save_tab),
-        );
+       app.add_systems(Update,
+           (save_tab, remove_save_tab_request)
+               .chain()
+               .distributive_run_if(should_save_tab),
+       );
 
-        app.add_systems(
-            (load_doc, remove_load_doc_request)
-                .chain()
-                .distributive_run_if(should_load_doc),
-        );
+       app.add_systems(Update,
+           (load_doc, remove_load_doc_request)
+               .chain()
+               .distributive_run_if(should_load_doc),
+       );
 
-        app.add_systems(
-            (load_tab, remove_load_tab_request)
-                .chain()
-                .distributive_run_if(should_load_tab),
-        );
+       app.add_systems(Update,
+           (load_tab, remove_load_tab_request)
+               .chain()
+               .distributive_run_if(should_load_tab),
+       );
 
-        app.add_systems((
+        app.add_systems(Update,(
             change_color_pallete,
             change_arrow_type,
             change_text_pos,
@@ -211,7 +211,7 @@ impl Plugin for ChartPlugin {
             clickable_links,
         ));
 
-        app.add_systems((
+        app.add_systems(Update,(
             button_generic_handler,
             select_tab_handler,
             export_to_file,
@@ -223,12 +223,12 @@ impl Plugin for ChartPlugin {
             shared_doc_handler,
             save_to_store.after(save_tab),
         ));
-        app.add_system(
+        app.add_systems(Update,
             entity_to_edit_changed
-                .before(save_doc)
-                .before(save_doc)
-                .before(load_tab)
-                .before(load_doc)
+               .before(save_doc)
+               .before(save_doc)
+               .before(load_tab)
+               .before(load_doc)
                 .before(rec_button_handlers)
                 .before(create_new_rectangle),
         );
@@ -428,7 +428,7 @@ fn entity_to_edit_changed(
                             semi_bold_italic_font: Some(
                                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
                             ),
-                            size: Some((style.max_size.width, style.max_size.height)),
+                            size: Some((style.max_width, style.max_height)),
                         };
                         let markdown_text =
                             spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
@@ -486,7 +486,7 @@ fn entity_to_edit_changed(
                         semi_bold_italic_font: Some(
                             asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
                         ),
-                        size: Some((style.max_size.width, style.max_size.height)),
+                        size: Some((style.max_width, style.max_height)),
                     };
                     let markdown_text = spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
                     commands
@@ -565,13 +565,13 @@ fn update_rectangle_position(
     for event in cursor_moved_events.iter() {
         for (mut style, top) in &mut node_position.iter_mut() {
             if Some(top.id) == state.hold_entity {
-                let size = query.single_mut().0.size;
-                if let (Val::Percent(x), Val::Px(element_width)) = (size.width, style.size.width) {
+                let size = query.single_mut().0;
+                if let (Val::Percent(x), Val::Px(element_width)) = (size.width, style.width) {
                     let width = (primary_window.width() * x) / 100.;
-                    style.position.left = Val::Px(event.position.x - width - element_width / 2.);
+                    style.left = Val::Px(event.position.x - width - element_width / 2.);
                 }
-                if let Val::Px(element_height) = style.size.height {
-                    style.position.bottom = Val::Px(event.position.y - element_height / 2.);
+                if let Val::Px(element_height) = style.height {
+                    style.bottom = Val::Px(event.position.y - element_height / 2.);
                 }
                 events.send(RedrawArrowEvent { id: top.id });
             }

@@ -87,70 +87,70 @@ pub fn resize_entity_end(
                     }
                     match resize_marker {
                         ResizeMarker::TopLeft => {
-                            if let Val::Px(width) = button_style.size.width {
-                                button_style.size.width = Val::Px(width - delta.x);
+                            if let Val::Px(width) = button_style.width {
+                                button_style.width = Val::Px(width - delta.x);
                             }
 
-                            if let Val::Px(height) = button_style.size.height {
-                                button_style.size.height = Val::Px(height - delta.y);
+                            if let Val::Px(height) = button_style.height {
+                                button_style.height = Val::Px(height - delta.y);
                             }
 
-                            if let Val::Px(x) = button_style.position.left {
-                                button_style.position.left = Val::Px(x + delta.x);
+                            if let Val::Px(x) = button_style.left {
+                                button_style.left = Val::Px(x + delta.x);
                             }
                         }
                         ResizeMarker::TopRight => {
-                            if let Val::Px(width) = button_style.size.width {
-                                button_style.size.width = Val::Px(width + delta.x);
+                            if let Val::Px(width) = button_style.width {
+                                button_style.width = Val::Px(width + delta.x);
                             }
 
-                            if let Val::Px(height) = button_style.size.height {
-                                button_style.size.height = Val::Px(height - delta.y);
+                            if let Val::Px(height) = button_style.height {
+                                button_style.height = Val::Px(height - delta.y);
                             }
                         }
                         ResizeMarker::BottomLeft => {
-                            if let Val::Px(width) = button_style.size.width {
-                                button_style.size.width = Val::Px(width - delta.x);
+                            if let Val::Px(width) = button_style.width {
+                                button_style.width = Val::Px(width - delta.x);
                             }
 
-                            if let Val::Px(height) = button_style.size.height {
-                                button_style.size.height = Val::Px(height + delta.y);
+                            if let Val::Px(height) = button_style.height {
+                                button_style.height = Val::Px(height + delta.y);
                             }
 
-                            if let Val::Px(x) = button_style.position.left {
-                                button_style.position.left = Val::Px(x + delta.x);
+                            if let Val::Px(x) = button_style.left {
+                                button_style.left = Val::Px(x + delta.x);
                             }
 
-                            if let Val::Px(y) = button_style.position.bottom {
-                                button_style.position.bottom = Val::Px(y - delta.y);
+                            if let Val::Px(y) = button_style.bottom {
+                                button_style.bottom = Val::Px(y - delta.y);
                             }
                         }
                         ResizeMarker::BottomRight => {
-                            if let Val::Px(width) = button_style.size.width {
-                                button_style.size.width = Val::Px(width + delta.x);
+                            if let Val::Px(width) = button_style.width {
+                                button_style.width = Val::Px(width + delta.x);
                             }
 
-                            if let Val::Px(height) = button_style.size.height {
-                                button_style.size.height = Val::Px(height + delta.y);
+                            if let Val::Px(height) = button_style.height {
+                                button_style.height = Val::Px(height + delta.y);
                             }
 
-                            if let Val::Px(y) = button_style.position.bottom {
-                                button_style.position.bottom = Val::Px(y - delta.y);
+                            if let Val::Px(y) = button_style.bottom {
+                                button_style.bottom = Val::Px(y - delta.y);
                             }
                         }
                     }
                     for (text, mut text_style) in &mut raw_text_input_query {
                         if text.id == id {
-                            text_style.max_size.width = button_style.size.width;
-                            text_style.max_size.height = button_style.size.height;
+                            text_style.max_width = button_style.width;
+                            text_style.max_height = button_style.height;
                         }
                     }
                     for (node, entity) in markdown_view_query.iter() {
                         if node.id == id {
                             for (parent, mut text_style) in &mut markdown_text_input_query {
                                 if parent.get() == entity {
-                                    text_style.max_size.width = button_style.size.width;
-                                    text_style.max_size.height = button_style.size.height;
+                                    text_style.max_width = button_style.width;
+                                    text_style.max_height = button_style.height;
                                 }
                             }
                         }
@@ -192,12 +192,10 @@ fn test_resize_entity_end() {
         app.world
             .spawn(NodeBundle {
                 style: Style {
-                    size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                    position: UiRect {
+                    width:Val::Px(100.0),
+
                         left: Val::Px(0.0),
                         bottom: Val::Px(0.0),
-                        ..Default::default()
-                    },
                     ..Default::default()
                 },
                 ..Default::default()
@@ -217,24 +215,24 @@ fn test_resize_entity_end() {
 
         match marker {
             ResizeMarker::TopLeft => {
-                assert_eq!(style.size.width, Val::Px(90.0));
-                assert_eq!(style.size.height, Val::Px(95.0));
-                assert_eq!(style.position.left, Val::Px(10.0));
+                assert_eq!(style.width, Val::Px(90.0));
+                assert_eq!(style.height, Val::Px(95.0));
+                assert_eq!(style.left, Val::Px(10.0));
             }
             ResizeMarker::TopRight => {
-                assert_eq!(style.size.width, Val::Px(120.0));
-                assert_eq!(style.size.height, Val::Px(90.0));
+                assert_eq!(style.width, Val::Px(120.0));
+                assert_eq!(style.height, Val::Px(90.0));
             }
             ResizeMarker::BottomLeft => {
-                assert_eq!(style.size.width, Val::Px(70.0));
-                assert_eq!(style.size.height, Val::Px(115.0));
-                assert_eq!(style.position.left, Val::Px(30.0));
-                assert_eq!(style.position.bottom, Val::Px(-15.0));
+                assert_eq!(style.width, Val::Px(70.0));
+                assert_eq!(style.height, Val::Px(115.0));
+                assert_eq!(style.left, Val::Px(30.0));
+                assert_eq!(style.bottom, Val::Px(-15.0));
             }
             ResizeMarker::BottomRight => {
-                assert_eq!(style.size.width, Val::Px(140.0));
-                assert_eq!(style.size.height, Val::Px(120.0));
-                assert_eq!(style.position.bottom, Val::Px(-20.0));
+                assert_eq!(style.width, Val::Px(140.0));
+                assert_eq!(style.height, Val::Px(120.0));
+                assert_eq!(style.bottom, Val::Px(-20.0));
             }
         }
     }
