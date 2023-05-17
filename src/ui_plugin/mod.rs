@@ -242,7 +242,6 @@ impl Plugin for UiPlugin {
             particles_effect,
             save_to_store.after(save_tab),
         ));
-
         app.add_systems((set_focused_entity, clickable_links).chain());
 
         app.add_system(
