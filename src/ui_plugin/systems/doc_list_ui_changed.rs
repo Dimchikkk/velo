@@ -37,18 +37,23 @@ pub fn doc_list_ui_changed(
     mut event_writer: EventWriter<UpdateDeleteDocBtnEvent>,
 ) {
     if app_state.is_changed() && app_state.doc_list_ui != *last_doc_list {
-        // think about re-using UI elements instead of destroying and re-creating them
+        // Think about re-using UI elements instead of destroying and re-creating them
         for entity in query_container.iter_mut() {
             commands.entity(entity).despawn_recursive();
         }
         let doc_list = doc_list_query.single_mut();
-        for doc_id in &app_state.doc_list_ui {
-            let doc_list_item = add_list_item(
-                &mut commands,
-                &asset_server,
-                *doc_id,
-                get_doc_name(*doc_id, &pkv, &app_state),
-            );
+        let mut doc_tuples: Vec<(String, ReflectableUuid)> = app_state
+            .doc_list_ui
+            .iter()
+            .map(|doc_id| {
+                let doc_name = get_doc_name(*doc_id, &pkv, &app_state);
+                (doc_name, *doc_id)
+            })
+            .collect();
+        // Sort the tuples alphabetically based on doc_name
+        doc_tuples.sort_by(|(name1, _), (name2, _)| name1.cmp(name2));
+        for (doc_name, doc_id) in doc_tuples {
+            let doc_list_item = add_list_item(&mut commands, &asset_server, doc_id, doc_name);
             commands.entity(doc_list).add_child(doc_list_item);
         }
         event_writer.send(UpdateDeleteDocBtnEvent);

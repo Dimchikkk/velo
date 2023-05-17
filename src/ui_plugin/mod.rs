@@ -226,7 +226,7 @@ impl Plugin for UiPlugin {
         app.add_systems((doc_list_del_button_update, doc_list_ui_changed).chain());
 
         #[cfg(not(target_arch = "wasm32"))]
-        app.add_system(search_box_click);
+        app.add_systems((search_box_click, search_box_text_changed));
 
         app.add_systems((
             button_generic_handler,
