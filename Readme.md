@@ -80,7 +80,7 @@ cargo bundle
 
 ```sh
 cargo fmt
-cargo clippy --fix --allow-staged -- -A clippy::type_complexity -A clippy::too_many_arguments
+cargo clippy --allow-staged -- -A clippy::type_complexity -A clippy::too_many_arguments
 ```
 
 # Contributing
