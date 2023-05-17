@@ -205,6 +205,7 @@ pub fn fuzzy_search(index: &Index, query: &str) -> tantivy::Result<Vec<NodeSearc
         .reload_policy(ReloadPolicy::OnCommit)
         .try_into()?;
     let searcher = reader.searcher();
+    let normalized_query = query.to_lowercase();
 
     let schema = index.schema();
     let text_field = schema.get_field("text").unwrap();
@@ -213,10 +214,10 @@ pub fn fuzzy_search(index: &Index, query: &str) -> tantivy::Result<Vec<NodeSearc
     let tab_id_field = schema.get_field("tab_id").unwrap();
     let node_id_field = schema.get_field("node_id").unwrap();
 
-    let text_term = Term::from_field_text(text_field, query);
+    let text_term = Term::from_field_text(text_field, normalized_query.as_str());
     let query1 = FuzzyTermQuery::new(text_term, 2, true);
 
-    let full_text_term = Term::from_field_text(full_text_field, query);
+    let full_text_term = Term::from_field_text(full_text_field, normalized_query.as_str());
     let query2 = FuzzyTermQuery::new(full_text_term, 2, true);
     let query = BooleanQuery::new(vec![
         (Occur::Should, Box::new(query1)),
