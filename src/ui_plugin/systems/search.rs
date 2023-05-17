@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use bevy_pkv::PkvStore;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::path::Path;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
@@ -15,6 +17,7 @@ use crate::resources::AppState;
 use crate::utils::ReflectableUuid;
 
 use super::ui_helpers::SearchButton;
+use super::ui_helpers::SearchText;
 use super::UiState;
 pub struct SearchIndexState {
     pub index: Index,
@@ -27,6 +30,71 @@ pub struct NodeSearchLocation {
     pub doc_id: Uuid,
     pub tab_id: Uuid,
     pub node_id: Uuid,
+}
+
+pub fn search_box_click(
+    mut interaction_query: Query<
+        (&Interaction, &SearchButton),
+        (Changed<Interaction>, With<SearchButton>),
+    >,
+    mut state: ResMut<UiState>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+) {
+    let mut primary_window = windows.single_mut();
+    for (interaction, node) in &mut interaction_query {
+        match *interaction {
+            Interaction::Clicked => {
+                primary_window.cursor.icon = CursorIcon::Text;
+                *state = UiState::default();
+                state.search_box_to_edit = Some(node.id);
+            }
+            Interaction::Hovered => {
+                primary_window.cursor.icon = CursorIcon::Hand;
+            }
+            Interaction::None => {
+                primary_window.cursor.icon = CursorIcon::Default;
+            }
+        }
+    }
+}
+
+pub fn search_box_text_changed(
+    text_query: Query<&Text, With<SearchText>>,
+    mut previous_search_text: Local<String>,
+    mut app_state: ResMut<AppState>,
+    pkv: Res<PkvStore>,
+) {
+    let mut search = text_query.single().clone();
+
+    search.sections.pop();
+    let mut str = "".to_string();
+    for section in search.sections.iter() {
+        str = format!("{}{}", str, section.value.clone());
+    }
+    if str != *previous_search_text {
+        if !str.is_empty() {
+            if let Some(index) = &app_state.search_index {
+                let index = &index.index;
+                let result = fuzzy_search(&index, str.as_str());
+                match result {
+                    Ok(docs) => {
+                        let doc_ids: HashSet<ReflectableUuid> = docs
+                            .into_iter()
+                            .map(|location| ReflectableUuid(location.doc_id))
+                            .collect();
+                        app_state.doc_list_ui = doc_ids;
+                    }
+                    Err(e) => info!("Error searching index {:?}", e),
+                }
+            }
+        } else {
+            if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
+                let keys: Vec<_> = names.keys().collect();
+                app_state.doc_list_ui.extend(keys);
+            }
+        }
+        *previous_search_text = str;
+    }
 }
 
 pub fn init_search_index(mut app_state: ResMut<AppState>) {
@@ -91,32 +159,6 @@ pub fn update_search_index(
 }
 
 const MAX_SEARCH_RESULTS: usize = 1000;
-
-pub fn search_box_click(
-    mut interaction_query: Query<
-        (&Interaction, &SearchButton),
-        (Changed<Interaction>, With<SearchButton>),
-    >,
-    mut state: ResMut<UiState>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
-) {
-    let mut primary_window = windows.single_mut();
-    for (interaction, node) in &mut interaction_query {
-        match *interaction {
-            Interaction::Clicked => {
-                primary_window.cursor.icon = CursorIcon::Text;
-                *state = UiState::default();
-                state.search_box_to_edit = Some(node.id);
-            }
-            Interaction::Hovered => {
-                primary_window.cursor.icon = CursorIcon::Hand;
-            }
-            Interaction::None => {
-                primary_window.cursor.icon = CursorIcon::Default;
-            }
-        }
-    }
-}
 
 pub fn clear_tab_index(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;

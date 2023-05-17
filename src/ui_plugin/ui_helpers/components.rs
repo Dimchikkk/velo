@@ -68,8 +68,9 @@ pub struct TabContainer {
 pub struct SearchButton {
     pub id: ReflectableUuid,
 }
+
 #[derive(Component)]
-pub struct SearchContainer {
+pub struct SearchText {
     pub id: ReflectableUuid,
 }
 
