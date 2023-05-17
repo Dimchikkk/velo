@@ -54,6 +54,7 @@ use add_effect::*;
 mod add_search_box;
 use add_search_box::*;
 
+// Think about splitting this function to wasm and native
 pub fn init_layout(
     mut commands: Commands,
     mut app_state: ResMut<AppState>,
@@ -283,6 +284,7 @@ pub fn init_layout(
             LeftPanelControls,
         ))
         .id();
+    #[cfg(not(target_arch = "wasm32"))]
     let search_box = add_search_box(&mut commands);
     let left_panel_explorer = commands
         .spawn((
@@ -299,6 +301,7 @@ pub fn init_layout(
             LeftPanelExplorer,
         ))
         .id();
+    #[cfg(not(target_arch = "wasm32"))]
     commands.entity(left_panel_explorer).add_child(search_box);
     commands.entity(left_panel_explorer).add_child(docs);
 

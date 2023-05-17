@@ -19,10 +19,11 @@ use crate::utils::ReflectableUuid;
 use super::ui_helpers::SearchButton;
 use super::ui_helpers::SearchText;
 use super::UiState;
+
 pub struct SearchIndexState {
     pub index: Index,
-    pub deleted_tabs: Vec<ReflectableUuid>,
-    pub updated_nodes: HashMap<NodeSearchLocation, String>,
+    pub tabs_to_delete: HashSet<Uuid>,
+    pub node_updates: HashMap<NodeSearchLocation, String>,
 }
 
 #[derive(Eq, PartialEq, Hash)]
@@ -75,7 +76,7 @@ pub fn search_box_text_changed(
         if !str.is_empty() {
             if let Some(index) = &app_state.search_index {
                 let index = &index.index;
-                let result = fuzzy_search(&index, str.as_str());
+                let result = fuzzy_search(index, str.as_str());
                 match result {
                     Ok(docs) => {
                         let doc_ids: HashSet<ReflectableUuid> = docs
@@ -87,12 +88,13 @@ pub fn search_box_text_changed(
                     Err(e) => info!("Error searching index {:?}", e),
                 }
             }
-        } else {
-            if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-                let keys: Vec<_> = names.keys().collect();
-                app_state.doc_list_ui.extend(keys);
+        } else if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
+                let keys_in_storage: Vec<_> = names.keys().collect();
+                let keys_in_memory: Vec<_> = app_state.docs.keys().cloned().collect();
+                let mut combined_keys = keys_in_memory;
+                combined_keys.extend(keys_in_storage);
+                app_state.doc_list_ui.extend(combined_keys);
             }
-        }
         *previous_search_text = str;
     }
 }
@@ -106,8 +108,8 @@ pub fn init_search_index(mut app_state: ResMut<AppState>) {
     .to_path_buf();
     app_state.search_index = Some(SearchIndexState {
         index: initialize_search_index(path),
-        deleted_tabs: vec![],
-        updated_nodes: HashMap::new(),
+        node_updates: HashMap::new(),
+        tabs_to_delete: HashSet::new(),
     });
 }
 
@@ -125,14 +127,14 @@ pub fn initialize_search_index(dir: PathBuf) -> tantivy::Index {
 
 pub fn update_search_index(
     index: &Index,
-    meta: NodeSearchLocation,
+    node_search_location: &NodeSearchLocation,
     text: &str,
 ) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;
 
     let term = tantivy::Term::from_field_text(
         index.schema().get_field("node_id").unwrap(),
-        &meta.node_id.to_string(),
+        &node_search_location.node_id.to_string(),
     );
     index_writer.delete_term(term);
 
@@ -140,15 +142,15 @@ pub fn update_search_index(
     document.add_text(index.schema().get_field("text").unwrap(), text);
     document.add_text(
         index.schema().get_field("doc_id").unwrap(),
-        &meta.doc_id.to_string(),
+        &node_search_location.doc_id.to_string(),
     );
     document.add_text(
         index.schema().get_field("tab_id").unwrap(),
-        &meta.tab_id.to_string(),
+        &node_search_location.tab_id.to_string(),
     );
     document.add_text(
         index.schema().get_field("node_id").unwrap(),
-        &meta.node_id.to_string(),
+        &node_search_location.node_id.to_string(),
     );
 
     index_writer.add_document(document)?;
@@ -174,12 +176,12 @@ pub fn clear_tab_index(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
     Ok(())
 }
 
-pub fn clear_doc_index(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
+pub fn clear_doc_index(index: &Index, doc_id: &Uuid) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;
 
     let term = tantivy::Term::from_field_text(
         index.schema().get_field("doc_id").unwrap(),
-        &tab_id.to_string(),
+        &doc_id.to_string(),
     );
     index_writer.delete_term(term);
 
@@ -244,7 +246,7 @@ mod tests {
         let text2 = "banana";
         update_search_index(
             &index,
-            NodeSearchLocation {
+            &NodeSearchLocation {
                 doc_id: id1,
                 tab_id: Uuid::new_v4(),
                 node_id: Uuid::new_v4(),
@@ -254,7 +256,7 @@ mod tests {
         .unwrap();
         update_search_index(
             &index,
-            NodeSearchLocation {
+            &NodeSearchLocation {
                 doc_id: id2,
                 tab_id: Uuid::new_v4(),
                 node_id: Uuid::new_v4(),
@@ -288,7 +290,7 @@ mod tests {
         let text_2 = "example text 2";
         update_search_index(
             &index,
-            NodeSearchLocation {
+            &NodeSearchLocation {
                 doc_id,
                 tab_id,
                 node_id: Uuid::new_v4(),
@@ -298,7 +300,7 @@ mod tests {
         .unwrap();
         update_search_index(
             &index,
-            NodeSearchLocation {
+            &NodeSearchLocation {
                 doc_id,
                 tab_id,
                 node_id: Uuid::new_v4(),
@@ -334,7 +336,7 @@ mod tests {
         let text_2 = "example text 2";
         update_search_index(
             &index,
-            NodeSearchLocation {
+            &NodeSearchLocation {
                 doc_id,
                 tab_id: Uuid::new_v4(),
                 node_id: Uuid::new_v4(),
@@ -344,7 +346,7 @@ mod tests {
         .unwrap();
         update_search_index(
             &index,
-            NodeSearchLocation {
+            &NodeSearchLocation {
                 doc_id,
                 tab_id: Uuid::new_v4(),
                 node_id: Uuid::new_v4(),
