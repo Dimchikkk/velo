@@ -6,7 +6,9 @@ use std::collections::HashSet;
 use std::path::Path;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
+use tantivy::query::BooleanQuery;
 use tantivy::query::FuzzyTermQuery;
+use tantivy::query::Occur;
 use tantivy::ReloadPolicy;
 
 use tantivy::schema::*;
@@ -119,6 +121,7 @@ pub fn initialize_search_index(dir: PathBuf) -> tantivy::Index {
     Index::open_in_dir(dir.clone()).unwrap_or_else(|_| {
         let mut schema_builder = Schema::builder();
         schema_builder.add_text_field("text", TEXT);
+        schema_builder.add_text_field("full_text", STRING);
         schema_builder.add_text_field("doc_id", STRING | STORED);
         schema_builder.add_text_field("tab_id", STRING | STORED);
         schema_builder.add_text_field("node_id", STRING | STORED);
@@ -142,6 +145,7 @@ pub fn update_search_index(
 
         let mut document = tantivy::Document::new();
         document.add_text(index.schema().get_field("text").unwrap(), str);
+        document.add_text(index.schema().get_field("full_text").unwrap(), str);
         document.add_text(
             index.schema().get_field("doc_id").unwrap(),
             &node_search_location.doc_id.to_string(),
@@ -204,12 +208,20 @@ pub fn fuzzy_search(index: &Index, query: &str) -> tantivy::Result<Vec<NodeSearc
 
     let schema = index.schema();
     let text_field = schema.get_field("text").unwrap();
+    let full_text_field = schema.get_field("full_text").unwrap();
     let doc_id_field = schema.get_field("doc_id").unwrap();
     let tab_id_field = schema.get_field("tab_id").unwrap();
     let node_id_field = schema.get_field("node_id").unwrap();
 
-    let term = Term::from_field_text(text_field, query);
-    let query = FuzzyTermQuery::new(term, 2, true);
+    let text_term = Term::from_field_text(text_field, query);
+    let query1 = FuzzyTermQuery::new(text_term, 2, true);
+
+    let full_text_term = Term::from_field_text(full_text_field, query);
+    let query2 = FuzzyTermQuery::new(full_text_term, 2, true);
+    let query = BooleanQuery::new(vec![
+        (Occur::Should, Box::new(query1)),
+        (Occur::Should, Box::new(query2)),
+    ]);
 
     let top_docs = searcher
         .search(&query, &(TopDocs::with_limit(MAX_SEARCH_RESULTS)))
