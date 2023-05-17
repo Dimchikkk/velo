@@ -60,7 +60,7 @@ pub fn save_doc(
 
 pub fn save_to_store(
     mut pkv: ResMut<PkvStore>,
-    app_state: Res<AppState>,
+    mut app_state: ResMut<AppState>,
     mut events: EventReader<SaveStoreEvent>,
 ) {
     for event in events.iter() {
@@ -104,6 +104,16 @@ pub fn save_to_store(
             std::fs::write(path, serde_json::to_string_pretty(&current_doc).unwrap())
                 .expect("Error saving current document to file")
         }
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Some(index) = &mut app_state.search_index {
+            for tab_id in index.tabs_to_delete.iter() {
+                let _ = super::clear_tab_index(&index.index, tab_id);
+            }
+            index.tabs_to_delete.clear();
+            for (node_search_location, str) in index.node_updates.iter() {
+                let _ = super::update_search_index(&index.index, node_search_location, str.as_str());
+            }
+        }
     }
 }
 
@@ -126,6 +136,10 @@ pub fn save_tab(
     mut app_state: ResMut<AppState>,
     text_query: Query<(&mut Text, &RawText), With<RawText>>,
 ) {
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(index) = &mut app_state.search_index {
+        index.tabs_to_delete.insert(request.tab_id.0);
+    }
     let mut json = json!({
         "images": {},
         "nodes": [],
@@ -172,7 +186,7 @@ pub fn save_tab(
                     height: size.height,
                     bg_color,
                     text: JsonNodeText {
-                        text: str,
+                        text: str.clone(),
                         pos: style_to_pos((
                             test_pos_style.justify_content,
                             test_pos_style.align_items
@@ -180,6 +194,17 @@ pub fn save_tab(
                     },
                     z_index,
                 }));
+                #[cfg(not(target_arch = "wasm32"))]
+                if let Some(index) = &mut app_state.search_index {
+                    index.node_updates.insert(
+                        super::NodeSearchLocation {
+                            doc_id: request.doc_id.0,
+                            tab_id: request.tab_id.0,
+                            node_id: node.id.0,
+                        },
+                        str.clone(),
+                    );
+                }
             }
         }
     }

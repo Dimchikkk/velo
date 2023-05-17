@@ -96,10 +96,8 @@ pub fn keyboard_input_system(
             {
                 *ui_state = UiState::default();
             }
-            if Some(editable_text.id) == ui_state.doc_to_edit {
-                if text.sections[0].value == *"Untitled" {
-                    text.sections[0].value = "".to_string();
-                }
+            if Some(editable_text.id) == ui_state.doc_to_edit && text.sections[0].value == *"Untitled" {
+                text.sections[0].value = "".to_string();
             }
             if vec![
                 ui_state.entity_to_edit,

@@ -49,6 +49,13 @@ fn delete_doc(
     commands.insert_resource(LoadDocRequest {
         doc_id: app_state.current_document.unwrap(),
     });
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        if let Some(index) = &app_state.search_index {
+            let index = &index.index;
+            let _ = super::clear_doc_index(index, &id_to_remove.0);
+        }
+    }
 }
 
 fn delete_tab(
@@ -57,16 +64,23 @@ fn delete_tab(
     query_container: &mut Query<(Entity, &TabContainer), With<TabContainer>>,
 ) {
     let current_document = app_state.current_document.unwrap();
-    let tab_to_remove = app_state
+    let tab_id = app_state
         .docs
-        .get_mut(&current_document)
+        .get(&current_document)
         .unwrap()
         .tabs
         .iter()
         .find(|x| x.is_active)
-        .unwrap();
+        .unwrap()
+        .id;
+
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(index) = &mut app_state.search_index {
+        index.tabs_to_delete.insert(tab_id.0);
+    }
+
     for (entity, tab) in query_container.iter_mut() {
-        if tab.id == tab_to_remove.id {
+        if tab.id == tab_id {
             commands.entity(entity).despawn_recursive();
             break;
         }
@@ -200,7 +214,7 @@ pub fn confirm_modal(
                             delete_doc(&mut app_state, &mut commands, &mut pkv);
                         }
                         ModalAction::DeleteTab => {
-                            delete_tab(&mut app_state, &mut commands, &mut tab_query_container)
+                            delete_tab(&mut app_state, &mut commands, &mut tab_query_container);
                         }
                     }
                 }
