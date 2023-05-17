@@ -53,7 +53,7 @@ enjoyable project to work on.
   - headings
   - inline code
 - particles effect [native target only 🖥️]
-- filter document by text in nodes [native target only 🖥️]
+- filter documents list by text in nodes [native target only 🖥️]
 
 ## Run
 
