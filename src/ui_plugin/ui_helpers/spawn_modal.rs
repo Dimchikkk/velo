@@ -7,6 +7,7 @@ use super::{
     ModalConfirm, ModalTop,
 };
 use crate::utils::ReflectableUuid;
+
 pub fn spawn_modal(
     commands: &mut Commands,
     window: &Window,

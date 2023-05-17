@@ -223,7 +223,12 @@ pub fn create_rectangle_txt(
     }
 }
 
-pub fn get_tooltip(text: String, size: f32) -> TextBundle {
+pub enum TooltipPosition {
+    Top,
+    Bottom,
+}
+
+pub fn get_tooltip(text: String, size: f32, tooltip_position: TooltipPosition) -> TextBundle {
     let text = Text {
         sections: vec![TextSection {
             value: text,
@@ -236,19 +241,23 @@ pub fn get_tooltip(text: String, size: f32) -> TextBundle {
         alignment: TextAlignment::Left,
         linebreak_behaviour: BreakLineOn::WordBoundary,
     };
-    let text_bundle_style = Style {
-        position: UiRect {
-            left: Val::Px(0.),
+    let position = match tooltip_position {
+        TooltipPosition::Bottom => UiRect {
+            left: Val::Px(30.),
             right: Val::Px(0.),
             top: Val::Px(30.),
             bottom: Val::Px(0.),
         },
-        padding: UiRect {
-            left: Val::Px(5.),
-            right: Val::Px(5.),
-            top: Val::Px(5.),
-            bottom: Val::Px(5.),
+        TooltipPosition::Top => UiRect {
+            left: Val::Px(30.),
+            right: Val::Px(0.),
+            top: Val::Px(-30.),
+            bottom: Val::Px(0.),
         },
+    };
+    let text_bundle_style = Style {
+        position,
+        padding: UiRect::all(Val::Px(5.)),
         ..default()
     };
     TextBundle {

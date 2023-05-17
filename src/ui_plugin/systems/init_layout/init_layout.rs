@@ -50,6 +50,11 @@ use add_list::*;
 mod add_effect;
 use add_effect::*;
 
+#[path = "add_search_box.rs"]
+mod add_search_box;
+use add_search_box::*;
+
+// Think about splitting this function to wasm and native
 pub fn init_layout(
     mut commands: Commands,
     mut app_state: ResMut<AppState>,
@@ -94,7 +99,7 @@ pub fn init_layout(
     let add_tab = add_menu_button(&mut commands, "New Tab".to_string(), &icon_font, AddTab);
     commands.entity(bottom_panel).add_child(add_tab);
 
-    let docs = add_list(&mut commands, &asset_server, &mut app_state, &mut pkv);
+    let docs = add_list(&mut commands, &mut app_state, &mut pkv);
 
     let root_ui = commands
         .spawn((
@@ -279,11 +284,14 @@ pub fn init_layout(
             LeftPanelControls,
         ))
         .id();
+    #[cfg(not(target_arch = "wasm32"))]
+    let search_box = add_search_box(&mut commands);
     let left_panel_explorer = commands
         .spawn((
             NodeBundle {
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(60.)),
+                    flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()
@@ -293,6 +301,8 @@ pub fn init_layout(
             LeftPanelExplorer,
         ))
         .id();
+    #[cfg(not(target_arch = "wasm32"))]
+    commands.entity(left_panel_explorer).add_child(search_box);
     commands.entity(left_panel_explorer).add_child(docs);
 
     commands.entity(left_panel).add_child(left_panel_controls);

@@ -1,6 +1,8 @@
 use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::ui_plugin::ui_helpers::{get_tooltip, ButtonAction, GenericButton, Tooltip};
+use crate::ui_plugin::ui_helpers::{
+    get_tooltip, ButtonAction, GenericButton, Tooltip, TooltipPosition,
+};
 
 pub fn node_manipulation(
     commands: &mut Commands,
@@ -57,7 +59,10 @@ pub fn node_manipulation(
             GenericButton,
         ))
         .with_children(|builder| {
-            builder.spawn((get_tooltip("New Rectangle".to_string(), 14.), Tooltip));
+            builder.spawn((
+                get_tooltip("New Rectangle".to_string(), 14., TooltipPosition::Bottom),
+                Tooltip,
+            ));
 
             let text_style = TextStyle {
                 font_size: 30.0,
@@ -122,7 +127,10 @@ pub fn node_manipulation(
             GenericButton,
         ))
         .with_children(|builder| {
-            builder.spawn((get_tooltip("New Circle".to_string(), 14.), Tooltip));
+            builder.spawn((
+                get_tooltip("New Circle".to_string(), 14., TooltipPosition::Bottom),
+                Tooltip,
+            ));
 
             let text_style = TextStyle {
                 font_size: 30.0,
@@ -187,7 +195,10 @@ pub fn node_manipulation(
             GenericButton,
         ))
         .with_children(|builder| {
-            builder.spawn((get_tooltip("Delete Rectangle".to_string(), 14.), Tooltip));
+            builder.spawn((
+                get_tooltip("Delete Rectangle".to_string(), 14., TooltipPosition::Bottom),
+                Tooltip,
+            ));
 
             let text_style = TextStyle {
                 font_size: 30.0,

@@ -7,10 +7,8 @@ use bevy::tasks::IoTaskPool;
 use bevy_pkv::PkvStore;
 use linkify::{LinkFinder, LinkKind};
 
-use super::ui_helpers::{DocListItemContainer, ModalCancel, ModalConfirm, ModalTop};
-use super::{
-    add_list_item, CommChannels, DeleteDoc, DocList, EditableText, ModalAction, TabContainer,
-};
+use super::ui_helpers::{ModalCancel, ModalConfirm, ModalTop};
+use super::{CommChannels, EditableText, ModalAction, TabContainer};
 use crate::components::Doc;
 use crate::resources::{AppState, LoadDocRequest, LoadTabRequest, SaveDocRequest};
 use crate::utils::ReflectableUuid;
@@ -41,27 +39,28 @@ fn delete_doc(
     app_state: &mut ResMut<AppState>,
     commands: &mut Commands,
     pkv: &mut ResMut<PkvStore>,
-    query_container: &mut Query<(Entity, &DocListItemContainer), With<DocListItemContainer>>,
 ) {
     let current_document = app_state.current_document.unwrap();
     let id_to_remove = current_document;
-    for (entity, button) in query_container.iter_mut() {
-        if button.id == id_to_remove {
-            commands.entity(entity).despawn_recursive();
-            break;
-        }
-    }
     app_state.docs.remove(&current_document);
     remove_from_storage(pkv, id_to_remove, app_state.current_document.unwrap());
-    for (_, button) in query_container.iter_mut() {
-        if button.id != id_to_remove {
-            app_state.current_document = Some(button.id);
-            break;
-        }
-    }
+    app_state.current_document = app_state.docs.keys().next().cloned();
+    app_state.doc_list_ui.remove(&id_to_remove);
     commands.insert_resource(LoadDocRequest {
         doc_id: app_state.current_document.unwrap(),
     });
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        if let Some(index) = &app_state.search_index {
+            let index = std::sync::Arc::new(index.index.clone());
+            let pool = IoTaskPool::get();
+            let id_to_remove = std::sync::Arc::new(id_to_remove);
+            pool.spawn(async move {
+                let _ = super::clear_doc_index(&index, &id_to_remove.0);
+            })
+            .detach();
+        }
+    }
 }
 
 fn delete_tab(
@@ -70,16 +69,23 @@ fn delete_tab(
     query_container: &mut Query<(Entity, &TabContainer), With<TabContainer>>,
 ) {
     let current_document = app_state.current_document.unwrap();
-    let tab_to_remove = app_state
+    let tab_id = app_state
         .docs
-        .get_mut(&current_document)
+        .get(&current_document)
         .unwrap()
         .tabs
         .iter()
         .find(|x| x.is_active)
-        .unwrap();
+        .unwrap()
+        .id;
+
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(index) = &mut app_state.search_index {
+        index.tabs_to_delete.insert(tab_id.0);
+    }
+
     for (entity, tab) in query_container.iter_mut() {
-        if tab.id == tab_to_remove.id {
+        if tab.id == tab_id {
             commands.entity(entity).despawn_recursive();
             break;
         }
@@ -116,10 +122,7 @@ fn delete_tab(
 pub fn load_doc_handler(
     mut commands: Commands,
     mut app_state: ResMut<AppState>,
-    doc_list_query: Query<Entity, With<DocList>>,
     comm_channels: Res<CommChannels>,
-    asset_server: Res<AssetServer>,
-    mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
     pkv: Res<PkvStore>,
 ) {
     if comm_channels.rx.is_empty() {
@@ -135,20 +138,11 @@ pub fn load_doc_handler(
             return;
         }
     }
-    let button = add_list_item(
-        &mut commands,
-        Some(&mut delete_doc),
-        &asset_server,
-        import_document.id,
-        import_document.name.clone(),
-        true,
-    );
-
-    commands.entity(doc_list_query.single()).add_child(button);
+    app_state.current_document = Some(import_document.id);
+    app_state.doc_list_ui.insert(import_document.id);
     app_state
         .docs
         .insert(import_document.id, import_document.clone());
-    app_state.current_document = Some(import_document.id);
     commands.insert_resource(LoadDocRequest {
         doc_id: import_document.id,
     });
@@ -163,10 +157,6 @@ pub fn confirm_modal(
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     query_top: Query<(Entity, &ModalTop), With<ModalTop>>,
-    mut doc_list_query_container: Query<
-        (Entity, &DocListItemContainer),
-        With<DocListItemContainer>,
-    >,
     mut tab_query_container: Query<(Entity, &TabContainer), With<TabContainer>>,
     mut pkv: ResMut<PkvStore>,
     input: Res<Input<KeyCode>>,
@@ -226,15 +216,10 @@ pub fn confirm_modal(
                         ModalAction::LoadFromFile => {}
                         ModalAction::LoadFromUrl => {}
                         ModalAction::DeleteDocument => {
-                            delete_doc(
-                                &mut app_state,
-                                &mut commands,
-                                &mut pkv,
-                                &mut doc_list_query_container,
-                            );
+                            delete_doc(&mut app_state, &mut commands, &mut pkv);
                         }
                         ModalAction::DeleteTab => {
-                            delete_tab(&mut app_state, &mut commands, &mut tab_query_container)
+                            delete_tab(&mut app_state, &mut commands, &mut tab_query_container);
                         }
                     }
                 }
@@ -295,12 +280,7 @@ pub fn confirm_modal(
                     ModalAction::LoadFromFile => {}
                     ModalAction::LoadFromUrl => {}
                     ModalAction::DeleteDocument => {
-                        delete_doc(
-                            &mut app_state,
-                            &mut commands,
-                            &mut pkv,
-                            &mut doc_list_query_container,
-                        );
+                        delete_doc(&mut app_state, &mut commands, &mut pkv);
                     }
                     ModalAction::DeleteTab => {
                         delete_tab(&mut app_state, &mut commands, &mut tab_query_container)
