@@ -14,6 +14,10 @@ use canvas::CanvasPlugin;
 use resources::FontHandle;
 use systems::*;
 use ui_plugin::*;
+
+pub static ORG_NAME: &str = "";
+pub static APP_NAME: &str = "velo";
+
 pub struct VeloPlugin;
 impl Plugin for VeloPlugin {
     fn build(&self, app: &mut App) {
@@ -41,7 +45,7 @@ impl Plugin for VeloPlugin {
             .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)
             .add_plugin(BordersPlugin)
-            .insert_resource(PkvStore::new("test", "velo"));
+            .insert_resource(PkvStore::new(ORG_NAME, APP_NAME));
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_plugin(HanabiPlugin);
