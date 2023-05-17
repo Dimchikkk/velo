@@ -89,12 +89,12 @@ pub fn search_box_text_changed(
                 }
             }
         } else if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-                let keys_in_storage: Vec<_> = names.keys().collect();
-                let keys_in_memory: Vec<_> = app_state.docs.keys().cloned().collect();
-                let mut combined_keys = keys_in_memory;
-                combined_keys.extend(keys_in_storage);
-                app_state.doc_list_ui.extend(combined_keys);
-            }
+            let keys_in_storage: Vec<_> = names.keys().collect();
+            let keys_in_memory: Vec<_> = app_state.docs.keys().cloned().collect();
+            let mut combined_keys = keys_in_memory;
+            combined_keys.extend(keys_in_storage);
+            app_state.doc_list_ui.extend(combined_keys);
+        }
         *previous_search_text = str;
     }
 }
@@ -127,33 +127,34 @@ pub fn initialize_search_index(dir: PathBuf) -> tantivy::Index {
 
 pub fn update_search_index(
     index: &Index,
-    node_search_location: &NodeSearchLocation,
-    text: &str,
+    node_search_locations: &HashMap<NodeSearchLocation, String>,
 ) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;
 
-    let term = tantivy::Term::from_field_text(
-        index.schema().get_field("node_id").unwrap(),
-        &node_search_location.node_id.to_string(),
-    );
-    index_writer.delete_term(term);
+    for (node_search_location, str) in node_search_locations.iter() {
+        let term = tantivy::Term::from_field_text(
+            index.schema().get_field("node_id").unwrap(),
+            &node_search_location.node_id.to_string(),
+        );
+        index_writer.delete_term(term);
 
-    let mut document = tantivy::Document::new();
-    document.add_text(index.schema().get_field("text").unwrap(), text);
-    document.add_text(
-        index.schema().get_field("doc_id").unwrap(),
-        &node_search_location.doc_id.to_string(),
-    );
-    document.add_text(
-        index.schema().get_field("tab_id").unwrap(),
-        &node_search_location.tab_id.to_string(),
-    );
-    document.add_text(
-        index.schema().get_field("node_id").unwrap(),
-        &node_search_location.node_id.to_string(),
-    );
+        let mut document = tantivy::Document::new();
+        document.add_text(index.schema().get_field("text").unwrap(), str);
+        document.add_text(
+            index.schema().get_field("doc_id").unwrap(),
+            &node_search_location.doc_id.to_string(),
+        );
+        document.add_text(
+            index.schema().get_field("tab_id").unwrap(),
+            &node_search_location.tab_id.to_string(),
+        );
+        document.add_text(
+            index.schema().get_field("node_id").unwrap(),
+            &node_search_location.node_id.to_string(),
+        );
 
-    index_writer.add_document(document)?;
+        index_writer.add_document(document)?;
+    }
 
     index_writer.commit()?;
 
@@ -162,14 +163,16 @@ pub fn update_search_index(
 
 const MAX_SEARCH_RESULTS: usize = 1000;
 
-pub fn clear_tab_index(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
+pub fn clear_tabs_index(index: &Index, tab_ids: &HashSet<Uuid>) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;
 
-    let term = tantivy::Term::from_field_text(
-        index.schema().get_field("tab_id").unwrap(),
-        &tab_id.to_string(),
-    );
-    index_writer.delete_term(term);
+    for tab_id in tab_ids {
+        let term = tantivy::Term::from_field_text(
+            index.schema().get_field("tab_id").unwrap(),
+            &tab_id.to_string(),
+        );
+        index_writer.delete_term(term);
+    }
 
     index_writer.commit()?;
 
@@ -241,30 +244,27 @@ mod tests {
         // Initialize the index using the temporary directory
         let index = initialize_search_index(temp_dir.path().to_path_buf());
         let id1 = Uuid::new_v4();
-        let text1 = "apple";
+        let text1 = "apple".to_string();
         let id2 = Uuid::new_v4();
-        let text2 = "banana";
-        update_search_index(
-            &index,
-            &NodeSearchLocation {
+        let text2 = "banana".to_string();
+        let mut node_search_locations = HashMap::new();
+        node_search_locations.insert(
+            NodeSearchLocation {
                 doc_id: id1,
                 tab_id: Uuid::new_v4(),
                 node_id: Uuid::new_v4(),
             },
             text1,
-        )
-        .unwrap();
-        update_search_index(
-            &index,
-            &NodeSearchLocation {
+        );
+        node_search_locations.insert(
+            NodeSearchLocation {
                 doc_id: id2,
                 tab_id: Uuid::new_v4(),
                 node_id: Uuid::new_v4(),
             },
             text2,
-        )
-        .unwrap();
-
+        );
+        update_search_index(&index, &node_search_locations).unwrap();
         // Perform fuzzy search and assert the results
         let query = "appla";
         let result = fuzzy_search(&index, query).unwrap();
@@ -286,31 +286,31 @@ mod tests {
         let index = initialize_search_index(temp_dir.path().to_path_buf());
         let doc_id = Uuid::new_v4();
         let tab_id = Uuid::new_v4();
-        let text_1 = "example text 1";
-        let text_2 = "example text 2";
-        update_search_index(
-            &index,
-            &NodeSearchLocation {
+        let text_1 = "example text 1".to_string();
+        let text_2 = "example text 2".to_string();
+        let mut node_search_locations = HashMap::new();
+        node_search_locations.insert(
+            NodeSearchLocation {
                 doc_id,
                 tab_id,
                 node_id: Uuid::new_v4(),
             },
             text_1,
-        )
-        .unwrap();
-        update_search_index(
-            &index,
-            &NodeSearchLocation {
+        );
+        node_search_locations.insert(
+            NodeSearchLocation {
                 doc_id,
                 tab_id,
                 node_id: Uuid::new_v4(),
             },
             text_2,
-        )
-        .unwrap();
+        );
+        update_search_index(&index, &node_search_locations).unwrap();
 
+        let mut tab_ids = HashSet::new();
+        tab_ids.insert(tab_id);
         // Clear the tab from the index
-        clear_tab_index(&index, &tab_id).unwrap();
+        clear_tabs_index(&index, &tab_ids).unwrap();
 
         // Perform a search and assert that the tab is not found
         let query = "example";
@@ -332,28 +332,26 @@ mod tests {
         // Initialize the index using the temporary directory
         let index = initialize_search_index(temp_dir.path().to_path_buf());
         let doc_id = Uuid::new_v4();
-        let text_1 = "example text 1";
-        let text_2 = "example text 2";
-        update_search_index(
-            &index,
-            &NodeSearchLocation {
+        let text_1 = "example text 1".to_string();
+        let text_2 = "example text 2".to_string();
+        let mut node_search_locations = HashMap::new();
+        node_search_locations.insert(
+            NodeSearchLocation {
                 doc_id,
                 tab_id: Uuid::new_v4(),
                 node_id: Uuid::new_v4(),
             },
             text_1,
-        )
-        .unwrap();
-        update_search_index(
-            &index,
-            &NodeSearchLocation {
+        );
+        node_search_locations.insert(
+            NodeSearchLocation {
                 doc_id,
                 tab_id: Uuid::new_v4(),
                 node_id: Uuid::new_v4(),
             },
             text_2,
-        )
-        .unwrap();
+        );
+        update_search_index(&index, &node_search_locations).unwrap();
 
         // Clear the document from the index
         clear_doc_index(&index, &doc_id).unwrap();
