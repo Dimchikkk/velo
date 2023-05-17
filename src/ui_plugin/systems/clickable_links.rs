@@ -5,7 +5,7 @@ use bevy::{
 };
 use bevy_markdown::BevyMarkdownNode;
 
-use super::{get_sections, UiState, VeloNode, ui_helpers::RawText};
+use super::{get_sections, ui_helpers::RawText, UiState, VeloNode};
 
 pub fn clickable_links(
     mut primary_window: Query<&mut Window, With<PrimaryWindow>>,
