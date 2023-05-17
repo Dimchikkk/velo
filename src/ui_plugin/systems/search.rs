@@ -1,4 +1,5 @@
-use bevy::prelude::ResMut;
+use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
@@ -12,6 +13,9 @@ use uuid::Uuid;
 
 use crate::resources::AppState;
 use crate::utils::ReflectableUuid;
+
+use super::ui_helpers::SearchButton;
+use super::UiState;
 pub struct SearchIndexState {
     pub index: Index,
     pub deleted_tabs: Vec<ReflectableUuid>,
@@ -87,6 +91,32 @@ pub fn update_search_index(
 }
 
 const MAX_SEARCH_RESULTS: usize = 1000;
+
+pub fn search_box_click(
+    mut interaction_query: Query<
+        (&Interaction, &SearchButton),
+        (Changed<Interaction>, With<SearchButton>),
+    >,
+    mut state: ResMut<UiState>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+) {
+    let mut primary_window = windows.single_mut();
+    for (interaction, node) in &mut interaction_query {
+        match *interaction {
+            Interaction::Clicked => {
+                primary_window.cursor.icon = CursorIcon::Text;
+                *state = UiState::default();
+                state.search_box_to_edit = Some(node.id);
+            }
+            Interaction::Hovered => {
+                primary_window.cursor.icon = CursorIcon::Hand;
+            }
+            Interaction::None => {
+                primary_window.cursor.icon = CursorIcon::Default;
+            }
+        }
+    }
+}
 
 pub fn clear_tab_index(index: &Index, tab_id: &Uuid) -> tantivy::Result<()> {
     let mut index_writer = index.writer(50_000_000)?;

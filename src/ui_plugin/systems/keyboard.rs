@@ -78,30 +78,34 @@ pub fn keyboard_input_system(
             || ui_state.doc_to_edit.is_some()
             || ui_state.tab_to_edit.is_some()
             || ui_state.modal_id.is_some()
+            || ui_state.search_box_to_edit.is_some()
         {
             blink_timer.timer.unpause();
         } else {
             blink_timer.timer.pause();
         }
         for (mut text, editable_text) in &mut editable_text_query.iter_mut() {
-            if Some(editable_text.id) == ui_state.tab_to_edit && input.just_pressed(KeyCode::Return)
+            if vec![
+                ui_state.tab_to_edit,
+                ui_state.doc_to_edit,
+                ui_state.search_box_to_edit,
+                ui_state.modal_id,
+            ]
+            .contains(&Some(editable_text.id))
+                && input.any_just_pressed([KeyCode::Escape, KeyCode::Return])
             {
-                ui_state.tab_to_edit = None;
-                continue;
+                *ui_state = UiState::default();
             }
             if Some(editable_text.id) == ui_state.doc_to_edit {
                 if text.sections[0].value == *"Untitled" {
                     text.sections[0].value = "".to_string();
-                }
-                if input.just_pressed(KeyCode::Return) {
-                    ui_state.doc_to_edit = None;
-                    continue;
                 }
             }
             if vec![
                 ui_state.entity_to_edit,
                 ui_state.tab_to_edit,
                 ui_state.doc_to_edit,
+                ui_state.search_box_to_edit,
                 ui_state.modal_id,
             ]
             .contains(&Some(editable_text.id))
