@@ -29,7 +29,6 @@ pub fn add_list(
         .spawn(NodeBundle {
             style: Style {
                 flex_direction: FlexDirection::Column,
-                // align_self: AlignSelf::Stretch,
                 size: Size::new(Val::Percent(80.), Val::Percent(80.)),
                 overflow: Overflow::Hidden,
                 ..default()
@@ -56,8 +55,7 @@ pub fn add_list(
         .id();
 
     if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-        let mut keys: Vec<_> = names.keys().collect();
-        keys.sort_by_key(|k| names.get(k).unwrap().to_lowercase());
+        let keys: Vec<_> = names.keys().collect();
         app_state.doc_list_ui.extend(keys);
     } else {
         let tab_id = ReflectableUuid::generate();
