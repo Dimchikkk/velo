@@ -14,22 +14,10 @@ use super::{DeleteDoc, DocListItemButton, DocListItemContainer, EditableText, Ge
 
 pub fn add_list_item(
     commands: &mut Commands,
-    delete_doc: Option<&mut Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>>,
     asset_server: &Res<AssetServer>,
     id: ReflectableUuid,
     name: String,
-    is_current: bool,
 ) -> Entity {
-    if let Some(delete_doc) = delete_doc {
-        for (mut visibility, doc) in delete_doc.iter_mut() {
-            if doc.id == id {
-                *visibility = Visibility::Visible;
-            } else {
-                *visibility = Visibility::Hidden;
-            }
-        }
-    }
-
     let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
     let root = commands
         .spawn((
@@ -56,7 +44,7 @@ pub fn add_list_item(
                 style: Style {
                     size: Size::new(Val::Percent(90.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
-                    padding: UiRect::all(Val::Px(5.)),
+                    padding: UiRect::all(Val::Px(3.)),
                     ..default()
                 },
                 ..default()
@@ -102,11 +90,7 @@ pub fn add_list_item(
     let del_button = commands
         .spawn((
             ButtonBundle {
-                visibility: if is_current {
-                    Visibility::Visible
-                } else {
-                    Visibility::Hidden
-                },
+                visibility: Visibility::Hidden,
                 background_color: Color::rgb(255., 242., 230.).into(),
                 style: Style {
                     margin: UiRect {
