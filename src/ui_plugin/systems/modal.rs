@@ -52,8 +52,13 @@ fn delete_doc(
     #[cfg(not(target_arch = "wasm32"))]
     {
         if let Some(index) = &app_state.search_index {
-            let index = &index.index;
-            let _ = super::clear_doc_index(index, &id_to_remove.0);
+            let index = std::sync::Arc::new(index.index.clone());
+            let pool = IoTaskPool::get();
+            let id_to_remove = std::sync::Arc::new(id_to_remove);
+            pool.spawn(async move {
+                let _ = super::clear_doc_index(&index, &id_to_remove.0);
+            })
+            .detach();
         }
     }
 }

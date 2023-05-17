@@ -105,13 +105,12 @@ pub fn save_to_store(
                 .expect("Error saving current document to file")
         }
         #[cfg(not(target_arch = "wasm32"))]
-        if let Some(index) = &mut app_state.search_index {
-            for tab_id in index.tabs_to_delete.iter() {
-                let _ = super::clear_tab_index(&index.index, tab_id);
-            }
-            index.tabs_to_delete.clear();
-            for (node_search_location, str) in index.node_updates.iter() {
-                let _ = super::update_search_index(&index.index, node_search_location, str.as_str());
+        {
+            if let Some(index) = &mut app_state.search_index {
+                let _ = super::clear_tabs_index(&index.index, &index.tabs_to_delete);
+                index.tabs_to_delete.clear();
+                let _ = super::update_search_index(&index.index, &index.node_updates);
+                index.node_updates.clear();
             }
         }
     }
