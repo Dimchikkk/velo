@@ -15,6 +15,8 @@ use uuid::Uuid;
 
 use crate::resources::AppState;
 use crate::utils::ReflectableUuid;
+use crate::APP_NAME;
+use crate::ORG_NAME;
 
 use super::ui_helpers::SearchButton;
 use super::ui_helpers::SearchText;
@@ -26,7 +28,7 @@ pub struct SearchIndexState {
     pub node_updates: HashMap<NodeSearchLocation, String>,
 }
 
-#[derive(Eq, PartialEq, Hash)]
+#[derive(Eq, PartialEq, Hash, Clone)]
 pub struct NodeSearchLocation {
     pub doc_id: Uuid,
     pub tab_id: Uuid,
@@ -100,7 +102,7 @@ pub fn search_box_text_changed(
 }
 
 pub fn init_search_index(mut app_state: ResMut<AppState>) {
-    let dirs = directories::ProjectDirs::from("", "test", "velo");
+    let dirs = directories::ProjectDirs::from("", ORG_NAME, APP_NAME);
     let path = match dirs.as_ref() {
         Some(dirs) => dirs.data_dir(),
         None => Path::new("."),

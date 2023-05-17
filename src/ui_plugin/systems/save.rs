@@ -107,10 +107,17 @@ pub fn save_to_store(
         #[cfg(not(target_arch = "wasm32"))]
         {
             if let Some(index) = &mut app_state.search_index {
-                let _ = super::clear_tabs_index(&index.index, &index.tabs_to_delete);
+                let pool = bevy::tasks::IoTaskPool::get();
+                let tabs_to_delete = std::sync::Arc::new(index.tabs_to_delete.clone());
+                let node_updates = std::sync::Arc::new(index.node_updates.clone());
                 index.tabs_to_delete.clear();
-                let _ = super::update_search_index(&index.index, &index.node_updates);
                 index.node_updates.clear();
+                let index = std::sync::Arc::new(index.index.clone());
+                pool.spawn(async move {
+                    let _ = super::clear_tabs_index(&index, &tabs_to_delete);
+                    let _ = super::update_search_index(&index, &node_updates);
+                })
+                .detach();
             }
         }
     }
