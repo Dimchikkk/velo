@@ -1,7 +1,9 @@
 use crate::components::Doc;
+#[cfg(not(target_arch = "wasm32"))]
+use crate::ui_plugin::SearchIndexState;
 use crate::utils::ReflectableUuid;
 use bevy::prelude::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
 #[derive(Resource, Default)]
@@ -9,6 +11,9 @@ pub struct AppState {
     pub current_document: Option<ReflectableUuid>,
     pub docs: HashMap<ReflectableUuid, Doc>,
     pub github_token: Option<String>,
+    #[cfg(not(target_arch = "wasm32"))]
+    pub search_index: Option<SearchIndexState>,
+    pub doc_list_ui: HashSet<ReflectableUuid>,
 }
 
 #[derive(Resource, Debug)]

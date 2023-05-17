@@ -10,7 +10,7 @@ WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
 mode is supported (tested on Chrome):
 
-[<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/3dc607976ea4ed695662a8fe9e3281a3/raw/8c8994c7b3051b7b8db58e20de2b6ab2d791b89d/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/3dc607976ea4ed695662a8fe9e3281a3/raw/8c8994c7b3051b7b8db58e20de2b6ab2d791b89d/velo.json)
+[<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a78e7380750c052bff78b8e27c9545d3/raw/537c6f57d5257b32940e3fbcf2f4bc6386cdbc7e/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a78e7380750c052bff78b8e27c9545d3/raw/537c6f57d5257b32940e3fbcf2f4bc6386cdbc7e/velo.json)
 
 ## Inspiration
 
@@ -28,7 +28,7 @@ enjoyable project to work on.
 -   node resizing
 -   node repositioning
 -   wrapped text inside nodes
--   paste screenshot from clipboard [native target only]
+-   paste screenshot from clipboard [native target only 🖥️] 
 -   connect nodes with arrows
 -   make app snapshot in memory and load from it (MacOs: Command + s\[l\])
 -   save app state to db and load from it
@@ -40,7 +40,7 @@ enjoyable project to work on.
 -   load app state from url
 -   ability to create sharable url of the document using \"Share
     Document\" button (**.velo.toml** should be created in user home
-    directory containing GitHub access token with \"gist\" scope) [native target only]:
+    directory containing GitHub access token with \"gist\" scope) [native target only 🖥️]:
 
    ```toml
    github_access_token = "<github_access_token>"
@@ -50,7 +50,10 @@ enjoyable project to work on.
   - italic/bold text style
   - links
   - syntax highlighting
-- particles effect [native target only]
+  - headings
+  - inline code
+- particles effect [native target only 🖥️]
+- filter document by text in nodes [native target only 🖥️]
 
 ## Run
 
@@ -77,7 +80,7 @@ cargo bundle
 
 ```sh
 cargo fmt
-cargo clippy --fix --allow-staged -- -A clippy::type_complexity -A clippy::too_many_arguments
+cargo clippy --allow-staged -- -A clippy::type_complexity -A clippy::too_many_arguments
 ```
 
 # Contributing

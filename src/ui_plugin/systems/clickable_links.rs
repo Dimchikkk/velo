@@ -5,13 +5,13 @@ use bevy::{
 };
 use bevy_markdown::BevyMarkdownNode;
 
-use super::{get_sections, EditableText, UiState, VeloNode};
+use super::{get_sections, ui_helpers::RawText, UiState, VeloNode};
 
 pub fn clickable_links(
     mut primary_window: Query<&mut Window, With<PrimaryWindow>>,
     mut editable_text_query: Query<
         (&Node, &GlobalTransform, &mut Text, &TextLayoutInfo),
-        (With<EditableText>, Without<BevyMarkdownNode>),
+        (With<RawText>, Without<BevyMarkdownNode>),
     >,
     mut markdown_text_query: Query<
         (
@@ -21,7 +21,7 @@ pub fn clickable_links(
             &TextLayoutInfo,
             &BevyMarkdownNode,
         ),
-        (With<BevyMarkdownNode>, Without<EditableText>),
+        (With<BevyMarkdownNode>, Without<RawText>),
     >,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<VeloNode>)>,
     mut ui_state: ResMut<UiState>,
@@ -67,7 +67,7 @@ pub fn clickable_links(
                             }
                         }
                     } else {
-                        primary_window.cursor.icon = CursorIcon::Default;
+                        primary_window.cursor.icon = CursorIcon::Text;
                     }
                 }
             }
@@ -107,7 +107,7 @@ pub fn clickable_links(
                             }
                         }
                     } else {
-                        primary_window.cursor.icon = CursorIcon::Default;
+                        primary_window.cursor.icon = CursorIcon::Text;
                     }
                 }
             }
