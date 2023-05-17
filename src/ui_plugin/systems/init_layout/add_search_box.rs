@@ -84,6 +84,10 @@ pub fn add_search_box(commands: &mut Commands) -> Entity {
                     ],
                     ..default()
                 },
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    ..default()
+                },
                 ..default()
             },
             EditableText { id },

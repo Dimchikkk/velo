@@ -14,14 +14,14 @@ pub fn set_focused_entity(
     mut holding_time: Local<(Duration, Option<ReflectableUuid>)>,
 ) {
     let mut primary_window = windows.single_mut();
-    for (interaction, rectangle) in &mut interaction_query {
+    for (interaction, node) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 primary_window.cursor.icon = CursorIcon::Text;
                 *state = UiState::default();
-                state.entity_to_edit = Some(rectangle.id);
+                state.entity_to_edit = Some(node.id);
                 let now_ms = get_timestamp();
-                *holding_time = (Duration::from_millis(now_ms as u64), Some(rectangle.id));
+                *holding_time = (Duration::from_millis(now_ms as u64), Some(node.id));
             }
             Interaction::Hovered => {
                 if state.hold_entity.is_none() && state.entity_to_edit.is_none() {

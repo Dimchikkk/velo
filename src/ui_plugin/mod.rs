@@ -132,6 +132,7 @@ pub struct UiState {
     pub entity_to_edit: Option<ReflectableUuid>,
     pub tab_to_edit: Option<ReflectableUuid>,
     pub doc_to_edit: Option<ReflectableUuid>,
+    pub search_box_to_edit: Option<ReflectableUuid>,
     pub arrow_type: ArrowType,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
@@ -223,6 +224,9 @@ impl Plugin for UiPlugin {
             keyboard_input_system,
         ));
         app.add_systems((doc_list_del_button_update, doc_list_ui_changed).chain());
+
+        #[cfg(not(target_arch = "wasm32"))]
+        app.add_system(search_box_click);
 
         app.add_systems((
             button_generic_handler,
