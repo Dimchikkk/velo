@@ -19,7 +19,12 @@ pub fn add_search_box(commands: &mut Commands) -> Entity {
                     justify_content: JustifyContent::Center,
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
-                    margin: UiRect::all(Val::Px(10.)),
+                    margin: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(10.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(10.),
+                    },
                     ..default()
                 },
                 ..default()
