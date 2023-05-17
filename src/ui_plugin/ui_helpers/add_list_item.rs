@@ -44,7 +44,7 @@ pub fn add_list_item(
                 style: Style {
                     size: Size::new(Val::Percent(90.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
-                    padding: UiRect::all(Val::Px(5.)),
+                    padding: UiRect::all(Val::Px(3.)),
                     ..default()
                 },
                 ..default()
