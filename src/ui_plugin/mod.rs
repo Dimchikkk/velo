@@ -168,8 +168,8 @@ impl Plugin for UiPlugin {
         #[cfg(not(target_arch = "wasm32"))]
         app.add_systems(Startup,(read_native_config, init_search_index).before(init_layout));
         #[cfg(target_arch = "wasm32")]
-        app.add_startup_systems(Startup, (load_from_url.before(init_layout)));
-        app.add_startup_systems(Startup, (init_layout));
+        app.add_systems(Startup, (load_from_url.before(init_layout)));
+        app.add_systems(Startup, init_layout);
 
 
         app.add_systems(Update,(
@@ -223,10 +223,10 @@ impl Plugin for UiPlugin {
             save_doc_handler,
             keyboard_input_system,
         ));
-        app.add_systems((doc_list_del_button_update, doc_list_ui_changed).chain());
+        app.add_systems(Update, (doc_list_del_button_update, doc_list_ui_changed).chain());
 
         #[cfg(not(target_arch = "wasm32"))]
-        app.add_systems((search_box_click, search_box_text_changed));
+        app.add_systems(Update, (search_box_click, search_box_text_changed));
 
         app.add_systems(Update,(
             button_generic_handler,

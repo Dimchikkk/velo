@@ -86,7 +86,7 @@ pub fn init_layout(
                     height:Val::Percent(4.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Start,
-                    overflow: Overflow::Hidden,
+                    overflow: Overflow::clip(),
                     ..default()
                 },
                 ..default()
@@ -252,7 +252,7 @@ pub fn init_layout(
                     height:Val::Percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
-                    overflow: Overflow::Hidden,
+                    overflow: Overflow::clip(),
                     ..default()
                 },
                 ..default()

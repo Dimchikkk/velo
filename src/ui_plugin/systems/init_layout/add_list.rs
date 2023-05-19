@@ -17,12 +17,11 @@ use crate::utils::ReflectableUuid;
 
 pub fn add_list(
     commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    state: &mut ResMut<AppState>,
+    app_state: &mut ResMut<AppState>,
     pkv: &mut ResMut<PkvStore>,
 ) -> Entity {
     if let Ok(last_saved) = pkv.get::<ReflectableUuid>("last_saved") {
-        state.current_document = Some(last_saved);
+        app_state.current_document = Some(last_saved);
         commands.insert_resource(LoadDocRequest { doc_id: last_saved });
     }
 
@@ -32,7 +31,7 @@ pub fn add_list(
                 flex_direction: FlexDirection::Column,
                 width:Val::Percent(80.),
                 height: Val::Percent(80.),
-                overflow: Overflow::Hidden,
+                overflow: Overflow::clip(),
                 ..default()
             },
             background_color: Color::rgb(158., 158., 158.).into(),
@@ -44,7 +43,6 @@ pub fn add_list(
             NodeBundle {
                 style: Style {
                     flex_direction: FlexDirection::Column,
-                    max_size: Size::UNDEFINED,
                     align_items: AlignItems::Center,
                     ..default()
                 },

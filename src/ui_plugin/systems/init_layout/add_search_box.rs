@@ -14,7 +14,8 @@ pub fn add_search_box(commands: &mut Commands) -> Entity {
     let root = commands
         .spawn((NodeBundle {
             style: Style {
-                size: Size::new(Val::Percent(80.), Val::Percent(8.)),
+                width: Val::Percent(80.),
+                height: Val::Percent(8.),
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
@@ -34,7 +35,8 @@ pub fn add_search_box(commands: &mut Commands) -> Entity {
             ButtonBundle {
                 background_color: Color::WHITE.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     border: UiRect::all(Val::Px(1.)),
