@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
-use crate::ui_plugin::ui_helpers::GenericButton;
+use crate::ui_plugin::ui_helpers::{GenericButton, TooltipPosition};
 
 use super::ui_helpers::{get_tooltip, Tooltip};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
@@ -69,7 +69,10 @@ pub fn add_arrow(
             GenericButton,
         ))
         .with_children(|builder| {
-            builder.spawn((get_tooltip(text.to_string(), 14.), Tooltip));
+            builder.spawn((
+                get_tooltip(text.to_string(), 14., TooltipPosition::Bottom),
+                Tooltip,
+            ));
         })
         .id();
     commands.entity(top).add_child(button);

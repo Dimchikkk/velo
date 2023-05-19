@@ -1,7 +1,7 @@
 use bevy::{prelude::*, text::BreakLineOn};
 use bevy_ui_borders::BorderColor;
 
-use crate::ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip};
+use crate::ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip, TooltipPosition};
 
 pub fn add_menu_button(
     commands: &mut Commands,
@@ -131,7 +131,7 @@ pub fn add_menu_button(
                     GenericButton,
                 ))
                 .with_children(|builder| {
-                    builder.spawn((get_tooltip(label, 14.), Tooltip));
+                    builder.spawn((get_tooltip(label, 14., TooltipPosition::Bottom), Tooltip));
 
                     let text_style = TextStyle {
                         font_size: 30.0,

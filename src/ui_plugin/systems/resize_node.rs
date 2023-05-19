@@ -161,78 +161,85 @@ pub fn resize_entity_end(
     }
 }
 
-#[test]
-fn test_resize_entity_end() {
-    // Set up a test app with the necessary resources and entities
-    let mut app = App::new();
-    let entity_id = crate::utils::ReflectableUuid::generate();
+#[cfg(test)]
+mod tests {
+    use super::{resize_entity_end, RedrawArrowEvent, VeloNodeContainer};
+    use crate::{ui_plugin::ui_helpers::ResizeMarker, UiState};
+    use bevy::{input::mouse::MouseMotion, prelude::*};
 
-    // Test all ResizeMarkers
-    for &marker in &[
-        ResizeMarker::TopLeft,
-        ResizeMarker::TopRight,
-        ResizeMarker::BottomLeft,
-        ResizeMarker::BottomRight,
-    ] {
-        app.insert_resource(UiState {
-            entity_to_resize: Some((entity_id, marker)),
-            ..default()
-        });
+    #[test]
+    fn test_resize_entity_end() {
+        // Set up a test app with the necessary resources and entities
+        let mut app = App::new();
+        let entity_id = crate::utils::ReflectableUuid::generate();
 
-        app.add_event::<MouseMotion>();
-        app.add_event::<RedrawArrowEvent>();
-        app.world
-            .resource_mut::<Events<MouseMotion>>()
-            .send(MouseMotion {
-                delta: Vec2::new(10.0, 5.0),
+        // Test all ResizeMarkers
+        for &marker in &[
+            ResizeMarker::TopLeft,
+            ResizeMarker::TopRight,
+            ResizeMarker::BottomLeft,
+            ResizeMarker::BottomRight,
+        ] {
+            app.insert_resource(UiState {
+                entity_to_resize: Some((entity_id, marker)),
+                ..default()
             });
 
-        app.add_system(resize_entity_end);
+            app.add_event::<MouseMotion>();
+            app.add_event::<RedrawArrowEvent>();
+            app.world
+                .resource_mut::<Events<MouseMotion>>()
+                .send(MouseMotion {
+                    delta: Vec2::new(10.0, 5.0),
+                });
 
-        app.world
-            .spawn(NodeBundle {
-                style: Style {
-                    width:Val::Px(100.0),
+            app.add_system(resize_entity_end);
+
+            app.world
+                .spawn(NodeBundle {
+                    style: Style {
+                        width:Val::Px(100.0),
 
                         left: Val::Px(0.0),
                         bottom: Val::Px(0.0),
+                        ..Default::default()
+                    },
                     ..Default::default()
-                },
-                ..Default::default()
-            })
-            .insert(VeloNodeContainer { id: entity_id });
+                })
+                .insert(VeloNodeContainer { id: entity_id });
 
-        // Run the app
-        app.update();
+            // Run the app
+            app.update();
 
-        // Check that the size and position of the rectangle have been updated correctly
-        let (_velo_node_container, style) = app
-            .world
-            .query::<(&VeloNodeContainer, &mut Style)>()
-            .iter_mut(&mut app.world)
-            .last()
-            .unwrap();
+            // Check that the size and position of the rectangle have been updated correctly
+            let (_velo_node_container, style) = app
+                .world
+                .query::<(&VeloNodeContainer, &mut Style)>()
+                .iter_mut(&mut app.world)
+                .last()
+                .unwrap();
 
-        match marker {
-            ResizeMarker::TopLeft => {
-                assert_eq!(style.width, Val::Px(90.0));
-                assert_eq!(style.height, Val::Px(95.0));
-                assert_eq!(style.left, Val::Px(10.0));
-            }
-            ResizeMarker::TopRight => {
-                assert_eq!(style.width, Val::Px(120.0));
-                assert_eq!(style.height, Val::Px(90.0));
-            }
-            ResizeMarker::BottomLeft => {
-                assert_eq!(style.width, Val::Px(70.0));
-                assert_eq!(style.height, Val::Px(115.0));
-                assert_eq!(style.left, Val::Px(30.0));
-                assert_eq!(style.bottom, Val::Px(-15.0));
-            }
-            ResizeMarker::BottomRight => {
-                assert_eq!(style.width, Val::Px(140.0));
-                assert_eq!(style.height, Val::Px(120.0));
-                assert_eq!(style.bottom, Val::Px(-20.0));
+            match marker {
+                ResizeMarker::TopLeft => {
+                    assert_eq!(style.width, Val::Px(90.0));
+                    assert_eq!(style.height, Val::Px(95.0));
+                    assert_eq!(style.left, Val::Px(10.0));
+                }
+                ResizeMarker::TopRight => {
+                    assert_eq!(style.width, Val::Px(120.0));
+                    assert_eq!(style.height, Val::Px(90.0));
+                }
+                ResizeMarker::BottomLeft => {
+                    assert_eq!(style.width, Val::Px(70.0));
+                    assert_eq!(style.height, Val::Px(115.0));
+                    assert_eq!(style.left, Val::Px(30.0));
+                    assert_eq!(style.bottom, Val::Px(-15.0));
+                }
+                ResizeMarker::BottomRight => {
+                    assert_eq!(style.width, Val::Px(140.0));
+                    assert_eq!(style.height, Val::Px(120.0));
+                    assert_eq!(style.bottom, Val::Px(-20.0));
+                }
             }
         }
     }

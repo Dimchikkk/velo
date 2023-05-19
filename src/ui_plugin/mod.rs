@@ -58,6 +58,15 @@ use update_rectangle_position::*;
 #[path = "systems/create_new_node.rs"]
 mod create_new_node;
 use create_new_node::*;
+#[cfg(not(target_arch = "wasm32"))]
+#[path = "systems/search.rs"]
+#[cfg(not(target_arch = "wasm32"))]
+mod search;
+#[cfg(not(target_arch = "wasm32"))]
+pub use search::*;
+#[path = "systems/doc_list_ui_changed.rs"]
+mod doc_list_ui_changed;
+use doc_list_ui_changed::*;
 
 pub struct UiPlugin;
 
@@ -70,6 +79,8 @@ pub struct SaveStoreEvent {
     pub doc_id: ReflectableUuid,
     pub path: Option<PathBuf>, // Save current document to file
 }
+
+pub struct UpdateDeleteDocBtnEvent;
 
 #[derive(Resource, Clone)]
 pub struct CommChannels {
@@ -121,6 +132,7 @@ pub struct UiState {
     pub entity_to_edit: Option<ReflectableUuid>,
     pub tab_to_edit: Option<ReflectableUuid>,
     pub doc_to_edit: Option<ReflectableUuid>,
+    pub search_box_to_edit: Option<ReflectableUuid>,
     pub arrow_type: ArrowType,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
@@ -152,11 +164,12 @@ impl Plugin for UiPlugin {
         app.add_event::<CreateArrowEvent>();
         app.add_event::<RedrawArrowEvent>();
         app.add_event::<SaveStoreEvent>();
-        
+        app.add_event::<UpdateDeleteDocBtnEvent>();
         #[cfg(not(target_arch = "wasm32"))]
-        app.add_systems(Startup,(init, init_layout));
+        app.add_systems(Startup,(read_native_config, init_search_index).before(init_layout));
         #[cfg(target_arch = "wasm32")]
-        app.add_systems(Startup,(load_from_url, init_layout));
+        app.add_startup_systems(Startup, (load_from_url.before(init_layout)));
+        app.add_startup_systems(Startup, (init_layout));
 
 
         app.add_systems(Update,(
@@ -210,6 +223,10 @@ impl Plugin for UiPlugin {
             save_doc_handler,
             keyboard_input_system,
         ));
+        app.add_systems((doc_list_del_button_update, doc_list_ui_changed).chain());
+
+        #[cfg(not(target_arch = "wasm32"))]
+        app.add_systems((search_box_click, search_box_text_changed));
 
         app.add_systems(Update,(
             button_generic_handler,
@@ -225,7 +242,6 @@ impl Plugin for UiPlugin {
             // particles_effect,
             save_to_store.after(save_tab),
         ));
-
         app.add_systems(Update,(set_focused_entity, clickable_links).chain());
 
             app.add_systems(Update,

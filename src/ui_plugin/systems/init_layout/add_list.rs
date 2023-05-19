@@ -30,9 +30,9 @@ pub fn add_list(
         .spawn(NodeBundle {
             style: Style {
                 flex_direction: FlexDirection::Column,
-                align_self: AlignSelf::Stretch,
-                width:Val::Percent(80.),height: Val::Percent(80.),
-                //overflow: Overflow::Hidden,
+                width:Val::Percent(80.),
+                height: Val::Percent(80.),
+                overflow: Overflow::Hidden,
                 ..default()
             },
             background_color: Color::rgb(158., 158., 158.).into(),
@@ -44,7 +44,7 @@ pub fn add_list(
             NodeBundle {
                 style: Style {
                     flex_direction: FlexDirection::Column,
-                    // max_size: Size::UNDEFINED,
+                    max_size: Size::UNDEFINED,
                     align_items: AlignItems::Center,
                     ..default()
                 },
@@ -57,21 +57,8 @@ pub fn add_list(
         .id();
 
     if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-        let mut keys: Vec<_> = names.keys().collect();
-        keys.sort_by_key(|k| names.get(k).unwrap().to_lowercase());
-
-        for key in keys {
-            let name = names.get(key).unwrap();
-            let button = add_list_item(
-                commands,
-                None,
-                asset_server,
-                *key,
-                name.clone(),
-                state.current_document == Some(*key),
-            );
-            commands.entity(node).add_child(button);
-        }
+        let keys: Vec<_> = names.keys().collect();
+        app_state.doc_list_ui.extend(keys);
     } else {
         let tab_id = ReflectableUuid::generate();
         let tab_name: String = "Tab 1".to_string();
@@ -82,19 +69,17 @@ pub fn add_list(
             is_active: true,
         }];
         let doc_id = ReflectableUuid::generate();
-        let name = "Untitled".to_string();
-        state.docs.insert(
+        app_state.docs.insert(
             doc_id,
             Doc {
                 id: doc_id,
-                name: name.clone(),
+                name: "Untitled".to_string(),
                 tabs,
                 tags: vec![],
             },
         );
-        let button = add_list_item(commands, None, asset_server, doc_id, name, true);
-        state.current_document = Some(doc_id);
-        commands.entity(node).add_child(button);
+        app_state.current_document = Some(doc_id);
+        app_state.doc_list_ui.insert(doc_id);
         commands.insert_resource(LoadDocRequest { doc_id });
     }
     commands.entity(top).add_child(node);
