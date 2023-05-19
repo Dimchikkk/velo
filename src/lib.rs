@@ -5,9 +5,9 @@ mod systems;
 mod ui_plugin;
 mod utils;
 use bevy::{prelude::*, window::PresentMode};
-use bevy_embedded_assets::EmbeddedAssetPlugin;
+// use bevy_embedded_assets::EmbeddedAssetPlugin;
 #[cfg(not(target_arch = "wasm32"))]
-use bevy_hanabi::HanabiPlugin;
+// use bevy_hanabi::HanabiPlugin;
 //use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_pkv::PkvStore;
 use bevy_ui_borders::BordersPlugin;
@@ -44,7 +44,7 @@ impl Plugin for VeloPlugin {
             .add_plugin(BordersPlugin)
             .insert_resource(PkvStore::new("", "velo"));
 
-        #[cfg(not(target_arch = "wasm32"))]
-        app.add_plugin(HanabiPlugin);
+        // #[cfg(not(target_arch = "wasm32"))]
+        // app.add_plugin(HanabiPlugin);
     }
 }

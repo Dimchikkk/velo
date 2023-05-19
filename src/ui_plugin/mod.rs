@@ -152,13 +152,14 @@ impl Plugin for UiPlugin {
         app.add_event::<CreateArrowEvent>();
         app.add_event::<RedrawArrowEvent>();
         app.add_event::<SaveStoreEvent>();
-
+        
         #[cfg(not(target_arch = "wasm32"))]
-        app.add_startup_systems((read_native_config, init_layout).chain());
+        app.add_systems(Startup,(init, init_layout));
         #[cfg(target_arch = "wasm32")]
-        app.add_startup_systems((load_from_url, init_layout));
+        app.add_systems(Startup,(load_from_url, init_layout));
 
-        app.add_systems((
+
+        app.add_systems(Update,(
             rec_button_handlers,
             update_rectangle_position,
             create_new_node,
@@ -169,31 +170,31 @@ impl Plugin for UiPlugin {
             resize_notificator,
         ));
 
-        app.add_systems(
+        app.add_systems(Update,
             (save_doc, remove_save_doc_request)
                 .chain()
                 .distributive_run_if(should_save_doc),
         );
 
-        app.add_systems(
+        app.add_systems(Update,
             (save_tab, remove_save_tab_request)
                 .chain()
                 .distributive_run_if(should_save_tab),
         );
 
-        app.add_systems(
+        app.add_systems(Update,
             (load_doc, remove_load_doc_request)
                 .chain()
                 .distributive_run_if(should_load_doc),
         );
 
-        app.add_systems(
+        app.add_systems(Update,
             (load_tab, remove_load_tab_request)
                 .chain()
                 .distributive_run_if(should_load_tab),
         );
 
-        app.add_systems((
+        app.add_systems(Update,(
             change_color_pallete,
             change_arrow_type,
             change_text_pos,
@@ -210,7 +211,7 @@ impl Plugin for UiPlugin {
             keyboard_input_system,
         ));
 
-        app.add_systems((
+        app.add_systems(Update,(
             button_generic_handler,
             select_tab_handler,
             export_to_file,
@@ -220,14 +221,14 @@ impl Plugin for UiPlugin {
             #[cfg(target_arch = "wasm32")]
             set_window_property,
             shared_doc_handler,
-            #[cfg(not(target_arch = "wasm32"))]
-            particles_effect,
+            // #[cfg(not(target_arch = "wasm32"))]
+            // particles_effect,
             save_to_store.after(save_tab),
         ));
 
-        app.add_systems((set_focused_entity, clickable_links).chain());
+        app.add_systems(Update,(set_focused_entity, clickable_links).chain());
 
-        app.add_system(
+            app.add_systems(Update,
             entity_to_edit_changed
                 .before(save_doc)
                 .before(save_doc)
@@ -270,6 +271,14 @@ fn load_from_url(mut commands: Commands) {
 fn read_native_config(mut app_state: ResMut<AppState>) {
     use crate::utils::read_config_file;
 
+    let config = read_config_file().unwrap_or_default();
+    if let Some(github_token) = &config.github_access_token {
+        app_state.github_token = Some(github_token.clone());
+    }
+}
+#[cfg(not(target_arch = "wasm32"))]
+fn init(mut app_state: ResMut<AppState>) {
+    use crate::utils::read_config_file;
     let config = read_config_file().unwrap_or_default();
     if let Some(github_token) = &config.github_access_token {
         app_state.github_token = Some(github_token.clone());

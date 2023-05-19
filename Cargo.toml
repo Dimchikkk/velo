@@ -50,7 +50,7 @@ async-channel = "1.8"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
 bevy-markdown = { path = "crates/bevy-markdown" }
 bevy_ui_borders = {path="crates/bevy_ui_borders"}
-bevy_embedded_assets ={path="crates/bevy_embedded_assets"}
+#bevy_embedded_assets ={path="crates/bevy_embedded_assets"}
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.7"
@@ -64,7 +64,7 @@ bevy = { git = "https://github.com/bevyengine/bevy",rev = "25f013ba1b809e9f962da
 arboard = "3.2.0"
 open = "4.0.1"
 toml = "0.7.3"
-bevy_hanabi = { git="https://github.com/flmng0/bevy_hanabi", default-features = false, features = [ "2d" ] }
+#bevy_hanabi = { git="https://github.com/flmng0/bevy_hanabi", default-features = false, features = [ "2d" ] }
 rand = "0.8.5"
 
 [dev-dependencies]

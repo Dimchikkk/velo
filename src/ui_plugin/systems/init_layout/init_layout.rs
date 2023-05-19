@@ -539,7 +539,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
+                width:Val::Percent(90.), height:Val::Percent(10.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()

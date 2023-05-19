@@ -73,7 +73,7 @@ pub fn entity_to_edit_changed(
                             extra_bold_font: Some(
                                 asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
                             ),
-                            size: Some((style.max_size.width, style.max_size.height)),
+                            size: Some((style.max_width, style.max_height)),
                         };
                         let markdown_text = spawn_bevy_markdown(&mut commands, bevy_markdown)
                             .expect("should handle markdown convertion");
@@ -135,7 +135,7 @@ pub fn entity_to_edit_changed(
                         extra_bold_font: Some(
                             asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
                         ),
-                        size: Some((style.max_size.width, style.max_size.height)),
+                        size: Some((style.max_width, style.max_height)),
                     };
                     let markdown_text = spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
                     commands

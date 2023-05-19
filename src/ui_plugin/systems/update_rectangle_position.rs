@@ -16,13 +16,13 @@ pub fn update_rectangle_position(
     for event in cursor_moved_events.iter() {
         for (mut style, top) in &mut node_position.iter_mut() {
             if Some(top.id) == state.hold_entity {
-                let size = query.single_mut().0.size;
-                if let (Val::Percent(x), Val::Px(element_width)) = (size.width, style.size.width) {
+                let width = query.single_mut().0.width;
+                if let (Val::Percent(x), Val::Px(element_width)) = (width, style.width) {
                     let width = (primary_window.width() * x) / 100.;
-                    style.position.left = Val::Px(event.position.x - width - element_width / 2.);
+                    style.left = Val::Px(event.position.x - width - element_width / 2.);
                 }
-                if let Val::Px(element_height) = style.size.height {
-                    style.position.bottom = Val::Px(event.position.y - element_height / 2.);
+                if let Val::Px(element_height) = style.height {
+                    style.bottom = Val::Px(event.position.y - element_height / 2.);
                 }
                 events.send(RedrawArrowEvent { id: top.id });
             }
