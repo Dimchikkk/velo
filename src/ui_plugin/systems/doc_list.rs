@@ -4,7 +4,7 @@ use bevy::{
 };
 
 use super::ui_helpers::ScrollingList;
-use crate::chart_plugin::ui_helpers::DocListItemButton;
+use crate::ui_plugin::ui_helpers::DocListItemButton;
 
 use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
 

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
-use crate::chart_plugin::ui_helpers::GenericButton;
+use crate::ui_plugin::ui_helpers::GenericButton;
 
 use super::ui_helpers::{get_tooltip, Tooltip};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};

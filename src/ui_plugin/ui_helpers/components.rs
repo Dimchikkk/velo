@@ -1,4 +1,4 @@
-use crate::{chart_plugin::NodeType, utils::ReflectableUuid};
+use crate::{ui_plugin::NodeType, utils::ReflectableUuid};
 use bevy::prelude::*;
 
 use crate::TextPos;
@@ -25,6 +25,9 @@ pub struct Tooltip;
 
 #[derive(Component)]
 pub struct NewDoc;
+
+#[derive(Component)]
+pub struct ParticlesEffect;
 
 #[derive(Component)]
 pub struct DocList;

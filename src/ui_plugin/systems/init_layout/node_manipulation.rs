@@ -1,6 +1,6 @@
 use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::chart_plugin::ui_helpers::{get_tooltip, ButtonAction, GenericButton, Tooltip};
+use crate::ui_plugin::ui_helpers::{get_tooltip, ButtonAction, GenericButton, Tooltip};
 
 pub fn node_manipulation(
     commands: &mut Commands,

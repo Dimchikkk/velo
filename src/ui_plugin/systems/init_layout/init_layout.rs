@@ -6,7 +6,8 @@ use bevy_pkv::PkvStore;
 
 use super::ui_helpers::{
     self, AddTab, BottomPanel, ButtonAction, LeftPanel, LeftPanelControls, LeftPanelExplorer,
-    MainPanel, Menu, NewDoc, Root, SaveDoc, TextManipulation, TextManipulationAction, TextPosMode,
+    MainPanel, Menu, NewDoc, ParticlesEffect, Root, SaveDoc, TextManipulation,
+    TextManipulationAction, TextPosMode,
 };
 use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
@@ -44,6 +45,10 @@ use add_menu_button::*;
 #[path = "add_list.rs"]
 mod add_list;
 use add_list::*;
+
+#[path = "add_effect.rs"]
+mod add_effect;
+use add_effect::*;
 
 pub fn init_layout(
     mut commands: Commands,
@@ -529,6 +534,25 @@ pub fn init_layout(
     }
     commands.entity(text_manipulation).add_child(cut);
 
+    #[cfg(not(target_arch = "wasm32"))]
+    let effects = commands
+        .spawn((NodeBundle {
+            style: Style {
+                align_items: AlignItems::Center,
+                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
+                margin: UiRect::all(Val::Px(5.)),
+                justify_content: JustifyContent::Start,
+                ..default()
+            },
+            ..default()
+        },))
+        .id();
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let effect1 = add_effect(&mut commands, &icon_font, ParticlesEffect);
+        commands.entity(effects).add_child(effect1);
+    }
+
     commands
         .entity(left_panel_controls)
         .add_child(rectangle_creation);
@@ -539,6 +563,8 @@ pub fn init_layout(
         .entity(left_panel_controls)
         .add_child(text_manipulation);
     commands.entity(left_panel_controls).add_child(fron_back);
+    #[cfg(not(target_arch = "wasm32"))]
+    commands.entity(left_panel_controls).add_child(effects);
 
     commands.entity(main_bottom).add_child(left_panel);
     commands.entity(main_bottom).add_child(right_panel);

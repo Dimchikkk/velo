@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 publish = false
 
@@ -23,7 +23,7 @@ members = [
 ]
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy",rev = "1da726e", default-features = false, features = [
+bevy = { git = "https://github.com/bevyengine/bevy",rev = "25f013ba1b809e9f962dafbefaeb860512f386e8", default-features = false, features = [
 "bevy_gizmos",
   "bevy_asset",
   "bevy_core_pipeline",
@@ -59,10 +59,12 @@ js-sys = "0.3.61"
 url = "2.3.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy",rev = "1da726e", default-features = false, features = [ "basis-universal" ] }
+bevy = { git = "https://github.com/bevyengine/bevy",rev = "25f013ba1b809e9f962dafbefaeb860512f386e8", default-features = false, features = [ "basis-universal" ] }
 arboard = "3.2.0"
 open = "4.0.1"
 toml = "0.7.3"
+bevy_hanabi = { git="https://github.com/flmng0/bevy_hanabi", default-features = false, features = [ "2d" ] }
+rand = "0.8.5"
 
 [dev-dependencies]
 tempfile = "3.5.0"
