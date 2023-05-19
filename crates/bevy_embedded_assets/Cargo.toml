@@ -1,0 +1,26 @@
+[package]
+name = "bevy_embedded_assets"
+version = "0.7.0"
+authors = ["François Mockers <mockersf@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+keywords = ["bevy", "assets"]
+readme = "README.md"
+description = "A Bevy plugin to embed assets in your game"
+repository = "https://github.com/vleue/bevy_embedded_assets"
+homepage = "https://github.com/vleue/bevy_embedded_assets"
+documentation = "https://docs.rs/bevy_embedded_assets"
+categories = ["game-development"]
+
+
+[dependencies.bevy]
+git = "https://github.com/bevyengine/bevy"
+rev = "25f013ba1b809e9f962dafbefaeb860512f386e8"
+default-features = false
+features = ["bevy_asset"]
+
+[build-dependencies]
+cargo-emit = "0.2.1"
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3"
