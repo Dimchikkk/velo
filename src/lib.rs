@@ -25,7 +25,7 @@ impl Plugin for VeloPlugin {
        app.add_systems(Startup,setup_camera)
             .add_systems(Startup,setup_background)
             .add_systems(Startup,setup_font)
-            .add_systems(Startup,set_default_font.run_if(resource_exists::<FontHandle>()))
+            .add_systems(Update,set_default_font.run_if(resource_exists::<FontHandle>()))
             .add_plugins(
                 DefaultPlugins
                     .set(WindowPlugin {
