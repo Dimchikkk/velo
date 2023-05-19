@@ -39,7 +39,7 @@ bevy = { git = "https://github.com/bevyengine/bevy",rev = "25f013ba1b809e9f962da
 base64 = "0.21.0"
 serde_json = "1.0.94"
 uuid = { version = "1.3.0", default-features = false, features = ["v4", "js"] }
-bevy_pkv = {path = "../bevy_pkv", default-features = false, features = [
+bevy_pkv = {path = "crates/bevy_pkv", default-features = false, features = [
   "bevy",
   "rocksdb",
 ] }
@@ -49,7 +49,8 @@ ehttp = "0.1.0"
 async-channel = "1.8"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
 bevy-markdown = { path = "crates/bevy-markdown" }
-bevy_ui_borders = {path="../bevy_ui_borders"}
+bevy_ui_borders = {path="crates/bevy_ui_borders"}
+bevy_embedded_assets ={path="crates/bevy_embedded_assets"}
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.7"
