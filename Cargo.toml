@@ -27,7 +27,7 @@ bevy = { git = "https://github.com/bevyengine/bevy", rev = "25f013ba1b809e9f962d
 base64 = "0.21.0"
 serde_json = "1.0.94"
 uuid = { version = "1.3.0", default-features = false, features = ["v4", "js"] }
-bevy_pkv = {path = "https://github.com/StaffEngineer/bevy_pkv", default-features = false, features = [
+bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", branch = "bevy-main", default-features = false, features = [
   "bevy",
   "rocksdb",
 ] }
@@ -36,8 +36,8 @@ linkify = "0.9.0"
 ehttp = "0.1.0"
 async-channel = "1.8"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
-bevy_ui_borders = { git = "https://github.com/StaffEngineer/bevy_ui_borders"}
-bevy_embedded_assets = { git = "https://github.com/StaffEngineer/bevy_embedded_assets" }
+bevy_ui_borders = { git = "https://github.com/StaffEngineer/bevy_ui_borders", branch = "bevy-main" }
+bevy_embedded_assets = { git = "https://github.com/StaffEngineer/bevy_embedded_assets", branch = "bevy-main" }
 bevy-markdown = { path = "crates/bevy-markdown" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
