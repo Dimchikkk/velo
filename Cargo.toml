@@ -11,8 +11,8 @@ publish = false
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
 
 # Enable max optimizations for dependencies, but not for our code:
-#[profile.dev.package."*"]
-#opt-level = 3
+[profile.dev.package."*"]
+opt-level = 3
 
 [profile.release]
 opt-level = 'z'
@@ -23,8 +23,8 @@ members = [
 ]
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy",rev = "25f013ba1b809e9f962dafbefaeb860512f386e8", default-features = false, features = [
-"bevy_gizmos",
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "25f013ba1b809e9f962dafbefaeb860512f386e8", default-features = false, features = [
+  "bevy_gizmos",
   "bevy_asset",
   "bevy_core_pipeline",
   "bevy_render",
