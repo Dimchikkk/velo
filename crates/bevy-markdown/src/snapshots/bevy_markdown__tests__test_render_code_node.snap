@@ -292,5 +292,5 @@ Text {
         },
     ],
     alignment: Left,
-    linebreak_behaviour: WordBoundary,
+    linebreak_behavior: WordBoundary,
 }

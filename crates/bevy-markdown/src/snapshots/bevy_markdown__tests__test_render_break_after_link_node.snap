@@ -1,5 +1,6 @@
 ---
 source: crates/bevy-markdown/src/lib.rs
+assertion_line: 474
 expression: node.clone()
 ---
 Text {
@@ -84,5 +85,5 @@ Text {
         },
     ],
     alignment: Left,
-    linebreak_behaviour: WordBoundary,
+    linebreak_behavior: WordBoundary,
 }
