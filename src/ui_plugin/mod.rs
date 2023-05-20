@@ -244,7 +244,7 @@ impl Plugin for UiPlugin {
         ));
         app.add_systems(Update,(set_focused_entity, clickable_links).chain());
 
-            app.add_systems(Update,
+        app.add_systems(Update,
             entity_to_edit_changed
                 .before(save_doc)
                 .before(save_doc)
