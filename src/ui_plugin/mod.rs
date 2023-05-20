@@ -292,11 +292,3 @@ fn read_native_config(mut app_state: ResMut<AppState>) {
         app_state.github_token = Some(github_token.clone());
     }
 }
-#[cfg(not(target_arch = "wasm32"))]
-fn init(mut app_state: ResMut<AppState>) {
-    use crate::utils::read_config_file;
-    let config = read_config_file().unwrap_or_default();
-    if let Some(github_token) = &config.github_access_token {
-        app_state.github_token = Some(github_token.clone());
-    }
-}
