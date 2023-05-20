@@ -23,23 +23,11 @@ members = [
 ]
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "25f013ba1b809e9f962dafbefaeb860512f386e8", default-features = false, features = [
-  "bevy_gizmos",
-  "bevy_asset",
-  "bevy_core_pipeline",
-  "bevy_render",
-  "bevy_scene",
-  "bevy_sprite",
-  "bevy_text",
-  "bevy_ui",
-  "bevy_winit",
-  "png",
-  "x11",
-] }
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "25f013ba1b809e9f962dafbefaeb860512f386e8", default-features = true }
 base64 = "0.21.0"
 serde_json = "1.0.94"
 uuid = { version = "1.3.0", default-features = false, features = ["v4", "js"] }
-bevy_pkv = {path = "crates/bevy_pkv", default-features = false, features = [
+bevy_pkv = {path = "https://github.com/StaffEngineer/bevy_pkv", default-features = false, features = [
   "bevy",
   "rocksdb",
 ] }
@@ -48,9 +36,9 @@ linkify = "0.9.0"
 ehttp = "0.1.0"
 async-channel = "1.8"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
+bevy_ui_borders = { git = "https://github.com/StaffEngineer/bevy_ui_borders"}
+bevy_embedded_assets = { git = "https://github.com/StaffEngineer/bevy_embedded_assets" }
 bevy-markdown = { path = "crates/bevy-markdown" }
-bevy_ui_borders = {path="crates/bevy_ui_borders"}
-#bevy_embedded_assets ={path="crates/bevy_embedded_assets"}
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.7"
