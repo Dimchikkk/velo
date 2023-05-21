@@ -83,10 +83,15 @@ cargo fmt
 cargo clippy --allow-staged -- -A clippy::type_complexity -A clippy::too_many_arguments
 ```
 
-# Contributing
+# License
+All code in this repository dual-licensed under either:
 
+MIT License or http://opensource.org/licenses/MIT
+Apache License, Version 2.0 or http://www.apache.org/licenses/LICENSE-2.0
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+
+# Contributing
 Contributions are always welcome! Please adhere to this project\'s code
-of conduct. If you have questions or suggestions, feel free to make an
-[issue](https://github.com/StaffEngineer/velo/issues).
+of conduct. If you have questions or suggestions feel free to share on [velo discord server](https://discord.gg/PqChPzWV).
 
 ❤️
