@@ -360,31 +360,12 @@ pub fn init_layout(
                 ..default()
             },
             ..default()
-        },))
+        }, ))
         .id();
     let color1 = add_color(&mut commands, Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0));
-    let color2 = add_color(
-        &mut commands,
-        Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
-    );
-    let color3 = add_color(
-        &mut commands,
-        Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
-    );
-    let color4 = add_color(
-        &mut commands,
-        Color::rgb(207.0 / 255.0, 226.0 / 255.0, 243.0 / 255.0),
-    );
-    let color5 = add_color(
-        &mut commands,
-        Color::rgb(245.0 / 255.0, 222.0 / 255.0, 179.0 / 255.0),
-    );
+
 
     commands.entity(color_picker).add_child(color1);
-    commands.entity(color_picker).add_child(color2);
-    commands.entity(color_picker).add_child(color3);
-    commands.entity(color_picker).add_child(color4);
-    commands.entity(color_picker).add_child(color5);
 
     let arrow_modes = commands
         .spawn((NodeBundle {
