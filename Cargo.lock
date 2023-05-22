@@ -315,18 +315,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy-markdown"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "insta",
- "markdown",
- "serde",
- "syntect",
- "uuid",
-]
-
-[[package]]
 name = "bevy_a11y"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -599,6 +587,18 @@ dependencies = [
  "quote",
  "syn 1.0.109",
  "toml_edit",
+]
+
+[[package]]
+name = "bevy_markdown"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "insta",
+ "markdown",
+ "serde",
+ "syntect",
+ "uuid",
 ]
 
 [[package]]
@@ -3823,9 +3823,9 @@ dependencies = [
  "async-channel",
  "base64 0.21.0",
  "bevy",
- "bevy-markdown",
  "bevy_embedded_assets",
  "bevy_hanabi",
+ "bevy_markdown",
  "bevy_pkv",
  "bevy_prototype_lyon",
  "bevy_ui_borders",
