@@ -10,7 +10,7 @@ edition = "2021"
 
 [dependencies]
 markdown = "1.0.0-alpha.9"
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "25f013ba1b809e9f962dafbefaeb860512f386e8", default-features = false, features = [
+bevy = { git = "https://github.com/bevyengine/bevy", default-features = false, features = [
   "bevy_asset",
   "bevy_core_pipeline",
   "bevy_render",
@@ -21,6 +21,7 @@ bevy = { git = "https://github.com/bevyengine/bevy", rev = "25f013ba1b809e9f962d
   "bevy_winit",
   "png",
   "x11",
+  "wayland",
 ] }
 uuid = { version = "1.3.0", default-features = false, features = ["v4", "js"] }
 serde = { version = "1.0", features = ["derive"] }
