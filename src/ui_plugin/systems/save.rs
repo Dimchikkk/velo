@@ -178,7 +178,7 @@ pub fn save_tab(
                 let left = style.left;
                 let bottom = style.bottom;
                 let width = style.width;
-                let height= style.height;
+                let height = style.height;
                 let bg_color = bg_color.0;
                 let z_index = match *z_index {
                     ZIndex::Local(v) => v,
@@ -251,7 +251,7 @@ mod tests {
     fn test_save_doc1() {
         // Setup
         let mut app = App::new();
-        app.add_systems(Update,(save_doc, save_to_store.after(save_doc)));
+        app.add_systems(Update, (save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -308,7 +308,7 @@ mod tests {
     fn test_save_doc2() {
         // Setup
         let mut app = App::new();
-        app.add_systems(Update,(save_doc, save_to_store.after(save_doc)));
+        app.add_systems(Update, (save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -369,7 +369,7 @@ mod tests {
     fn test_save_doc3() {
         // Setup
         let mut app = App::new();
-        app.add_systems(Update,(save_doc, save_to_store.after(save_doc)));
+        app.add_systems(Update, (save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();

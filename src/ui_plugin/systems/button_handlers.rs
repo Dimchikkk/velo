@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::{collections::VecDeque, time::Duration};
 
-use bevy::render::view::RenderLayers;
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use bevy_pkv::PkvStore;
@@ -13,12 +12,12 @@ use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
-    DocListItemButton, EditableText, GenericButton, NewDoc, ParticlesEffect, SaveDoc,
-    TextManipulation, TextManipulationAction, TextPosMode, Tooltip, VeloNode,
+    DocListItemButton, EditableText, GenericButton, NewDoc, SaveDoc, TextManipulation,
+    TextManipulationAction, TextPosMode, Tooltip, VeloNode,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
-use crate::components::{Doc, EffectsCamera, Tab};
+use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
 use crate::utils::{get_timestamp, load_doc_to_memory, ReflectableUuid};
 
@@ -760,17 +759,17 @@ fn test_change_color_pallete() {
     app.add_event::<Interaction>();
     app.add_event::<ChangeColor>();
 
-    app.add_system(change_color_pallete);
+    app.add_systems(Update, change_color_pallete);
 
     app.world
         .spawn(NodeBundle {
             style: Style {
-                size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                position: UiRect {
-                    left: Val::Px(0.0),
-                    bottom: Val::Px(0.0),
-                    ..Default::default()
-                },
+                width: Val::Px(100.0),
+                height: Val::Px(100.0),
+
+                left: Val::Px(0.0),
+                bottom: Val::Px(0.0),
+
                 ..Default::default()
             },
             ..Default::default()
@@ -781,12 +780,11 @@ fn test_change_color_pallete() {
         .spawn(NodeBundle {
             background_color: BackgroundColor(Color::BLUE),
             style: Style {
-                size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                position: UiRect {
-                    left: Val::Px(0.0),
-                    bottom: Val::Px(0.0),
-                    ..Default::default()
-                },
+                width: Val::Px(100.0),
+                height: Val::Px(100.0),
+
+                left: Val::Px(0.0),
+                bottom: Val::Px(0.0),
                 ..Default::default()
             },
             ..Default::default()

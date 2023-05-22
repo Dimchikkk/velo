@@ -25,13 +25,13 @@ pub use add_list_item::*;
 fn get_marker_style(position: UiRect, size: f32) -> Style {
     Style {
         position_type: PositionType::Absolute,
-        top:position.top,
-        bottom:position.bottom,
-        left:position.left,
-        right:position.right,
+        top: position.top,
+        bottom: position.bottom,
+        left: position.left,
+        right: position.right,
         border: UiRect::all(Val::Px(1.)),
         width: Val::Px(size),
-        height:Val::Px(size),
+        height: Val::Px(size),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         ..default()
@@ -83,7 +83,8 @@ fn create_rectangle_btn(
         z_index: ZIndex::Local(z_index),
         style: Style {
             position_type: PositionType::Absolute,
-            width: Val::Percent(100.),height:Val::Percent(100.),
+            width: Val::Percent(100.),
+            height: Val::Percent(100.),
             // position: UiRect {
             //     left: Val::Px(-3.),
             //     right: Val::Px(0.),
@@ -213,8 +214,8 @@ pub fn create_rectangle_txt(
         ..default()
     };
     if let Some((x, y)) = max_size {
-        text_bundle_style.max_width=x;
-        text_bundle_style.max_height=y;
+        text_bundle_style.max_width = x;
+        text_bundle_style.max_height = y;
     };
     if is_active {
         text_bundle_style.display = Display::Flex;

@@ -13,7 +13,8 @@ pub fn add_effect(
                 margin: UiRect::all(Val::Px(5.)),
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
-                width:Val::Percent(2.3),height: Val::Percent(85.),
+                width: Val::Percent(2.3),
+                height: Val::Percent(85.),
                 ..default()
             },
             ..default()
@@ -30,7 +31,8 @@ pub fn add_effect(
                         top: Val::Px(0.),
                         bottom: Val::Px(0.),
                     },
-                    width:Val::Percent(100.), height:Val::Percent(100.),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()

@@ -193,12 +193,12 @@ mod tests {
                     delta: Vec2::new(10.0, 5.0),
                 });
 
-            app.add_system(resize_entity_end);
+            app.add_systems(Update, resize_entity_end);
 
             app.world
                 .spawn(NodeBundle {
                     style: Style {
-                        width:Val::Px(100.0),
+                        width: Val::Px(100.0),
 
                         left: Val::Px(0.0),
                         bottom: Val::Px(0.0),

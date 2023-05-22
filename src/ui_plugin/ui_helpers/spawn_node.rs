@@ -39,11 +39,12 @@ pub fn spawn_node(
                     flex_direction: FlexDirection::Column,
                     align_self: AlignSelf::Stretch,
                     position_type: PositionType::Absolute,
-                
-                        left: item_meta.position.0,
-                        bottom: item_meta.position.1,
-              
-                    width: item_meta.size.0, height:item_meta.size.1,
+
+                    left: item_meta.position.0,
+                    bottom: item_meta.position.1,
+
+                    width: item_meta.size.0,
+                    height: item_meta.size.1,
                     ..default()
                 },
                 // background_color: Color::BLACK.with_a(0.5).into(),

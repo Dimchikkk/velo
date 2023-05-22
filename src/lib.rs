@@ -5,7 +5,7 @@ mod systems;
 mod ui_plugin;
 mod utils;
 use bevy::{prelude::*, window::PresentMode};
-// use bevy_embedded_assets::EmbeddedAssetPlugin;
+use bevy_embedded_assets::EmbeddedAssetPlugin;
 #[cfg(not(target_arch = "wasm32"))]
 // use bevy_hanabi::HanabiPlugin;
 //use bevy_embedded_assets::EmbeddedAssetPlugin;
@@ -22,10 +22,13 @@ pub static APP_NAME: &str = "velo";
 pub struct VeloPlugin;
 impl Plugin for VeloPlugin {
     fn build(&self, app: &mut App) {
-       app.add_systems(Startup,setup_camera)
-            .add_systems(Startup,setup_background)
-            .add_systems(Startup,setup_font)
-            .add_systems(Update,set_default_font.run_if(resource_exists::<FontHandle>()))
+        app.add_systems(Startup, setup_camera)
+            .add_systems(Startup, setup_background)
+            .add_systems(Startup, setup_font)
+            .add_systems(
+                Update,
+                set_default_font.run_if(resource_exists::<FontHandle>()),
+            )
             .add_plugins(
                 DefaultPlugins
                     .set(WindowPlugin {
@@ -41,7 +44,7 @@ impl Plugin for VeloPlugin {
                         ..default()
                     })
                     .build()
-  //                  .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
+                    .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
             )
             .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)

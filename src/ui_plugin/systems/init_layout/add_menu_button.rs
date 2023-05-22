@@ -36,7 +36,7 @@ pub fn add_menu_button(
                             top: Val::Px(3.),
                             ..default()
                         },
-                        width:Val::Percent(2.3),
+                        width: Val::Percent(2.3),
                         height: Val::Percent(85.),
                         ..default()
                     },
@@ -49,7 +49,7 @@ pub fn add_menu_button(
                         background_color: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0)
                             .into(),
                         style: Style {
-                            width:Val::Percent(100.),
+                            width: Val::Percent(100.),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
                             // //overflow: Overflow::Hidden,
@@ -96,9 +96,8 @@ pub fn add_menu_button(
                                 top: Val::Px(3.),
                                 bottom: Val::Px(3.),
                             },
-                            width:
-                                Val::Percent(2.3), 
-                            height:Val::Percent(85.),
+                            width: Val::Percent(2.3),
+                            height: Val::Percent(85.),
                             ..default()
                         },
                         ..default()
@@ -112,16 +111,16 @@ pub fn add_menu_button(
                         background_color: Color::rgb(0.0 / 255.0, 150.0 / 255.0, 136.0 / 255.0)
                             .into(),
                         style: Style {
-                            width:Val::Percent(100.),
+                            width: Val::Percent(100.),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
                             position_type: PositionType::Absolute,
-       
-                                left: Val::Px(-2.),
-                                right: Val::Px(0.),
-                                top: Val::Px(-2.),
-                                bottom: Val::Px(0.),
-         
+
+                            left: Val::Px(-2.),
+                            right: Val::Px(0.),
+                            top: Val::Px(-2.),
+                            bottom: Val::Px(0.),
+
                             // //overflow: Overflow::Hidden,
                             ..default()
                         },

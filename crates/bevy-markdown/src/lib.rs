@@ -465,7 +465,7 @@ mod tests {
         let mut app = App::new();
         app.add_plugin(TaskPoolPlugin::default());
         app.add_plugin(AssetPlugin::default());
-        app.add_system(test_render_text_style_system);
+        app.add_systems(Update, test_render_text_style_system);
 
         app.update();
 

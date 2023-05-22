@@ -82,8 +82,8 @@ pub fn init_layout(
                     right: Val::Percent(0.),
                     bottom: Val::Percent(0.),
                     top: Val::Percent(96.),
-                    width:Val::Percent(100.),
-                    height:Val::Percent(4.),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(4.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Start,
                     overflow: Overflow::clip(),
@@ -106,7 +106,8 @@ pub fn init_layout(
                 style: Style {
                     left: Val::Px(0.0),
                     bottom: Val::Px(0.0),
-                    width: Val::Percent(100.0), height:Val::Percent(100.0),
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
                     align_items: AlignItems::Start,
                     justify_content: JustifyContent::Center,
                     flex_direction: FlexDirection::Column,
@@ -124,8 +125,8 @@ pub fn init_layout(
                 background_color: Color::rgb(245.0 / 255.0, 245.0 / 255.0, 245.0 / 255.0).into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
-                    width:Val::Percent(100.0),
-                    height:Val::Percent(5.),
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(5.),
                     padding: UiRect {
                         left: Val::Px(10.),
                         ..default()
@@ -204,7 +205,7 @@ pub fn init_layout(
         .spawn(NodeBundle {
             style: Style {
                 width: Val::Percent(100.0),
-                height:Val::Percent(95.),
+                height: Val::Percent(95.),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 ..default()
@@ -218,8 +219,8 @@ pub fn init_layout(
                 background_color: Color::rgb(224.0 / 255.0, 224.0 / 255.0, 224.0 / 255.0).into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
-                    width:Val::Percent(15.),
-                    height:Val::Percent(100.),
+                    width: Val::Percent(15.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Start,
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
@@ -235,7 +236,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 width: Val::Percent(85.),
-                height:Val::Percent(100.),
+                height: Val::Percent(100.),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
@@ -248,8 +249,8 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 style: Style {
-                    width:Val::Percent(100.),
-                    height:Val::Percent(100.),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     overflow: Overflow::clip(),
@@ -270,7 +271,7 @@ pub fn init_layout(
                 style: Style {
                     padding: UiRect::all(Val::Px(10.)),
                     width: Val::Percent(100.),
-                    height:Val::Percent(40.),
+                    height: Val::Percent(40.),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
@@ -288,7 +289,7 @@ pub fn init_layout(
             NodeBundle {
                 style: Style {
                     width: Val::Percent(100.),
-                    height:Val::Percent(60.),
+                    height: Val::Percent(60.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()
@@ -323,7 +324,7 @@ pub fn init_layout(
             style: Style {
                 align_items: AlignItems::Center,
                 width: Val::Percent(90.),
-                height:Val::Percent(10.),
+                height: Val::Percent(10.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -353,7 +354,7 @@ pub fn init_layout(
             style: Style {
                 align_items: AlignItems::Center,
                 width: Val::Percent(90.),
-                height:Val::Percent(9.),
+                height: Val::Percent(9.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -390,7 +391,7 @@ pub fn init_layout(
             style: Style {
                 align_items: AlignItems::Center,
                 width: Val::Percent(90.),
-                height:Val::Percent(8.),
+                height: Val::Percent(8.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -452,7 +453,7 @@ pub fn init_layout(
             style: Style {
                 align_items: AlignItems::Center,
                 width: Val::Percent(90.),
-                height:Val::Percent(8.),
+                height: Val::Percent(8.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -506,7 +507,7 @@ pub fn init_layout(
             style: Style {
                 align_items: AlignItems::Center,
                 width: Val::Percent(90.),
-                height:Val::Percent(10.),
+                height: Val::Percent(10.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -548,8 +549,8 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                width:Val::Percent(90.),
-                height:Val::Percent(10.),
+                width: Val::Percent(90.),
+                height: Val::Percent(10.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()

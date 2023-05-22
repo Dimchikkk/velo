@@ -36,7 +36,7 @@ pub fn add_arrow(
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
                 margin: UiRect::all(Val::Px(5.)),
-                width:Val::Percent(12.),
+                width: Val::Percent(12.),
                 ..default()
             },
             background_color: Color::BLACK.with_a(0.5).into(),
@@ -49,15 +49,15 @@ pub fn add_arrow(
                 background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
                 image: image.into(),
                 style: Style {
-                    width:Val::Percent(100.),
+                    width: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     position_type: PositionType::Absolute,
-                  
-                        left: Val::Px(-2.),
-                        right: Val::Px(0.),
-                        top: Val::Px(-2.),
-                        bottom: Val::Px(0.),
-          
+
+                    left: Val::Px(-2.),
+                    right: Val::Px(0.),
+                    top: Val::Px(-2.),
+                    bottom: Val::Px(0.),
+
                     border: UiRect::all(Val::Px(1.)),
                     justify_content: JustifyContent::Center,
                     ..default()

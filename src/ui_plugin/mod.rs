@@ -166,85 +166,104 @@ impl Plugin for UiPlugin {
         app.add_event::<SaveStoreEvent>();
         app.add_event::<UpdateDeleteDocBtnEvent>();
         #[cfg(not(target_arch = "wasm32"))]
-        app.add_systems(Startup,(read_native_config, init_search_index).before(init_layout));
+        app.add_systems(
+            Startup,
+            (read_native_config, init_search_index).before(init_layout),
+        );
         #[cfg(target_arch = "wasm32")]
         app.add_systems(Startup, (load_from_url.before(init_layout)));
         app.add_systems(Startup, init_layout);
 
+        app.add_systems(
+            Update,
+            (
+                rec_button_handlers,
+                update_rectangle_position,
+                create_new_node,
+                resize_entity_start,
+                resize_entity_end,
+                cancel_modal,
+                confirm_modal,
+                resize_notificator,
+            ),
+        );
 
-        app.add_systems(Update,(
-            rec_button_handlers,
-            update_rectangle_position,
-            create_new_node,
-            resize_entity_start,
-            resize_entity_end,
-            cancel_modal,
-            confirm_modal,
-            resize_notificator,
-        ));
-
-        app.add_systems(Update,
+        app.add_systems(
+            Update,
             (save_doc, remove_save_doc_request)
                 .chain()
                 .distributive_run_if(should_save_doc),
         );
 
-        app.add_systems(Update,
+        app.add_systems(
+            Update,
             (save_tab, remove_save_tab_request)
                 .chain()
                 .distributive_run_if(should_save_tab),
         );
 
-        app.add_systems(Update,
+        app.add_systems(
+            Update,
             (load_doc, remove_load_doc_request)
                 .chain()
                 .distributive_run_if(should_load_doc),
         );
 
-        app.add_systems(Update,
+        app.add_systems(
+            Update,
             (load_tab, remove_load_tab_request)
                 .chain()
                 .distributive_run_if(should_load_tab),
         );
 
-        app.add_systems(Update,(
-            change_color_pallete,
-            change_arrow_type,
-            change_text_pos,
-            add_tab_handler,
-            delete_tab_handler,
-            rename_tab_handler,
-            text_manipulation,
-            mouse_scroll_list,
-            list_item_click,
-            new_doc_handler,
-            rename_doc_handler,
-            delete_doc_handler,
-            save_doc_handler,
-            keyboard_input_system,
-        ));
-        app.add_systems(Update, (doc_list_del_button_update, doc_list_ui_changed).chain());
+        app.add_systems(
+            Update,
+            (
+                change_color_pallete,
+                change_arrow_type,
+                change_text_pos,
+                add_tab_handler,
+                delete_tab_handler,
+                rename_tab_handler,
+                text_manipulation,
+                mouse_scroll_list,
+                list_item_click,
+                new_doc_handler,
+                rename_doc_handler,
+                delete_doc_handler,
+                save_doc_handler,
+                keyboard_input_system,
+            ),
+        );
+        app.add_systems(
+            Update,
+            (doc_list_del_button_update, doc_list_ui_changed).chain(),
+        );
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_systems(Update, (search_box_click, search_box_text_changed));
 
-        app.add_systems(Update,(
-            button_generic_handler,
-            select_tab_handler,
-            export_to_file,
-            import_from_file,
-            import_from_url,
-            load_doc_handler,
-            #[cfg(target_arch = "wasm32")]
-            set_window_property,
-            shared_doc_handler,
-            // #[cfg(not(target_arch = "wasm32"))]
-            // particles_effect,
-            save_to_store.after(save_tab),
-        ));
-        app.add_systems(Update,(set_focused_entity, clickable_links).chain());
+        app.add_systems(
+            Update,
+            (
+                button_generic_handler,
+                select_tab_handler,
+                export_to_file,
+                import_from_file,
+                import_from_url,
+                load_doc_handler,
+                #[cfg(target_arch = "wasm32")]
+                set_window_property,
+                shared_doc_handler,
+                // #[cfg(not(target_arch = "wasm32"))]
+                // particles_effect,
+                save_to_store.after(save_tab),
+            ),
+        );
+        app.add_systems(Update, (set_focused_entity, clickable_links).chain());
 
-        app.add_systems(Update,
+        app.add_systems(
+            Update,
             entity_to_edit_changed
                 .before(save_doc)
                 .before(save_doc)

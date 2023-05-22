@@ -12,7 +12,7 @@ use bevy_pkv::PkvStore;
 use super::ui_helpers::ScrollingList;
 use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadDocRequest};
-use crate::ui_plugin::ui_helpers::{add_list_item, DocList};
+use crate::ui_plugin::ui_helpers::DocList;
 use crate::utils::ReflectableUuid;
 
 pub fn add_list(
@@ -29,7 +29,7 @@ pub fn add_list(
         .spawn(NodeBundle {
             style: Style {
                 flex_direction: FlexDirection::Column,
-                width:Val::Percent(80.),
+                width: Val::Percent(80.),
                 height: Val::Percent(80.),
                 overflow: Overflow::clip(),
                 ..default()

@@ -8,7 +8,6 @@ use super::utils::{build_arrow, create_arrow, get_pos};
 use crate::components::MainCamera;
 use crate::ui_plugin::UiState;
 
-
 pub fn create_arrow_start(
     mut interaction_query: Query<
         (&Interaction, &ArrowConnect),
@@ -48,7 +47,7 @@ pub fn create_arrow_start(
 }
 
 pub fn create_arrow_end(
-    mut gizmos:Gizmos,
+    mut gizmos: Gizmos,
     _commands: Commands,
     mut events: EventReader<CreateArrowEvent>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
