@@ -53,6 +53,7 @@ bevy_embedded_assets = { git = "https://github.com/StaffEngineer/bevy_embedded_a
 bevy-markdown = { path = "crates/bevy-markdown" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+bevy = { git = "https://github.com/bevyengine/bevy", default-features = false, features = [ "webgl2" ] }
 console_error_panic_hook = "0.1.7"
 web-sys = { version = "0.3.61", default-features = false, features = ["Window", "Location"] }
 wasm-bindgen = "0.2.84"
