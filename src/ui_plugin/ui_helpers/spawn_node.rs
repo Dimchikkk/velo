@@ -1,3 +1,4 @@
+use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta};
 use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
 use bevy_ui_borders::{BorderColor, Outline};
 
@@ -7,8 +8,8 @@ use crate::ui_plugin::NodeType;
 use crate::TextPos;
 
 use super::{
-    create_arrow_marker, create_rectangle_btn, create_rectangle_txt, create_resize_marker,
-    BevyMarkdownView, EditableText, RawText, ResizeMarker, VeloNode, VeloNodeContainer,
+    create_arrow_marker, create_rectangle_btn, create_resize_marker, BevyMarkdownView, RawText,
+    ResizeMarker, VeloNode, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
 use crate::utils::ReflectableUuid;
@@ -145,17 +146,18 @@ pub fn spawn_node(
             ResizeMarker::BottomLeft,
         ))
         .id();
-    let raw_text = commands
-        .spawn((
-            create_rectangle_txt(
-                item_meta.text.clone(),
-                Some(item_meta.size),
-                item_meta.is_active,
-            ),
-            RawText { id: item_meta.id },
-            EditableText { id: item_meta.id },
-        ))
-        .id();
+    // let raw_text = commands
+    //     .spawn((
+    //         create_rectangle_txt(
+    //             item_meta.text.clone(),
+    //             Some(item_meta.size),
+    //             item_meta.is_active,
+    //         ),
+    //         RawText { id: item_meta.id },
+    //         EditableText { id: item_meta.id },
+    //     ))
+    //     .id();
+
     commands.entity(button).add_child(arrow_marker1);
     commands.entity(button).add_child(arrow_marker2);
     commands.entity(button).add_child(arrow_marker3);
@@ -164,7 +166,7 @@ pub fn spawn_node(
     commands.entity(button).add_child(resize_marker2);
     commands.entity(button).add_child(resize_marker3);
     commands.entity(button).add_child(resize_marker4);
-    commands.entity(button).add_child(raw_text);
+    // commands.entity(button).add_child(raw_text);
     if !item_meta.is_active {
         let bevy_markdown = BevyMarkdown {
             text: item_meta.text.clone(),
@@ -185,7 +187,32 @@ pub fn spawn_node(
             .unwrap()
             .insert(BevyMarkdownView { id: item_meta.id });
         commands.entity(button).add_child(markdown_text);
+    } else {
+        let cosmic_edit_meta = CosmicEditMeta {
+            text: item_meta.text.clone(),
+            width: convert_from_px(item_meta.size.0),
+            height: convert_from_px(item_meta.size.1),
+            font_size: 18.,
+            line_height: 20.,
+            scale_factor: 1.,
+            font_dir_path: None,
+        };
+        let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
+        commands
+            .entity(cosmic_edit)
+            .insert(RawText { id: item_meta.id });
+        commands.entity(button).add_child(cosmic_edit);
+        commands.insert_resource(ActiveEditor {
+            entity: Some(cosmic_edit),
+        });
     }
     commands.entity(top).add_child(button);
     top
+}
+
+fn convert_from_px(x: Val) -> f32 {
+    match x {
+        Val::Px(x) => x,
+        _ => 0.,
+    }
 }
