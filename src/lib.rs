@@ -5,6 +5,7 @@ mod systems;
 mod ui_plugin;
 mod utils;
 use bevy::{prelude::*, window::PresentMode};
+use bevy_cosmic_edit::CosmicEditPlugin;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 #[cfg(not(target_arch = "wasm32"))]
 use bevy_hanabi::HanabiPlugin;
@@ -15,7 +16,7 @@ use resources::FontHandle;
 use systems::*;
 use ui_plugin::*;
 
-pub static ORG_NAME: &str = "";
+pub static ORG_NAME: &str = "test";
 pub static APP_NAME: &str = "velo";
 
 pub struct VeloPlugin;
@@ -42,6 +43,7 @@ impl Plugin for VeloPlugin {
                     .build()
                     .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
             )
+            .add_plugin(CosmicEditPlugin)
             .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)
             .add_plugin(BordersPlugin)
