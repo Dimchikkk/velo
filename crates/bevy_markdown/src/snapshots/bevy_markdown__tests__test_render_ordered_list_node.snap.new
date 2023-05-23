@@ -1,0 +1,180 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+assertion_line: 575
+expression: node.clone()
+---
+Text {
+    sections: [
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 12.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\t 1. ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Import a HTML file and watch it magically convert to Markdown",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 12.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\t 2. ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Drag and drop images (requires your Dropbox account be linked)",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 12.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\t 3. ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Import and save files from GitHub, Dropbox, Google Drive and One Drive",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+    ],
+    alignment: Left,
+    linebreak_behaviour: WordBoundary,
+}
