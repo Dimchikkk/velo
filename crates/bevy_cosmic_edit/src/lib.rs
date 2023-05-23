@@ -6,15 +6,14 @@ use bevy::{
 use cosmic_text::{Action, Attrs, Buffer, Edit, Editor, FontSystem, Metrics, SwashCache};
 use image::{ImageBuffer, RgbaImage};
 
-#[derive(Default, Debug)]
-pub struct CosmicEditMeta {
+pub struct CosmicEditMeta<'a> {
     pub text: String,
     pub width: f32,
     pub height: f32,
     pub font_size: f32,
     pub line_height: f32,
     pub scale_factor: f32,
-    pub font_dir_path: Option<std::path::PathBuf>,
+    pub font_system: &'a mut FontSystem,
 }
 
 #[derive(Component)]
@@ -48,8 +47,8 @@ pub struct ActiveEditor {
 }
 
 #[derive(Resource, Default)]
-struct FontSystemState {
-    font_system: Option<FontSystem>,
+pub struct FontSystemState {
+    pub font_system: Option<FontSystem>,
 }
 
 #[derive(Resource, Default)]
@@ -72,6 +71,28 @@ fn init(
     swash_cache_state.swash_cache = Some(SwashCache::new());
 }
 
+fn get_node_cursor_pos(
+    window: &Window,
+    node_transform: &GlobalTransform,
+    node: &Node,
+) -> Option<(f32, f32)> {
+    let x_min = node_transform.affine().translation.x - node.size().x / 2.;
+    let y_min = window.height() - node_transform.affine().translation.y - node.size().y / 2.;
+    let x_max = x_min + node.size().x;
+    let y_max = y_min + node.size().y;
+    let node_cursor_pos = match window.cursor_position() {
+        Some(pos) => {
+            if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
+                Some((pos.x-x_min, y_max-pos.y))
+            } else {
+                None
+            }
+        }
+        None => None,
+    };
+    node_cursor_pos
+}
+
 fn cosmic_edit_bevy_events(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut font_system_state: ResMut<FontSystemState>,
@@ -79,11 +100,14 @@ fn cosmic_edit_bevy_events(
     keys: Res<Input<KeyCode>>,
     mut char_evr: EventReader<ReceivedCharacter>,
     buttons: Res<Input<MouseButton>>,
-    mut cosmic_edit_query: Query<(&mut CosmicEditImage, &Parent), With<CosmicEditImage>>,
+    mut cosmic_edit_query: Query<
+        (&mut CosmicEditImage, &Parent, &GlobalTransform, &Node),
+        With<CosmicEditImage>,
+    >,
 ) {
     let window = windows.single();
     let font_system = font_system_state.font_system.as_mut().unwrap();
-    for (mut cosmic_edit, parent) in &mut cosmic_edit_query.iter_mut() {
+    for (mut cosmic_edit, parent, node_transform, node) in &mut cosmic_edit_query.iter_mut() {
         if active_editor.entity == Some(parent.get()) {
             if keys.just_pressed(KeyCode::Left) {
                 cosmic_edit.editor.action(font_system, Action::Left);
@@ -118,25 +142,27 @@ fn cosmic_edit_bevy_events(
                 return;
             }
             if buttons.just_pressed(MouseButton::Left) {
-                cosmic_edit.editor.action(
-                    font_system,
-                    Action::Click {
-                        // TODO: do not unwrap
-                        x: window.cursor_position().unwrap().x as i32,
-                        y: window.cursor_position().unwrap().y as i32,
-                    },
-                );
+                if let Some(node_cursor_pos) = get_node_cursor_pos(&window, node_transform, node) {
+                    cosmic_edit.editor.action(
+                        font_system,
+                        Action::Click {
+                            x: (node_cursor_pos.0 * window.scale_factor() as f32) as i32,
+                            y: (node_cursor_pos.1 * window.scale_factor() as f32) as i32,
+                        },
+                    );
+                }
                 return;
             }
             if buttons.pressed(MouseButton::Left) {
-                cosmic_edit.editor.action(
-                    font_system,
-                    Action::Drag {
-                        // TODO: do not unwrap
-                        x: window.cursor_position().unwrap().x as i32,
-                        y: window.cursor_position().unwrap().y as i32,
-                    },
-                );
+                if let Some(node_cursor_pos) = get_node_cursor_pos(&window, node_transform, node) {
+                    cosmic_edit.editor.action(
+                        font_system,
+                        Action::Drag {
+                            x: (node_cursor_pos.0 * window.scale_factor() as f32) as i32,
+                            y: (node_cursor_pos.1 * window.scale_factor() as f32) as i32,
+                        },
+                    );
+                }
                 return;
             }
             for char_ev in char_evr.iter() {
@@ -149,27 +175,23 @@ fn cosmic_edit_bevy_events(
 }
 
 fn cosmic_edit_redraw_buffer(
+    windows: Query<&Window, With<PrimaryWindow>>,
     mut images: ResMut<Assets<Image>>,
     mut font_system_state: ResMut<FontSystemState>,
     mut swash_cache_state: ResMut<SwashCacheState>,
     mut cosmic_edit_query: Query<
-        (&mut CosmicEditImage, &mut UiImage, &Style),
+        (&mut CosmicEditImage, &mut UiImage, &Node),
         With<CosmicEditImage>,
     >,
 ) {
+    let window = windows.single();
     let mut font_system = font_system_state.font_system.as_mut().unwrap();
     let mut swash_cache = swash_cache_state.swash_cache.as_mut().unwrap();
-    for (mut cosmic_edit, mut img, style) in &mut cosmic_edit_query.iter_mut() {
+    for (mut cosmic_edit, mut img, node) in &mut cosmic_edit_query.iter_mut() {
         cosmic_edit.editor.shape_as_needed(&mut font_system);
         if cosmic_edit.editor.buffer().redraw() {
-            let width = match style.size.width {
-                Val::Px(x) => x,
-                _ => 0.,
-            };
-            let height = match style.size.height {
-                Val::Px(y) => y,
-                _ => 0.,
-            };
+            let width = node.size().x * window.scale_factor() as f32;
+            let height = node.size().y * window.scale_factor() as f32;
             let font_color = cosmic_text::Color::rgb(0, 0, 0);
             let mut pixels = vec![0; width as usize * height as usize * 4];
             cosmic_edit.editor.draw(
@@ -216,24 +238,14 @@ fn cosmic_edit_redraw_buffer(
 }
 
 pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMeta) -> Entity {
-    let locale = sys_locale::get_locale().unwrap_or_else(|| String::from("en-US"));
-    let mut db = cosmic_text::fontdb::Database::new();
-    if cosmic_edit_meta.font_dir_path.is_none() {
-        db.load_system_fonts();
-    } else {
-        db.load_fonts_dir(cosmic_edit_meta.font_dir_path.unwrap());
-    }
-    db.set_monospace_family("Fira Mono");
-    db.set_sans_serif_family("Fira Sans");
-    db.set_serif_family("DejaVu Serif");
-    let mut font_system = cosmic_text::FontSystem::new_with_locale_and_db(locale, db);
+    let mut font_system = cosmic_edit_meta.font_system;
     let metrics = Metrics::new(cosmic_edit_meta.font_size, cosmic_edit_meta.line_height)
         .scale(cosmic_edit_meta.scale_factor);
     let mut buffer = Buffer::new(&mut font_system, metrics);
     buffer.set_size(
         &mut font_system,
-        cosmic_edit_meta.width,
-        cosmic_edit_meta.height,
+        cosmic_edit_meta.width * cosmic_edit_meta.scale_factor as f32,
+        cosmic_edit_meta.height * cosmic_edit_meta.scale_factor as f32,
     );
     let mut editor = Editor::new(buffer);
     editor.buffer_mut().lines.clear();
@@ -339,7 +351,7 @@ mod tests {
             font_size: 18.,
             line_height: 20.,
             scale_factor: 1.,
-            font_dir_path: None,
+            font_system: &mut FontSystem::new(),
         };
         spawn_cosmic_edit(&mut commands, cosmic_edit_meta);
     }

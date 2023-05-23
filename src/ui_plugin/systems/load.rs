@@ -2,7 +2,9 @@ use base64::{engine::general_purpose, Engine};
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+    window::PrimaryWindow,
 };
+use bevy_cosmic_edit::FontSystemState;
 
 use super::{
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
@@ -91,8 +93,11 @@ pub fn load_tab(
     mut create_arrow: EventWriter<CreateArrowEvent>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     mut delete_tab: Query<(&mut Visibility, &DeleteTab), (With<DeleteTab>, Without<ArrowMeta>)>,
+    mut font_system_state: ResMut<FontSystemState>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     *ui_state = UiState::default();
+    let window = windows.single_mut();
 
     #[allow(unused)]
     for (entity, mut visibility) in &mut old_arrows.iter_mut() {
@@ -160,6 +165,7 @@ pub fn load_tab(
                 let entity = spawn_node(
                     &mut commands,
                     &asset_server,
+                    &mut font_system_state,
                     NodeMeta {
                         size: (json_node.width, json_node.height),
                         node_type: json_node.node_type,
@@ -171,6 +177,7 @@ pub fn load_tab(
                         text_pos: json_node.text.pos,
                         z_index: json_node.z_index,
                         is_active: false,
+                        scale_factor: window.scale_factor() as f32,
                     },
                 );
                 commands.entity(main_panel_query.single()).add_child(entity);
