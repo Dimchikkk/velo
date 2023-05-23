@@ -1,4 +1,4 @@
-use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta};
+use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, FontSystemState};
 use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
 use bevy_ui_borders::{BorderColor, Outline};
 
@@ -26,11 +26,13 @@ pub struct NodeMeta {
     pub text_pos: TextPos,
     pub z_index: i32,
     pub is_active: bool,
+    pub scale_factor: f32,
 }
 
 pub fn spawn_node(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
+    font_system: &mut ResMut<FontSystemState>,
     item_meta: NodeMeta,
 ) -> Entity {
     let top = commands
@@ -192,10 +194,10 @@ pub fn spawn_node(
             text: item_meta.text.clone(),
             width: convert_from_px(item_meta.size.0),
             height: convert_from_px(item_meta.size.1),
-            font_size: 18.,
-            line_height: 20.,
-            scale_factor: 1.,
-            font_dir_path: None,
+            font_size: 20.,
+            line_height: 28.,
+            scale_factor: item_meta.scale_factor,
+            font_system: font_system.font_system.as_mut().unwrap(),
         };
         let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
         commands
