@@ -12,24 +12,16 @@ pub fn set_focused_entity(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
     mut holding_time: Local<(Duration, Option<ReflectableUuid>)>,
-    mut double_click: Local<(Duration, Option<ReflectableUuid>)>,
 ) {
     let mut primary_window = windows.single_mut();
     for (interaction, node) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 primary_window.cursor.icon = CursorIcon::Text;
+                *state = UiState::default();
+                state.entity_to_edit = Some(node.id);
                 let now_ms = get_timestamp();
                 *holding_time = (Duration::from_millis(now_ms as u64), Some(node.id));
-                if double_click.1 == Some(node.id)
-                    && Duration::from_millis(now_ms as u64) - double_click.0
-                        < Duration::from_millis(500)
-                {
-                    state.entity_to_edit = Some(node.id);
-                    *double_click = (Duration::from_secs(0), None);
-                } else {
-                    *double_click = (Duration::from_millis(now_ms as u64), Some(node.id));
-                }
             }
             Interaction::Hovered => {
                 if state.hold_entity.is_none() && state.entity_to_edit.is_none() {
@@ -61,5 +53,6 @@ pub fn set_focused_entity(
     if buttons.just_released(MouseButton::Left) {
         *holding_time = (Duration::new(0, 0), None);
         state.hold_entity = None;
+        state.entity_to_resize = None;
     }
 }
