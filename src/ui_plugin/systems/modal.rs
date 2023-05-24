@@ -104,7 +104,7 @@ fn delete_tab(
         .unwrap()
         .tabs
         .remove(index);
-    let mut last_tab = app_state
+    let last_tab = app_state
         .docs
         .get_mut(&current_document)
         .unwrap()
