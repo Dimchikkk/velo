@@ -15,7 +15,7 @@ pub fn update_rectangle_position(
     let primary_window = windows.single();
     for event in cursor_moved_events.iter() {
         for (mut style, top) in &mut node_position.iter_mut() {
-            if Some(top.id) == state.hold_entity && state.entity_to_edit.is_none() {
+            if Some(top.id) == state.hold_entity {
                 let size = query.single_mut().0.size;
                 if let (Val::Percent(x), Val::Px(element_width)) = (size.width, style.size.width) {
                     let width = (primary_window.width() * x) / 100.;
