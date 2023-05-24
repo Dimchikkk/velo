@@ -5,7 +5,9 @@ use bevy::{
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     window::PrimaryWindow,
 };
-use cosmic_text::{Action, Align, Attrs, Buffer, Edit, Editor, FontSystem, Metrics, SwashCache};
+use cosmic_text::{
+    Action, Affinity, Align, Attrs, Buffer, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
+};
 use image::{ImageBuffer, RgbaImage};
 
 pub struct CosmicEditMeta<'a> {
@@ -121,6 +123,8 @@ fn cosmic_edit_bevy_events(
     let font_system = font_system_state.font_system.as_mut().unwrap();
     for (mut cosmic_edit, parent, node_transform, node) in &mut cosmic_edit_query.iter_mut() {
         if active_editor.entity == Some(parent.get()) {
+            let command = keys.any_pressed([KeyCode::RWin, KeyCode::LWin]);
+            let option = keys.any_pressed([KeyCode::LAlt, KeyCode::RAlt]);
             if keys.just_pressed(KeyCode::Left) {
                 cosmic_edit.editor.action(font_system, Action::Left);
             }
@@ -147,6 +151,26 @@ fn cosmic_edit_bevy_events(
             }
             if keys.just_pressed(KeyCode::Escape) {
                 cosmic_edit.editor.action(font_system, Action::Escape);
+            }
+            if command && keys.just_pressed(KeyCode::A) {
+                cosmic_edit.editor.action(font_system, Action::BufferEnd);
+                cosmic_edit.editor.set_select_opt(Some(Cursor {
+                    line: 0,
+                    index: 0,
+                    affinity: Affinity::Before,
+                }));
+                // RETURN
+                return
+            }
+            if command && option && keys.just_pressed(KeyCode::Left) {
+                cosmic_edit.editor.action(font_system, Action::PreviousWord);
+                // RETURN
+                return
+            }
+            if command && option && keys.just_pressed(KeyCode::Right) {
+                cosmic_edit.editor.action(font_system, Action::NextWord);
+                // RETURN
+                return
             }
             let offset_y = get_y_offset(&cosmic_edit.editor);
             if buttons.just_pressed(MouseButton::Left) {
@@ -175,9 +199,9 @@ fn cosmic_edit_bevy_events(
                 if *is_deleting {
                     cosmic_edit.editor.action(font_system, Action::Backspace);
                 } else {
-cosmic_edit
-                    .editor
-                    .action(font_system, Action::Insert(char_ev.char));
+                    cosmic_edit
+                        .editor
+                        .action(font_system, Action::Insert(char_ev.char));
                 }
             }
         }
