@@ -42,9 +42,9 @@ pub fn set_focused_entity(
     }
 
     let now_ms = get_timestamp();
-    // 150ms delay before re-positioning the rectangle
+    // 250ms delay before re-positioning the rectangle
     if state.hold_entity.is_none()
-        && Duration::from_millis(now_ms as u64) - holding_time.0 > Duration::from_millis(150)
+        && Duration::from_millis(now_ms as u64) - holding_time.0 > Duration::from_millis(250)
         && holding_time.1.is_some()
     {
         state.hold_entity = holding_time.1;

@@ -56,7 +56,7 @@ pub fn resize_entity_end(
             Without<BevyMarkdownNode>,
         ),
     >,
-    raw_text_input_query: Query<(&RawText, Entity), (With<RawText>,)>,
+    raw_text_input_query: Query<(&RawText, Entity), With<RawText>>,
     mut markdown_text_input_query: Query<
         (&Parent, &mut Style),
         (
