@@ -135,7 +135,7 @@ pub fn keyboard_input_system(
                         };
                 }
                 if let Some(doc_id) = ui_state.doc_to_edit {
-                    let mut doc = app_state.docs.get_mut(&doc_id).unwrap();
+                    let doc = app_state.docs.get_mut(&doc_id).unwrap();
                     doc.name = str.clone();
                 }
                 if let Some(tab_id) = ui_state.tab_to_edit {

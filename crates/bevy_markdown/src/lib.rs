@@ -397,21 +397,6 @@ pub fn spawn_bevy_markdown(
                                 .into_iter()
                                 .for_each(|node| match node {
                                     markdown::mdast::Node::ListItem(item) => {
-                                        text_sections.push((
-                                            TextSection {
-                                                value: "\n".to_string(),
-                                                style: TextStyle {
-                                                    font: bevy_markdown
-                                                        .regular_font
-                                                        .clone()
-                                                        .unwrap(),
-                                                    font_size: 12.0,
-                                                    color: Color::BLACK,
-                                                },
-                                            },
-                                            None,
-                                        ));
-
                                         let indent_char = if list.ordered {
                                             let index = list_index.unwrap();
                                             list_index = Some(index + 1);
