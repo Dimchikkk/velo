@@ -115,6 +115,7 @@ fn cosmic_edit_bevy_events(
         (&mut CosmicEditImage, &Parent, &GlobalTransform, &Node),
         With<CosmicEditImage>,
     >,
+    mut is_deleting: Local<bool>,
 ) {
     let window = windows.single();
     let font_system = font_system_state.font_system.as_mut().unwrap();
@@ -122,35 +123,30 @@ fn cosmic_edit_bevy_events(
         if active_editor.entity == Some(parent.get()) {
             if keys.just_pressed(KeyCode::Left) {
                 cosmic_edit.editor.action(font_system, Action::Left);
-                return;
             }
             if keys.just_pressed(KeyCode::Right) {
                 cosmic_edit.editor.action(font_system, Action::Right);
-                return;
             }
             if keys.just_pressed(KeyCode::Up) {
                 cosmic_edit.editor.action(font_system, Action::Up);
-                return;
             }
             if keys.just_pressed(KeyCode::Down) {
                 cosmic_edit.editor.action(font_system, Action::Down);
-                return;
             }
             if keys.just_pressed(KeyCode::Back) {
-                cosmic_edit.editor.action(font_system, Action::Backspace);
-                return;
+                *is_deleting = true;
+            }
+            if keys.just_released(KeyCode::Back) {
+                *is_deleting = false;
             }
             if keys.just_pressed(KeyCode::Delete) {
                 cosmic_edit.editor.action(font_system, Action::Delete);
-                return;
             }
             if keys.just_pressed(KeyCode::Return) {
                 cosmic_edit.editor.action(font_system, Action::Enter);
-                return;
             }
             if keys.just_pressed(KeyCode::Escape) {
                 cosmic_edit.editor.action(font_system, Action::Escape);
-                return;
             }
             let offset_y = get_y_offset(&cosmic_edit.editor);
             if buttons.just_pressed(MouseButton::Left) {
@@ -163,7 +159,6 @@ fn cosmic_edit_bevy_events(
                         },
                     );
                 }
-                return;
             }
             if buttons.pressed(MouseButton::Left) {
                 if let Some(node_cursor_pos) = get_node_cursor_pos(&window, node_transform, node) {
@@ -175,12 +170,15 @@ fn cosmic_edit_bevy_events(
                         },
                     );
                 }
-                return;
             }
             for char_ev in char_evr.iter() {
-                cosmic_edit
+                if *is_deleting {
+                    cosmic_edit.editor.action(font_system, Action::Backspace);
+                } else {
+cosmic_edit
                     .editor
                     .action(font_system, Action::Insert(char_ev.char));
+                }
             }
         }
     }
