@@ -4155,6 +4155,7 @@ dependencies = [
  "bevy_prototype_lyon",
  "bevy_ui_borders",
  "console_error_panic_hook",
+ "cosmic-text",
  "directories 5.0.1",
  "ehttp",
  "env_logger",
