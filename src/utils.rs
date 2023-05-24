@@ -78,3 +78,10 @@ pub fn read_config_file() -> Option<Config> {
     }
     Some(config)
 }
+
+pub fn convert_from_val_px(x: Val) -> f32 {
+    match x {
+        Val::Px(x) => x,
+        _ => 0.,
+    }
+}

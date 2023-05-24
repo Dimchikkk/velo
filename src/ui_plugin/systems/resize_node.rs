@@ -2,9 +2,11 @@ use super::{
     ui_helpers::ResizeMarker, BevyMarkdownView, RawText, RedrawArrowEvent, VeloNode,
     VeloNodeContainer,
 };
-use crate::UiState;
+use crate::{utils::convert_from_val_px, UiState};
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
+use bevy_cosmic_edit::{CosmicEditImage, FontSystemState};
 use bevy_markdown::BevyMarkdownNode;
+use cosmic_text::Edit;
 
 pub fn resize_entity_start(
     mut interaction_query: Query<
@@ -46,36 +48,41 @@ pub fn resize_entity_start(
 pub fn resize_entity_end(
     mut mouse_motion_events: EventReader<MouseMotion>,
     state: Res<UiState>,
-    mut rectangle_query: Query<
+    mut node_query: Query<
         (&VeloNodeContainer, &mut Style),
         (
             With<VeloNodeContainer>,
-            Without<RawText>,
+            Without<CosmicEditImage>,
             Without<BevyMarkdownNode>,
         ),
     >,
-    mut raw_text_input_query: Query<
-        (&RawText, &mut Style),
-        (
-            With<RawText>,
-            Without<VeloNodeContainer>,
-            Without<BevyMarkdownNode>,
-        ),
-    >,
+    raw_text_input_query: Query<(&RawText, Entity), (With<RawText>,)>,
     mut markdown_text_input_query: Query<
         (&Parent, &mut Style),
         (
             With<BevyMarkdownNode>,
+            Without<CosmicEditImage>,
             Without<VeloNodeContainer>,
-            Without<RawText>,
         ),
     >,
     markdown_view_query: Query<(&BevyMarkdownView, Entity), With<BevyMarkdownView>>,
     mut events: EventWriter<RedrawArrowEvent>,
+    windows: Query<&mut Window, With<PrimaryWindow>>,
+    mut cosmic_edit_query: Query<
+        (&mut CosmicEditImage, &Parent, &mut Style),
+        (
+            With<CosmicEditImage>,
+            Without<VeloNodeContainer>,
+            Without<BevyMarkdownNode>,
+        ),
+    >,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
+    let primary_window = windows.single();
+    let font_system = font_system_state.font_system.as_mut().unwrap();
     for event in mouse_motion_events.iter() {
         if let Some((id, resize_marker)) = state.entity_to_resize {
-            for (rectangle, mut button_style) in &mut rectangle_query {
+            for (rectangle, mut button_style) in &mut node_query {
                 if id == rectangle.id {
                     events.send(RedrawArrowEvent { id });
                     #[allow(unused)]
@@ -139,19 +146,37 @@ pub fn resize_entity_end(
                             }
                         }
                     }
-                    for (text, mut text_style) in &mut raw_text_input_query {
-                        if text.id == id {
-                            text_style.max_size.width = button_style.size.width;
-                            text_style.max_size.height = button_style.size.height;
+                }
+                for (text, entity) in raw_text_input_query.iter() {
+                    if text.id == id {
+                        for (mut cosmic_edit, parent, mut text_style) in
+                            &mut cosmic_edit_query.iter_mut()
+                        {
+                            if parent.get() == entity {
+                                let scale_factor = primary_window.scale_factor() as f32;
+                                let width = convert_from_val_px(button_style.size.width);
+                                let height = convert_from_val_px(button_style.size.height);
+                                if width > 0. && height > 0. {
+                                    cosmic_edit.editor.buffer_mut().set_size(
+                                        font_system,
+                                        width * scale_factor,
+                                        height * scale_factor,
+                                    );
+                                }
+                                text_style.size = Size {
+                                    width: Val::Px(width),
+                                    height: Val::Px(height),
+                                }
+                            }
                         }
                     }
-                    for (node, entity) in markdown_view_query.iter() {
-                        if node.id == id {
-                            for (parent, mut text_style) in &mut markdown_text_input_query {
-                                if parent.get() == entity {
-                                    text_style.max_size.width = button_style.size.width;
-                                    text_style.max_size.height = button_style.size.height;
-                                }
+                }
+                for (node, entity) in markdown_view_query.iter() {
+                    if node.id == id {
+                        for (parent, mut text_style) in &mut markdown_text_input_query {
+                            if parent.get() == entity {
+                                text_style.max_size.width = button_style.size.width;
+                                text_style.max_size.height = button_style.size.height;
                             }
                         }
                     }

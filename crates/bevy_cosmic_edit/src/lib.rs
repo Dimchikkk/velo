@@ -83,7 +83,7 @@ fn get_node_cursor_pos(
     let node_cursor_pos = match window.cursor_position() {
         Some(pos) => {
             if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
-                Some((pos.x-x_min, y_max-pos.y))
+                Some((pos.x - x_min, y_max - pos.y))
             } else {
                 None
             }
