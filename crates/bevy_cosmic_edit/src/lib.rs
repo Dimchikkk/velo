@@ -1,3 +1,5 @@
+use std::cmp;
+
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
@@ -93,6 +95,15 @@ fn get_node_cursor_pos(
     node_cursor_pos
 }
 
+fn get_y_offset(editor: &Editor) -> i32 {
+    let text_height = editor.buffer().metrics().line_height
+        * cmp::min(
+            editor.buffer().visible_lines(),
+            editor.buffer().lines.len() as i32,
+        ) as f32;
+    ((editor.buffer().size().1 - text_height) / 2.0) as i32
+}
+
 fn cosmic_edit_bevy_events(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut font_system_state: ResMut<FontSystemState>,
@@ -141,8 +152,7 @@ fn cosmic_edit_bevy_events(
                 cosmic_edit.editor.action(font_system, Action::Escape);
                 return;
             }
-            let text_height = cosmic_edit.editor.buffer().metrics().line_height * cosmic_edit.editor.buffer().lines.len() as f32;
-            let offset_y = ((node.size().y * window.scale_factor() as f32 - text_height) / 2.0) as i32;
+            let offset_y = get_y_offset(&cosmic_edit.editor);
             if buttons.just_pressed(MouseButton::Left) {
                 if let Some(node_cursor_pos) = get_node_cursor_pos(&window, node_transform, node) {
                     cosmic_edit.editor.action(
@@ -204,9 +214,7 @@ fn cosmic_edit_redraw_buffer(
             let height = node.size().y * window.scale_factor() as f32;
             let font_color = cosmic_text::Color::rgb(0, 0, 0);
             let mut pixels = vec![0; width as usize * height as usize * 4];
-            let text_height = cosmic_edit.editor.buffer().metrics().line_height
-                * cosmic_edit.editor.buffer().lines.len() as f32;
-            let offset_y = ((height - text_height) / 2.0) as i32;
+            let offset_y = get_y_offset(&cosmic_edit.editor);
             cosmic_edit.editor.draw(
                 &mut font_system,
                 &mut swash_cache,
