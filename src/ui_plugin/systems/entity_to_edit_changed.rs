@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_cosmic_edit::ActiveEditor;
 use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
 
 use bevy_ui_borders::Outline;
@@ -11,7 +12,7 @@ pub fn entity_to_edit_changed(
     ui_state: Res<UiState>,
     mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
     mut velo_node_query: Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
-    mut raw_text_node_query: Query<(&Text, &mut Style, &RawText, &Parent), With<RawText>>,
+    mut raw_text_node_query: Query<(&mut Style, &RawText, &Parent, Entity), With<RawText>>,
     mut markdown_text_node_query: Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -44,8 +45,12 @@ pub fn entity_to_edit_changed(
                 }
                 // hide raw text and have markdown view for all nodes (except selected)
                 {
-                    for (text, mut style, raw_text, parent) in &mut raw_text_node_query.iter_mut() {
+                    for (mut style, raw_text, parent, entity) in &mut raw_text_node_query.iter_mut()
+                    {
                         if raw_text.id == entity_to_edit {
+                            commands.insert_resource(ActiveEditor {
+                                entity: Some(entity),
+                            });
                             style.display = Display::Flex;
                             continue;
                         }
@@ -53,12 +58,8 @@ pub fn entity_to_edit_changed(
                             continue;
                         }
                         style.display = Display::None;
-                        let mut str = "".to_string();
-                        let mut text_copy = text.clone();
-                        text_copy.sections.pop();
-                        for section in text_copy.sections.iter() {
-                            str = format!("{}{}", str, section.value.clone());
-                        }
+                        let str = "".to_string();
+                        // TODO: imlement getting text
                         let bevy_markdown = BevyMarkdown {
                             text: str,
                             regular_font: Some(
@@ -96,6 +97,9 @@ pub fn entity_to_edit_changed(
                 }
             }
             None => {
+                {
+                    commands.insert_resource(ActiveEditor { entity: None });
+                }
                 // change border
                 {
                     for (mut outline, node, _) in &mut velo_node_query.iter_mut() {
@@ -112,17 +116,13 @@ pub fn entity_to_edit_changed(
                         outline.thickness = UiRect::all(Val::Px(1.));
                     }
                 }
-                for (text, mut style, raw_text, parent) in &mut raw_text_node_query.iter_mut() {
+                for (mut style, raw_text, parent, _) in &mut raw_text_node_query.iter_mut() {
                     if style.display == Display::None {
                         continue;
                     }
                     style.display = Display::None;
-                    let mut str = "".to_string();
-                    let mut text_copy = text.clone();
-                    text_copy.sections.pop();
-                    for section in text_copy.sections.iter() {
-                        str = format!("{}{}", str, section.value.clone());
-                    }
+                    let str = "".to_string();
+                    // TODO: imlement getting text
                     let bevy_markdown = BevyMarkdown {
                         text: str,
                         regular_font: Some(TextStyle::default().font),
