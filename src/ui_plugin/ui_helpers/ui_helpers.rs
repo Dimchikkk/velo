@@ -80,15 +80,8 @@ fn create_rectangle_btn(
         style: Style {
             position_type: PositionType::Absolute,
             size: Size::new(Val::Percent(100.), Val::Percent(100.)),
-            // position: UiRect {
-            //     left: Val::Px(-3.),
-            //     right: Val::Px(0.),
-            //     top: Val::Px(-3.),
-            //     bottom: Val::Px(0.),
-            // },
             justify_content,
             align_items,
-            // overflow: Overflow::Hidden,
             ..default()
         },
         ..default()

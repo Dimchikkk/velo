@@ -236,7 +236,7 @@ mod tests {
             app.update();
 
             // Check that the size and position of the rectangle have been updated correctly
-            let (_velo_node_container, style) = app
+            let (_, style) = app
                 .world
                 .query::<(&VeloNodeContainer, &mut Style)>()
                 .iter_mut(&mut app.world)

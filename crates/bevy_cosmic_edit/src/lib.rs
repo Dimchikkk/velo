@@ -3,7 +3,8 @@ use std::cmp;
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
-    window::PrimaryWindow, ui::FocusPolicy,
+    ui::FocusPolicy,
+    window::PrimaryWindow,
 };
 use cosmic_text::{
     Action, Affinity, Attrs, Buffer, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
@@ -30,8 +31,7 @@ pub struct CosmicEditPlugin;
 impl Plugin for CosmicEditPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(init)
-            .add_system(cosmic_edit_redraw_buffer)
-            .add_system(cosmic_edit_bevy_events)
+            .add_systems((cosmic_edit_bevy_events, cosmic_edit_redraw_buffer))
             .init_resource::<FontSystemState>()
             .init_resource::<SwashCacheState>()
             .init_resource::<ActiveEditor>();
