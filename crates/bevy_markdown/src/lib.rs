@@ -288,8 +288,8 @@ pub fn handle_inline_styling(
 fn handle_list_recursive(
     list: &markdown::mdast::List,
     bevy_markdown: &BevyMarkdown,
-    mut text_sections: &mut Vec<(TextSection, Option<String>)>,
-    mut errors: &mut Vec<BevyMarkdownError>,
+    text_sections: &mut Vec<(TextSection, Option<String>)>,
+    errors: &mut Vec<BevyMarkdownError>,
     indentation_level: u8,
 ) -> Result<(), Vec<BevyMarkdownError>> {
     text_sections.push((
@@ -345,9 +345,9 @@ fn handle_list_recursive(
                         paragraph.children.iter().for_each(|child| {
                             let _ = handle_inline_styling(
                                 child,
-                                &bevy_markdown,
-                                &mut text_sections,
-                                &mut errors,
+                                bevy_markdown,
+                                text_sections,
+                                errors,
                                 InlineStyleType::None as u8,
                                 None,
                                 None,
@@ -358,9 +358,9 @@ fn handle_list_recursive(
                     markdown::mdast::Node::List(inner_list) => {
                         let _ = handle_list_recursive(
                             &inner_list,
-                            &bevy_markdown,
-                            &mut text_sections,
-                            &mut errors,
+                            bevy_markdown,
+                            text_sections,
+                            errors,
                             indentation_level + 1,
                         );
                     }
@@ -496,7 +496,7 @@ pub fn spawn_bevy_markdown(
                         }
                         markdown::mdast::Node::List(list) => {
                             let _ = handle_list_recursive(
-                                &list,
+                                list,
                                 &bevy_markdown,
                                 &mut text_sections,
                                 &mut errors,
@@ -706,4 +706,5 @@ hello world
         .to_string();
         test_bevymarkdown(input, "test_render_ordered_list".to_string())
     }
+    
 }
