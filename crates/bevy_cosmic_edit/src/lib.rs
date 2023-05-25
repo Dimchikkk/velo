@@ -21,16 +21,8 @@ pub struct CosmicEditMeta<'a> {
 }
 
 #[derive(Component)]
-pub struct CosmicEditRoot;
-
-#[derive(Component)]
 pub struct CosmicEditImage {
     pub editor: Editor,
-}
-
-#[derive(Debug)]
-pub enum CosmicEditError {
-    Unknown,
 }
 pub struct CosmicEditPlugin;
 
@@ -130,15 +122,15 @@ fn cosmic_edit_bevy_events(
     mut char_evr: EventReader<ReceivedCharacter>,
     buttons: Res<Input<MouseButton>>,
     mut cosmic_edit_query: Query<
-        (&mut CosmicEditImage, &Parent, &GlobalTransform, &Node),
+        (&mut CosmicEditImage, &GlobalTransform, &Node, Entity),
         With<CosmicEditImage>,
     >,
     mut is_deleting: Local<bool>,
 ) {
     let window = windows.single();
     let font_system = font_system_state.font_system.as_mut().unwrap();
-    for (mut cosmic_edit, parent, node_transform, node) in &mut cosmic_edit_query.iter_mut() {
-        if active_editor.entity == Some(parent.get()) {
+    for (mut cosmic_edit, node_transform, node, entity) in &mut cosmic_edit_query.iter_mut() {
+        if active_editor.entity == Some(entity) {
             let command = keys.any_pressed([KeyCode::RWin, KeyCode::LWin]);
             let option = keys.any_pressed([KeyCode::LAlt, KeyCode::RAlt]);
             if keys.just_pressed(KeyCode::Left) {
@@ -310,26 +302,11 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
     editor
         .buffer_mut()
         .set_text(&mut font_system, cosmic_edit_meta.text.as_str(), attrs);
-    let root = commands
+    let cosmic_edit = commands
         .spawn((
-            NodeBundle {
+            ButtonBundle {
                 background_color: bevy::prelude::Color::WHITE.into(),
                 style: Style {
-                    size: Size {
-                        width: Val::Percent(100.),
-                        height: Val::Percent(100.),
-                    },
-                    ..default()
-                },
-                ..default()
-            },
-            CosmicEditRoot,
-        ))
-        .id();
-    let image = commands
-        .spawn((
-            ImageBundle {
-                style: bevy::prelude::Style {
                     size: Size {
                         width: Val::Px(cosmic_edit_meta.width),
                         height: Val::Px(cosmic_edit_meta.height),
@@ -341,8 +318,7 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
             CosmicEditImage { editor },
         ))
         .id();
-    commands.entity(root).add_child(image);
-    root
+    cosmic_edit
 }
 
 fn draw_pixel(
