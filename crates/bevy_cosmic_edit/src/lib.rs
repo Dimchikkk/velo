@@ -117,7 +117,9 @@ fn get_x_offset(editor: &Editor) -> i32 {
             }
         }
     }
-    ((editor.buffer().size().1 - max_line_width) / 2.0) as i32
+    ((editor.buffer().size().0
+        - cmp::min(max_line_width as i32, editor.buffer().size().0 as i32) as f32)
+        / 2.0) as i32
 }
 
 fn cosmic_edit_bevy_events(
