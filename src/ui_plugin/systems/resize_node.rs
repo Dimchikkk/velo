@@ -52,30 +52,32 @@ pub fn resize_entity_end(
         (&VeloNodeContainer, &mut Style),
         (
             With<VeloNodeContainer>,
-            Without<CosmicEditImage>,
             Without<BevyMarkdownNode>,
+            Without<RawText>,
         ),
     >,
-    raw_text_input_query: Query<(&RawText, Entity), With<RawText>>,
+    mut raw_text_input_query: Query<
+        (&RawText, &mut CosmicEditImage, &mut Style),
+        (
+            Without<VeloNodeContainer>,
+            Without<BevyMarkdownNode>,
+            With<RawText>,
+        ),
+    >,
     mut markdown_text_input_query: Query<
         (&Parent, &mut Style),
+        (With<BevyMarkdownNode>, Without<VeloNodeContainer>),
+    >,
+    markdown_view_query: Query<
+        (&BevyMarkdownView, Entity),
         (
-            With<BevyMarkdownNode>,
-            Without<CosmicEditImage>,
             Without<VeloNodeContainer>,
+            With<BevyMarkdownNode>,
+            Without<RawText>,
         ),
     >,
-    markdown_view_query: Query<(&BevyMarkdownView, Entity), With<BevyMarkdownView>>,
     mut events: EventWriter<RedrawArrowEvent>,
     windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut cosmic_edit_query: Query<
-        (&mut CosmicEditImage, &Parent, &mut Style),
-        (
-            With<CosmicEditImage>,
-            Without<VeloNodeContainer>,
-            Without<BevyMarkdownNode>,
-        ),
-    >,
     mut font_system_state: ResMut<FontSystemState>,
 ) {
     let primary_window = windows.single();
@@ -147,27 +149,22 @@ pub fn resize_entity_end(
                         }
                     }
                 }
-                for (text, entity) in raw_text_input_query.iter() {
+                for (text, mut cosmic_edit, mut text_style) in &mut raw_text_input_query.iter_mut()
+                {
                     if text.id == id {
-                        for (mut cosmic_edit, parent, mut text_style) in
-                            &mut cosmic_edit_query.iter_mut()
-                        {
-                            if parent.get() == entity {
-                                let scale_factor = primary_window.scale_factor() as f32;
-                                let width = convert_from_val_px(button_style.size.width);
-                                let height = convert_from_val_px(button_style.size.height);
-                                if width > 0. && height > 0. {
-                                    cosmic_edit.editor.buffer_mut().set_size(
-                                        font_system,
-                                        width * scale_factor,
-                                        height * scale_factor,
-                                    );
-                                }
-                                text_style.size = Size {
-                                    width: Val::Px(width),
-                                    height: Val::Px(height),
-                                }
-                            }
+                        let scale_factor = primary_window.scale_factor() as f32;
+                        let width = convert_from_val_px(button_style.size.width);
+                        let height = convert_from_val_px(button_style.size.height);
+                        if width > 0. && height > 0. {
+                            cosmic_edit.editor.buffer_mut().set_size(
+                                font_system,
+                                width * scale_factor,
+                                height * scale_factor,
+                            );
+                        }
+                        text_style.size = Size {
+                            width: Val::Px(width),
+                            height: Val::Px(height),
                         }
                     }
                 }
