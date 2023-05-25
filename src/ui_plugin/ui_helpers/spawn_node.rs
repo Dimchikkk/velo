@@ -172,30 +172,34 @@ pub fn spawn_node(
         .entity(cosmic_edit)
         .insert(RawText { id: item_meta.id });
     commands.entity(button).add_child(cosmic_edit);
-    commands.insert_resource(ActiveEditor {
-        entity: Some(cosmic_edit),
-    });
 
-    if !item_meta.is_active {
-        let bevy_markdown = BevyMarkdown {
-            text: item_meta.text.clone(),
-            regular_font: Some(TextStyle::default().font),
-            code_font: Some(TextStyle::default().font),
-            bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-            italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
-            extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
-            semi_bold_italic_font: Some(
-                asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-            ),
-            size: Some(item_meta.size),
-        };
-        let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
-            .expect("should handle markdown convertion");
-        commands
-            .get_entity(markdown_text)
-            .unwrap()
-            .insert(BevyMarkdownView { id: item_meta.id });
-        commands.entity(button).add_child(markdown_text);
+    match item_meta.is_active {
+        true => {
+            commands.insert_resource(ActiveEditor {
+                entity: Some(cosmic_edit),
+            });
+        }
+        false => {
+            let bevy_markdown = BevyMarkdown {
+                text: item_meta.text.clone(),
+                regular_font: Some(TextStyle::default().font),
+                code_font: Some(TextStyle::default().font),
+                bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
+                italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
+                extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
+                semi_bold_italic_font: Some(
+                    asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
+                ),
+                size: Some(item_meta.size),
+            };
+            let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
+                .expect("should handle markdown convertion");
+            commands
+                .get_entity(markdown_text)
+                .unwrap()
+                .insert(BevyMarkdownView { id: item_meta.id });
+            commands.entity(button).add_child(markdown_text);
+        }
     }
     commands.entity(top).add_child(button);
     top
