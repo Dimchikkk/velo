@@ -60,9 +60,10 @@ fn init(
     let locale = sys_locale::get_locale().unwrap_or_else(|| String::from("en-US"));
     let mut db = cosmic_text::fontdb::Database::new();
     db.load_system_fonts();
-    db.set_monospace_family("Fira Mono");
-    db.set_sans_serif_family("Fira Sans");
-    db.set_serif_family("DejaVu Serif");
+    // TODO: figure out whether 'Source Code Pro' is valid value
+    db.set_monospace_family("Source Code Pro");
+    db.set_sans_serif_family("Source Code Pro");
+    db.set_serif_family("Source Code Pro");
     let font_system = cosmic_text::FontSystem::new_with_locale_and_db(locale, db);
     font_system_state.font_system = Some(font_system);
     swash_cache_state.swash_cache = Some(SwashCache::new());
