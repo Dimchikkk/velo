@@ -706,5 +706,30 @@ hello world
         .to_string();
         test_bevymarkdown(input, "test_render_ordered_list".to_string())
     }
-    
+
+    #[test]
+    pub fn test_render_nested_unordered_list() {
+        let input = "
+- Import a HTML file and watch it magically convert to Markdown
+    - Drag and drop images (requires your Dropbox account be linked)
+- Import and save files from GitHub, Dropbox, Google Drive and One Drive
+    - Drag and drop markdown and HTML files into Dillinger
+- Export documents as Markdown, HTML and PDF
+"
+        .to_string();
+        test_bevymarkdown(input, "test_render_nested_unordered_list".to_string())
+    }
+
+    #[test]
+    pub fn test_render_nested_ordered_list() {
+        let input = "
+1. Import a HTML file and watch it magically convert to Markdown
+2. Drag and drop images (requires your Dropbox account be linked)
+    1. Import and save files from GitHub, Dropbox, Google Drive and One Drive
+    2. Drag and drop images (requires your Dropbox account be linked)
+3. Drag and drop images (requires your Dropbox account be linked)
+"
+        .to_string();
+        test_bevymarkdown(input, "test_render_nested_ordered_list".to_string())
+    }
 }

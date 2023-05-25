@@ -1,0 +1,25 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+expression: node.link_sections.clone()
+---
+[
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+]
