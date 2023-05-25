@@ -3,7 +3,6 @@ use std::cmp;
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
-    ui::FocusPolicy,
     window::PrimaryWindow,
 };
 use cosmic_text::{
@@ -20,6 +19,7 @@ pub struct CosmicEditMeta<'a> {
     pub scale_factor: f32,
     pub font_system: &'a mut FontSystem,
     pub is_visible: bool,
+    pub initial_background: Option<UiImage>,
 }
 
 #[derive(Component)]
@@ -322,18 +322,17 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
     if !cosmic_edit_meta.is_visible {
         style.display = Display::None;
         editor.buffer_mut().set_redraw(false);
-        // redraw false
+    }
+    let mut image_bundle = ImageBundle {
+        background_color: bevy::prelude::Color::WHITE.into(),
+        style,
+        ..default()
+    };
+    if let Some(initial_background) = cosmic_edit_meta.initial_background {
+        image_bundle.image = initial_background.clone();
     }
     let cosmic_edit = commands
-        .spawn((
-            ButtonBundle {
-                focus_policy: FocusPolicy::Pass,
-                background_color: bevy::prelude::Color::WHITE.into(),
-                style,
-                ..default()
-            },
-            CosmicEditImage { editor },
-        ))
+        .spawn((image_bundle, CosmicEditImage { editor }))
         .id();
     cosmic_edit
 }
@@ -403,6 +402,7 @@ mod tests {
             scale_factor: 1.,
             font_system: &mut FontSystem::new(),
             is_visible: true,
+            initial_background: None,
         };
         spawn_cosmic_edit(&mut commands, cosmic_edit_meta);
     }
