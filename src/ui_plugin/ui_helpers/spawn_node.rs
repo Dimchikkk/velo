@@ -194,8 +194,8 @@ pub fn spawn_node(
             text: item_meta.text.clone(),
             width: convert_from_val_px(item_meta.size.0),
             height: convert_from_val_px(item_meta.size.1),
-            font_size: 20.,
-            line_height: 28.,
+            font_size: 16.,
+            line_height: 18.,
             scale_factor: item_meta.scale_factor,
             font_system: font_system.font_system.as_mut().unwrap(),
         };
