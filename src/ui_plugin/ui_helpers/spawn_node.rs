@@ -148,18 +148,6 @@ pub fn spawn_node(
             ResizeMarker::BottomLeft,
         ))
         .id();
-    // let raw_text = commands
-    //     .spawn((
-    //         create_rectangle_txt(
-    //             item_meta.text.clone(),
-    //             Some(item_meta.size),
-    //             item_meta.is_active,
-    //         ),
-    //         RawText { id: item_meta.id },
-    //         EditableText { id: item_meta.id },
-    //     ))
-    //     .id();
-
     commands.entity(button).add_child(arrow_marker1);
     commands.entity(button).add_child(arrow_marker2);
     commands.entity(button).add_child(arrow_marker3);
@@ -168,7 +156,26 @@ pub fn spawn_node(
     commands.entity(button).add_child(resize_marker2);
     commands.entity(button).add_child(resize_marker3);
     commands.entity(button).add_child(resize_marker4);
-    // commands.entity(button).add_child(raw_text);
+
+    let cosmic_edit_meta = CosmicEditMeta {
+        text: item_meta.text.clone(),
+        width: convert_from_val_px(item_meta.size.0),
+        height: convert_from_val_px(item_meta.size.1),
+        font_size: 16.,
+        line_height: 18.,
+        scale_factor: item_meta.scale_factor,
+        font_system: font_system.font_system.as_mut().unwrap(),
+        is_visible: false,
+    };
+    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
+    commands
+        .entity(cosmic_edit)
+        .insert(RawText { id: item_meta.id });
+    commands.entity(button).add_child(cosmic_edit);
+    commands.insert_resource(ActiveEditor {
+        entity: Some(cosmic_edit),
+    });
+
     if !item_meta.is_active {
         let bevy_markdown = BevyMarkdown {
             text: item_meta.text.clone(),
@@ -189,24 +196,6 @@ pub fn spawn_node(
             .unwrap()
             .insert(BevyMarkdownView { id: item_meta.id });
         commands.entity(button).add_child(markdown_text);
-    } else {
-        let cosmic_edit_meta = CosmicEditMeta {
-            text: item_meta.text.clone(),
-            width: convert_from_val_px(item_meta.size.0),
-            height: convert_from_val_px(item_meta.size.1),
-            font_size: 16.,
-            line_height: 18.,
-            scale_factor: item_meta.scale_factor,
-            font_system: font_system.font_system.as_mut().unwrap(),
-        };
-        let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
-        commands
-            .entity(cosmic_edit)
-            .insert(RawText { id: item_meta.id });
-        commands.entity(button).add_child(cosmic_edit);
-        commands.insert_resource(ActiveEditor {
-            entity: Some(cosmic_edit),
-        });
     }
     commands.entity(top).add_child(button);
     top
