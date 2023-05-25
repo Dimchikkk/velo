@@ -6,7 +6,7 @@ use bevy::{
     window::PrimaryWindow,
 };
 use cosmic_text::{
-    Action, Affinity, Align, Attrs, Buffer, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
+    Action, Affinity, Attrs, Buffer, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
 };
 use image::{ImageBuffer, RgbaImage};
 
@@ -106,6 +106,20 @@ fn get_y_offset(editor: &Editor) -> i32 {
     ((editor.buffer().size().1 - text_height) / 2.0) as i32
 }
 
+fn get_x_offset(editor: &Editor) -> i32 {
+    let mut max_line_width = 0.;
+    for line in editor.buffer().lines.iter() {
+        if let Some(layout_opt) = line.layout_opt().as_ref() {
+            for layout_line in layout_opt {
+                if layout_line.w > max_line_width {
+                    max_line_width = layout_line.w;
+                }
+            }
+        }
+    }
+    ((editor.buffer().size().1 - max_line_width) / 2.0) as i32
+}
+
 fn cosmic_edit_bevy_events(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut font_system_state: ResMut<FontSystemState>,
@@ -160,40 +174,45 @@ fn cosmic_edit_bevy_events(
                     affinity: Affinity::Before,
                 }));
                 // RETURN
-                return
+                return;
             }
             if command && option && keys.just_pressed(KeyCode::Left) {
                 cosmic_edit.editor.action(font_system, Action::PreviousWord);
                 // RETURN
-                return
+                return;
             }
             if command && option && keys.just_pressed(KeyCode::Right) {
                 cosmic_edit.editor.action(font_system, Action::NextWord);
                 // RETURN
-                return
+                return;
             }
             let offset_y = get_y_offset(&cosmic_edit.editor);
+            let offset_x = get_x_offset(&cosmic_edit.editor);
             if buttons.just_pressed(MouseButton::Left) {
                 if let Some(node_cursor_pos) = get_node_cursor_pos(&window, node_transform, node) {
                     cosmic_edit.editor.action(
                         font_system,
                         Action::Click {
-                            x: (node_cursor_pos.0 * window.scale_factor() as f32) as i32,
+                            x: (node_cursor_pos.0 * window.scale_factor() as f32) as i32 - offset_x,
                             y: (node_cursor_pos.1 * window.scale_factor() as f32) as i32 - offset_y,
                         },
                     );
                 }
+                // RETURN
+                return;
             }
             if buttons.pressed(MouseButton::Left) {
                 if let Some(node_cursor_pos) = get_node_cursor_pos(&window, node_transform, node) {
                     cosmic_edit.editor.action(
                         font_system,
                         Action::Drag {
-                            x: (node_cursor_pos.0 * window.scale_factor() as f32) as i32,
+                            x: (node_cursor_pos.0 * window.scale_factor() as f32) as i32 - offset_x,
                             y: (node_cursor_pos.1 * window.scale_factor() as f32) as i32 - offset_y,
                         },
                     );
                 }
+                // RETURN
+                return;
             }
             for char_ev in char_evr.iter() {
                 if *is_deleting {
@@ -224,19 +243,12 @@ fn cosmic_edit_redraw_buffer(
     for (mut cosmic_edit, mut img, node) in &mut cosmic_edit_query.iter_mut() {
         cosmic_edit.editor.shape_as_needed(&mut font_system);
         if cosmic_edit.editor.buffer().redraw() {
-            cosmic_edit
-                .editor
-                .buffer_mut()
-                .lines
-                .iter_mut()
-                .for_each(|line| {
-                    line.set_align(Some(Align::Center));
-                });
             let width = node.size().x * window.scale_factor() as f32;
             let height = node.size().y * window.scale_factor() as f32;
             let font_color = cosmic_text::Color::rgb(0, 0, 0);
             let mut pixels = vec![0; width as usize * height as usize * 4];
             let offset_y = get_y_offset(&cosmic_edit.editor);
+            let offset_x = get_x_offset(&cosmic_edit.editor);
             cosmic_edit.editor.draw(
                 &mut font_system,
                 &mut swash_cache,
@@ -248,7 +260,7 @@ fn cosmic_edit_redraw_buffer(
                                 &mut pixels,
                                 width as i32,
                                 height as i32,
-                                x + col,
+                                x + col + offset_x,
                                 y + row + offset_y,
                                 color,
                             );
