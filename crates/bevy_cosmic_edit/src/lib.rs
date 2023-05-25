@@ -3,7 +3,7 @@ use std::cmp;
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
-    window::PrimaryWindow,
+    window::PrimaryWindow, ui::FocusPolicy,
 };
 use cosmic_text::{
     Action, Affinity, Attrs, Buffer, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
@@ -18,6 +18,7 @@ pub struct CosmicEditMeta<'a> {
     pub line_height: f32,
     pub scale_factor: f32,
     pub font_system: &'a mut FontSystem,
+    pub is_visible: bool,
 }
 
 #[derive(Component)]
@@ -87,6 +88,15 @@ fn get_node_cursor_pos(
         None => None,
     };
     node_cursor_pos
+}
+
+pub fn get_cosmic_text(editor: &Editor) -> String {
+    let mut text = String::new();
+    for line in editor.buffer().lines.iter() {
+        text.push_str(line.text());
+        text.push('\n');
+    }
+    text
 }
 
 fn get_y_offset(editor: &Editor) -> i32 {
@@ -302,17 +312,24 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
     editor
         .buffer_mut()
         .set_text(&mut font_system, cosmic_edit_meta.text.as_str(), attrs);
+    let mut style = Style {
+        size: Size {
+            width: Val::Px(cosmic_edit_meta.width),
+            height: Val::Px(cosmic_edit_meta.height),
+        },
+        ..default()
+    };
+    if !cosmic_edit_meta.is_visible {
+        style.display = Display::None;
+        editor.buffer_mut().set_redraw(false);
+        // redraw false
+    }
     let cosmic_edit = commands
         .spawn((
             ButtonBundle {
+                focus_policy: FocusPolicy::Pass,
                 background_color: bevy::prelude::Color::WHITE.into(),
-                style: Style {
-                    size: Size {
-                        width: Val::Px(cosmic_edit_meta.width),
-                        height: Val::Px(cosmic_edit_meta.height),
-                    },
-                    ..default()
-                },
+                style,
                 ..default()
             },
             CosmicEditImage { editor },
@@ -385,6 +402,7 @@ mod tests {
             line_height: 20.,
             scale_factor: 1.,
             font_system: &mut FontSystem::new(),
+            is_visible: true,
         };
         spawn_cosmic_edit(&mut commands, cosmic_edit_meta);
     }
