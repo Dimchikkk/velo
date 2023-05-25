@@ -70,7 +70,7 @@ pub fn spawn_node(
         .spawn((
             create_rectangle_btn(
                 item_meta.bg_color,
-                image,
+                image.clone(),
                 item_meta.z_index,
                 item_meta.text_pos,
             ),
@@ -166,6 +166,7 @@ pub fn spawn_node(
         scale_factor: item_meta.scale_factor,
         font_system: font_system.font_system.as_mut().unwrap(),
         is_visible: false,
+        initial_background: image.clone(),
     };
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
     commands
