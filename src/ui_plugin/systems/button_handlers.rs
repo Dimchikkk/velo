@@ -77,6 +77,7 @@ pub fn rec_button_handlers(
                 }
                 super::ui_helpers::ButtonTypes::Del => {
                     if let Some(id) = state.entity_to_edit {
+                        commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                         *state = UiState::default();
                         for (entity, node, _) in nodes.iter() {
                             if node.id == id {
@@ -249,6 +250,7 @@ pub fn new_doc_handler(
 }
 
 pub fn rename_doc_handler(
+    mut commands: Commands,
     mut rename_doc_query: Query<
         (&Interaction, &DocListItemButton),
         (Changed<Interaction>, With<DocListItemButton>),
@@ -265,6 +267,7 @@ pub fn rename_doc_handler(
                         < Duration::from_millis(500)
                 {
                     *ui_state = UiState::default();
+                    commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                     ui_state.doc_to_edit = Some(item.id);
                     *double_click = (Duration::from_secs(0), None);
                 } else {
@@ -310,6 +313,7 @@ pub fn delete_doc_handler(
                 }
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
@@ -357,6 +361,7 @@ pub fn export_to_file(
             Interaction::Clicked => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(&mut commands, window, id, super::ModalAction::SaveToFile);
                 commands.entity(main_panel_query.single()).add_child(entity);
@@ -470,6 +475,7 @@ pub fn import_from_file(
             Interaction::Clicked => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
                 let entity =
                     spawn_modal(&mut commands, window, id, super::ModalAction::LoadFromFile);
@@ -494,6 +500,7 @@ pub fn import_from_url(
             Interaction::Clicked => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
                 let entity =
                     spawn_modal(&mut commands, window, id, super::ModalAction::LoadFromUrl);

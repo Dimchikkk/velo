@@ -4,7 +4,7 @@ use bevy::{
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     window::PrimaryWindow,
 };
-use bevy_cosmic_edit::FontSystemState;
+use bevy_cosmic_edit::{FontSystemState};
 
 use super::{
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
@@ -97,6 +97,7 @@ pub fn load_tab(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     *ui_state = UiState::default();
+    commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
     let window = windows.single_mut();
 
     #[allow(unused)]

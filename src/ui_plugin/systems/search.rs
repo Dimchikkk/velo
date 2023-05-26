@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+
 use bevy_pkv::PkvStore;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -38,6 +39,7 @@ pub struct NodeSearchLocation {
 }
 
 pub fn search_box_click(
+    mut commands: Commands,
     mut interaction_query: Query<
         (&Interaction, &SearchButton),
         (Changed<Interaction>, With<SearchButton>),
@@ -51,6 +53,7 @@ pub fn search_box_click(
             Interaction::Clicked => {
                 primary_window.cursor.icon = CursorIcon::Text;
                 *state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 state.search_box_to_edit = Some(node.id);
             }
             Interaction::Hovered => {
