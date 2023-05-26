@@ -440,8 +440,6 @@ mod tests {
         let mut app = App::new();
         app.add_plugin(TaskPoolPlugin::default());
         app.add_plugin(AssetPlugin::default());
-        app.add_plugin(WindowPlugin::default());
-        app.add_plugin(CosmicEditPlugin);
         app.add_system(test_spawn_cosmic_edit_system);
 
         let input = Input::<KeyCode>::default();
