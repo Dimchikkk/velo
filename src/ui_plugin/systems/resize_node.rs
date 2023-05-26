@@ -161,6 +161,7 @@ pub fn resize_entity_end(
                                 width * scale_factor,
                                 height * scale_factor,
                             );
+                            cosmic_edit.editor.buffer_mut().set_redraw(true);
                         }
                         text_style.size = Size {
                             width: Val::Px(width),
