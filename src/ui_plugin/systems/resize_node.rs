@@ -188,11 +188,14 @@ mod tests {
     use super::{resize_entity_end, RedrawArrowEvent, VeloNodeContainer};
     use crate::{ui_plugin::ui_helpers::ResizeMarker, UiState};
     use bevy::{input::mouse::MouseMotion, prelude::*};
+    use bevy_cosmic_edit::FontSystemState;
+    use cosmic_text::FontSystem;
 
     #[test]
     fn test_resize_entity_end() {
         // Set up a test app with the necessary resources and entities
         let mut app = App::new();
+        app.add_plugin(WindowPlugin::default());
         let entity_id = crate::utils::ReflectableUuid::generate();
 
         // Test all ResizeMarkers
@@ -205,6 +208,9 @@ mod tests {
             app.insert_resource(UiState {
                 entity_to_resize: Some((entity_id, marker)),
                 ..default()
+            });
+            app.insert_resource(FontSystemState {
+                font_system: Some(FontSystem::new()),
             });
 
             app.add_event::<MouseMotion>();
