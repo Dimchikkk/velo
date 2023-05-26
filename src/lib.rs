@@ -12,7 +12,6 @@ use bevy_hanabi::HanabiPlugin;
 use bevy_pkv::PkvStore;
 use bevy_ui_borders::BordersPlugin;
 use canvas::CanvasPlugin;
-use resources::FontHandle;
 use systems::*;
 use ui_plugin::*;
 
@@ -24,8 +23,6 @@ impl Plugin for VeloPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_camera)
             .add_startup_system(setup_background)
-            .add_startup_system(setup_font)
-            .add_system(set_default_font.run_if(resource_exists::<FontHandle>()))
             .add_plugins(
                 DefaultPlugins
                     .set(WindowPlugin {
