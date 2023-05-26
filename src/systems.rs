@@ -1,7 +1,4 @@
-use crate::{
-    components::{EffectsCamera, MainCamera},
-    resources::FontHandle,
-};
+use crate::components::{EffectsCamera, MainCamera};
 use bevy::{
     core_pipeline::clear_color::ClearColorConfig,
     prelude::*,
@@ -37,20 +34,4 @@ pub fn setup_camera(mut commands: Commands) {
         EffectsCamera,
         RenderLayers::from_layers(&[2]),
     ));
-}
-
-pub fn set_default_font(
-    mut commands: Commands,
-    mut fonts: ResMut<Assets<Font>>,
-    font_handle: Res<FontHandle>,
-) {
-    if let Some(font) = fonts.remove(&font_handle.0) {
-        fonts.set_untracked(TextStyle::default().font, font);
-        commands.remove_resource::<FontHandle>();
-    }
-}
-
-pub fn setup_font(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
-    commands.insert_resource(FontHandle(font));
 }
