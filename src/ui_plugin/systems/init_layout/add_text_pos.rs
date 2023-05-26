@@ -20,7 +20,7 @@ pub fn add_text_pos(
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
                 margin: UiRect::all(Val::Px(5.)),
-                size: Size::new(Val::Percent(12.), Val::Percent(100.)),
+                size: Size::new(Val::Percent(15.), Val::Percent(100.)),
                 ..default()
             },
             background_color: Color::BLACK.with_a(0.5).into(),

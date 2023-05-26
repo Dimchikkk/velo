@@ -35,8 +35,8 @@ pub fn add_arrow(
             style: Style {
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
-                margin: UiRect::all(Val::Px(5.)),
-                size: Size::new(Val::Percent(12.), Val::Percent(100.)),
+                margin: UiRect::all(Val::Px(3.)),
+                size: Size::new(Val::Percent(13.), Val::Percent(100.)),
                 ..default()
             },
             background_color: Color::BLACK.with_a(0.5).into(),
