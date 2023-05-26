@@ -4,7 +4,7 @@ use bevy::{
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     window::PrimaryWindow,
 };
-use bevy_cosmic_edit::{FontSystemState};
+use bevy_cosmic_edit::FontSystemState;
 
 use super::{
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
