@@ -161,12 +161,12 @@ pub fn spawn_node(
         text: item_meta.text.clone(),
         width: convert_from_val_px(item_meta.size.0),
         height: convert_from_val_px(item_meta.size.1),
-        font_size: 16.,
-        line_height: 18.,
+        font_size: 14.,
+        line_height: 16.,
         scale_factor: item_meta.scale_factor,
         font_system: font_system.font_system.as_mut().unwrap(),
         is_visible: false,
-        initial_background: image.clone(),
+        initial_background: image,
     };
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
     commands
