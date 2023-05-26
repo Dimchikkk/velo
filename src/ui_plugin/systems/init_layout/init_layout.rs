@@ -385,7 +385,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(8.)),
+                size: Size::new(Val::Percent(90.), Val::Percent(9.)),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -446,7 +446,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(8.)),
+                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
