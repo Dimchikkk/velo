@@ -342,7 +342,6 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
     };
     if !cosmic_edit_meta.is_visible {
         style.display = Display::None;
-        editor.buffer_mut().set_redraw(false);
     }
     let mut image_bundle = ImageBundle {
         background_color: bevy::prelude::Color::WHITE.into(),
