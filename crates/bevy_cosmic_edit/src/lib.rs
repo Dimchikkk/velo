@@ -254,8 +254,8 @@ fn cosmic_edit_redraw_buffer(
     for (mut cosmic_edit, mut img, node) in &mut cosmic_edit_query.iter_mut() {
         cosmic_edit.editor.shape_as_needed(font_system);
         if cosmic_edit.editor.buffer().redraw() {
-            let width = node.size().x * window.scale_factor() as f32;
-            let height = node.size().y * window.scale_factor() as f32;
+            let width = cmp::max((node.size().x * window.scale_factor() as f32) as i32, 1) as f32;
+            let height = cmp::max((node.size().y * window.scale_factor() as f32) as i32, 1) as f32;
             let font_color = cosmic_text::Color::rgb(0, 0, 0);
             let mut pixels = vec![0; width as usize * height as usize * 4];
             let offset_y = get_y_offset(&cosmic_edit.editor);

@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
 
+
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
 use crate::components::Tab;
@@ -100,6 +101,7 @@ pub fn add_tab_handler(
 }
 
 pub fn rename_tab_handler(
+    mut commands: Commands,
     mut interaction_query: Query<
         (&Interaction, &TabButton),
         (Changed<Interaction>, With<TabButton>),
@@ -117,6 +119,7 @@ pub fn rename_tab_handler(
                         < Duration::from_millis(500)
                 {
                     *ui_state = UiState::default();
+                    commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                     let current_document = app_state.current_document.unwrap();
                     let tab = app_state
                         .docs
@@ -152,6 +155,7 @@ pub fn delete_tab_handler(
             Interaction::Clicked => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 let current_document = app_state.current_document.unwrap();
                 let tabs_len = app_state
                     .docs

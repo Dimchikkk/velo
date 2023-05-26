@@ -4,6 +4,7 @@ use bevy::{
     window::PrimaryWindow,
 };
 
+
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 
@@ -95,6 +96,7 @@ pub fn keyboard_input_system(
                 && input.any_just_pressed([KeyCode::Escape, KeyCode::Return])
             {
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
             }
             if Some(editable_text.id) == ui_state.doc_to_edit
                 && text.sections[0].value == *"Untitled"
