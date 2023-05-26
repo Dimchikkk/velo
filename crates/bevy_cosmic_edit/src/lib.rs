@@ -82,16 +82,13 @@ fn get_node_cursor_pos(
     let y_min = window.height() - node_transform.affine().translation.y - node.size().y / 2.;
     let x_max = x_min + node.size().x;
     let y_max = y_min + node.size().y;
-    match window.cursor_position() {
-        Some(pos) => {
-            if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
-                Some((pos.x - x_min, y_max - pos.y))
-            } else {
-                None
-            }
+    window.cursor_position().and_then(|pos| {
+        if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
+            Some((pos.x - x_min, y_max - pos.y))
+        } else {
+            None
         }
-        None => None,
-    }
+    })
 }
 
 pub fn get_cosmic_text(editor: &Editor) -> String {

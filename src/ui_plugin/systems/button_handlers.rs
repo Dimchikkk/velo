@@ -12,9 +12,8 @@ use uuid::Uuid;
 use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
-    pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
-    DocListItemButton, GenericButton, NewDoc, ParticlesEffect, SaveDoc,
-    TextPosMode, Tooltip, VeloNode,
+    pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc, DocListItemButton,
+    GenericButton, NewDoc, ParticlesEffect, SaveDoc, TextPosMode, Tooltip, VeloNode,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
