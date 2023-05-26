@@ -2,10 +2,8 @@ use bevy::prelude::*;
 use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEditImage};
 use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
 
-use bevy_ui_borders::Outline;
-use cosmic_text::Edit;
-
 use crate::utils::ReflectableUuid;
+use bevy_ui_borders::Outline;
 
 use super::{BevyMarkdownView, NodeType, RawText, UiState, VeloNode};
 
@@ -14,7 +12,7 @@ pub fn entity_to_edit_changed(
     mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
     mut velo_node_query: Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
     mut raw_text_node_query: Query<
-        (&mut Style, &RawText, &Parent, Entity, &mut CosmicEditImage),
+        (&mut Style, &RawText, &Parent, Entity, &CosmicEditImage),
         With<RawText>,
     >,
     mut markdown_text_node_query: Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
@@ -50,7 +48,7 @@ fn handle_entity_selection(
     entity_to_edit: ReflectableUuid,
     velo_node_query: &mut Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
     raw_text_node_query: &mut Query<
-        (&mut Style, &RawText, &Parent, Entity, &mut CosmicEditImage),
+        (&mut Style, &RawText, &Parent, Entity, &CosmicEditImage),
         With<RawText>,
     >,
     markdown_text_node_query: &mut Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
@@ -77,7 +75,7 @@ fn handle_entity_selection(
     }
 
     // Hide raw text and have markdown view for all nodes (except selected)
-    for (mut style, raw_text, parent, entity, mut cosmic_edit) in raw_text_node_query.iter_mut() {
+    for (mut style, raw_text, parent, entity, cosmic_edit) in raw_text_node_query.iter_mut() {
         if raw_text.id == entity_to_edit {
             commands.insert_resource(ActiveEditor {
                 entity: Some(entity),
@@ -89,7 +87,6 @@ fn handle_entity_selection(
             continue;
         }
         style.display = Display::None;
-        cosmic_edit.editor.buffer_mut().set_redraw(false);
         let str = get_cosmic_text(&cosmic_edit.editor);
         let bevy_markdown = BevyMarkdown {
             text: str,
@@ -125,7 +122,7 @@ fn handle_entity_selection(
 fn handle_no_entity_selection(
     velo_node_query: &mut Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
     raw_text_node_query: &mut Query<
-        (&mut Style, &RawText, &Parent, Entity, &mut CosmicEditImage),
+        (&mut Style, &RawText, &Parent, Entity, &CosmicEditImage),
         With<RawText>,
     >,
     commands: &mut Commands,
@@ -145,12 +142,11 @@ fn handle_no_entity_selection(
     }
 
     // Hide raw text and have markdown view for all nodes
-    for (mut style, raw_text, parent, _, mut cosmic_edit) in raw_text_node_query.iter_mut() {
+    for (mut style, raw_text, parent, _, cosmic_edit) in raw_text_node_query.iter_mut() {
         if style.display == Display::None {
             continue;
         }
         style.display = Display::None;
-        cosmic_edit.editor.buffer_mut().set_redraw(false);
         let str = get_cosmic_text(&cosmic_edit.editor);
         let bevy_markdown = BevyMarkdown {
             text: str,
