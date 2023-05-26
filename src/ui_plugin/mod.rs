@@ -98,7 +98,7 @@ pub enum NodeType {
 #[derive(Serialize, Deserialize, Clone)]
 pub enum TextPos {
     Center,
-    TopLeft
+    TopLeft,
 }
 
 #[derive(Serialize, Deserialize)]
