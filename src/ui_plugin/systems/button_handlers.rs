@@ -4,7 +4,9 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::render::view::RenderLayers;
 use bevy::{prelude::*, window::PrimaryWindow};
 
+use bevy_cosmic_edit::CosmicEditImage;
 use bevy_pkv::PkvStore;
+use cosmic_text::Edit;
 use serde::Serialize;
 use serde_json::{json, Value};
 use uuid::Uuid;
@@ -13,13 +15,13 @@ use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc, DocListItemButton,
-    GenericButton, NewDoc, ParticlesEffect, SaveDoc, TextPosMode, Tooltip, VeloNode,
+    GenericButton, NewDoc, ParticlesEffect, RawText, SaveDoc, TextPosMode, Tooltip, VeloNode,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, EffectsCamera, Tab};
 use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
-use crate::utils::{get_timestamp, load_doc_to_memory, ReflectableUuid};
+use crate::utils::{get_timestamp, load_doc_to_memory, to_cosmic_text_pos, ReflectableUuid};
 
 pub fn rec_button_handlers(
     mut commands: Commands,
@@ -161,6 +163,7 @@ pub fn change_text_pos(
     >,
     mut nodes: Query<(&mut Style, &VeloNode), With<VeloNode>>,
     state: Res<UiState>,
+    mut raw_text_node_query: Query<(&RawText, &mut CosmicEditImage), With<RawText>>,
 ) {
     for (interaction, text_pos_mode) in &mut interaction_query {
         match *interaction {
@@ -172,6 +175,14 @@ pub fn change_text_pos(
                                 pos_to_style(text_pos_mode.text_pos.clone());
                             style.justify_content = justify_content;
                             style.align_items = align_items;
+                            for (raw_text, mut cosmic_editor) in &mut raw_text_node_query.iter_mut()
+                            {
+                                if raw_text.id == node.id {
+                                    cosmic_editor.text_pos =
+                                        to_cosmic_text_pos(text_pos_mode.text_pos.clone());
+                                    cosmic_editor.editor.buffer_mut().set_redraw(true)
+                                }
+                            }
                         }
                     }
                 }

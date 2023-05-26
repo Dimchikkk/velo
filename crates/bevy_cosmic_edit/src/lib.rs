@@ -20,11 +20,18 @@ pub struct CosmicEditMeta<'a> {
     pub font_system: &'a mut FontSystem,
     pub is_visible: bool,
     pub initial_background: Option<UiImage>,
+    pub text_pos: CosmicTextPos,
+}
+
+pub enum CosmicTextPos {
+    Center,
+    TopLeft,
 }
 
 #[derive(Component)]
 pub struct CosmicEditImage {
     pub editor: Editor,
+    pub text_pos: CosmicTextPos,
 }
 pub struct CosmicEditPlugin;
 
@@ -197,8 +204,13 @@ fn cosmic_edit_bevy_events(
                 // RETURN
                 return;
             }
-            let offset_y = get_y_offset(&cosmic_edit.editor);
-            let offset_x = get_x_offset(&cosmic_edit.editor);
+            let (offset_y, offset_x) = match cosmic_edit.text_pos {
+                CosmicTextPos::Center => (
+                    get_y_offset(&cosmic_edit.editor),
+                    get_x_offset(&cosmic_edit.editor),
+                ),
+                CosmicTextPos::TopLeft => (0, 0),
+            };
             if buttons.just_pressed(MouseButton::Left) {
                 if let Some(node_cursor_pos) = get_node_cursor_pos(window, node_transform, node) {
                     cosmic_edit.editor.action(
@@ -258,8 +270,13 @@ fn cosmic_edit_redraw_buffer(
             let height = cmp::max((node.size().y * window.scale_factor() as f32) as i32, 1) as f32;
             let font_color = cosmic_text::Color::rgb(0, 0, 0);
             let mut pixels = vec![0; width as usize * height as usize * 4];
-            let offset_y = get_y_offset(&cosmic_edit.editor);
-            let offset_x = get_x_offset(&cosmic_edit.editor);
+            let (offset_y, offset_x) = match cosmic_edit.text_pos {
+                CosmicTextPos::Center => (
+                    get_y_offset(&cosmic_edit.editor),
+                    get_x_offset(&cosmic_edit.editor),
+                ),
+                CosmicTextPos::TopLeft => (0, 0),
+            };
             cosmic_edit
                 .editor
                 .draw(font_system, swash_cache, font_color, |x, y, w, h, color| {
@@ -336,7 +353,13 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
         image_bundle.image = initial_background;
     }
     let cosmic_edit = commands
-        .spawn((image_bundle, CosmicEditImage { editor }))
+        .spawn((
+            image_bundle,
+            CosmicEditImage {
+                editor,
+                text_pos: cosmic_edit_meta.text_pos,
+            },
+        ))
         .id();
     cosmic_edit
 }
@@ -407,6 +430,7 @@ mod tests {
             font_system: &mut FontSystem::new(),
             is_visible: true,
             initial_background: None,
+            text_pos: CosmicTextPos::Center,
         };
         spawn_cosmic_edit(&mut commands, cosmic_edit_meta);
     }
