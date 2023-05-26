@@ -98,10 +98,7 @@ pub enum NodeType {
 #[derive(Serialize, Deserialize, Clone)]
 pub enum TextPos {
     Center,
-    BottomRight,
-    BottomLeft,
-    TopRight,
-    TopLeft,
+    TopLeft
 }
 
 #[derive(Serialize, Deserialize)]
@@ -214,7 +211,6 @@ impl Plugin for UiPlugin {
             add_tab_handler,
             delete_tab_handler,
             rename_tab_handler,
-            text_manipulation,
             mouse_scroll_list,
             list_item_click,
             new_doc_handler,

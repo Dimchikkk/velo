@@ -12,9 +12,6 @@ pub fn add_text_pos(
 ) -> Entity {
     let image = match text_pos_mode.text_pos {
         crate::TextPos::Center => arrow_server.load("text-center.png"),
-        crate::TextPos::BottomRight => arrow_server.load("text-right-bottom.png"),
-        crate::TextPos::BottomLeft => arrow_server.load("text-left-bottom.png"),
-        crate::TextPos::TopRight => arrow_server.load("text-right-top.png"),
         crate::TextPos::TopLeft => arrow_server.load("text-left-top.png"),
     };
     let top = commands

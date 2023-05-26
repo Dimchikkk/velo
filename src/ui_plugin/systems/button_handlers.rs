@@ -12,9 +12,9 @@ use uuid::Uuid;
 use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
-    get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
-    DocListItemButton, EditableText, GenericButton, NewDoc, ParticlesEffect, SaveDoc,
-    TextManipulation, TextManipulationAction, TextPosMode, Tooltip, VeloNode,
+    pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
+    DocListItemButton, GenericButton, NewDoc, ParticlesEffect, SaveDoc,
+    TextPosMode, Tooltip, VeloNode,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
@@ -193,118 +193,6 @@ pub fn change_arrow_type(
         match *interaction {
             Interaction::Clicked => {
                 state.arrow_type = arrow_mode.arrow_type;
-            }
-            Interaction::Hovered => {}
-            Interaction::None => {}
-        }
-    }
-}
-
-pub fn text_manipulation(
-    mut interaction_query: Query<
-        (&Interaction, &TextManipulationAction),
-        (Changed<Interaction>, With<TextManipulationAction>),
-    >,
-    mut editable_text: Query<(&mut Text, &EditableText), With<EditableText>>,
-    ui_state: Res<UiState>,
-) {
-    for (interaction, text_manipulation) in &mut interaction_query {
-        match *interaction {
-            Interaction::Clicked => {
-                #[cfg(not(target_arch = "wasm32"))]
-                let mut clipboard = arboard::Clipboard::new().unwrap();
-
-                match text_manipulation.action_type {
-                    TextManipulation::Cut => {
-                        if let Some(id) = vec![
-                            ui_state.entity_to_edit,
-                            ui_state.tab_to_edit,
-                            ui_state.doc_to_edit,
-                            ui_state.modal_id,
-                        ]
-                        .into_iter()
-                        .find_map(|x| x)
-                        {
-                            for (mut text, node) in editable_text.iter_mut() {
-                                if node.id == id {
-                                    let mut str = "".to_string();
-                                    let mut text_sections = text.sections.clone();
-                                    text_sections.pop();
-                                    for section in text_sections.iter() {
-                                        str = format!("{}{}", str, section.value.clone());
-                                    }
-                                    text.sections = vec![
-                                        TextSection {
-                                            value: "".to_string(),
-                                            style: TextStyle {
-                                                font_size: 20.0,
-                                                color: Color::BLACK,
-                                                ..default()
-                                            },
-                                        },
-                                        TextSection {
-                                            value: " ".to_string(),
-                                            style: TextStyle {
-                                                font_size: 20.0,
-                                                color: Color::BLACK,
-                                                ..default()
-                                            },
-                                        },
-                                    ];
-                                }
-                            }
-                        }
-                    }
-                    TextManipulation::Paste =>
-                    {
-                        #[cfg(not(target_arch = "wasm32"))]
-                        if let Ok(clipboard_text) = clipboard.get_text() {
-                            for (mut text, editable_text) in editable_text.iter_mut() {
-                                if vec![
-                                    ui_state.entity_to_edit,
-                                    ui_state.tab_to_edit,
-                                    ui_state.doc_to_edit,
-                                    ui_state.modal_id,
-                                ]
-                                .contains(&Some(editable_text.id))
-                                {
-                                    let mut str = "".to_string();
-                                    let mut text_sections = text.sections.clone();
-                                    text_sections.pop();
-                                    for section in text_sections.iter() {
-                                        str = format!("{}{}", str, section.value.clone());
-                                    }
-                                    str = format!("{}{}", str, clipboard_text);
-                                    text.sections = get_sections(str).0;
-                                }
-                            }
-                        }
-                    }
-                    TextManipulation::Copy => {
-                        if let Some(id) = vec![
-                            ui_state.entity_to_edit,
-                            ui_state.tab_to_edit,
-                            ui_state.doc_to_edit,
-                            ui_state.modal_id,
-                        ]
-                        .into_iter()
-                        .find_map(|x| x)
-                        {
-                            for (text, node) in editable_text.iter_mut() {
-                                if node.id == id {
-                                    let mut str = "".to_string();
-                                    let mut text_sections = text.sections.clone();
-                                    text_sections.pop();
-                                    for section in text_sections.iter() {
-                                        str = format!("{}{}", str, section.value.clone());
-                                    }
-                                    #[cfg(not(target_arch = "wasm32"))]
-                                    clipboard.set_text(str).unwrap()
-                                }
-                            }
-                        }
-                    }
-                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
