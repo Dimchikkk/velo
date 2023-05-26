@@ -38,7 +38,11 @@ pub struct CosmicEditPlugin;
 impl Plugin for CosmicEditPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(init)
-            .add_systems((cosmic_edit_bevy_events, cosmic_edit_redraw_buffer))
+            .add_systems((
+                cosmic_edit_bevy_events,
+                cosmic_edit_redraw_buffer,
+                active_editor_changed,
+            ))
             .init_resource::<FontSystemState>()
             .init_resource::<SwashCacheState>()
             .init_resource::<ActiveEditor>();
@@ -78,6 +82,25 @@ fn init(
     let font_system = cosmic_text::FontSystem::new_with_locale_and_db(locale, db);
     font_system_state.font_system = Some(font_system);
     swash_cache_state.swash_cache = Some(SwashCache::new());
+}
+
+fn active_editor_changed(
+    active_editor: ResMut<ActiveEditor>,
+    mut previous_editor: Local<Option<Entity>>,
+    mut cosmic_edit_query: Query<&mut CosmicEditImage, With<CosmicEditImage>>,
+    mut font_system_state: ResMut<FontSystemState>,
+) {
+    if active_editor.is_changed() && active_editor.entity != *previous_editor {
+        if let Some(editor) = active_editor.entity {
+            if let Ok(mut cosmic_edit) = cosmic_edit_query.get_mut(editor) {
+                let font_system = font_system_state.font_system.as_mut().unwrap();
+                cosmic_edit.editor.set_select_opt(None);
+                cosmic_edit.editor.action(font_system, Action::BufferEnd);
+                cosmic_edit.editor.buffer_mut().set_redraw(true);
+            }
+        }
+        *previous_editor = active_editor.entity;
+    }
 }
 
 fn get_node_cursor_pos(
@@ -224,6 +247,7 @@ fn cosmic_edit_bevy_events(
                 // RETURN
                 return;
             }
+            // TODO: implement proper hold check
             if buttons.pressed(MouseButton::Left) {
                 if let Some(node_cursor_pos) = get_node_cursor_pos(window, node_transform, node) {
                     cosmic_edit.editor.action(
