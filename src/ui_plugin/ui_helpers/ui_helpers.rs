@@ -48,20 +48,14 @@ pub fn add_rectangle_txt(text: String) -> TextBundle {
 
 pub fn pos_to_style(text_pos: TextPos) -> (JustifyContent, AlignItems) {
     match text_pos {
-        TextPos::TopRight => (JustifyContent::FlexEnd, AlignItems::FlexStart),
         TextPos::TopLeft => (JustifyContent::FlexStart, AlignItems::FlexStart),
-        TextPos::BottomRight => (JustifyContent::FlexEnd, AlignItems::FlexEnd),
-        TextPos::BottomLeft => (JustifyContent::FlexStart, AlignItems::FlexEnd),
         TextPos::Center => (JustifyContent::Center, AlignItems::Center),
     }
 }
 
 pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
     match style {
-        (JustifyContent::FlexEnd, AlignItems::FlexStart) => TextPos::TopRight,
         (JustifyContent::FlexStart, AlignItems::FlexStart) => TextPos::TopLeft,
-        (JustifyContent::FlexEnd, AlignItems::FlexEnd) => TextPos::BottomRight,
-        (JustifyContent::FlexStart, AlignItems::FlexEnd) => TextPos::BottomLeft,
         (JustifyContent::Center, AlignItems::Center) => TextPos::Center,
         _ => panic!("Invalid style! {:?}", style),
     }

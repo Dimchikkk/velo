@@ -6,8 +6,7 @@ use bevy_pkv::PkvStore;
 
 use super::ui_helpers::{
     self, AddTab, BottomPanel, ButtonAction, LeftPanel, LeftPanelControls, LeftPanelExplorer,
-    MainPanel, Menu, NewDoc, ParticlesEffect, Root, SaveDoc, TextManipulation,
-    TextManipulationAction, TextPosMode,
+    MainPanel, Menu, NewDoc, ParticlesEffect, Root, SaveDoc, TextPosMode,
 };
 use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
@@ -25,10 +24,6 @@ use add_color::*;
 #[path = "add_front_back.rs"]
 mod add_front_back;
 use add_front_back::*;
-
-#[path = "add_text_manipulation.rs"]
-mod add_text_manipulation;
-use add_text_manipulation::*;
 
 #[path = "add_text_pos.rs"]
 mod add_text_pos;
@@ -470,76 +465,11 @@ pub fn init_layout(
         &mut commands,
         &asset_server,
         TextPosMode {
-            text_pos: TextPos::BottomRight,
-        },
-    );
-    let text_pos3 = add_text_pos(
-        &mut commands,
-        &asset_server,
-        TextPosMode {
-            text_pos: TextPos::BottomLeft,
-        },
-    );
-    let text_pos4 = add_text_pos(
-        &mut commands,
-        &asset_server,
-        TextPosMode {
             text_pos: TextPos::TopLeft,
-        },
-    );
-    let text_pos5 = add_text_pos(
-        &mut commands,
-        &asset_server,
-        TextPosMode {
-            text_pos: TextPos::TopRight,
         },
     );
     commands.entity(text_modes).add_child(text_pos1);
     commands.entity(text_modes).add_child(text_pos2);
-    commands.entity(text_modes).add_child(text_pos3);
-    commands.entity(text_modes).add_child(text_pos4);
-    commands.entity(text_modes).add_child(text_pos5);
-
-    let text_manipulation = commands
-        .spawn((NodeBundle {
-            style: Style {
-                align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
-                margin: UiRect::all(Val::Px(5.)),
-                justify_content: JustifyContent::Start,
-                ..default()
-            },
-            ..default()
-        },))
-        .id();
-    let cut = add_text_manipulation(
-        &mut commands,
-        &asset_server,
-        TextManipulationAction {
-            action_type: TextManipulation::Cut,
-        },
-    );
-
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let copy = add_text_manipulation(
-            &mut commands,
-            &asset_server,
-            TextManipulationAction {
-                action_type: TextManipulation::Copy,
-            },
-        );
-        let paste = add_text_manipulation(
-            &mut commands,
-            &asset_server,
-            TextManipulationAction {
-                action_type: TextManipulation::Paste,
-            },
-        );
-        commands.entity(text_manipulation).add_child(copy);
-        commands.entity(text_manipulation).add_child(paste);
-    }
-    commands.entity(text_manipulation).add_child(cut);
 
     #[cfg(not(target_arch = "wasm32"))]
     let effects = commands
@@ -566,9 +496,6 @@ pub fn init_layout(
     commands.entity(left_panel_controls).add_child(color_picker);
     commands.entity(left_panel_controls).add_child(arrow_modes);
     commands.entity(left_panel_controls).add_child(text_modes);
-    commands
-        .entity(left_panel_controls)
-        .add_child(text_manipulation);
     commands.entity(left_panel_controls).add_child(fron_back);
     #[cfg(not(target_arch = "wasm32"))]
     commands.entity(left_panel_controls).add_child(effects);
