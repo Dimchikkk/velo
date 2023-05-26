@@ -4,7 +4,6 @@ use bevy::{
     window::PrimaryWindow,
 };
 
-
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 

@@ -4,7 +4,6 @@ use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
 
-
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
 use crate::components::Tab;
