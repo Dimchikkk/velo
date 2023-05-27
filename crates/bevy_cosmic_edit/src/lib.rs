@@ -3,7 +3,7 @@ use std::cmp;
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
-    window::PrimaryWindow,
+    window::{PrimaryWindow, WindowScaleFactorChanged},
 };
 use cosmic_text::{
     Action, Affinity, Attrs, Buffer, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
@@ -32,6 +32,8 @@ pub enum CosmicTextPos {
 pub struct CosmicEditImage {
     pub editor: Editor,
     pub text_pos: CosmicTextPos,
+    pub font_size: f32,
+    pub font_line_height: f32,
 }
 pub struct CosmicEditPlugin;
 
@@ -42,6 +44,7 @@ impl Plugin for CosmicEditPlugin {
                 cosmic_edit_bevy_events,
                 cosmic_edit_redraw_buffer,
                 active_editor_changed,
+                scale_factor_changed,
             ))
             .init_resource::<FontSystemState>()
             .init_resource::<SwashCacheState>()
@@ -82,6 +85,37 @@ fn init(
     let font_system = cosmic_text::FontSystem::new_with_locale_and_db(locale, db);
     font_system_state.font_system = Some(font_system);
     swash_cache_state.swash_cache = Some(SwashCache::new());
+}
+
+fn scale_factor_changed(
+    mut scale_factor_changed: EventReader<WindowScaleFactorChanged>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+    mut cosmic_edit_query: Query<(&mut CosmicEditImage, &mut Style), With<CosmicEditImage>>,
+    mut font_system_state: ResMut<FontSystemState>,
+) {
+    let factor_changed = scale_factor_changed.iter().last().is_some();
+    let window = windows.single();
+    if factor_changed {
+        let font_system = font_system_state.font_system.as_mut().unwrap();
+        for (mut cosmic_edit, style) in &mut cosmic_edit_query.iter_mut() {
+            let scale_factor = window.scale_factor() as f32;
+            let size = (
+                convert_from_val_px(style.size.width),
+                convert_from_val_px(style.size.height),
+            );
+            let metrics = Metrics::new(cosmic_edit.font_size, cosmic_edit.font_line_height).scale(scale_factor);
+            cosmic_edit
+                .editor
+                .buffer_mut()
+                .set_metrics(font_system, metrics);
+            cosmic_edit.editor.buffer_mut().set_size(
+                font_system,
+                size.0 * scale_factor,
+                size.1 * scale_factor,
+            );
+            cosmic_edit.editor.buffer_mut().set_redraw(true);
+        }
+    }
 }
 
 fn active_editor_changed(
@@ -381,6 +415,8 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
             CosmicEditImage {
                 editor,
                 text_pos: cosmic_edit_meta.text_pos,
+                font_line_height: cosmic_edit_meta.line_height,
+                font_size: cosmic_edit_meta.font_size
             },
         ))
         .id();
@@ -434,6 +470,13 @@ fn draw_pixel(
     buffer[offset + 1] = (current >> 8) as u8;
     buffer[offset] = (current >> 16) as u8;
     buffer[offset + 3] = (current >> 24) as u8;
+}
+
+fn convert_from_val_px(x: Val) -> f32 {
+    match x {
+        Val::Px(x) => x,
+        _ => 0.,
+    }
 }
 
 #[cfg(test)]
