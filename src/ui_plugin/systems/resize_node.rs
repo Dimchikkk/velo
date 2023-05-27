@@ -57,7 +57,7 @@ pub fn resize_entity_end(
         ),
     >,
     mut raw_text_query: Query<
-        (&RawText, &mut CosmicEditImage, &mut Style),
+        (&RawText, &mut CosmicEditImage),
         (
             Without<VeloNodeContainer>,
             Without<BevyMarkdownNode>,
@@ -145,7 +145,7 @@ pub fn resize_entity_end(
                             }
                         }
                     };
-                    for (text, mut cosmic_edit, mut text_style) in &mut raw_text_query.iter_mut() {
+                    for (text, mut cosmic_edit) in &mut raw_text_query.iter_mut() {
                         if text.id == id {
                             let scale_factor = primary_window.scale_factor() as f32;
                             let width = convert_from_val_px(button_style.size.width);
@@ -156,10 +156,6 @@ pub fn resize_entity_end(
                                 height * scale_factor,
                             );
                             cosmic_edit.editor.buffer_mut().set_redraw(true);
-                            text_style.size = Size {
-                                width: Val::Px(width),
-                                height: Val::Px(height),
-                            };
                             break;
                         }
                     }

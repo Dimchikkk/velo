@@ -232,19 +232,18 @@ pub fn get_tooltip(text: String, size: f32, tooltip_position: TooltipPosition) -
         TooltipPosition::Bottom => UiRect {
             left: Val::Px(30.),
             right: Val::Px(0.),
-            top: Val::Px(30.),
+            top: Val::Px(40.),
             bottom: Val::Px(0.),
         },
         TooltipPosition::Top => UiRect {
             left: Val::Px(30.),
             right: Val::Px(0.),
-            top: Val::Px(-30.),
+            top: Val::Px(-40.),
             bottom: Val::Px(0.),
         },
     };
     let text_bundle_style = Style {
         position,
-        padding: UiRect::all(Val::Px(5.)),
         ..default()
     };
     TextBundle {

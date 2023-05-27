@@ -12,15 +12,13 @@ use image::{ImageBuffer, RgbaImage};
 
 pub struct CosmicEditMeta<'a> {
     pub text: String,
-    pub width: f32,
-    pub height: f32,
+    pub text_pos: CosmicTextPos,
+    pub initial_background: Option<UiImage>,
     pub font_size: f32,
     pub line_height: f32,
     pub scale_factor: f32,
     pub font_system: &'a mut FontSystem,
     pub is_visible: bool,
-    pub initial_background: Option<UiImage>,
-    pub text_pos: CosmicTextPos,
 }
 
 pub enum CosmicTextPos {
@@ -119,19 +117,15 @@ fn init(
 fn scale_factor_changed(
     mut scale_factor_changed: EventReader<WindowScaleFactorChanged>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut cosmic_edit_query: Query<(&mut CosmicEditImage, &mut Style), With<CosmicEditImage>>,
+    mut cosmic_edit_query: Query<(&mut CosmicEditImage, &Node), With<CosmicEditImage>>,
     mut font_system_state: ResMut<FontSystemState>,
 ) {
     let factor_changed = scale_factor_changed.iter().last().is_some();
     let window = windows.single();
     if factor_changed {
         let font_system = font_system_state.font_system.as_mut().unwrap();
-        for (mut cosmic_edit, style) in &mut cosmic_edit_query.iter_mut() {
+        for (mut cosmic_edit, node) in &mut cosmic_edit_query.iter_mut() {
             let scale_factor = window.scale_factor() as f32;
-            let size = (
-                convert_from_val_px(style.size.width),
-                convert_from_val_px(style.size.height),
-            );
             let metrics = Metrics::new(cosmic_edit.font_size, cosmic_edit.font_line_height)
                 .scale(scale_factor);
             cosmic_edit
@@ -140,8 +134,8 @@ fn scale_factor_changed(
                 .set_metrics(font_system, metrics);
             cosmic_edit.editor.buffer_mut().set_size(
                 font_system,
-                size.0 * scale_factor,
-                size.1 * scale_factor,
+                node.size().x * scale_factor,
+                node.size().y * scale_factor,
             );
             cosmic_edit.editor.buffer_mut().set_redraw(true);
         }
@@ -356,6 +350,10 @@ fn cosmic_edit_redraw_buffer(
         if cosmic_edit.editor.buffer().redraw() {
             let width = cmp::max((node.size().x * window.scale_factor() as f32) as i32, 1) as f32;
             let height = cmp::max((node.size().y * window.scale_factor() as f32) as i32, 1) as f32;
+            cosmic_edit
+                .editor
+                .buffer_mut()
+                .set_size(font_system, width, height);
             let font_color = cosmic_text::Color::rgb(0, 0, 0);
             let mut pixels = vec![0; width as usize * height as usize * 4];
             let (offset_y, offset_x) = match cosmic_edit.text_pos {
@@ -409,12 +407,7 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
     let font_system = cosmic_edit_meta.font_system;
     let metrics = Metrics::new(cosmic_edit_meta.font_size, cosmic_edit_meta.line_height)
         .scale(cosmic_edit_meta.scale_factor);
-    let mut buffer = Buffer::new(font_system, metrics);
-    buffer.set_size(
-        font_system,
-        cosmic_edit_meta.width * cosmic_edit_meta.scale_factor,
-        cosmic_edit_meta.height * cosmic_edit_meta.scale_factor,
-    );
+    let buffer = Buffer::new(font_system, metrics);
     let mut editor = Editor::new(buffer);
     editor.buffer_mut().lines.clear();
     let attrs = Attrs::new();
@@ -423,8 +416,8 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
         .set_text(font_system, cosmic_edit_meta.text.as_str(), attrs);
     let mut style = Style {
         size: Size {
-            width: Val::Px(cosmic_edit_meta.width),
-            height: Val::Px(cosmic_edit_meta.height),
+            width: Val::Percent(100.),
+            height: Val::Percent(100.),
         },
         ..default()
     };
@@ -502,13 +495,6 @@ fn draw_pixel(
     buffer[offset + 3] = (current >> 24) as u8;
 }
 
-fn convert_from_val_px(x: Val) -> f32 {
-    match x {
-        Val::Px(x) => x,
-        _ => 0.,
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use bevy::prelude::*;
@@ -518,8 +504,6 @@ mod tests {
     fn test_spawn_cosmic_edit_system(mut commands: Commands) {
         let cosmic_edit_meta = CosmicEditMeta {
             text: "Blah".to_string(),
-            width: 50.,
-            height: 50.,
             font_size: 18.,
             line_height: 20.,
             scale_factor: 1.,

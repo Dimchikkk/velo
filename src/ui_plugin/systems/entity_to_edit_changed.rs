@@ -12,7 +12,14 @@ pub fn entity_to_edit_changed(
     mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
     mut velo_node_query: Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
     mut raw_text_node_query: Query<
-        (&mut Style, &RawText, &Parent, Entity, &CosmicEditImage),
+        (
+            &mut Style,
+            &RawText,
+            &Parent,
+            Entity,
+            &CosmicEditImage,
+            &Node,
+        ),
         With<RawText>,
     >,
     mut markdown_text_node_query: Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
@@ -48,7 +55,14 @@ fn handle_entity_selection(
     entity_to_edit: ReflectableUuid,
     velo_node_query: &mut Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
     raw_text_node_query: &mut Query<
-        (&mut Style, &RawText, &Parent, Entity, &CosmicEditImage),
+        (
+            &mut Style,
+            &RawText,
+            &Parent,
+            Entity,
+            &CosmicEditImage,
+            &Node,
+        ),
         With<RawText>,
     >,
     markdown_text_node_query: &mut Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
@@ -75,7 +89,7 @@ fn handle_entity_selection(
     }
 
     // Hide raw text and have markdown view for all nodes (except selected)
-    for (mut style, raw_text, parent, entity, cosmic_edit) in raw_text_node_query.iter_mut() {
+    for (mut style, raw_text, parent, entity, cosmic_edit, node) in raw_text_node_query.iter_mut() {
         if raw_text.id == entity_to_edit {
             commands.insert_resource(ActiveEditor {
                 entity: Some(entity),
@@ -98,7 +112,7 @@ fn handle_entity_selection(
                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
             ),
             extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
-            size: Some((style.size.width, style.size.height)),
+            size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
             .expect("should handle markdown conversion");
@@ -122,7 +136,14 @@ fn handle_entity_selection(
 fn handle_no_entity_selection(
     velo_node_query: &mut Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
     raw_text_node_query: &mut Query<
-        (&mut Style, &RawText, &Parent, Entity, &CosmicEditImage),
+        (
+            &mut Style,
+            &RawText,
+            &Parent,
+            Entity,
+            &CosmicEditImage,
+            &Node,
+        ),
         With<RawText>,
     >,
     commands: &mut Commands,
@@ -142,7 +163,7 @@ fn handle_no_entity_selection(
     }
 
     // Hide raw text and have markdown view for all nodes
-    for (mut style, raw_text, parent, _, cosmic_edit) in raw_text_node_query.iter_mut() {
+    for (mut style, raw_text, parent, _, cosmic_edit, node) in raw_text_node_query.iter_mut() {
         if style.display == Display::None {
             continue;
         }
@@ -158,7 +179,7 @@ fn handle_no_entity_selection(
                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
             ),
             extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
-            size: Some((style.size.width, style.size.height)),
+            size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown).unwrap();
         commands

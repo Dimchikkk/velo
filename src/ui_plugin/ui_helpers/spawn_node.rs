@@ -12,7 +12,7 @@ use super::{
     ResizeMarker, VeloNode, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
-use crate::utils::{convert_from_val_px, to_cosmic_text_pos, ReflectableUuid};
+use crate::utils::{to_cosmic_text_pos, ReflectableUuid};
 
 #[derive(Clone)]
 pub struct NodeMeta {
@@ -159,8 +159,6 @@ pub fn spawn_node(
 
     let cosmic_edit_meta = CosmicEditMeta {
         text: item_meta.text.clone(),
-        width: convert_from_val_px(item_meta.size.0),
-        height: convert_from_val_px(item_meta.size.1),
         font_size: 14.,
         line_height: 18.,
         scale_factor: item_meta.scale_factor,
