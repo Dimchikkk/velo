@@ -1,52 +1,69 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, ui::FocusPolicy};
+use bevy_cosmic_edit::{spawn_cosmic_edit, CosmicEditMeta};
 use bevy_ui_borders::BorderColor;
+use cosmic_text::FontSystem;
 
 use crate::{
-    ui_plugin::ui_helpers::{
-        get_tooltip, EditableText, GenericButton, SearchButton, SearchText, Tooltip,
-        TooltipPosition,
+    ui_plugin::{
+        ui_helpers::{
+            get_tooltip, GenericButton, SearchButton, SearchText, Tooltip, TooltipPosition,
+        },
+        TextPos,
     },
-    utils::ReflectableUuid,
+    utils::{to_cosmic_text_pos, ReflectableUuid},
 };
 
-pub fn add_search_box(commands: &mut Commands) -> Entity {
+pub fn add_search_box(
+    commands: &mut Commands,
+    font_system: &mut FontSystem,
+    scale_factor: f32,
+) -> Entity {
     let id = ReflectableUuid::generate();
     let root = commands
-        .spawn((NodeBundle {
-            style: Style {
-                size: Size::new(Val::Percent(80.), Val::Percent(8.)),
-                justify_content: JustifyContent::Center,
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                margin: UiRect {
-                    left: Val::Px(10.),
-                    right: Val::Px(10.),
-                    top: Val::Px(0.),
-                    bottom: Val::Px(10.),
-                },
-                ..default()
-            },
-            ..default()
-        },))
-        .id();
-    let search_button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::WHITE.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    border: UiRect::all(Val::Px(1.)),
+                    size: Size::new(Val::Percent(80.), Val::Percent(8.)),
+                    flex_direction: FlexDirection::Column,
+                    margin: UiRect::all(Val::Px(5.)),
                     ..default()
                 },
                 ..default()
             },
-            BorderColor(Color::GRAY.with_a(0.5)),
             GenericButton,
+        ))
+        .id();
+    let button = commands
+        .spawn((
+            ButtonBundle {
+                focus_policy: FocusPolicy::Pass,
+                style: Style {
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    justify_content: JustifyContent::Center,
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ..default()
+            },
             SearchButton { id },
         ))
         .id();
+    let cosmic_edit_meta = CosmicEditMeta {
+        text: "".to_string(),
+        text_pos: to_cosmic_text_pos(TextPos::Center),
+        initial_background: None,
+        font_size: 14.,
+        line_height: 18.,
+        scale_factor,
+        font_system,
+        is_visible: true,
+    };
+    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
+    commands
+        .entity(cosmic_edit)
+        .insert(BorderColor(Color::GRAY.with_a(0.5)));
+    commands.entity(cosmic_edit).insert(SearchText { id });
     let tooltip = commands
         .spawn((
             get_tooltip(
@@ -57,42 +74,9 @@ pub fn add_search_box(commands: &mut Commands) -> Entity {
             Tooltip,
         ))
         .id();
-    let search_label = commands
-        .spawn((
-            TextBundle {
-                text: Text {
-                    sections: vec![
-                        TextSection {
-                            value: "".to_string(),
-                            style: TextStyle {
-                                font_size: 14.,
-                                color: Color::BLACK,
-                                ..default()
-                            },
-                        },
-                        TextSection {
-                            value: " ".to_string(),
-                            style: TextStyle {
-                                font_size: 14.,
-                                color: Color::BLACK,
-                                ..default()
-                            },
-                        },
-                    ],
-                    ..default()
-                },
-                style: Style {
-                    position_type: PositionType::Absolute,
-                    ..default()
-                },
-                ..default()
-            },
-            SearchText { id },
-            EditableText { id },
-        ))
-        .id();
-    commands.entity(search_button).add_child(tooltip);
-    commands.entity(search_button).add_child(search_label);
-    commands.entity(root).add_child(search_button);
+
+    commands.entity(button).add_child(cosmic_edit);
+    commands.entity(root).add_child(button);
+    commands.entity(root).add_child(tooltip);
     root
 }

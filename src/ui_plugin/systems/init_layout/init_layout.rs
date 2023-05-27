@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use bevy::window::PrimaryWindow;
+use bevy_cosmic_edit::FontSystemState;
 use bevy_ui_borders::BorderColor;
 use std::time::Duration;
 
@@ -56,13 +58,16 @@ pub fn init_layout(
     mut app_state: ResMut<AppState>,
     asset_server: Res<AssetServer>,
     mut pkv: ResMut<PkvStore>,
+    mut font_system_state: ResMut<FontSystemState>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
+    let primary_window: &Window = windows.single();
     #[cfg(not(target_arch = "wasm32"))]
     {
         let (tx, rx) = async_channel::bounded(1);
         commands.insert_resource(CommChannels { tx, rx });
     }
-
+    let font_system = font_system_state.font_system.as_mut().unwrap();
     let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
     commands.insert_resource(BlinkTimer {
         timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
@@ -264,12 +269,7 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 style: Style {
-                    padding: UiRect {
-                        left: Val::Px(10.),
-                        right: Val::Px(10.),
-                        top: Val::Px(10.),
-                        bottom: Val::Px(10.),
-                    },
+                    padding: UiRect::all(Val::Px(10.)),
                     size: Size::new(Val::Percent(100.), Val::Percent(40.)),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
@@ -282,7 +282,11 @@ pub fn init_layout(
         ))
         .id();
     #[cfg(not(target_arch = "wasm32"))]
-    let search_box = add_search_box(&mut commands);
+    let search_box = add_search_box(
+        &mut commands,
+        font_system,
+        primary_window.scale_factor() as f32,
+    );
     let left_panel_explorer = commands
         .spawn((
             NodeBundle {
