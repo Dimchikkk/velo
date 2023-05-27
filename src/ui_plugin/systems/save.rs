@@ -126,7 +126,7 @@ pub fn save_to_store(
 
 pub fn save_tab(
     images: Res<Assets<Image>>,
-    node_container_query: Query<&Style, With<VeloNodeContainer>>,
+    node_container_query: Query<(&Style, &Node), With<VeloNodeContainer>>,
     node_query: Query<
         (
             &VeloNode,
@@ -170,10 +170,10 @@ pub fn save_tab(
         for (editable_text, cosmic_edit) in text_query.iter() {
             if node.id == editable_text.id {
                 let str = get_cosmic_text(&cosmic_edit.editor);
-                let style: &Style = node_container_query.get(parent.get()).unwrap();
+                let (style, node_container): (&Style, &Node) =
+                    node_container_query.get(parent.get()).unwrap();
                 let left = style.position.left;
                 let bottom = style.position.bottom;
-                let size = style.size;
                 let bg_color = bg_color.0;
                 let z_index = match *z_index {
                     ZIndex::Local(v) => v,
@@ -184,8 +184,8 @@ pub fn save_tab(
                     id: node.id.0,
                     left,
                     bottom,
-                    width: size.width,
-                    height: size.height,
+                    width: Val::Px(node_container.size().x),
+                    height: Val::Px(node_container.size().y),
                     bg_color,
                     text: JsonNodeText {
                         text: str.clone(),
