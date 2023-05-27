@@ -90,7 +90,7 @@ fn handle_entity_selection(
         let str = get_cosmic_text(&cosmic_edit.editor);
         let bevy_markdown = BevyMarkdown {
             text: str,
-            regular_font: Some(asset_server.load("fonts/SourceCodePro-Regular.ttf")),
+            regular_font: Some(TextStyle::default().font),
             code_font: Some(TextStyle::default().font),
             bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
             italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
