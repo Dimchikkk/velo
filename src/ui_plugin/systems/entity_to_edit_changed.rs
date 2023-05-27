@@ -98,7 +98,7 @@ fn handle_entity_selection(
                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
             ),
             extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
-            size: Some((style.max_size.width, style.max_size.height)),
+            size: Some((style.size.width, style.size.height)),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
             .expect("should handle markdown conversion");
@@ -158,7 +158,7 @@ fn handle_no_entity_selection(
                 asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
             ),
             extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
-            size: Some((style.max_size.width, style.max_size.height)),
+            size: Some((style.size.width, style.size.height)),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown).unwrap();
         commands

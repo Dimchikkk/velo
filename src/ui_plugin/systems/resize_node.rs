@@ -56,7 +56,7 @@ pub fn resize_entity_end(
             Without<RawText>,
         ),
     >,
-    mut raw_text_input_query: Query<
+    mut raw_text_query: Query<
         (&RawText, &mut CosmicEditImage, &mut Style),
         (
             Without<VeloNodeContainer>,
@@ -66,16 +66,13 @@ pub fn resize_entity_end(
     >,
     mut markdown_text_input_query: Query<
         (&Parent, &mut Style),
-        (With<BevyMarkdownNode>, Without<VeloNodeContainer>),
-    >,
-    markdown_view_query: Query<
-        (&BevyMarkdownView, Entity),
         (
-            Without<VeloNodeContainer>,
             With<BevyMarkdownNode>,
+            Without<VeloNodeContainer>,
             Without<RawText>,
         ),
     >,
+    markdown_view_query: Query<(&BevyMarkdownView, Entity), With<BevyMarkdownView>>,
     mut events: EventWriter<RedrawArrowEvent>,
     windows: Query<&mut Window, With<PrimaryWindow>>,
     mut font_system_state: ResMut<FontSystemState>,
@@ -147,34 +144,33 @@ pub fn resize_entity_end(
                                 button_style.position.bottom = Val::Px(y - delta.y);
                             }
                         }
-                    }
-                }
-                for (text, mut cosmic_edit, mut text_style) in &mut raw_text_input_query.iter_mut()
-                {
-                    if text.id == id {
-                        let scale_factor = primary_window.scale_factor() as f32;
-                        let width = convert_from_val_px(button_style.size.width);
-                        let height = convert_from_val_px(button_style.size.height);
-                        if width > 0. && height > 0. {
+                    };
+                    for (text, mut cosmic_edit, mut text_style) in &mut raw_text_query.iter_mut() {
+                        if text.id == id {
+                            let scale_factor = primary_window.scale_factor() as f32;
+                            let width = convert_from_val_px(button_style.size.width);
+                            let height = convert_from_val_px(button_style.size.height);
                             cosmic_edit.editor.buffer_mut().set_size(
                                 font_system,
                                 width * scale_factor,
                                 height * scale_factor,
                             );
                             cosmic_edit.editor.buffer_mut().set_redraw(true);
-                        }
-                        text_style.size = Size {
-                            width: Val::Px(width),
-                            height: Val::Px(height),
+                            text_style.size = Size {
+                                width: Val::Px(width),
+                                height: Val::Px(height),
+                            };
+                            break;
                         }
                     }
-                }
-                for (node, entity) in markdown_view_query.iter() {
-                    if node.id == id {
-                        for (parent, mut text_style) in &mut markdown_text_input_query {
-                            if parent.get() == entity {
-                                text_style.max_size.width = button_style.size.width;
-                                text_style.max_size.height = button_style.size.height;
+                    for (node, entity) in markdown_view_query.iter() {
+                        if node.id == id {
+                            for (parent, mut text_style) in &mut markdown_text_input_query {
+                                if parent.get() == entity {
+                                    text_style.max_size.width = button_style.size.width;
+                                    text_style.max_size.height = button_style.size.height;
+                                    break;
+                                }
                             }
                         }
                     }
