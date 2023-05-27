@@ -64,9 +64,9 @@ use create_new_node::*;
 mod search;
 #[cfg(not(target_arch = "wasm32"))]
 pub use search::*;
-#[path = "systems/doc_list_ui_changed.rs"]
-mod doc_list_ui_changed;
-use doc_list_ui_changed::*;
+#[path = "systems/canvas_click.rs"]
+mod canvas_click;
+use canvas_click::*;
 
 pub struct UiPlugin;
 
@@ -237,6 +237,7 @@ impl Plugin for UiPlugin {
             #[cfg(not(target_arch = "wasm32"))]
             particles_effect,
             save_to_store.after(save_tab),
+            canvas_click,
         ));
         app.add_systems((set_focused_entity, clickable_links).chain());
 

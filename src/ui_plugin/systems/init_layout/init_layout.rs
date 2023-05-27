@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+
 use bevy_ui_borders::BorderColor;
 use std::time::Duration;
 
@@ -241,7 +242,8 @@ pub fn init_layout(
         .id();
     let main_panel = commands
         .spawn((
-            NodeBundle {
+            ButtonBundle {
+                background_color: Color::WHITE.with_a(0.).into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,

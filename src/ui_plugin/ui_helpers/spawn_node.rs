@@ -158,7 +158,7 @@ pub fn spawn_node(
     commands.entity(button).add_child(resize_marker4);
 
     let cosmic_edit_meta = CosmicEditMeta {
-        text: "Emoji and ligatures supported: 😀😀😀 x => y".to_string(),
+        text: item_meta.text.clone(),
         width: convert_from_val_px(item_meta.size.0),
         height: convert_from_val_px(item_meta.size.1),
         font_size: 14.,
