@@ -5,7 +5,7 @@ mod systems;
 mod ui_plugin;
 mod utils;
 use bevy::{prelude::*, window::PresentMode};
-use bevy_cosmic_edit::CosmicEditPlugin;
+use bevy_cosmic_edit::{CosmicEditPlugin, CosmicFontConfig, CustomCosmicFont};
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 #[cfg(not(target_arch = "wasm32"))]
 use bevy_hanabi::HanabiPlugin;
@@ -44,7 +44,18 @@ impl Plugin for VeloPlugin {
             .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)
             .add_plugin(BordersPlugin)
-            .insert_resource(PkvStore::new(ORG_NAME, APP_NAME));
+            .insert_resource(PkvStore::new(ORG_NAME, APP_NAME))
+            .insert_resource(CosmicFontConfig {
+                fonts_dir_path: None,
+                load_system_fonts: false,
+                monospace_family: Some("Source Code Pro".to_string()),
+                sans_serif_family: Some("Source Code Pro".to_string()),
+                serif_family: Some("Source Code Pro".to_string()),
+                custom_font_data: Some(CustomCosmicFont {
+                    data: include_bytes!("../assets/fonts/SourceCodePro-Regular.ttf"),
+                    override_bevy_font: true,
+                }),
+            });
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_plugin(HanabiPlugin);

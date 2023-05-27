@@ -1,4 +1,4 @@
-use std::cmp;
+use std::{cmp, path::PathBuf};
 
 use bevy::{
     prelude::*,
@@ -32,8 +32,8 @@ pub enum CosmicTextPos {
 pub struct CosmicEditImage {
     pub editor: Editor,
     pub text_pos: CosmicTextPos,
-    pub font_size: f32,
-    pub font_line_height: f32,
+    font_size: f32,
+    font_line_height: f32,
 }
 pub struct CosmicEditPlugin;
 
@@ -62,6 +62,20 @@ pub struct FontSystemState {
     pub font_system: Option<FontSystem>,
 }
 
+pub struct CustomCosmicFont {
+    pub data: &'static [u8],
+    pub override_bevy_font: bool,
+}
+#[derive(Resource, Default)]
+pub struct CosmicFontConfig {
+    pub fonts_dir_path: Option<PathBuf>,
+    pub load_system_fonts: bool,
+    pub monospace_family: Option<String>,
+    pub sans_serif_family: Option<String>,
+    pub serif_family: Option<String>,
+    pub custom_font_data: Option<CustomCosmicFont>,
+}
+
 #[derive(Resource, Default)]
 struct SwashCacheState {
     swash_cache: Option<SwashCache>,
@@ -71,17 +85,32 @@ fn init(
     mut font_system_state: ResMut<FontSystemState>,
     mut swash_cache_state: ResMut<SwashCacheState>,
     mut fonts: ResMut<Assets<Font>>,
+    cosmic_font: Res<CosmicFontConfig>,
 ) {
     let locale = sys_locale::get_locale().unwrap_or_else(|| String::from("en-US"));
     let mut db = cosmic_text::fontdb::Database::new();
-    let data: &'static [u8] = include_bytes!("../../../assets/fonts/SourceCodePro-Regular.ttf");
-    db.load_font_data(data.to_vec());
-    let font = Font::try_from_bytes(data.to_vec()).unwrap();
-    fonts.set_untracked(TextStyle::default().font, font);
-    // TODO: figure out whether 'Source Code Pro' is valid value
-    db.set_monospace_family("Source Code Pro");
-    db.set_sans_serif_family("Source Code Pro");
-    db.set_serif_family("Source Code Pro");
+    if let Some(monospace_family) = cosmic_font.monospace_family.clone() {
+        db.set_monospace_family(monospace_family);
+    }
+    if let Some(sans_serif_family) = cosmic_font.sans_serif_family.clone() {
+        db.set_sans_serif_family(sans_serif_family);
+    }
+    if let Some(serif_family) = cosmic_font.serif_family.clone() {
+        db.set_serif_family(serif_family);
+    }
+    if let Some(dir_path) = cosmic_font.fonts_dir_path.clone() {
+        db.load_fonts_dir(dir_path);
+    }
+    if let Some(custom_font_data) = &cosmic_font.custom_font_data {
+        db.load_font_data(custom_font_data.data.to_vec());
+        if custom_font_data.override_bevy_font {
+            let font = Font::try_from_bytes(custom_font_data.data.to_vec()).unwrap();
+            fonts.set_untracked(TextStyle::default().font, font);
+        }
+    }
+    if cosmic_font.load_system_fonts {
+        db.load_system_fonts();
+    }
     let font_system = cosmic_text::FontSystem::new_with_locale_and_db(locale, db);
     font_system_state.font_system = Some(font_system);
     swash_cache_state.swash_cache = Some(SwashCache::new());
@@ -103,7 +132,8 @@ fn scale_factor_changed(
                 convert_from_val_px(style.size.width),
                 convert_from_val_px(style.size.height),
             );
-            let metrics = Metrics::new(cosmic_edit.font_size, cosmic_edit.font_line_height).scale(scale_factor);
+            let metrics = Metrics::new(cosmic_edit.font_size, cosmic_edit.font_line_height)
+                .scale(scale_factor);
             cosmic_edit
                 .editor
                 .buffer_mut()
@@ -416,7 +446,7 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
                 editor,
                 text_pos: cosmic_edit_meta.text_pos,
                 font_line_height: cosmic_edit_meta.line_height,
-                font_size: cosmic_edit_meta.font_size
+                font_size: cosmic_edit_meta.font_size,
             },
         ))
         .id();
