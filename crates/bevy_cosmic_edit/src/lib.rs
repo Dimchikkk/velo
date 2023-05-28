@@ -461,7 +461,7 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
     if let Some(initial_size) = cosmic_edit_meta.initial_size {
         editor
             .buffer_mut()
-            .set_size(font_system, initial_size.0 as f32, initial_size.1 as f32);
+            .set_size(font_system, initial_size.0, initial_size.1);
     }
     let mut style = Style {
         size: Size {
