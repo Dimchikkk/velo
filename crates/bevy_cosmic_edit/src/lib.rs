@@ -10,6 +10,7 @@ use cosmic_text::{
 };
 use image::{ImageBuffer, RgbaImage};
 
+/// Contains metadata for spawning cosmic edit, including text content, position, size, and style.
 pub struct CosmicEditMeta<'a> {
     pub text: String,
     pub text_pos: CosmicTextPos,
@@ -22,11 +23,14 @@ pub struct CosmicEditMeta<'a> {
     pub is_visible: bool,
 }
 
+/// Enum representing the position of the cosmic text.
 pub enum CosmicTextPos {
     Center,
     TopLeft,
 }
 
+
+/// Component struct that holds an Editor and cosmic text position.
 #[derive(Component)]
 pub struct CosmicEditImage {
     pub editor: Editor,
@@ -34,6 +38,8 @@ pub struct CosmicEditImage {
     font_size: f32,
     font_line_height: f32,
 }
+
+/// Plugin struct that adds systems and initializes resources related to cosmic edit functionality.
 pub struct CosmicEditPlugin;
 
 impl Plugin for CosmicEditPlugin {
@@ -51,20 +57,25 @@ impl Plugin for CosmicEditPlugin {
     }
 }
 
+/// Resource struct that keeps track of the currently active editor entity.
 #[derive(Resource, Default)]
 pub struct ActiveEditor {
     pub entity: Option<Entity>,
 }
 
+/// Resource struct that holds the font system used for cosmic text rendering.
 #[derive(Resource, Default)]
 pub struct FontSystemState {
     pub font_system: Option<FontSystem>,
 }
 
+/// Struct representing a custom cosmic font.
 pub struct CustomCosmicFont {
     pub data: &'static [u8],
     pub override_bevy_font: bool,
 }
+
+/// Resource struct that holds configuration options for cosmic fonts.
 #[derive(Resource, Default)]
 pub struct CosmicFontConfig {
     pub fonts_dir_path: Option<PathBuf>,
@@ -180,6 +191,23 @@ fn get_node_cursor_pos(
     })
 }
 
+/// Retrieves the cosmic text content from an editor.
+///
+/// # Arguments
+///
+/// * `editor` - A reference to the `Editor` instance containing the text content.
+///
+/// # Returns
+///
+/// A `String` containing the cosmic text content.
+///
+/// # Examples
+///
+/// ```
+/// let editor = Editor::new();
+/// let cosmic_text = get_cosmic_text(&editor);
+/// println!("Cosmic text: {}", cosmic_text);
+/// ```
 pub fn get_cosmic_text(editor: &Editor) -> String {
     let mut text = String::new();
     let line_count = editor.buffer().lines.len();
@@ -410,6 +438,16 @@ fn cosmic_edit_redraw_buffer(
     }
 }
 
+/// Spawns a cosmic edit entity with the provided configuration.
+///
+/// # Arguments
+///
+/// * `commands` - A mutable reference to the `Commands` instance to spawn the entity.
+/// * `cosmic_edit_meta` - The configuration data for the cosmic edit entity.
+///
+/// # Returns
+///
+/// The `Entity` identifier of the spawned cosmic edit entity.
 pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMeta) -> Entity {
     let font_system = cosmic_edit_meta.font_system;
     let metrics = Metrics::new(cosmic_edit_meta.font_size, cosmic_edit_meta.line_height)
