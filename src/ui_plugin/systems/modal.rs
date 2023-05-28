@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use bevy::prelude::*;
 use bevy::tasks::IoTaskPool;
-use bevy_cosmic_edit::{get_cosmic_text, CosmicEditImage};
+use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEditImage};
 use bevy_pkv::PkvStore;
 use linkify::{LinkFinder, LinkKind};
 
@@ -225,6 +225,7 @@ pub fn confirm_modal(
                 }
                 commands.entity(entity).despawn_recursive();
                 ui_state.modal_id = None;
+                commands.insert_resource(ActiveEditor { entity: None });
             }
         }
     }
@@ -288,6 +289,7 @@ pub fn confirm_modal(
             }
             commands.entity(entity).despawn_recursive();
             ui_state.modal_id = None;
+            commands.insert_resource(ActiveEditor { entity: None });
         }
     }
 }
