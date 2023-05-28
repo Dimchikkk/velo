@@ -4,7 +4,7 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::render::view::RenderLayers;
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use bevy_cosmic_edit::CosmicEditImage;
+use bevy_cosmic_edit::{CosmicEditImage, FontSystemState};
 use bevy_pkv::PkvStore;
 use cosmic_text::Edit;
 use serde::Serialize;
@@ -299,6 +299,7 @@ pub fn delete_doc_handler(
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     pkv: Res<PkvStore>,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut delete_doc_query.iter_mut() {
@@ -328,6 +329,7 @@ pub fn delete_doc_handler(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
+                    &mut font_system_state,
                     window,
                     id,
                     super::ModalAction::DeleteDocument,
@@ -365,6 +367,7 @@ pub fn export_to_file(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -374,7 +377,13 @@ pub fn export_to_file(
                 *ui_state = UiState::default();
                 commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
-                let entity = spawn_modal(&mut commands, window, id, super::ModalAction::SaveToFile);
+                let entity = spawn_modal(
+                    &mut commands,
+                    &mut font_system_state,
+                    window,
+                    id,
+                    super::ModalAction::SaveToFile,
+                );
                 commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}
@@ -479,6 +488,7 @@ pub fn import_from_file(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -488,8 +498,13 @@ pub fn import_from_file(
                 *ui_state = UiState::default();
                 commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
-                let entity =
-                    spawn_modal(&mut commands, window, id, super::ModalAction::LoadFromFile);
+                let entity = spawn_modal(
+                    &mut commands,
+                    &mut font_system_state,
+                    window,
+                    id,
+                    super::ModalAction::LoadFromFile,
+                );
                 commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}
@@ -504,6 +519,7 @@ pub fn import_from_url(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -513,8 +529,13 @@ pub fn import_from_url(
                 *ui_state = UiState::default();
                 commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
-                let entity =
-                    spawn_modal(&mut commands, window, id, super::ModalAction::LoadFromUrl);
+                let entity = spawn_modal(
+                    &mut commands,
+                    &mut font_system_state,
+                    window,
+                    id,
+                    super::ModalAction::LoadFromUrl,
+                );
                 commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}

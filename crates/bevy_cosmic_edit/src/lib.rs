@@ -13,6 +13,7 @@ use image::{ImageBuffer, RgbaImage};
 pub struct CosmicEditMeta<'a> {
     pub text: String,
     pub text_pos: CosmicTextPos,
+    pub initial_size: Option<(f32, f32)>,
     pub initial_background: Option<UiImage>,
     pub font_size: f32,
     pub line_height: f32,
@@ -414,6 +415,11 @@ pub fn spawn_cosmic_edit(commands: &mut Commands, cosmic_edit_meta: CosmicEditMe
     editor
         .buffer_mut()
         .set_text(font_system, cosmic_edit_meta.text.as_str(), attrs);
+    if let Some(initial_size) = cosmic_edit_meta.initial_size {
+        editor
+            .buffer_mut()
+            .set_size(font_system, initial_size.0 as f32, initial_size.1 as f32);
+    }
     let mut style = Style {
         size: Size {
             width: Val::Percent(100.),
@@ -511,6 +517,7 @@ mod tests {
             is_visible: true,
             initial_background: None,
             text_pos: CosmicTextPos::Center,
+            initial_size: None,
         };
         spawn_cosmic_edit(&mut commands, cosmic_edit_meta);
     }
