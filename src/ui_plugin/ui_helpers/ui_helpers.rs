@@ -48,20 +48,14 @@ pub fn add_rectangle_txt(text: String) -> TextBundle {
 
 pub fn pos_to_style(text_pos: TextPos) -> (JustifyContent, AlignItems) {
     match text_pos {
-        TextPos::TopRight => (JustifyContent::FlexEnd, AlignItems::FlexStart),
         TextPos::TopLeft => (JustifyContent::FlexStart, AlignItems::FlexStart),
-        TextPos::BottomRight => (JustifyContent::FlexEnd, AlignItems::FlexEnd),
-        TextPos::BottomLeft => (JustifyContent::FlexStart, AlignItems::FlexEnd),
         TextPos::Center => (JustifyContent::Center, AlignItems::Center),
     }
 }
 
 pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
     match style {
-        (JustifyContent::FlexEnd, AlignItems::FlexStart) => TextPos::TopRight,
         (JustifyContent::FlexStart, AlignItems::FlexStart) => TextPos::TopLeft,
-        (JustifyContent::FlexEnd, AlignItems::FlexEnd) => TextPos::BottomRight,
-        (JustifyContent::FlexStart, AlignItems::FlexEnd) => TextPos::BottomLeft,
         (JustifyContent::Center, AlignItems::Center) => TextPos::Center,
         _ => panic!("Invalid style! {:?}", style),
     }
@@ -80,15 +74,8 @@ fn create_rectangle_btn(
         style: Style {
             position_type: PositionType::Absolute,
             size: Size::new(Val::Percent(100.), Val::Percent(100.)),
-            // position: UiRect {
-            //     left: Val::Px(-3.),
-            //     right: Val::Px(0.),
-            //     top: Val::Px(-3.),
-            //     bottom: Val::Px(0.),
-            // },
             justify_content,
             align_items,
-            // overflow: Overflow::Hidden,
             ..default()
         },
         ..default()
@@ -194,35 +181,6 @@ pub fn get_sections(text: String) -> (Vec<TextSection>, Vec<bool>) {
     (sections, is_link)
 }
 
-pub fn create_rectangle_txt(
-    text: String,
-    max_size: Option<(Val, Val)>,
-    is_active: bool,
-) -> TextBundle {
-    let text = Text {
-        sections: get_sections(text).0,
-        alignment: TextAlignment::Left,
-        linebreak_behaviour: BreakLineOn::WordBoundary,
-    };
-    let mut text_bundle_style = Style {
-        padding: UiRect::all(Val::Px(10.)),
-        ..default()
-    };
-    if let Some((x, y)) = max_size {
-        text_bundle_style.max_size = Size::new(x, y);
-    };
-    if is_active {
-        text_bundle_style.display = Display::Flex;
-    } else {
-        text_bundle_style.display = Display::None;
-    }
-    TextBundle {
-        text,
-        style: text_bundle_style,
-        ..default()
-    }
-}
-
 pub enum TooltipPosition {
     Top,
     Bottom,
@@ -245,19 +203,18 @@ pub fn get_tooltip(text: String, size: f32, tooltip_position: TooltipPosition) -
         TooltipPosition::Bottom => UiRect {
             left: Val::Px(30.),
             right: Val::Px(0.),
-            top: Val::Px(30.),
+            top: Val::Px(40.),
             bottom: Val::Px(0.),
         },
         TooltipPosition::Top => UiRect {
             left: Val::Px(30.),
             right: Val::Px(0.),
-            top: Val::Px(-30.),
+            top: Val::Px(-40.),
             bottom: Val::Px(0.),
         },
     };
     let text_bundle_style = Style {
         position,
-        padding: UiRect::all(Val::Px(5.)),
         ..default()
     };
     TextBundle {
