@@ -96,6 +96,8 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 - for wasm target you can use url query parameter `?document=<url>` to load document from url
 - click save icon to save document to database on native platform or to localhost on wasm target
 
+![velo](./velo.gif)
+
 ## License
 All code in this repository dual-licensed under either:
 
