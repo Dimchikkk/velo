@@ -1,15 +1,20 @@
+use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, FontSystemState};
 use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
 
 use super::{
-    add_rectangle_txt, create_rectangle_txt, EditableText, GenericButton, ModalAction, ModalCancel,
-    ModalConfirm, ModalTop,
+    add_rectangle_txt, EditableText, GenericButton, ModalAction, ModalCancel, ModalConfirm,
+    ModalTop,
 };
-use crate::utils::ReflectableUuid;
+use crate::{
+    ui_plugin::TextPos,
+    utils::{to_cosmic_text_pos, ReflectableUuid},
+};
 
 pub fn spawn_modal(
     commands: &mut Commands,
+    font_system: &mut ResMut<FontSystemState>,
     window: &Window,
     id: ReflectableUuid,
     modal_action: ModalAction,
@@ -19,7 +24,7 @@ pub fn spawn_modal(
     let default_value = match modal_action {
         ModalAction::SaveToFile => "./velo.json".to_string(),
         ModalAction::LoadFromFile => "./velo.json".to_string(),
-        ModalAction::LoadFromUrl => "https://<path-to-velo.json>".to_string(),
+        ModalAction::LoadFromUrl => "https://gist..".to_string(),
         _ => "".to_string(),
     };
     let top = commands
@@ -140,6 +145,7 @@ pub fn spawn_modal(
                     style: Style {
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::SpaceAround,
+                        padding: UiRect::all(Val::Px(20.)),
                         size: Size {
                             width: Val::Percent(100.),
                             height: Val::Percent(70.),
@@ -154,10 +160,6 @@ pub fn spawn_modal(
                     style: Style {
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
-                        margin: UiRect {
-                            left: Val::Px(20.),
-                            ..default()
-                        },
                         size: Size {
                             width: Val::Px(50.),
                             height: Val::Percent(30.),
@@ -170,6 +172,8 @@ pub fn spawn_modal(
                     builder.spawn(add_rectangle_txt(modal_action.to_string()));
                 })
                 .id();
+            let width = 180.;
+            let height = 35.;
             let button = commands
                 .spawn((
                     ButtonBundle {
@@ -178,8 +182,8 @@ pub fn spawn_modal(
                             align_items: AlignItems::Center,
                             border: UiRect::all(Val::Px(1.)),
                             size: Size {
-                                width: Val::Px(220.),
-                                height: Val::Px(35.),
+                                width: Val::Px(width),
+                                height: Val::Px(height),
                             },
                             padding: UiRect::all(Val::Px(5.)),
                             ..default()
@@ -189,14 +193,24 @@ pub fn spawn_modal(
                     BorderColor(Color::BLACK),
                 ))
                 .id();
-            let button_text = commands
-                .spawn((
-                    create_rectangle_txt(default_value, None, true),
-                    EditableText { id },
-                ))
-                .id();
+            let cosmic_edit_meta = CosmicEditMeta {
+                text: default_value,
+                text_pos: to_cosmic_text_pos(TextPos::Center),
+                initial_background: None,
+                initial_size: Some((width, height)),
+                font_size: 14.,
+                line_height: 18.,
+                scale_factor: window.scale_factor() as f32,
+                font_system: font_system.font_system.as_mut().unwrap(),
+                is_visible: true,
+            };
+            let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
+            commands.entity(cosmic_edit).insert(EditableText { id });
+            commands.insert_resource(ActiveEditor {
+                entity: Some(cosmic_edit),
+            });
             commands.entity(top).add_child(label);
-            commands.entity(button).add_child(button_text);
+            commands.entity(button).add_child(cosmic_edit);
             commands.entity(top).add_child(button);
             top
         }
@@ -220,7 +234,6 @@ pub fn spawn_modal(
                     style: Style {
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
-                        // overflow: Overflow::Hidden,
                         ..default()
                     },
                     ..default()

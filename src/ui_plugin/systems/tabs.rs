@@ -3,6 +3,7 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
+use bevy_cosmic_edit::FontSystemState;
 
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
@@ -147,6 +148,7 @@ pub fn delete_tab_handler(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut interaction_query {
@@ -166,7 +168,13 @@ pub fn delete_tab_handler(
                     return;
                 }
                 ui_state.modal_id = Some(id);
-                let entity = spawn_modal(&mut commands, window, id, super::ModalAction::DeleteTab);
+                let entity = spawn_modal(
+                    &mut commands,
+                    &mut font_system_state,
+                    window,
+                    id,
+                    super::ModalAction::DeleteTab,
+                );
                 commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}
