@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::PrimaryWindow};
+use bevy_cosmic_edit::FontSystemState;
 
 use crate::utils::ReflectableUuid;
 
@@ -10,13 +11,17 @@ pub fn create_new_node(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     asset_server: Res<AssetServer>,
+    mut font_system_state: ResMut<FontSystemState>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
+    let window = windows.single_mut();
     for event in events.iter() {
         *ui_state = UiState::default();
         ui_state.entity_to_edit = Some(ReflectableUuid(event.node.id));
         let entity = spawn_node(
             &mut commands,
             &asset_server,
+            &mut font_system_state,
             NodeMeta {
                 size: (event.node.width, event.node.height),
                 id: ReflectableUuid(event.node.id),
@@ -28,6 +33,7 @@ pub fn create_new_node(
                 text_pos: event.node.text.pos.clone(),
                 z_index: event.node.z_index,
                 is_active: true,
+                scale_factor: window.scale_factor() as f32,
             },
         );
         commands.entity(main_panel_query.single()).add_child(entity);

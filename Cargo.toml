@@ -6,7 +6,6 @@ repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
 version = "0.1.4"
 edition = "2021"
-publish = false
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
 
@@ -20,6 +19,7 @@ opt-level = 'z'
 [workspace]
 members = [
     "crates/bevy_markdown",
+    "crates/bevy_cosmic_edit"
 ]
 
 [dependencies]
@@ -50,7 +50,9 @@ bevy_pkv = { git = "https://github.com/johanhelsing/bevy_pkv.git", default-featu
 ehttp = "0.1.0"
 async-channel = "1.8"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
+cosmic-text = "0.8.0"
 bevy_markdown = { path = "crates/bevy_markdown" }
+bevy_cosmic_edit = { path = "crates/bevy_cosmic_edit" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.7"

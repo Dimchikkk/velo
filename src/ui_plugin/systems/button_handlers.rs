@@ -4,7 +4,9 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::render::view::RenderLayers;
 use bevy::{prelude::*, window::PrimaryWindow};
 
+use bevy_cosmic_edit::{CosmicEditImage, FontSystemState};
 use bevy_pkv::PkvStore;
+use cosmic_text::Edit;
 use serde::Serialize;
 use serde_json::{json, Value};
 use uuid::Uuid;
@@ -12,15 +14,14 @@ use uuid::Uuid;
 use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
-    get_sections, pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc,
-    DocListItemButton, EditableText, GenericButton, NewDoc, ParticlesEffect, SaveDoc,
-    TextManipulation, TextManipulationAction, TextPosMode, Tooltip, VeloNode,
+    pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc, DocListItemButton,
+    GenericButton, NewDoc, ParticlesEffect, RawText, SaveDoc, TextPosMode, Tooltip, VeloNode,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, EffectsCamera, Tab};
 use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
-use crate::utils::{get_timestamp, load_doc_to_memory, ReflectableUuid};
+use crate::utils::{get_timestamp, load_doc_to_memory, to_cosmic_text_pos, ReflectableUuid};
 
 pub fn rec_button_handlers(
     mut commands: Commands,
@@ -78,6 +79,7 @@ pub fn rec_button_handlers(
                 }
                 super::ui_helpers::ButtonTypes::Del => {
                     if let Some(id) = state.entity_to_edit {
+                        commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                         *state = UiState::default();
                         for (entity, node, _) in nodes.iter() {
                             if node.id == id {
@@ -161,6 +163,7 @@ pub fn change_text_pos(
     >,
     mut nodes: Query<(&mut Style, &VeloNode), With<VeloNode>>,
     state: Res<UiState>,
+    mut raw_text_node_query: Query<(&RawText, &mut CosmicEditImage), With<RawText>>,
 ) {
     for (interaction, text_pos_mode) in &mut interaction_query {
         match *interaction {
@@ -172,6 +175,14 @@ pub fn change_text_pos(
                                 pos_to_style(text_pos_mode.text_pos.clone());
                             style.justify_content = justify_content;
                             style.align_items = align_items;
+                            for (raw_text, mut cosmic_editor) in &mut raw_text_node_query.iter_mut()
+                            {
+                                if raw_text.id == node.id {
+                                    cosmic_editor.text_pos =
+                                        to_cosmic_text_pos(text_pos_mode.text_pos.clone());
+                                    cosmic_editor.editor.buffer_mut().set_redraw(true)
+                                }
+                            }
                         }
                     }
                 }
@@ -193,118 +204,6 @@ pub fn change_arrow_type(
         match *interaction {
             Interaction::Clicked => {
                 state.arrow_type = arrow_mode.arrow_type;
-            }
-            Interaction::Hovered => {}
-            Interaction::None => {}
-        }
-    }
-}
-
-pub fn text_manipulation(
-    mut interaction_query: Query<
-        (&Interaction, &TextManipulationAction),
-        (Changed<Interaction>, With<TextManipulationAction>),
-    >,
-    mut editable_text: Query<(&mut Text, &EditableText), With<EditableText>>,
-    ui_state: Res<UiState>,
-) {
-    for (interaction, text_manipulation) in &mut interaction_query {
-        match *interaction {
-            Interaction::Clicked => {
-                #[cfg(not(target_arch = "wasm32"))]
-                let mut clipboard = arboard::Clipboard::new().unwrap();
-
-                match text_manipulation.action_type {
-                    TextManipulation::Cut => {
-                        if let Some(id) = vec![
-                            ui_state.entity_to_edit,
-                            ui_state.tab_to_edit,
-                            ui_state.doc_to_edit,
-                            ui_state.modal_id,
-                        ]
-                        .into_iter()
-                        .find_map(|x| x)
-                        {
-                            for (mut text, node) in editable_text.iter_mut() {
-                                if node.id == id {
-                                    let mut str = "".to_string();
-                                    let mut text_sections = text.sections.clone();
-                                    text_sections.pop();
-                                    for section in text_sections.iter() {
-                                        str = format!("{}{}", str, section.value.clone());
-                                    }
-                                    text.sections = vec![
-                                        TextSection {
-                                            value: "".to_string(),
-                                            style: TextStyle {
-                                                font_size: 20.0,
-                                                color: Color::BLACK,
-                                                ..default()
-                                            },
-                                        },
-                                        TextSection {
-                                            value: " ".to_string(),
-                                            style: TextStyle {
-                                                font_size: 20.0,
-                                                color: Color::BLACK,
-                                                ..default()
-                                            },
-                                        },
-                                    ];
-                                }
-                            }
-                        }
-                    }
-                    TextManipulation::Paste =>
-                    {
-                        #[cfg(not(target_arch = "wasm32"))]
-                        if let Ok(clipboard_text) = clipboard.get_text() {
-                            for (mut text, editable_text) in editable_text.iter_mut() {
-                                if vec![
-                                    ui_state.entity_to_edit,
-                                    ui_state.tab_to_edit,
-                                    ui_state.doc_to_edit,
-                                    ui_state.modal_id,
-                                ]
-                                .contains(&Some(editable_text.id))
-                                {
-                                    let mut str = "".to_string();
-                                    let mut text_sections = text.sections.clone();
-                                    text_sections.pop();
-                                    for section in text_sections.iter() {
-                                        str = format!("{}{}", str, section.value.clone());
-                                    }
-                                    str = format!("{}{}", str, clipboard_text);
-                                    text.sections = get_sections(str).0;
-                                }
-                            }
-                        }
-                    }
-                    TextManipulation::Copy => {
-                        if let Some(id) = vec![
-                            ui_state.entity_to_edit,
-                            ui_state.tab_to_edit,
-                            ui_state.doc_to_edit,
-                            ui_state.modal_id,
-                        ]
-                        .into_iter()
-                        .find_map(|x| x)
-                        {
-                            for (text, node) in editable_text.iter_mut() {
-                                if node.id == id {
-                                    let mut str = "".to_string();
-                                    let mut text_sections = text.sections.clone();
-                                    text_sections.pop();
-                                    for section in text_sections.iter() {
-                                        str = format!("{}{}", str, section.value.clone());
-                                    }
-                                    #[cfg(not(target_arch = "wasm32"))]
-                                    clipboard.set_text(str).unwrap()
-                                }
-                            }
-                        }
-                    }
-                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -362,6 +261,7 @@ pub fn new_doc_handler(
 }
 
 pub fn rename_doc_handler(
+    mut commands: Commands,
     mut rename_doc_query: Query<
         (&Interaction, &DocListItemButton),
         (Changed<Interaction>, With<DocListItemButton>),
@@ -378,6 +278,7 @@ pub fn rename_doc_handler(
                         < Duration::from_millis(500)
                 {
                     *ui_state = UiState::default();
+                    commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                     ui_state.doc_to_edit = Some(item.id);
                     *double_click = (Duration::from_secs(0), None);
                 } else {
@@ -398,6 +299,7 @@ pub fn delete_doc_handler(
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     pkv: Res<PkvStore>,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut delete_doc_query.iter_mut() {
@@ -423,9 +325,11 @@ pub fn delete_doc_handler(
                 }
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
+                    &mut font_system_state,
                     window,
                     id,
                     super::ModalAction::DeleteDocument,
@@ -463,6 +367,7 @@ pub fn export_to_file(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -470,8 +375,15 @@ pub fn export_to_file(
             Interaction::Clicked => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
-                let entity = spawn_modal(&mut commands, window, id, super::ModalAction::SaveToFile);
+                let entity = spawn_modal(
+                    &mut commands,
+                    &mut font_system_state,
+                    window,
+                    id,
+                    super::ModalAction::SaveToFile,
+                );
                 commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}
@@ -576,6 +488,7 @@ pub fn import_from_file(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -583,9 +496,15 @@ pub fn import_from_file(
             Interaction::Clicked => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
-                let entity =
-                    spawn_modal(&mut commands, window, id, super::ModalAction::LoadFromFile);
+                let entity = spawn_modal(
+                    &mut commands,
+                    &mut font_system_state,
+                    window,
+                    id,
+                    super::ModalAction::LoadFromFile,
+                );
                 commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}
@@ -600,6 +519,7 @@ pub fn import_from_url(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -607,9 +527,15 @@ pub fn import_from_url(
             Interaction::Clicked => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 ui_state.modal_id = Some(id);
-                let entity =
-                    spawn_modal(&mut commands, window, id, super::ModalAction::LoadFromUrl);
+                let entity = spawn_modal(
+                    &mut commands,
+                    &mut font_system_state,
+                    window,
+                    id,
+                    super::ModalAction::LoadFromUrl,
+                );
                 commands.entity(main_panel_query.single()).add_child(entity);
             }
             Interaction::Hovered => {}

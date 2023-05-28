@@ -39,6 +39,3 @@ pub struct LoadTabRequest {
     pub tab_id: ReflectableUuid,
     pub drop_last_checkpoint: bool, // Useful for undo functionality
 }
-
-#[derive(Resource)]
-pub struct FontHandle(pub Handle<Font>);

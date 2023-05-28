@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 
+use bevy_cosmic_edit::CosmicTextPos;
 use serde::{Deserialize, Serialize};
 
 use crate::resources::AppState;
+use crate::ui_plugin::TextPos;
 
 use std::collections::HashMap;
 use std::{fs, path::PathBuf};
@@ -77,4 +79,18 @@ pub fn read_config_file() -> Option<Config> {
         }
     }
     Some(config)
+}
+
+pub fn convert_from_val_px(x: Val) -> f32 {
+    match x {
+        Val::Px(x) => x,
+        _ => 0.,
+    }
+}
+
+pub fn to_cosmic_text_pos(pos: TextPos) -> CosmicTextPos {
+    match pos {
+        TextPos::Center => CosmicTextPos::Center,
+        TextPos::TopLeft => CosmicTextPos::TopLeft,
+    }
 }
