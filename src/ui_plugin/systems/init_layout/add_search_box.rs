@@ -58,6 +58,7 @@ pub fn add_search_box(
         scale_factor,
         font_system,
         is_visible: true,
+        initial_size: None,
     };
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
     commands
