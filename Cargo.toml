@@ -6,7 +6,6 @@ repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
 version = "0.1.4"
 edition = "2021"
-publish = false
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
 
