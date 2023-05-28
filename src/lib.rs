@@ -15,7 +15,7 @@ use canvas::CanvasPlugin;
 use systems::*;
 use ui_plugin::*;
 
-pub static ORG_NAME: &str = "test";
+pub static ORG_NAME: &str = "";
 pub static APP_NAME: &str = "velo";
 
 pub struct VeloPlugin;
