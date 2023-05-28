@@ -1,15 +1,20 @@
+use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, FontSystemState};
 use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
 
 use super::{
-    add_rectangle_txt, create_rectangle_txt, EditableText, GenericButton, ModalAction, ModalCancel,
-    ModalConfirm, ModalTop,
+    add_rectangle_txt, EditableText, GenericButton, ModalAction, ModalCancel, ModalConfirm,
+    ModalTop,
 };
-use crate::utils::ReflectableUuid;
+use crate::{
+    ui_plugin::TextPos,
+    utils::{to_cosmic_text_pos, ReflectableUuid},
+};
 
 pub fn spawn_modal(
     commands: &mut Commands,
+    font_system: &mut ResMut<FontSystemState>,
     window: &Window,
     id: ReflectableUuid,
     modal_action: ModalAction,
@@ -19,7 +24,7 @@ pub fn spawn_modal(
     let default_value = match modal_action {
         ModalAction::SaveToFile => "./velo.json".to_string(),
         ModalAction::LoadFromFile => "./velo.json".to_string(),
-        ModalAction::LoadFromUrl => "https://<path-to-velo.json>".to_string(),
+        ModalAction::LoadFromUrl => "https://gist..".to_string(),
         _ => "".to_string(),
     };
     let top = commands
@@ -60,85 +65,87 @@ pub fn spawn_modal(
             },
             ..default()
         })
+        .id();
+
+    let ok_button = commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0).into(),
+                style: Style {
+                    justify_content: JustifyContent::Center,
+                    border: UiRect::all(Val::Px(1.)),
+                    align_items: AlignItems::Center,
+                    padding: UiRect::all(Val::Px(5.)),
+                    // overflow: Overflow::Hidden,
+                    ..default()
+                },
+                ..default()
+            },
+            BorderColor(Color::BLACK),
+            GenericButton,
+            ModalConfirm {
+                id,
+                action: modal_action.clone(),
+            },
+        ))
         .with_children(|builder| {
-            builder
-                .spawn((
-                    ButtonBundle {
-                        background_color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0)
-                            .into(),
-                        style: Style {
-                            justify_content: JustifyContent::Center,
-                            border: UiRect::all(Val::Px(1.)),
-                            align_items: AlignItems::Center,
-                            padding: UiRect::all(Val::Px(5.)),
-                            // overflow: Overflow::Hidden,
-                            ..default()
-                        },
-                        ..default()
-                    },
-                    BorderColor(Color::BLACK),
-                    GenericButton,
-                    ModalConfirm {
-                        id,
-                        action: modal_action.clone(),
-                    },
-                ))
-                .with_children(|builder| {
-                    let text_style = TextStyle {
-                        font_size: 18.0,
-                        color: Color::rgb(1., 1., 1.),
-                        ..default()
-                    };
+            let text_style = TextStyle {
+                font_size: 18.0,
+                color: Color::rgb(1., 1., 1.),
+                ..default()
+            };
 
-                    builder.spawn(
-                        TextBundle::from_section(" Ok ", text_style).with_style(Style {
-                            position_type: PositionType::Relative,
-                            ..default()
-                        }),
-                    );
-                });
-            builder
-                .spawn((
-                    ButtonBundle {
-                        background_color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0)
-                            .into(),
-                        style: Style {
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            border: UiRect::all(Val::Px(1.)),
-                            padding: UiRect::all(Val::Px(5.)),
-                            ..default()
-                        },
-                        ..default()
-                    },
-                    GenericButton,
-                    BorderColor(Color::BLACK),
-                    ModalCancel { id },
-                ))
-                .with_children(|builder| {
-                    let text_style = TextStyle {
-                        font_size: 18.0,
-                        color: Color::rgb(1., 1., 1.),
-                        ..default()
-                    };
-
-                    builder.spawn(TextBundle::from_section("Cancel", text_style).with_style(
-                        Style {
-                            position_type: PositionType::Relative,
-                            ..default()
-                        },
-                    ));
-                });
+            builder.spawn(
+                TextBundle::from_section(" Ok ", text_style).with_style(Style {
+                    position_type: PositionType::Relative,
+                    ..default()
+                }),
+            );
         })
         .id();
+    let cancel_button = commands
+        .spawn((
+            ButtonBundle {
+                background_color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0).into(),
+                style: Style {
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    border: UiRect::all(Val::Px(1.)),
+                    padding: UiRect::all(Val::Px(5.)),
+                    ..default()
+                },
+                ..default()
+            },
+            GenericButton,
+            BorderColor(Color::BLACK),
+            ModalCancel { id },
+        ))
+        .with_children(|builder| {
+            let text_style = TextStyle {
+                font_size: 18.0,
+                color: Color::rgb(1., 1., 1.),
+                ..default()
+            };
+
+            builder.spawn(
+                TextBundle::from_section("Cancel", text_style).with_style(Style {
+                    position_type: PositionType::Relative,
+                    ..default()
+                }),
+            );
+        })
+        .id();
+    commands.entity(modal_static).add_child(ok_button);
+    commands.entity(modal_static).add_child(cancel_button);
 
     let modal_dynamic = match modal_action {
         ModalAction::SaveToFile | ModalAction::LoadFromFile | ModalAction::LoadFromUrl => {
-            commands
+            let top = commands
                 .spawn(NodeBundle {
                     style: Style {
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::SpaceAround,
+                        padding: UiRect::all(Val::Px(20.)),
                         size: Size {
                             width: Val::Percent(100.),
                             height: Val::Percent(70.),
@@ -147,57 +154,72 @@ pub fn spawn_modal(
                     },
                     ..default()
                 })
-                .with_children(|builder: &mut ChildBuilder| {
-                    builder
-                        .spawn(ButtonBundle {
-                            style: Style {
-                                justify_content: JustifyContent::Center,
-                                align_items: AlignItems::Center,
-                                margin: UiRect {
-                                    left: Val::Px(20.),
-                                    ..default()
-                                },
-                                size: Size {
-                                    width: Val::Px(50.),
-                                    height: Val::Percent(30.),
-                                },
+                .id();
+            let label = commands
+                .spawn(NodeBundle {
+                    style: Style {
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        size: Size {
+                            width: Val::Px(50.),
+                            height: Val::Percent(30.),
+                        },
+                        ..default()
+                    },
+                    ..default()
+                })
+                .with_children(|builder| {
+                    builder.spawn(add_rectangle_txt(modal_action.to_string()));
+                })
+                .id();
+            let width = 180.;
+            let height = 35.;
+            let button = commands
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            justify_content: JustifyContent::Start,
+                            align_items: AlignItems::Center,
+                            border: UiRect::all(Val::Px(1.)),
+                            size: Size {
+                                width: Val::Px(width),
+                                height: Val::Px(height),
+                            },
+                            padding: UiRect {
+                                top: Val::Px(7.),
+                                left: Val::Px(7.),
                                 ..default()
                             },
                             ..default()
-                        })
-                        .with_children(|builder| {
-                            builder.spawn(add_rectangle_txt(modal_action.to_string()));
-                        });
-                    builder
-                        .spawn((
-                            ButtonBundle {
-                                style: Style {
-                                    justify_content: JustifyContent::Start,
-                                    align_items: AlignItems::Center,
-                                    border: UiRect::all(Val::Px(1.)),
-                                    size: Size {
-                                        width: Val::Px(220.),
-                                        height: Val::Px(35.),
-                                    },
-                                    padding: UiRect::all(Val::Px(5.)),
-                                    // overflow: Overflow::Hidden,
-                                    ..default()
-                                },
-                                ..default()
-                            },
-                            BorderColor(Color::BLACK),
-                        ))
-                        .with_children(|builder| {
-                            builder.spawn((
-                                create_rectangle_txt(default_value, None, true),
-                                EditableText { id },
-                            ));
-                        });
-                })
-                .id()
+                        },
+                        ..default()
+                    },
+                    BorderColor(Color::BLACK),
+                ))
+                .id();
+            let cosmic_edit_meta = CosmicEditMeta {
+                text: default_value,
+                text_pos: to_cosmic_text_pos(TextPos::TopLeft),
+                initial_background: None,
+                initial_size: Some((width, height)),
+                font_size: 14.,
+                line_height: 18.,
+                scale_factor: window.scale_factor() as f32,
+                font_system: font_system.font_system.as_mut().unwrap(),
+                is_visible: true,
+            };
+            let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
+            commands.entity(cosmic_edit).insert(EditableText { id });
+            commands.insert_resource(ActiveEditor {
+                entity: Some(cosmic_edit),
+            });
+            commands.entity(top).add_child(label);
+            commands.entity(button).add_child(cosmic_edit);
+            commands.entity(top).add_child(button);
+            top
         }
         ModalAction::DeleteDocument | ModalAction::DeleteTab => {
-            commands
+            let top = commands
                 .spawn(NodeBundle {
                     style: Style {
                         align_items: AlignItems::Center,
@@ -210,25 +232,26 @@ pub fn spawn_modal(
                     },
                     ..default()
                 })
-                .with_children(|builder: &mut ChildBuilder| {
-                    builder
-                        .spawn(ButtonBundle {
-                            style: Style {
-                                justify_content: JustifyContent::Center,
-                                align_items: AlignItems::Center,
-                                // overflow: Overflow::Hidden,
-                                ..default()
-                            },
-                            ..default()
-                        })
-                        .with_children(|builder| {
-                            builder.spawn(add_rectangle_txt(format!(
-                                "Are you sure you want to {}?",
-                                modal_action
-                            )));
-                        });
+                .id();
+            let node = commands
+                .spawn(NodeBundle {
+                    style: Style {
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    ..default()
                 })
-                .id()
+                .id();
+            let node_label = commands
+                .spawn(add_rectangle_txt(format!(
+                    "Are you sure you want to {}?",
+                    modal_action
+                )))
+                .id();
+            commands.entity(node).add_child(node_label);
+            commands.entity(top).add_child(node);
+            top
         }
     };
     let modal = commands

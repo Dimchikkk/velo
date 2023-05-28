@@ -1,16 +1,16 @@
 [package]
-name = "bevy_markdown"
-version = "0.1.0"
-license = "MIT OR Apache-2.0"
-description = "Bevy markdown renderer"
-repository = "https://github.com/StaffEngineer/velo.git"
+name = "bevy_cosmic_edit"
+version = "0.2.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Bevy cosmic-text multiline text input"
+repository = "https://github.com/StaffEngineer/velo.git"
+readme = "Readme.md"
 keywords = ["bevy"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-markdown = "1.0.0-alpha.9"
 bevy = { version = "0.10.1", default-features = false, features = [
   "bevy_asset",
   "bevy_core_pipeline",
@@ -23,9 +23,9 @@ bevy = { version = "0.10.1", default-features = false, features = [
   "png",
   "x11",
 ] }
-uuid = { version = "1.3.0", default-features = false, features = ["v4", "js"] }
-serde = { version = "1.0", features = ["derive"] }
-syntect = { version = "5.0.0", default-features = false, features = ["default-fancy"] }
+cosmic-text = "0.8.0"
+image = "0.24.6"
+sys-locale = "0.3.0"
 
 [dev-dependencies]
 insta = "1.29.0"
