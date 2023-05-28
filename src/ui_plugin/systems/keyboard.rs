@@ -71,24 +71,13 @@ pub fn keyboard_input_system(
             }
         }
     } else {
-        if ui_state.entity_to_edit.is_some()
-            || ui_state.doc_to_edit.is_some()
-            || ui_state.tab_to_edit.is_some()
-            || ui_state.modal_id.is_some()
-            || ui_state.search_box_to_edit.is_some()
-        {
+        if ui_state.doc_to_edit.is_some() || ui_state.tab_to_edit.is_some() {
             blink_timer.timer.unpause();
         } else {
             blink_timer.timer.pause();
         }
         for (mut text, editable_text) in &mut editable_text_query.iter_mut() {
-            if vec![
-                ui_state.tab_to_edit,
-                ui_state.doc_to_edit,
-                ui_state.search_box_to_edit,
-                ui_state.modal_id,
-            ]
-            .contains(&Some(editable_text.id))
+            if vec![ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id))
                 && input.any_just_pressed([KeyCode::Escape, KeyCode::Return])
             {
                 *ui_state = UiState::default();
@@ -99,15 +88,7 @@ pub fn keyboard_input_system(
             {
                 text.sections[0].value = "".to_string();
             }
-            if vec![
-                ui_state.entity_to_edit,
-                ui_state.tab_to_edit,
-                ui_state.doc_to_edit,
-                ui_state.search_box_to_edit,
-                ui_state.modal_id,
-            ]
-            .contains(&Some(editable_text.id))
-            {
+            if vec![ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id)) {
                 let mut str = "".to_string();
                 let mut text_copy = text.clone();
                 text_copy.sections.pop();
