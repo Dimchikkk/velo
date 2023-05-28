@@ -185,7 +185,11 @@ pub fn spawn_modal(
                                 width: Val::Px(width),
                                 height: Val::Px(height),
                             },
-                            padding: UiRect::all(Val::Px(5.)),
+                            padding: UiRect {
+                                top: Val::Px(7.),
+                                left: Val::Px(7.),
+                                ..default()
+                            },
                             ..default()
                         },
                         ..default()
@@ -195,7 +199,7 @@ pub fn spawn_modal(
                 .id();
             let cosmic_edit_meta = CosmicEditMeta {
                 text: default_value,
-                text_pos: to_cosmic_text_pos(TextPos::Center),
+                text_pos: to_cosmic_text_pos(TextPos::TopLeft),
                 initial_background: None,
                 initial_size: Some((width, height)),
                 font_size: 14.,
