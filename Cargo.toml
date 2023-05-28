@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
-version = "0.1.4"
+version = "0.2.0"
 edition = "2021"
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
