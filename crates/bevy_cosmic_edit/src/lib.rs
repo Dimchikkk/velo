@@ -29,7 +29,6 @@ pub enum CosmicTextPos {
     TopLeft,
 }
 
-
 /// Component struct that holds an Editor and cosmic text position.
 #[derive(Component)]
 pub struct CosmicEditImage {
