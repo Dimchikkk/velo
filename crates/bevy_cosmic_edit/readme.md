@@ -1,6 +1,6 @@
 # bevy_cosmic_edit
 
-This bevy plugin provides mutliline text editing for bevy, thanks to [cosmic_text](https://github.com/pop-os/cosmic-text) crate!
+This bevy plugin provides mutliline text editing for bevy apps, thanks to [cosmic_text](https://github.com/pop-os/cosmic-text) crate!
 
 Emoji, ligatures, and other fancy stuff is supported!
 
@@ -32,7 +32,7 @@ and insert `CosmicFontConfig` resource:
 
 Specify directory with fonts, or use system fonts, or use custom font data.
 
-Then spawn cosmic edit UI node:
+Then spawn cosmic-edit UI node:
 
 ```rust
 fn my_bevy_system(
@@ -55,14 +55,42 @@ fn my_bevy_system(
         initial_size: Some((180., 35.)),
     };
     let cosmic_edit = spawn_cosmic_edit(&mut commands, cosmic_edit_meta);
-    // and attach cosmic_edit to any bevy UI node
+    // attach cosmic_edit to any Bevy UI node
     commands.entity(top).add_child(cosmic_edit);
+    // `ActiveEditor` resource controls which cosmic-edit UI node is active (may be useful when window has multiple cosmic-edit nodes)
+    commands.insert_resource(ActiveEditor { entity: Some(cosmic_edit) });
 }
 ```
 
-|bevy|bevy\_cosmic_edit|
-|----|---|
-|0.10|0.2|
+Query created cosmic_entity in another system:
+```rust
+fn my_bevy_another_system(
+    ...,
+    cosmic_edit_query: Query<&CosmicEditImage, With<CosmicEditImage>>,
+) {
+    ...
+    for cosmic_edit in cosmic_edit_query.iter() {
+        let text = get_cosmic_text(&cosmic_edit.editor);
+        ...
+    }
+}
+```
+
+
+`get_cosmic_text` is a little helper function that returns `String` from cosmic-text `Editor`. `Editor` exposes cosmic-text API, so you can use it directly.
+
+
+
+## Examples
+
+For complete examples explore how the plugin is used in https://github.com/StaffEngineer/velo
+
+
+## Compatibility
+
+| bevy | bevy\_cosmic_edit |
+| ---- | ----------------- |
+| 0.10 | 0.2               |
 
 ## License
 
