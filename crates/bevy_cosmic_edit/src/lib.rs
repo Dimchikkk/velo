@@ -182,10 +182,16 @@ fn get_node_cursor_pos(
 
 pub fn get_cosmic_text(editor: &Editor) -> String {
     let mut text = String::new();
-    for line in editor.buffer().lines.iter() {
+    let line_count = editor.buffer().lines.len();
+
+    for (i, line) in editor.buffer().lines.iter().enumerate() {
         text.push_str(line.text());
-        text.push('\n');
+
+        if i < line_count - 1 {
+            text.push('\n');
+        }
     }
+
     text
 }
 
