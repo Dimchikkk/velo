@@ -80,8 +80,21 @@ cargo bundle
 
 ```sh
 cargo fmt
-cargo clippy --allow-staged -- -A clippy::type_complexity -A clippy::too_many_arguments
+cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 ```
+
+## Basic usage
+
+- click on rectangle icon to create rectangle node
+- double-click to select node
+- start typing to add text to selected node
+- resize node by dragging its corners
+- click on canvas to deselect node
+- move node by dragging it (only unselected node can be dragged to allow mouse text selection for selected nodes)
+- click on arrow connection icon to connect nodes, arrow connection nodes are placed on each side of node
+- for native target there is search box that allows to filter documents by text in nodes (fuzzy search)
+- for wasm target you can use url query parameter `?document=<url>` to load document from url
+- click save icon to save document to database on native platform or to localhost on wasm target
 
 ## License
 All code in this repository dual-licensed under either:
