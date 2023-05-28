@@ -10,7 +10,7 @@ WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
 mode is supported (tested on Chrome):
 
-  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/ccd3062ad10af32fba7e189f209509b2/raw/99345e1d2e5d66c0a269635d39f34cc5d6bdf253/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/ccd3062ad10af32fba7e189f209509b2/raw/99345e1d2e5d66c0a269635d39f34cc5d6bdf253/velo.json)
+  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/d5a5c4c8543a520e8751a91c29e4f5f2/raw/38fb5f9b935a5c5dee35261989c1ef9f7e54abe3/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/d5a5c4c8543a520e8751a91c29e4f5f2/raw/38fb5f9b935a5c5dee35261989c1ef9f7e54abe3/velo.json)
 
 ## Inspiration
 
@@ -91,10 +91,12 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 - resize node by dragging its corners
 - click on canvas to deselect node
 - move node by dragging it (only unselected node can be dragged to allow mouse text selection for selected nodes)
-- click on arrow connection icon to connect nodes, arrow connection nodes are placed on each side of node
+- click on little arrow connection icon to connect nodes, arrow connection icons are placed on each side of node
 - for native target there is search box that allows to filter documents by text in nodes (fuzzy search)
 - for wasm target you can use url query parameter `?document=<url>` to load document from url
 - click save icon to save document to database on native platform or to localhost on wasm target
+
+![velo](./velo.gif)
 
 ## License
 All code in this repository dual-licensed under either:
