@@ -105,6 +105,6 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 
 ## Contributing
 Contributions are always welcome! Please adhere to this project\'s code
-of conduct. If you have questions or suggestions feel free to share on [velo discord server](https://discord.gg/PqChPzWV).
+of conduct. If you have questions or suggestions feel free to share on [velo discord server](https://discord.gg/u9E4kr4AtU).
 
 ❤️
