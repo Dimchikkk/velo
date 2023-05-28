@@ -10,7 +10,7 @@ WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
 mode is supported (tested on Chrome):
 
-[<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a78e7380750c052bff78b8e27c9545d3/raw/537c6f57d5257b32940e3fbcf2f4bc6386cdbc7e/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a78e7380750c052bff78b8e27c9545d3/raw/537c6f57d5257b32940e3fbcf2f4bc6386cdbc7e/velo.json)
+  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/ccd3062ad10af32fba7e189f209509b2/raw/99345e1d2e5d66c0a269635d39f34cc5d6bdf253/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/ccd3062ad10af32fba7e189f209509b2/raw/99345e1d2e5d66c0a269635d39f34cc5d6bdf253/velo.json)
 
 ## Inspiration
 
@@ -35,7 +35,6 @@ enjoyable project to work on.
 -   change background color of nodes
 -   move node to front/back
 -   positioning text inside node
--   buttons to cut/copy/paste text
 -   multiple documents/tabs support
 -   load app state from url
 -   ability to create sharable url of the document using \"Share
@@ -52,8 +51,9 @@ enjoyable project to work on.
   - syntax highlighting
   - headings
   - inline code
+  - ordered/unordered lists
 - particles effect [native target only 🖥️]
-- filter documents by text in nodes [native target only 🖥️]
+- filter documents by text in nodes (fuzzy search) [native target only 🖥️]
 
 ## Run
 
