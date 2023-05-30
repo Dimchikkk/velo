@@ -3,12 +3,12 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
-use bevy_cosmic_edit::FontSystemState;
+use bevy_cosmic_edit::{CosmicEditEventer, CosmicFont};
 
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
 use crate::components::Tab;
-use crate::resources::{AppState, LoadDocRequest, LoadTabRequest, SaveTabRequest};
+use crate::resources::{AppState, FontSystemState, LoadDocRequest, LoadTabRequest, SaveTabRequest};
 use crate::utils::{get_timestamp, ReflectableUuid};
 use crate::UiState;
 
@@ -148,7 +148,9 @@ pub fn delete_tab_handler(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut font_system_state: ResMut<FontSystemState>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
+    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
+    font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut interaction_query {
@@ -170,7 +172,9 @@ pub fn delete_tab_handler(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
-                    &mut font_system_state,
+                    &mut cosmic_fonts,
+                    &mut cosmic_edit_eventer,
+                    font_system_state.0.clone().unwrap(),
                     window,
                     id,
                     super::ModalAction::DeleteTab,
