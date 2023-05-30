@@ -4,7 +4,7 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::render::view::RenderLayers;
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use bevy_cosmic_edit::{CosmicEditImage, FontSystemState};
+use bevy_cosmic_edit::{CosmicEdit, CosmicEditEventer, CosmicFont};
 use bevy_pkv::PkvStore;
 use cosmic_text::Edit;
 use serde::Serialize;
@@ -20,7 +20,7 @@ use super::ui_helpers::{
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, EffectsCamera, Tab};
-use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
+use crate::resources::{AppState, FontSystemState, LoadDocRequest, SaveDocRequest};
 use crate::utils::{get_timestamp, load_doc_to_memory, to_cosmic_text_pos, ReflectableUuid};
 
 pub fn rec_button_handlers(
@@ -163,7 +163,7 @@ pub fn change_text_pos(
     >,
     mut nodes: Query<(&mut Style, &VeloNode), With<VeloNode>>,
     state: Res<UiState>,
-    mut raw_text_node_query: Query<(&RawText, &mut CosmicEditImage), With<RawText>>,
+    mut raw_text_node_query: Query<(&RawText, &mut CosmicEdit), With<RawText>>,
 ) {
     for (interaction, text_pos_mode) in &mut interaction_query {
         match *interaction {
@@ -175,12 +175,11 @@ pub fn change_text_pos(
                                 pos_to_style(text_pos_mode.text_pos.clone());
                             style.justify_content = justify_content;
                             style.align_items = align_items;
-                            for (raw_text, mut cosmic_editor) in &mut raw_text_node_query.iter_mut()
-                            {
+                            for (raw_text, mut cosmic_edit) in &mut raw_text_node_query.iter_mut() {
                                 if raw_text.id == node.id {
-                                    cosmic_editor.text_pos =
+                                    cosmic_edit.text_pos =
                                         to_cosmic_text_pos(text_pos_mode.text_pos.clone());
-                                    cosmic_editor.editor.buffer_mut().set_redraw(true)
+                                    cosmic_edit.editor.buffer_mut().set_redraw(true)
                                 }
                             }
                         }
@@ -299,7 +298,9 @@ pub fn delete_doc_handler(
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     pkv: Res<PkvStore>,
-    mut font_system_state: ResMut<FontSystemState>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
+    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
+    font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut delete_doc_query.iter_mut() {
@@ -329,7 +330,9 @@ pub fn delete_doc_handler(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
-                    &mut font_system_state,
+                    &mut cosmic_fonts,
+                    &mut cosmic_edit_eventer,
+                    font_system_state.0.clone().unwrap(),
                     window,
                     id,
                     super::ModalAction::DeleteDocument,
@@ -367,7 +370,9 @@ pub fn export_to_file(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut font_system_state: ResMut<FontSystemState>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
+    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
+    font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -379,7 +384,9 @@ pub fn export_to_file(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
-                    &mut font_system_state,
+                    &mut cosmic_fonts,
+                    &mut cosmic_edit_eventer,
+                    font_system_state.0.clone().unwrap(),
                     window,
                     id,
                     super::ModalAction::SaveToFile,
@@ -488,7 +495,9 @@ pub fn import_from_file(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut font_system_state: ResMut<FontSystemState>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
+    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
+    font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -500,7 +509,9 @@ pub fn import_from_file(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
-                    &mut font_system_state,
+                    &mut cosmic_fonts,
+                    &mut cosmic_edit_eventer,
+                    font_system_state.0.clone().unwrap(),
                     window,
                     id,
                     super::ModalAction::LoadFromFile,
@@ -519,7 +530,9 @@ pub fn import_from_url(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut font_system_state: ResMut<FontSystemState>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
+    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
+    font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -531,7 +544,9 @@ pub fn import_from_url(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
-                    &mut font_system_state,
+                    &mut cosmic_fonts,
+                    &mut cosmic_edit_eventer,
+                    font_system_state.0.clone().unwrap(),
                     window,
                     id,
                     super::ModalAction::LoadFromUrl,
@@ -551,7 +566,7 @@ pub fn button_generic_handler(
         (Changed<Interaction>, With<GenericButton>),
     >,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut tooltips_query: Query<(&mut Visibility, &Parent), With<Tooltip>>,
+    mut tooltips_query: Query<(&mut Style, &Parent), With<Tooltip>>,
 ) {
     let mut primary_window = windows.single_mut();
     for (interaction, mut bg_color, entity) in &mut generic_button_query.iter_mut() {
@@ -560,18 +575,18 @@ pub fn button_generic_handler(
             Interaction::Hovered => {
                 primary_window.cursor.icon = CursorIcon::Hand;
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
-                for (mut visibility, parent) in tooltips_query.iter_mut() {
+                for (mut style, parent) in tooltips_query.iter_mut() {
                     if parent.get() == entity {
-                        *visibility = Visibility::Visible;
+                        style.display = Display::Flex;
                     }
                 }
             }
             Interaction::None => {
                 primary_window.cursor.icon = CursorIcon::Default;
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
-                for (mut visibility, parent) in tooltips_query.iter_mut() {
+                for (mut style, parent) in tooltips_query.iter_mut() {
                     if parent.get() == entity {
-                        *visibility = Visibility::Hidden;
+                        style.display = Display::None;
                     }
                 }
             }
