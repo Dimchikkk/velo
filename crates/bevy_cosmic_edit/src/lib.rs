@@ -505,17 +505,17 @@ pub fn spawn_cosmic_edit(
     if cosmic_edit_meta.display_none {
         style.display = Display::None;
     }
-    let mut image_bundle = ButtonBundle {
+    let mut button_bundle = ButtonBundle {
         focus_policy: bevy::ui::FocusPolicy::Pass,
         style,
         ..default()
     };
     if let Some(initial_background) = cosmic_edit_meta.initial_background {
-        image_bundle.image = initial_background;
+        button_bundle.image = initial_background;
     }
     let cosmic_edit = commands
         .spawn((
-            image_bundle,
+            button_bundle,
             CosmicEdit {
                 editor,
                 font_system: cosmic_edit_meta.font_system_handle,
