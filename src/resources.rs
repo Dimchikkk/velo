@@ -3,6 +3,7 @@ use crate::components::Doc;
 use crate::ui_plugin::SearchIndexState;
 use crate::utils::ReflectableUuid;
 use bevy::prelude::*;
+use bevy_cosmic_edit::CosmicFont;
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
@@ -39,3 +40,6 @@ pub struct LoadTabRequest {
     pub tab_id: ReflectableUuid,
     pub drop_last_checkpoint: bool, // Useful for undo functionality
 }
+
+#[derive(Resource, Default)]
+pub struct FontSystemState(pub Option<Handle<CosmicFont>>);
