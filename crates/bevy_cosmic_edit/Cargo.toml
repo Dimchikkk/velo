@@ -8,7 +8,7 @@ repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
 keywords = ["bevy"]
 
-exclude = ["assets/*", "examples"]
+exclude = ["assets/*"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
