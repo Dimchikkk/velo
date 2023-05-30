@@ -2,6 +2,7 @@ mod canvas;
 mod components;
 mod resources;
 mod systems;
+mod themes;
 mod ui_plugin;
 mod utils;
 use bevy::{prelude::*, window::PresentMode};
@@ -14,6 +15,7 @@ use bevy_ui_borders::BordersPlugin;
 use canvas::CanvasPlugin;
 use resources::FontSystemState;
 use systems::*;
+use themes::*;
 use ui_plugin::*;
 
 pub static ORG_NAME: &str = "";
