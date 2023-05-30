@@ -1,6 +1,5 @@
 ---
-source: crates/bevy-markdown/src/lib.rs
-assertion_line: 473
+source: crates/bevy_markdown/src/lib.rs
 expression: node.clone()
 ---
 Text {
@@ -19,10 +18,23 @@ Text {
             },
         },
         TextSection {
-            value: "Header 1",
+            value: " 1. ",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 30.0,
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Import a HTML file and watch it magically convert to Markdown",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
                 color: Rgba {
                     red: 0.0,
                     green: 0.0,
@@ -45,10 +57,23 @@ Text {
             },
         },
         TextSection {
-            value: "Header 2",
+            value: " 2. ",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 27.0,
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Drag and drop images (requires your Dropbox account be linked)",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
                 color: Rgba {
                     red: 0.0,
                     green: 0.0,
@@ -71,10 +96,23 @@ Text {
             },
         },
         TextSection {
-            value: "Header 3",
+            value: " 3. ",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 24.0,
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Import and save files from GitHub, Dropbox, Google Drive and One Drive",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
                 color: Rgba {
                     red: 0.0,
                     green: 0.0,
@@ -92,84 +130,6 @@ Text {
                     red: 0.0,
                     green: 0.0,
                     blue: 0.0,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "Some header 4 ",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 21.0,
-                color: Rgba {
-                    red: 0.0,
-                    green: 0.0,
-                    blue: 0.0,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "as well",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 21.0,
-                color: Rgba {
-                    red: 0.0,
-                    green: 0.0,
-                    blue: 0.0,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: " italicised",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 21.0,
-                color: Rgba {
-                    red: 0.0,
-                    green: 0.0,
-                    blue: 0.0,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "\n",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.0,
-                    green: 0.0,
-                    blue: 0.0,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "another header ",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.0,
-                    green: 0.0,
-                    blue: 0.0,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "redirecting to google",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.0,
-                    green: 0.0,
-                    blue: 1.0,
                     alpha: 1.0,
                 },
             },

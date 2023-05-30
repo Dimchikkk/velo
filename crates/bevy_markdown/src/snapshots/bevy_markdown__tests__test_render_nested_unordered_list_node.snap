@@ -1,5 +1,5 @@
 ---
-source: crates/bevy-markdown/src/lib.rs
+source: crates/bevy_markdown/src/lib.rs
 expression: node.clone()
 ---
 Text {
@@ -18,7 +18,7 @@ Text {
             },
         },
         TextSection {
-            value: "My rust code:",
+            value: " • ",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
                 font_size: 18.0,
@@ -31,7 +31,7 @@ Text {
             },
         },
         TextSection {
-            value: "\n\n",
+            value: "Import a HTML file and watch it magically convert to Markdown",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
                 font_size: 18.0,
@@ -39,97 +39,6 @@ Text {
                     red: 0.0,
                     green: 0.0,
                     blue: 0.0,
-                    alpha: 0.0,
-                },
-            },
-        },
-        TextSection {
-            value: "fn",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.14901961,
-                    green: 0.54509807,
-                    blue: 0.8235294,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: " ",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "main",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.70980394,
-                    green: 0.5372549,
-                    blue: 0.0,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "(",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: ")",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: " ",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "{",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
                     alpha: 1.0,
                 },
             },
@@ -140,9 +49,9 @@ Text {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
                 font_size: 18.0,
                 color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
                     alpha: 1.0,
                 },
             },
@@ -150,129 +59,38 @@ Text {
         TextSection {
             value: "    ",
             style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
+                font: WeakHandle<Font>(Id(97059ac6-c9ba-4da9-95b6-bed82c3ce198, 0)),
+                font_size: 12.0,
                 color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
+                    red: 1.0,
+                    green: 1.0,
+                    blue: 1.0,
                     alpha: 1.0,
                 },
             },
         },
         TextSection {
-            value: "println!",
+            value: " ◦ ",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
                 font_size: 18.0,
                 color: Rgba {
-                    red: 0.52156866,
-                    green: 0.6,
+                    red: 0.0,
+                    green: 0.0,
                     blue: 0.0,
                     alpha: 1.0,
                 },
             },
         },
         TextSection {
-            value: "(",
+            value: "Drag and drop images (requires your Dropbox account be linked)",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
                 font_size: 18.0,
                 color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "\"",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.5137255,
-                    green: 0.5803922,
-                    blue: 0.5882353,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "Hello world",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.16470589,
-                    green: 0.6313726,
-                    blue: 0.59607846,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "\"",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.5137255,
-                    green: 0.5803922,
-                    blue: 0.5882353,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: ")",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: ";",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "\n",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
-                    alpha: 1.0,
-                },
-            },
-        },
-        TextSection {
-            value: "}",
-            style: TextStyle {
-                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
-                color: Rgba {
-                    red: 0.39607844,
-                    green: 0.48235294,
-                    blue: 0.5137255,
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
                     alpha: 1.0,
                 },
             },
@@ -286,7 +104,163 @@ Text {
                     red: 0.0,
                     green: 0.0,
                     blue: 0.0,
-                    alpha: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: " • ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Import and save files from GitHub, Dropbox, Google Drive and One Drive",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "    ",
+            style: TextStyle {
+                font: WeakHandle<Font>(Id(97059ac6-c9ba-4da9-95b6-bed82c3ce198, 0)),
+                font_size: 12.0,
+                color: Rgba {
+                    red: 1.0,
+                    green: 1.0,
+                    blue: 1.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: " ◦ ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Drag and drop markdown and HTML files into Dillinger",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: " • ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Export documents as Markdown, HTML and PDF",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
                 },
             },
         },

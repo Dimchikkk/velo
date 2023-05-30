@@ -1,0 +1,14 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+expression: node.link_sections.clone()
+---
+[
+    None,
+    None,
+    Some(
+        "https://example.com",
+    ),
+    None,
+    None,
+    None,
+]

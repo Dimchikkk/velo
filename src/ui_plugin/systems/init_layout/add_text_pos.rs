@@ -12,9 +12,6 @@ pub fn add_text_pos(
 ) -> Entity {
     let image = match text_pos_mode.text_pos {
         crate::TextPos::Center => arrow_server.load("text-center.png"),
-        crate::TextPos::BottomRight => arrow_server.load("text-right-bottom.png"),
-        crate::TextPos::BottomLeft => arrow_server.load("text-left-bottom.png"),
-        crate::TextPos::TopRight => arrow_server.load("text-right-top.png"),
         crate::TextPos::TopLeft => arrow_server.load("text-left-top.png"),
     };
     let top = commands
@@ -23,7 +20,7 @@ pub fn add_text_pos(
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
                 margin: UiRect::all(Val::Px(5.)),
-                size: Size::new(Val::Percent(12.), Val::Percent(100.)),
+                size: Size::new(Val::Percent(15.), Val::Percent(100.)),
                 ..default()
             },
             background_color: Color::BLACK.with_a(0.5).into(),

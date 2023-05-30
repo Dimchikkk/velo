@@ -99,17 +99,6 @@ pub struct TextPosMode {
     pub text_pos: TextPos,
 }
 
-pub enum TextManipulation {
-    Cut,
-    Paste,
-    Copy,
-}
-
-#[derive(Component)]
-pub struct TextManipulationAction {
-    pub action_type: TextManipulation,
-}
-
 #[derive(Component)]
 pub struct MainPanel;
 

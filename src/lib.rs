@@ -5,13 +5,13 @@ mod systems;
 mod ui_plugin;
 mod utils;
 use bevy::{prelude::*, window::PresentMode};
+use bevy_cosmic_edit::{CosmicEditPlugin, CosmicFontConfig, CustomCosmicFont};
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 #[cfg(not(target_arch = "wasm32"))]
 use bevy_hanabi::HanabiPlugin;
 use bevy_pkv::PkvStore;
 use bevy_ui_borders::BordersPlugin;
 use canvas::CanvasPlugin;
-use resources::FontHandle;
 use systems::*;
 use ui_plugin::*;
 
@@ -23,8 +23,6 @@ impl Plugin for VeloPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_camera)
             .add_startup_system(setup_background)
-            .add_startup_system(setup_font)
-            .add_system(set_default_font.run_if(resource_exists::<FontHandle>()))
             .add_plugins(
                 DefaultPlugins
                     .set(WindowPlugin {
@@ -42,10 +40,22 @@ impl Plugin for VeloPlugin {
                     .build()
                     .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
             )
+            .add_plugin(CosmicEditPlugin)
             .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)
             .add_plugin(BordersPlugin)
-            .insert_resource(PkvStore::new(ORG_NAME, APP_NAME));
+            .insert_resource(PkvStore::new(ORG_NAME, APP_NAME))
+            .insert_resource(CosmicFontConfig {
+                fonts_dir_path: None,
+                load_system_fonts: false,
+                monospace_family: Some("Source Code Pro".to_string()),
+                sans_serif_family: Some("Source Code Pro".to_string()),
+                serif_family: Some("Source Code Pro".to_string()),
+                custom_font_data: Some(CustomCosmicFont {
+                    data: include_bytes!("../assets/fonts/SourceCodePro-Regular.ttf"),
+                    override_bevy_font: true,
+                }),
+            });
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_plugin(HanabiPlugin);

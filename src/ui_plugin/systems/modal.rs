@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use bevy::prelude::*;
 use bevy::tasks::IoTaskPool;
+use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEditImage};
 use bevy_pkv::PkvStore;
 use linkify::{LinkFinder, LinkKind};
 
@@ -104,7 +105,7 @@ fn delete_tab(
         .unwrap()
         .tabs
         .remove(index);
-    let mut last_tab = app_state
+    let last_tab = app_state
         .docs
         .get_mut(&current_document)
         .unwrap()
@@ -160,27 +161,26 @@ pub fn confirm_modal(
     mut tab_query_container: Query<(Entity, &TabContainer), With<TabContainer>>,
     mut pkv: ResMut<PkvStore>,
     input: Res<Input<KeyCode>>,
-    mut query_path: Query<(&Text, &EditableText), With<EditableText>>,
+    mut query_path: Query<(&CosmicEditImage, &EditableText), With<EditableText>>,
     comm_channels: Res<CommChannels>,
 ) {
     for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
             for (entity, path_modal_top) in query_top.iter() {
                 if path_modal_confirm.id == path_modal_top.id {
-                    for (text, editable_text) in query_path.iter_mut() {
+                    for (cosmic_edit, editable_text) in query_path.iter_mut() {
+                        let text = get_cosmic_text(&cosmic_edit.editor);
                         if editable_text.id == path_modal_top.id {
                             match path_modal_confirm.action {
                                 ModalAction::SaveToFile => {
                                     commands.insert_resource(SaveDocRequest {
                                         doc_id: app_state.current_document.unwrap(),
-                                        path: Some(PathBuf::from(text.sections[0].value.trim())),
+                                        path: Some(PathBuf::from(text.trim())),
                                     });
                                     break;
                                 }
                                 ModalAction::LoadFromFile => {
-                                    if let Ok(path) =
-                                        canonicalize(PathBuf::from(text.sections[0].value.trim()))
-                                    {
+                                    if let Ok(path) = canonicalize(PathBuf::from(text.trim())) {
                                         let json = std::fs::read_to_string(path)
                                             .expect("Error reading document from file");
                                         let cc = comm_channels.tx.clone();
@@ -189,7 +189,7 @@ pub fn confirm_modal(
                                 }
                                 ModalAction::LoadFromUrl => {
                                     let pool = IoTaskPool::get();
-                                    let url = text.sections[0].value.trim();
+                                    let url = text.trim();
                                     let mut finder = LinkFinder::new();
                                     finder.kinds(&[LinkKind::Url]);
                                     let links: Vec<_> = finder.links(url).collect();
@@ -225,26 +225,26 @@ pub fn confirm_modal(
                 }
                 commands.entity(entity).despawn_recursive();
                 ui_state.modal_id = None;
+                commands.insert_resource(ActiveEditor { entity: None });
             }
         }
     }
     if input.just_pressed(KeyCode::Return) {
         for (entity, path_modal_top) in query_top.iter() {
             if Some(path_modal_top.id) == ui_state.modal_id {
-                for (text, editable_text) in query_path.iter_mut() {
+                for (cosmic_edit, editable_text) in query_path.iter_mut() {
+                    let text = get_cosmic_text(&cosmic_edit.editor);
                     if editable_text.id == path_modal_top.id {
                         match path_modal_top.action {
                             ModalAction::SaveToFile => {
                                 commands.insert_resource(SaveDocRequest {
                                     doc_id: app_state.current_document.unwrap(),
-                                    path: Some(PathBuf::from(text.sections[0].value.trim())),
+                                    path: Some(PathBuf::from(text.trim())),
                                 });
                                 break;
                             }
                             ModalAction::LoadFromFile => {
-                                if let Ok(path) =
-                                    canonicalize(PathBuf::from(text.sections[0].value.trim()))
-                                {
+                                if let Ok(path) = canonicalize(PathBuf::from(text.trim())) {
                                     let json = std::fs::read_to_string(path)
                                         .expect("Error reading document from file");
                                     let cc = comm_channels.tx.clone();
@@ -253,7 +253,7 @@ pub fn confirm_modal(
                             }
                             ModalAction::LoadFromUrl => {
                                 let pool = IoTaskPool::get();
-                                let url = text.sections[0].value.trim();
+                                let url = text.trim();
                                 let mut finder = LinkFinder::new();
                                 finder.kinds(&[LinkKind::Url]);
                                 let links: Vec<_> = finder.links(url).collect();
@@ -289,6 +289,7 @@ pub fn confirm_modal(
             }
             commands.entity(entity).despawn_recursive();
             ui_state.modal_id = None;
+            commands.insert_resource(ActiveEditor { entity: None });
         }
     }
 }

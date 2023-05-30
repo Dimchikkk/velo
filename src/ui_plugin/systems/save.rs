@@ -1,6 +1,7 @@
 use base64::{engine::general_purpose, Engine};
 use bevy::prelude::*;
 
+use bevy_cosmic_edit::{get_cosmic_text, CosmicEditImage};
 use bevy_pkv::PkvStore;
 use image::*;
 
@@ -125,7 +126,7 @@ pub fn save_to_store(
 
 pub fn save_tab(
     images: Res<Assets<Image>>,
-    node_container_query: Query<&Style, With<VeloNodeContainer>>,
+    node_container_query: Query<(&Style, &Node), With<VeloNodeContainer>>,
     node_query: Query<
         (
             &VeloNode,
@@ -140,7 +141,7 @@ pub fn save_tab(
     arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
     request: Res<SaveTabRequest>,
     mut app_state: ResMut<AppState>,
-    text_query: Query<(&mut Text, &RawText), With<RawText>>,
+    text_query: Query<(&RawText, &CosmicEditImage), With<RawText>>,
 ) {
     #[cfg(not(target_arch = "wasm32"))]
     if let Some(index) = &mut app_state.search_index {
@@ -166,18 +167,13 @@ pub fn save_tab(
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
     for (node, _, bg_color, z_index, parent, test_pos_style) in node_query.iter() {
-        for (text, editable_text) in text_query.iter() {
+        for (editable_text, cosmic_edit) in text_query.iter() {
             if node.id == editable_text.id {
-                let mut str = "".to_string();
-                let mut text_copy = text.clone();
-                text_copy.sections.pop();
-                for section in text_copy.sections.iter() {
-                    str = format!("{}{}", str, section.value.clone());
-                }
-                let style: &Style = node_container_query.get(parent.get()).unwrap();
+                let str = get_cosmic_text(&cosmic_edit.editor);
+                let (style, node_container): (&Style, &Node) =
+                    node_container_query.get(parent.get()).unwrap();
                 let left = style.position.left;
                 let bottom = style.position.bottom;
-                let size = style.size;
                 let bg_color = bg_color.0;
                 let z_index = match *z_index {
                     ZIndex::Local(v) => v,
@@ -188,8 +184,8 @@ pub fn save_tab(
                     id: node.id.0,
                     left,
                     bottom,
-                    width: size.width,
-                    height: size.height,
+                    width: Val::Px(node_container.size().x),
+                    height: Val::Px(node_container.size().y),
                     bg_color,
                     text: JsonNodeText {
                         text: str.clone(),

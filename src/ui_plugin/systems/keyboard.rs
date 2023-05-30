@@ -37,9 +37,6 @@ pub fn keyboard_input_system(
     let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
     let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
     blink_timer.timer.tick(time.delta());
-    if input.just_pressed(KeyCode::Escape) {
-        ui_state.entity_to_edit = None;
-    }
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(
@@ -74,42 +71,24 @@ pub fn keyboard_input_system(
             }
         }
     } else {
-        if ui_state.entity_to_edit.is_some()
-            || ui_state.doc_to_edit.is_some()
-            || ui_state.tab_to_edit.is_some()
-            || ui_state.modal_id.is_some()
-            || ui_state.search_box_to_edit.is_some()
-        {
+        if ui_state.doc_to_edit.is_some() || ui_state.tab_to_edit.is_some() {
             blink_timer.timer.unpause();
         } else {
             blink_timer.timer.pause();
         }
         for (mut text, editable_text) in &mut editable_text_query.iter_mut() {
-            if vec![
-                ui_state.tab_to_edit,
-                ui_state.doc_to_edit,
-                ui_state.search_box_to_edit,
-                ui_state.modal_id,
-            ]
-            .contains(&Some(editable_text.id))
+            if vec![ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id))
                 && input.any_just_pressed([KeyCode::Escape, KeyCode::Return])
             {
                 *ui_state = UiState::default();
+                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
             }
             if Some(editable_text.id) == ui_state.doc_to_edit
                 && text.sections[0].value == *"Untitled"
             {
                 text.sections[0].value = "".to_string();
             }
-            if vec![
-                ui_state.entity_to_edit,
-                ui_state.tab_to_edit,
-                ui_state.doc_to_edit,
-                ui_state.search_box_to_edit,
-                ui_state.modal_id,
-            ]
-            .contains(&Some(editable_text.id))
-            {
+            if vec![ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id)) {
                 let mut str = "".to_string();
                 let mut text_copy = text.clone();
                 text_copy.sections.pop();
@@ -135,7 +114,7 @@ pub fn keyboard_input_system(
                         };
                 }
                 if let Some(doc_id) = ui_state.doc_to_edit {
-                    let mut doc = app_state.docs.get_mut(&doc_id).unwrap();
+                    let doc = app_state.docs.get_mut(&doc_id).unwrap();
                     doc.name = str.clone();
                 }
                 if let Some(tab_id) = ui_state.tab_to_edit {

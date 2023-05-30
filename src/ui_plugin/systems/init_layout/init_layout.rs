@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+
+use bevy::window::PrimaryWindow;
+use bevy_cosmic_edit::FontSystemState;
 use bevy_ui_borders::BorderColor;
 use std::time::Duration;
 
@@ -6,8 +9,7 @@ use bevy_pkv::PkvStore;
 
 use super::ui_helpers::{
     self, AddTab, BottomPanel, ButtonAction, LeftPanel, LeftPanelControls, LeftPanelExplorer,
-    MainPanel, Menu, NewDoc, ParticlesEffect, Root, SaveDoc, TextManipulation,
-    TextManipulationAction, TextPosMode,
+    MainPanel, Menu, NewDoc, ParticlesEffect, Root, SaveDoc, TextPosMode,
 };
 use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
@@ -25,10 +27,6 @@ use add_color::*;
 #[path = "add_front_back.rs"]
 mod add_front_back;
 use add_front_back::*;
-
-#[path = "add_text_manipulation.rs"]
-mod add_text_manipulation;
-use add_text_manipulation::*;
 
 #[path = "add_text_pos.rs"]
 mod add_text_pos;
@@ -60,13 +58,16 @@ pub fn init_layout(
     mut app_state: ResMut<AppState>,
     asset_server: Res<AssetServer>,
     mut pkv: ResMut<PkvStore>,
+    mut font_system_state: ResMut<FontSystemState>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
+    let primary_window: &Window = windows.single();
     #[cfg(not(target_arch = "wasm32"))]
     {
         let (tx, rx) = async_channel::bounded(1);
         commands.insert_resource(CommChannels { tx, rx });
     }
-
+    let font_system = font_system_state.font_system.as_mut().unwrap();
     let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
     commands.insert_resource(BlinkTimer {
         timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
@@ -246,7 +247,8 @@ pub fn init_layout(
         .id();
     let main_panel = commands
         .spawn((
-            NodeBundle {
+            ButtonBundle {
+                background_color: Color::WHITE.with_a(0.).into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
@@ -267,12 +269,7 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 style: Style {
-                    padding: UiRect {
-                        left: Val::Px(10.),
-                        right: Val::Px(10.),
-                        top: Val::Px(10.),
-                        bottom: Val::Px(10.),
-                    },
+                    padding: UiRect::all(Val::Px(10.)),
                     size: Size::new(Val::Percent(100.), Val::Percent(40.)),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
@@ -285,7 +282,11 @@ pub fn init_layout(
         ))
         .id();
     #[cfg(not(target_arch = "wasm32"))]
-    let search_box = add_search_box(&mut commands);
+    let search_box = add_search_box(
+        &mut commands,
+        font_system,
+        primary_window.scale_factor() as f32,
+    );
     let left_panel_explorer = commands
         .spawn((
             NodeBundle {
@@ -371,7 +372,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(8.)),
+                size: Size::new(Val::Percent(90.), Val::Percent(9.)),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -432,7 +433,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(8.)),
+                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -451,76 +452,11 @@ pub fn init_layout(
         &mut commands,
         &asset_server,
         TextPosMode {
-            text_pos: TextPos::BottomRight,
-        },
-    );
-    let text_pos3 = add_text_pos(
-        &mut commands,
-        &asset_server,
-        TextPosMode {
-            text_pos: TextPos::BottomLeft,
-        },
-    );
-    let text_pos4 = add_text_pos(
-        &mut commands,
-        &asset_server,
-        TextPosMode {
             text_pos: TextPos::TopLeft,
-        },
-    );
-    let text_pos5 = add_text_pos(
-        &mut commands,
-        &asset_server,
-        TextPosMode {
-            text_pos: TextPos::TopRight,
         },
     );
     commands.entity(text_modes).add_child(text_pos1);
     commands.entity(text_modes).add_child(text_pos2);
-    commands.entity(text_modes).add_child(text_pos3);
-    commands.entity(text_modes).add_child(text_pos4);
-    commands.entity(text_modes).add_child(text_pos5);
-
-    let text_manipulation = commands
-        .spawn((NodeBundle {
-            style: Style {
-                align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
-                margin: UiRect::all(Val::Px(5.)),
-                justify_content: JustifyContent::Start,
-                ..default()
-            },
-            ..default()
-        },))
-        .id();
-    let cut = add_text_manipulation(
-        &mut commands,
-        &asset_server,
-        TextManipulationAction {
-            action_type: TextManipulation::Cut,
-        },
-    );
-
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let copy = add_text_manipulation(
-            &mut commands,
-            &asset_server,
-            TextManipulationAction {
-                action_type: TextManipulation::Copy,
-            },
-        );
-        let paste = add_text_manipulation(
-            &mut commands,
-            &asset_server,
-            TextManipulationAction {
-                action_type: TextManipulation::Paste,
-            },
-        );
-        commands.entity(text_manipulation).add_child(copy);
-        commands.entity(text_manipulation).add_child(paste);
-    }
-    commands.entity(text_manipulation).add_child(cut);
 
     #[cfg(not(target_arch = "wasm32"))]
     let effects = commands
@@ -547,9 +483,6 @@ pub fn init_layout(
     commands.entity(left_panel_controls).add_child(color_picker);
     commands.entity(left_panel_controls).add_child(arrow_modes);
     commands.entity(left_panel_controls).add_child(text_modes);
-    commands
-        .entity(left_panel_controls)
-        .add_child(text_manipulation);
     commands.entity(left_panel_controls).add_child(fron_back);
     #[cfg(not(target_arch = "wasm32"))]
     commands.entity(left_panel_controls).add_child(effects);

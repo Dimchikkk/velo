@@ -1,5 +1,5 @@
 ---
-source: crates/bevy-markdown/src/lib.rs
+source: crates/bevy_markdown/src/lib.rs
 expression: node.clone()
 ---
 Text {
@@ -18,10 +18,10 @@ Text {
             },
         },
         TextSection {
-            value: "bold1",
+            value: "Header 1",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
+                font_size: 30.0,
                 color: Rgba {
                     red: 0.0,
                     green: 0.0,
@@ -44,10 +44,10 @@ Text {
             },
         },
         TextSection {
-            value: "bold2",
+            value: "Header 2",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
+                font_size: 27.0,
                 color: Rgba {
                     red: 0.0,
                     green: 0.0,
@@ -70,10 +70,10 @@ Text {
             },
         },
         TextSection {
-            value: "italic1",
+            value: "Header 3",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
-                font_size: 18.0,
+                font_size: 24.0,
                 color: Rgba {
                     red: 0.0,
                     green: 0.0,
@@ -96,7 +96,46 @@ Text {
             },
         },
         TextSection {
-            value: "italic2",
+            value: "Some header 4 ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 21.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "as well",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 21.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: " italicised",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 21.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
                 font_size: 18.0,
@@ -109,7 +148,7 @@ Text {
             },
         },
         TextSection {
-            value: "\nHello world\n",
+            value: "another header ",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
                 font_size: 18.0,
@@ -122,7 +161,7 @@ Text {
             },
         },
         TextSection {
-            value: "link",
+            value: "redirecting to google",
             style: TextStyle {
                 font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
                 font_size: 18.0,

@@ -83,6 +83,17 @@ pub fn get_resultant_style(
     }
 }
 
+pub fn get_bullet_for_indentation_level(level: u8) -> &'static str {
+    let level = level % 3;
+    if level == 0 {
+        " • "
+    } else if level == 1 {
+        " ◦ "
+    } else {
+        " ▪ "
+    }
+}
+
 pub fn handle_block_styling(
     node: &markdown::mdast::Node,
     bevy_markdown: &BevyMarkdown,
@@ -274,6 +285,111 @@ pub fn handle_inline_styling(
     Ok(())
 }
 
+fn handle_list_recursive(
+    list: &markdown::mdast::List,
+    bevy_markdown: &BevyMarkdown,
+    text_sections: &mut Vec<(TextSection, Option<String>)>,
+    errors: &mut Vec<BevyMarkdownError>,
+    indentation_level: u8,
+) -> Result<(), Vec<BevyMarkdownError>> {
+    text_sections.push((
+        TextSection {
+            value: "\n".to_string(),
+            style: TextStyle {
+                font: bevy_markdown.regular_font.clone().unwrap(),
+                font_size: 18.0,
+                color: Color::BLACK,
+            },
+        },
+        None,
+    ));
+
+    let mut list_index = list.start;
+    list.children
+        .clone()
+        .into_iter()
+        .for_each(|node| match node {
+            markdown::mdast::Node::ListItem(item) => {
+                for _ in 0..indentation_level {
+                    text_sections.push((
+                        TextSection {
+                            value: "    ".to_string(),
+                            ..Default::default()
+                        },
+                        None,
+                    ));
+                }
+
+                let indent_char = if list.ordered {
+                    let index = list_index.unwrap();
+                    list_index = Some(index + 1);
+                    format!(" {}. ", index)
+                } else {
+                    get_bullet_for_indentation_level(indentation_level).to_string()
+                };
+
+                text_sections.push((
+                    TextSection {
+                        value: indent_char,
+                        style: TextStyle {
+                            font: bevy_markdown.regular_font.clone().unwrap(),
+                            font_size: 18.0,
+                            color: Color::BLACK,
+                        },
+                    },
+                    None,
+                ));
+
+                item.children.into_iter().for_each(|child| match child {
+                    markdown::mdast::Node::Paragraph(paragraph) => {
+                        paragraph.children.iter().for_each(|child| {
+                            let _ = handle_inline_styling(
+                                child,
+                                bevy_markdown,
+                                text_sections,
+                                errors,
+                                InlineStyleType::None as u8,
+                                None,
+                                None,
+                                &None,
+                            );
+                        })
+                    }
+                    markdown::mdast::Node::List(inner_list) => {
+                        let _ = handle_list_recursive(
+                            &inner_list,
+                            bevy_markdown,
+                            text_sections,
+                            errors,
+                            indentation_level + 1,
+                        );
+                    }
+                    node => errors.push(BevyMarkdownError::Transform {
+                        info: format!("{:?} node is not implemented for list item", node),
+                    }),
+                });
+
+                text_sections.push((
+                    TextSection {
+                        value: "\n".to_string(),
+                        style: TextStyle {
+                            font: bevy_markdown.regular_font.clone().unwrap(),
+                            font_size: 18.0,
+                            color: Color::BLACK,
+                        },
+                    },
+                    None,
+                ));
+            }
+            _ => {
+                errors.push(BevyMarkdownError::Transform {
+                    info: "invalid list children".to_string(),
+                });
+            }
+        });
+    Ok(())
+}
+
 pub fn spawn_bevy_markdown(
     commands: &mut Commands,
     bevy_markdown: BevyMarkdown,
@@ -376,6 +492,15 @@ pub fn spawn_bevy_markdown(
                                 &bevy_markdown,
                                 &mut text_sections,
                                 &mut errors,
+                            );
+                        }
+                        markdown::mdast::Node::List(list) => {
+                            let _ = handle_list_recursive(
+                                list,
+                                &bevy_markdown,
+                                &mut text_sections,
+                                &mut errors,
+                                0,
                             );
                         }
                         node => errors.push(BevyMarkdownError::Transform {
@@ -556,5 +681,55 @@ hello world
             input.to_string(),
             "test_render_break_after_link".to_string(),
         );
+    }
+
+    #[test]
+    pub fn test_render_unordered_list() {
+        let input = "
+- Import a HTML file and watch it magically convert to Markdown
+- Drag and drop images (requires your Dropbox account be linked)
+- Import and save files from GitHub, Dropbox, Google Drive and One Drive
+- Drag and drop markdown and HTML files into Dillinger
+- Export documents as Markdown, HTML and PDF
+"
+        .to_string();
+        test_bevymarkdown(input, "test_render_unordered_list".to_string())
+    }
+
+    #[test]
+    pub fn test_render_ordered_list() {
+        let input = "
+1. Import a HTML file and watch it magically convert to Markdown
+2. Drag and drop images (requires your Dropbox account be linked)
+3. Import and save files from GitHub, Dropbox, Google Drive and One Drive
+"
+        .to_string();
+        test_bevymarkdown(input, "test_render_ordered_list".to_string())
+    }
+
+    #[test]
+    pub fn test_render_nested_unordered_list() {
+        let input = "
+- Import a HTML file and watch it magically convert to Markdown
+    - Drag and drop images (requires your Dropbox account be linked)
+- Import and save files from GitHub, Dropbox, Google Drive and One Drive
+    - Drag and drop markdown and HTML files into Dillinger
+- Export documents as Markdown, HTML and PDF
+"
+        .to_string();
+        test_bevymarkdown(input, "test_render_nested_unordered_list".to_string())
+    }
+
+    #[test]
+    pub fn test_render_nested_ordered_list() {
+        let input = "
+1. Import a HTML file and watch it magically convert to Markdown
+2. Drag and drop images (requires your Dropbox account be linked)
+    1. Import and save files from GitHub, Dropbox, Google Drive and One Drive
+    2. Drag and drop images (requires your Dropbox account be linked)
+3. Drag and drop images (requires your Dropbox account be linked)
+"
+        .to_string();
+        test_bevymarkdown(input, "test_render_nested_ordered_list".to_string())
     }
 }

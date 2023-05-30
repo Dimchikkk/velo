@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+
+use bevy_cosmic_edit::get_cosmic_text;
+use bevy_cosmic_edit::ActiveEditor;
+use bevy_cosmic_edit::CosmicEditImage;
 use bevy_pkv::PkvStore;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -38,10 +42,12 @@ pub struct NodeSearchLocation {
 }
 
 pub fn search_box_click(
+    mut commands: Commands,
     mut interaction_query: Query<
         (&Interaction, &SearchButton),
         (Changed<Interaction>, With<SearchButton>),
     >,
+    search_query: Query<(&SearchText, Entity), With<SearchText>>,
     mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
@@ -52,6 +58,14 @@ pub fn search_box_click(
                 primary_window.cursor.icon = CursorIcon::Text;
                 *state = UiState::default();
                 state.search_box_to_edit = Some(node.id);
+                for (search_text, entity) in search_query.iter() {
+                    if search_text.id == node.id {
+                        commands.insert_resource(ActiveEditor {
+                            entity: Some(entity),
+                        });
+                        break;
+                    }
+                }
             }
             Interaction::Hovered => {
                 primary_window.cursor.icon = CursorIcon::Hand;
@@ -64,18 +78,12 @@ pub fn search_box_click(
 }
 
 pub fn search_box_text_changed(
-    text_query: Query<&Text, With<SearchText>>,
+    text_query: Query<&CosmicEditImage, With<SearchText>>,
     mut previous_search_text: Local<String>,
     mut app_state: ResMut<AppState>,
     pkv: Res<PkvStore>,
 ) {
-    let mut search = text_query.single().clone();
-
-    search.sections.pop();
-    let mut str = "".to_string();
-    for section in search.sections.iter() {
-        str = format!("{}{}", str, section.value.clone());
-    }
+    let str = get_cosmic_text(&text_query.single().editor);
     if str != *previous_search_text {
         if !str.is_empty() {
             if let Some(index) = &app_state.search_index {

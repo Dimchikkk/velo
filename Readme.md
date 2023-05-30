@@ -10,7 +10,7 @@ WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
 mode is supported (tested on Chrome):
 
-[<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a78e7380750c052bff78b8e27c9545d3/raw/537c6f57d5257b32940e3fbcf2f4bc6386cdbc7e/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a78e7380750c052bff78b8e27c9545d3/raw/537c6f57d5257b32940e3fbcf2f4bc6386cdbc7e/velo.json)
+  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/d5a5c4c8543a520e8751a91c29e4f5f2/raw/38fb5f9b935a5c5dee35261989c1ef9f7e54abe3/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/d5a5c4c8543a520e8751a91c29e4f5f2/raw/38fb5f9b935a5c5dee35261989c1ef9f7e54abe3/velo.json)
 
 ## Inspiration
 
@@ -35,7 +35,6 @@ enjoyable project to work on.
 -   change background color of nodes
 -   move node to front/back
 -   positioning text inside node
--   buttons to cut/copy/paste text
 -   multiple documents/tabs support
 -   load app state from url
 -   ability to create sharable url of the document using \"Share
@@ -52,8 +51,9 @@ enjoyable project to work on.
   - syntax highlighting
   - headings
   - inline code
+  - ordered/unordered lists
 - particles effect [native target only 🖥️]
-- filter documents by text in nodes [native target only 🖥️]
+- filter documents by text in nodes (fuzzy search) [native target only 🖥️]
 
 ## Run
 
@@ -80,13 +80,33 @@ cargo bundle
 
 ```sh
 cargo fmt
-cargo clippy --allow-staged -- -A clippy::type_complexity -A clippy::too_many_arguments
+cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 ```
 
-# Contributing
+## Basic usage
 
+- click on rectangle icon to create rectangle node
+- double-click to select node
+- start typing to add text to selected node
+- resize node by dragging its corners
+- click on canvas to deselect node
+- move node by dragging it (only unselected node can be dragged to allow mouse text selection for selected nodes)
+- click on little arrow connection icon to connect nodes, arrow connection icons are placed on each side of node
+- for native target there is search box that allows to filter documents by text in nodes (fuzzy search)
+- for wasm target you can use url query parameter `?document=<url>` to load document from url
+- click save icon to save document to database on native platform or to localhost on wasm target
+
+![velo](./velo.gif)
+
+## License
+All code in this repository dual-licensed under either:
+
+MIT License or http://opensource.org/licenses/MIT
+Apache License, Version 2.0 or http://www.apache.org/licenses/LICENSE-2.0
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+
+## Contributing
 Contributions are always welcome! Please adhere to this project\'s code
-of conduct. If you have questions or suggestions, feel free to make an
-[issue](https://github.com/StaffEngineer/velo/issues).
+of conduct. If you have questions or suggestions feel free to share on [velo discord server](https://discord.gg/u9E4kr4AtU).
 
 ❤️

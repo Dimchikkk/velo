@@ -1,0 +1,296 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+expression: node.clone()
+---
+Text {
+    sections: [
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "My rust code:",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 0.0,
+                },
+            },
+        },
+        TextSection {
+            value: "fn",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.14901961,
+                    green: 0.54509807,
+                    blue: 0.8235294,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: " ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "main",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.70980394,
+                    green: 0.5372549,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "(",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: ")",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: " ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "{",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "    ",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "println!",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.52156866,
+                    green: 0.6,
+                    blue: 0.0,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "(",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\"",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.5137255,
+                    green: 0.5803922,
+                    blue: 0.5882353,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "Hello world",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.16470589,
+                    green: 0.6313726,
+                    blue: 0.59607846,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\"",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.5137255,
+                    green: 0.5803922,
+                    blue: 0.5882353,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: ")",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: ";",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "}",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.39607844,
+                    green: 0.48235294,
+                    blue: 0.5137255,
+                    alpha: 1.0,
+                },
+            },
+        },
+        TextSection {
+            value: "\n",
+            style: TextStyle {
+                font: StrongHandle<Font>(AssetPathId(AssetPathId(SourcePathId(5753483401309755652), LabelId(6298619649789039366)))),
+                font_size: 18.0,
+                color: Rgba {
+                    red: 0.0,
+                    green: 0.0,
+                    blue: 0.0,
+                    alpha: 0.0,
+                },
+            },
+        },
+    ],
+    alignment: Left,
+    linebreak_behaviour: WordBoundary,
+}

@@ -1,0 +1,31 @@
+[package]
+name = "bevy_cosmic_edit"
+version = "0.2.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Bevy cosmic-text multiline text input"
+repository = "https://github.com/StaffEngineer/velo.git"
+readme = "Readme.md"
+keywords = ["bevy"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = { version = "0.10.1", default-features = false, features = [
+  "bevy_asset",
+  "bevy_core_pipeline",
+  "bevy_render",
+  "bevy_scene",
+  "bevy_sprite",
+  "bevy_text",
+  "bevy_ui",
+  "bevy_winit",
+  "png",
+  "x11",
+] }
+cosmic-text = "0.8.0"
+image = "0.24.6"
+sys-locale = "0.3.0"
+
+[dev-dependencies]
+insta = "1.29.0"
