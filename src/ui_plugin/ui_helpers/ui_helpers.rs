@@ -214,12 +214,14 @@ pub fn get_tooltip(text: String, size: f32, tooltip_position: TooltipPosition) -
         },
     };
     let text_bundle_style = Style {
+        padding: UiRect::all(Val::Px(0.)),
+        position_type: PositionType::Relative,
         position,
+        display: Display::None,
         ..default()
     };
     TextBundle {
         z_index: ZIndex::Global(1),
-        visibility: Visibility::Hidden,
         background_color: Color::WHITE.into(),
         text,
         style: text_bundle_style,
