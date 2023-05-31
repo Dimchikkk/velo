@@ -1,0 +1,4 @@
+[build.env]
+passthrough = [
+    "BEVY_ASSET_PATH",
+]
