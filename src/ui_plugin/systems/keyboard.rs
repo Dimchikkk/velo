@@ -173,47 +173,28 @@ pub fn insert_from_clipboard(
             image.bytes.into_owned(),
         )
         .unwrap();
+        let width = image.width();
+        let height = image.height();
         let size: Extent3d = Extent3d {
-            width: image.width(),
-            height: image.height(),
+            width,
+            height,
             ..Default::default()
         };
-        let resize_width = image.width() / scale_factor as u32;
-        let resize_height = image.height() / scale_factor as u32;
-
         let image = Image::new(
             size,
             TextureDimension::D2,
             image.to_vec(),
             TextureFormat::Rgba8UnormSrgb,
         );
-        let image_buffer = imageops::resize(
-            &image.try_into_dynamic().unwrap(),
-            resize_width,
-            resize_height,
-            imageops::FilterType::Lanczos3,
-        );
-        let data = image_buffer.to_vec();
-        let resize_size: Extent3d = Extent3d {
-            width: resize_width,
-            height: resize_height,
-            ..Default::default()
-        };
-        let resized_image = Image::new(
-            resize_size,
-            TextureDimension::D2,
-            data,
-            TextureFormat::Rgba8UnormSrgb,
-        );
-        let image = images.add(resized_image);
+        let image = images.add(image);
         events.send(AddRectEvent {
             node: JsonNode {
                 id: Uuid::new_v4(),
                 node_type: crate::NodeType::Rect,
                 left: Val::Px(0.0),
                 bottom: Val::Px(0.0),
-                width: Val::Px(resize_width as f32),
-                height: Val::Px(resize_height as f32),
+                width: Val::Px(width as f32 / scale_factor as f32),
+                height: Val::Px(height as f32 / scale_factor as f32),
                 text: crate::JsonNodeText {
                     text: "".to_string(),
                     pos: crate::TextPos::Center,
