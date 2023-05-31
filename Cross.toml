@@ -2,3 +2,10 @@
 passthrough = [
     "BEVY_ASSET_PATH",
 ]
+
+[target.x86_64-unknown-linux-gnu]
+pre-build = ["dpkg --add-architecture arm64 && apt-get update && apt-get install -y clang libclang-dev libc6-dev-i386"]
+
+
+[target.arm-unknown-linux-gnueabihf]
+pre-build = ["dpkg --add-architecture arm64 && apt-get update && apt-get install -y clang libclang-dev libc6-dev-i386"]
