@@ -126,7 +126,7 @@ jobs:
 
     - name: Build release binary
       env:
-        BEVY_ASSET_PATH: assets
+        BEVY_ASSET_PATH: /project/assets
       run: ${{ env.CARGO }} build --verbose --release ${{ env.TARGET_FLAGS }}
 
     - name: Strip release binary (linux and macos)
