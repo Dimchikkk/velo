@@ -2,8 +2,3 @@
 passthrough = [
     "BEVY_ASSET_PATH",
 ]
-
-[target.x86_64-unknown-linux-gnu]
-pre-build = [
-    "apt-get install libclang-dev"
-]
