@@ -1,4 +1,4 @@
-use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, FontSystemState};
+use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont};
 use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
 use bevy_ui_borders::{BorderColor, Outline};
 
@@ -26,13 +26,14 @@ pub struct NodeMeta {
     pub text_pos: TextPos,
     pub z_index: i32,
     pub is_active: bool,
-    pub scale_factor: f32,
 }
 
 pub fn spawn_node(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
-    font_system: &mut ResMut<FontSystemState>,
+    cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
+    cosmic_font_handle: Handle<CosmicFont>,
+    scale_factor: f32,
     item_meta: NodeMeta,
 ) -> Entity {
     let top = commands
@@ -156,22 +157,21 @@ pub fn spawn_node(
     commands.entity(button).add_child(resize_marker2);
     commands.entity(button).add_child(resize_marker3);
     commands.entity(button).add_child(resize_marker4);
-
     let cosmic_edit_meta = CosmicEditMeta {
         text: item_meta.text.clone(),
-        font_size: 14.,
-        line_height: 18.,
-        scale_factor: item_meta.scale_factor,
-        font_system: font_system.font_system.as_mut().unwrap(),
-        is_visible: false,
-        initial_background: image,
+        font_system_handle: cosmic_font_handle,
+        text_pos: to_cosmic_text_pos(item_meta.text_pos),
         initial_size: Some((
             convert_from_val_px(item_meta.size.0),
             convert_from_val_px(item_meta.size.1),
         )),
-        text_pos: to_cosmic_text_pos(item_meta.text_pos),
+        initial_background: image,
+        font_size: 14.,
+        line_height: 18.,
+        scale_factor,
+        display_none: !item_meta.is_active,
     };
-    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
+    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands
         .entity(cosmic_edit)
         .insert(RawText { id: item_meta.id });

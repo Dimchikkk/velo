@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use bevy::prelude::*;
 use bevy::tasks::IoTaskPool;
-use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEditImage};
+use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEdit};
 use bevy_pkv::PkvStore;
 use linkify::{LinkFinder, LinkKind};
 
@@ -161,15 +161,15 @@ pub fn confirm_modal(
     mut tab_query_container: Query<(Entity, &TabContainer), With<TabContainer>>,
     mut pkv: ResMut<PkvStore>,
     input: Res<Input<KeyCode>>,
-    mut query_path: Query<(&CosmicEditImage, &EditableText), With<EditableText>>,
+    mut query_path: Query<(&CosmicEdit, &EditableText), With<EditableText>>,
     comm_channels: Res<CommChannels>,
 ) {
     for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
         if let Interaction::Clicked = interaction {
             for (entity, path_modal_top) in query_top.iter() {
                 if path_modal_confirm.id == path_modal_top.id {
-                    for (cosmic_edit, editable_text) in query_path.iter_mut() {
-                        let text = get_cosmic_text(&cosmic_edit.editor);
+                    for (editor, editable_text) in query_path.iter_mut() {
+                        let text = get_cosmic_text(&editor.editor);
                         if editable_text.id == path_modal_top.id {
                             match path_modal_confirm.action {
                                 ModalAction::SaveToFile => {
@@ -232,8 +232,8 @@ pub fn confirm_modal(
     if input.just_pressed(KeyCode::Return) {
         for (entity, path_modal_top) in query_top.iter() {
             if Some(path_modal_top.id) == ui_state.modal_id {
-                for (cosmic_edit, editable_text) in query_path.iter_mut() {
-                    let text = get_cosmic_text(&cosmic_edit.editor);
+                for (editor, editable_text) in query_path.iter_mut() {
+                    let text = get_cosmic_text(&editor.editor);
                     if editable_text.id == path_modal_top.id {
                         match path_modal_top.action {
                             ModalAction::SaveToFile => {

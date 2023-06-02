@@ -1,4 +1,4 @@
-use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, FontSystemState};
+use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont};
 use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
@@ -14,7 +14,8 @@ use crate::{
 
 pub fn spawn_modal(
     commands: &mut Commands,
-    font_system: &mut ResMut<FontSystemState>,
+    cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
+    cosmic_font_handle: Handle<CosmicFont>,
     window: &Window,
     id: ReflectableUuid,
     modal_action: ModalAction,
@@ -199,16 +200,16 @@ pub fn spawn_modal(
                 .id();
             let cosmic_edit_meta = CosmicEditMeta {
                 text: default_value,
+                font_system_handle: cosmic_font_handle,
                 text_pos: to_cosmic_text_pos(TextPos::TopLeft),
-                initial_background: None,
                 initial_size: Some((width, height)),
+                initial_background: None,
                 font_size: 14.,
                 line_height: 18.,
                 scale_factor: window.scale_factor() as f32,
-                font_system: font_system.font_system.as_mut().unwrap(),
-                is_visible: true,
+                display_none: false,
             };
-            let cosmic_edit = spawn_cosmic_edit(commands, cosmic_edit_meta);
+            let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
             commands.entity(cosmic_edit).insert(EditableText { id });
             commands.insert_resource(ActiveEditor {
                 entity: Some(cosmic_edit),
