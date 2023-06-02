@@ -2,13 +2,17 @@ use bevy::prelude::*;
 use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEdit};
 use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
 
-use crate::utils::ReflectableUuid;
+use crate::{
+    resources::{AppState, SaveDocRequest},
+    utils::ReflectableUuid,
+};
 use bevy_ui_borders::Outline;
 
 use super::{BevyMarkdownView, NodeType, RawText, UiState, VeloNode};
 
 pub fn entity_to_edit_changed(
     ui_state: Res<UiState>,
+    app_state: Res<AppState>,
     mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
     mut velo_node_query: Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
     mut raw_text_node_query: Query<
@@ -38,6 +42,12 @@ pub fn entity_to_edit_changed(
                     &mut commands,
                     &asset_server,
                 );
+                if let Some(current_document) = app_state.current_document {
+                    commands.insert_resource(SaveDocRequest {
+                        doc_id: current_document,
+                        path: None,
+                    });
+                }
             }
         }
         *last_entity_to_edit = ui_state.entity_to_edit;

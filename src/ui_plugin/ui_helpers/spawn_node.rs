@@ -1,6 +1,4 @@
-use bevy_cosmic_edit::{
-    spawn_cosmic_edit, ActiveEditor, CosmicEditEventer, CosmicEditMeta, CosmicFont,
-};
+use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont};
 use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
 use bevy_ui_borders::{BorderColor, Outline};
 
@@ -34,7 +32,6 @@ pub fn spawn_node(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
-    cosmic_edit_eventer: &mut EventWriter<CosmicEditEventer>,
     cosmic_font_handle: Handle<CosmicFont>,
     scale_factor: f32,
     item_meta: NodeMeta,
@@ -174,12 +171,7 @@ pub fn spawn_node(
         scale_factor,
         display_none: !item_meta.is_active,
     };
-    let cosmic_edit = spawn_cosmic_edit(
-        commands,
-        cosmic_edit_eventer,
-        cosmic_fonts,
-        cosmic_edit_meta,
-    );
+    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands
         .entity(cosmic_edit)
         .insert(RawText { id: item_meta.id });

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_cosmic_edit::{spawn_cosmic_edit, CosmicEditEventer, CosmicEditMeta, CosmicFont};
+use bevy_cosmic_edit::{spawn_cosmic_edit, CosmicEditMeta, CosmicFont};
 use bevy_ui_borders::BorderColor;
 
 use crate::{
@@ -15,7 +15,6 @@ use crate::{
 pub fn add_search_box(
     commands: &mut Commands,
     cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
-    cosmic_edit_eventer: &mut EventWriter<CosmicEditEventer>,
     cosmic_font_handle: Handle<CosmicFont>,
     scale_factor: f32,
 ) -> Entity {
@@ -43,12 +42,7 @@ pub fn add_search_box(
         display_none: false,
         initial_size: None,
     };
-    let cosmic_edit = spawn_cosmic_edit(
-        commands,
-        cosmic_edit_eventer,
-        cosmic_fonts,
-        cosmic_edit_meta,
-    );
+    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands
         .entity(cosmic_edit)
         .insert(BorderColor(Color::GRAY.with_a(0.5)))
