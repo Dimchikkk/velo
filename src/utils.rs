@@ -18,6 +18,11 @@ use crate::{components::Doc, ui_plugin::MAX_SAVED_DOCS_IN_MEMORY};
 #[reflect_value]
 pub struct ReflectableUuid(pub Uuid);
 
+#[derive( Serialize, Deserialize)]
+pub struct UserPreferences {
+    pub theme_name: Option<String>,
+}
+
 impl ReflectableUuid {
     pub fn generate() -> Self {
         let uuid = uuid::Uuid::new_v4();
