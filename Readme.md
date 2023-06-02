@@ -54,6 +54,7 @@ enjoyable project to work on.
   - ordered/unordered lists
 - particles effect [native target only 🖥️]
 - filter documents by text in nodes (fuzzy search) [native target only 🖥️]
+- highlight nodes containing searched text [native target only 🖥️]
 
 ## Run
 

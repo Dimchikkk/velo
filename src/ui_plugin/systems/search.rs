@@ -98,6 +98,9 @@ pub fn search_box_text_changed(
                         let node_ids: HashSet<ReflectableUuid> = docs
                             .clone()
                             .into_iter()
+                            .filter(|l| {
+                                Some(ReflectableUuid(l.doc_id)) == app_state.current_document
+                            })
                             .map(|l| ReflectableUuid(l.node_id))
                             .collect();
                         highlight_search_match_nodes(&node_ids, &mut velo_node_query);
