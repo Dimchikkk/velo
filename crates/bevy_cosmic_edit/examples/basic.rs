@@ -2,14 +2,13 @@ use std::path::Path;
 
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{
-    create_cosmic_font_system, spawn_cosmic_edit, ActiveEditor, CosmicEditEventer, CosmicEditMeta,
-    CosmicEditPlugin, CosmicFont, CosmicFontConfig, CosmicTextPos,
+    create_cosmic_font_system, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicEditPlugin,
+    CosmicFont, CosmicFontConfig, CosmicTextPos,
 };
 
 fn setup(
     mut commands: Commands,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
 ) {
     let primary_window = windows.single();
@@ -46,12 +45,7 @@ fn setup(
         text_pos: CosmicTextPos::Center,
         initial_size: None,
     };
-    let cosmic_edit = spawn_cosmic_edit(
-        &mut commands,
-        &mut cosmic_edit_eventer,
-        &mut cosmic_fonts,
-        cosmic_edit_meta,
-    );
+    let cosmic_edit = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     commands.entity(root).add_child(cosmic_edit);
     commands.insert_resource(ActiveEditor {
         entity: Some(cosmic_edit),
