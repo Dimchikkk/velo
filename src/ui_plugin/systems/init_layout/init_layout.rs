@@ -14,6 +14,7 @@ use super::ui_helpers::{
 use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
 use crate::resources::{AppState, FontSystemState};
+use crate::themes::Theme;
 use crate::{BlinkTimer, TextPos};
 
 #[path = "add_arrow.rs"]
@@ -61,6 +62,7 @@ pub fn init_layout(
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut fonts: ResMut<Assets<Font>>,
+    theme: Res<Theme>,
 ) {
     // font setup
     let custom_font_data = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
@@ -91,7 +93,7 @@ pub fn init_layout(
     let bottom_panel = commands
         .spawn((
             NodeBundle {
-                background_color: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0).into(),
+                background_color: theme.bottom_panel_bg.into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
                     position_type: PositionType::Absolute,
@@ -110,7 +112,7 @@ pub fn init_layout(
                 ..default()
             },
             BottomPanel,
-            BorderColor(Color::rgb(204.0 / 255.0, 204.0 / 255.0, 204.0 / 255.0)),
+            BorderColor(theme.btn_border),
         ))
         .id();
     let add_tab = add_menu_button(&mut commands, "New Tab".to_string(), &icon_font, AddTab);
@@ -142,7 +144,7 @@ pub fn init_layout(
     let menu = commands
         .spawn((
             NodeBundle {
-                background_color: Color::rgb(245.0 / 255.0, 245.0 / 255.0, 245.0 / 255.0).into(),
+                background_color: theme.menu_bg.into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
                     size: Size::new(Val::Percent(100.0), Val::Percent(5.)),
@@ -156,7 +158,7 @@ pub fn init_layout(
                 },
                 ..default()
             },
-            BorderColor(Color::rgb(200.0 / 255.0, 200.0 / 255.0, 200.0 / 255.0)),
+            BorderColor(theme.btn_border),
             Menu,
         ))
         .id();
@@ -234,7 +236,7 @@ pub fn init_layout(
     let left_panel = commands
         .spawn((
             NodeBundle {
-                background_color: Color::rgb(224.0 / 255.0, 224.0 / 255.0, 224.0 / 255.0).into(),
+                background_color: theme.left_panel_bg.into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
                     size: Size::new(Val::Percent(15.), Val::Percent(100.)),
@@ -245,7 +247,7 @@ pub fn init_layout(
                 },
                 ..default()
             },
-            BorderColor(Color::rgb(192.0 / 255.0, 192.0 / 255.0, 192.0 / 255.0)),
+            BorderColor(theme.btn_border),
             LeftPanel,
         ))
         .id();
