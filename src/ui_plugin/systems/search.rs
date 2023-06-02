@@ -3,7 +3,7 @@ use bevy::window::PrimaryWindow;
 
 use bevy_cosmic_edit::get_cosmic_text;
 use bevy_cosmic_edit::ActiveEditor;
-use bevy_cosmic_edit::CosmicEditImage;
+use bevy_cosmic_edit::CosmicEdit;
 use bevy_pkv::PkvStore;
 use bevy_ui_borders::Outline;
 use std::collections::HashMap;
@@ -50,7 +50,7 @@ pub fn search_box_click(
         (&Interaction, &SearchButton),
         (Changed<Interaction>, With<SearchButton>),
     >,
-    search_query: Query<(&SearchText, Entity), With<SearchText>>,
+    mut search_query: Query<(&SearchText, Entity), With<SearchText>>,
     mut state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
@@ -61,7 +61,7 @@ pub fn search_box_click(
                 primary_window.cursor.icon = CursorIcon::Text;
                 *state = UiState::default();
                 state.search_box_to_edit = Some(node.id);
-                for (search_text, entity) in search_query.iter() {
+                for (search_text, entity) in &mut search_query.iter_mut() {
                     if search_text.id == node.id {
                         commands.insert_resource(ActiveEditor {
                             entity: Some(entity),
@@ -81,7 +81,7 @@ pub fn search_box_click(
 }
 
 pub fn search_box_text_changed(
-    text_query: Query<&CosmicEditImage, With<SearchText>>,
+    text_query: Query<&CosmicEdit, With<SearchText>>,
     mut previous_search_text: Local<String>,
     mut app_state: ResMut<AppState>,
     pkv: Res<PkvStore>,

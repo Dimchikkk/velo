@@ -4,7 +4,7 @@ use super::{
 };
 use crate::{utils::convert_from_val_px, UiState};
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
-use bevy_cosmic_edit::{CosmicEditImage, FontSystemState};
+use bevy_cosmic_edit::{CosmicEdit, CosmicFont};
 use bevy_markdown::BevyMarkdownNode;
 use cosmic_text::Edit;
 
@@ -57,7 +57,7 @@ pub fn resize_entity_end(
         ),
     >,
     mut raw_text_query: Query<
-        (&RawText, &mut CosmicEditImage),
+        (&RawText, &mut CosmicEdit),
         (
             Without<VeloNodeContainer>,
             Without<BevyMarkdownNode>,
@@ -75,10 +75,9 @@ pub fn resize_entity_end(
     markdown_view_query: Query<(&BevyMarkdownView, Entity), With<BevyMarkdownView>>,
     mut events: EventWriter<RedrawArrowEvent>,
     windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut font_system_state: ResMut<FontSystemState>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
 ) {
     let primary_window = windows.single();
-    let font_system = font_system_state.font_system.as_mut().unwrap();
     for event in mouse_motion_events.iter() {
         if let Some((id, resize_marker)) = state.entity_to_resize {
             for (rectangle, mut button_style) in &mut node_query {
@@ -147,16 +146,20 @@ pub fn resize_entity_end(
                     };
                     for (text, mut cosmic_edit) in &mut raw_text_query.iter_mut() {
                         if text.id == id {
-                            let scale_factor = primary_window.scale_factor() as f32;
-                            let width = convert_from_val_px(button_style.size.width);
-                            let height = convert_from_val_px(button_style.size.height);
-                            cosmic_edit.editor.buffer_mut().set_size(
-                                font_system,
-                                width * scale_factor,
-                                height * scale_factor,
-                            );
-                            cosmic_edit.editor.buffer_mut().set_redraw(true);
-                            break;
+                            if let Some(font_system) =
+                                cosmic_fonts.get_mut(&cosmic_edit.font_system)
+                            {
+                                let scale_factor = primary_window.scale_factor() as f32;
+                                let width = convert_from_val_px(button_style.size.width);
+                                let height = convert_from_val_px(button_style.size.height);
+                                cosmic_edit.editor.buffer_mut().set_size(
+                                    &mut font_system.0,
+                                    width * scale_factor,
+                                    height * scale_factor,
+                                );
+                                cosmic_edit.editor.buffer_mut().set_redraw(true);
+                                break;
+                            }
                         }
                     }
                     for (node, entity) in markdown_view_query.iter() {
@@ -181,13 +184,13 @@ mod tests {
     use super::{resize_entity_end, RedrawArrowEvent, VeloNodeContainer};
     use crate::{ui_plugin::ui_helpers::ResizeMarker, UiState};
     use bevy::{input::mouse::MouseMotion, prelude::*};
-    use bevy_cosmic_edit::FontSystemState;
-    use cosmic_text::FontSystem;
+    use bevy_cosmic_edit::CosmicFont;
 
     #[test]
     fn test_resize_entity_end() {
         // Set up a test app with the necessary resources and entities
         let mut app = App::new();
+        app.add_plugin(AssetPlugin::default());
         app.add_plugin(WindowPlugin::default());
         let entity_id = crate::utils::ReflectableUuid::generate();
 
@@ -202,12 +205,10 @@ mod tests {
                 entity_to_resize: Some((entity_id, marker)),
                 ..default()
             });
-            app.insert_resource(FontSystemState {
-                font_system: Some(FontSystem::new()),
-            });
 
             app.add_event::<MouseMotion>();
             app.add_event::<RedrawArrowEvent>();
+            app.add_asset::<CosmicFont>();
             app.world
                 .resource_mut::<Events<MouseMotion>>()
                 .send(MouseMotion {

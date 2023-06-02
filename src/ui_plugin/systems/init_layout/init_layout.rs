@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
-use bevy_cosmic_edit::FontSystemState;
+use bevy_cosmic_edit::{create_cosmic_font_system, CosmicFont, CosmicFontConfig};
 use bevy_ui_borders::BorderColor;
 use std::time::Duration;
 
@@ -13,7 +13,7 @@ use super::ui_helpers::{
 };
 use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
-use crate::resources::AppState;
+use crate::resources::{AppState, FontSystemState};
 use crate::{BlinkTimer, TextPos};
 
 #[path = "add_arrow.rs"]
@@ -58,16 +58,32 @@ pub fn init_layout(
     mut app_state: ResMut<AppState>,
     asset_server: Res<AssetServer>,
     mut pkv: ResMut<PkvStore>,
-    mut font_system_state: ResMut<FontSystemState>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut fonts: ResMut<Assets<Font>>,
 ) {
+    // font setup
+    let custom_font_data = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
+    let font = Font::try_from_bytes(custom_font_data.to_vec()).unwrap();
+    fonts.set_untracked(TextStyle::default().font, font);
+    let cosmic_font_config = CosmicFontConfig {
+        fonts_dir_path: None,
+        load_system_fonts: false,
+        custom_font_data: Some(custom_font_data),
+        monospace_family: Some("Source Code Pro".to_string()),
+        sans_serif_family: Some("Source Code Pro".to_string()),
+        serif_family: Some("Source Code Pro".to_string()),
+    };
+    let font_system = create_cosmic_font_system(cosmic_font_config);
+    let cosmic_font_handle = cosmic_fonts.add(CosmicFont(font_system));
+    commands.insert_resource(FontSystemState(Some(cosmic_font_handle.clone())));
+
     let primary_window: &Window = windows.single();
     #[cfg(not(target_arch = "wasm32"))]
     {
         let (tx, rx) = async_channel::bounded(1);
         commands.insert_resource(CommChannels { tx, rx });
     }
-    let font_system = font_system_state.font_system.as_mut().unwrap();
     let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
     commands.insert_resource(BlinkTimer {
         timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
@@ -284,7 +300,8 @@ pub fn init_layout(
     #[cfg(not(target_arch = "wasm32"))]
     let search_box = add_search_box(
         &mut commands,
-        font_system,
+        &mut cosmic_fonts,
+        cosmic_font_handle,
         primary_window.scale_factor() as f32,
     );
     let left_panel_explorer = commands

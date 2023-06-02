@@ -1,7 +1,7 @@
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_cosmic_edit::FontSystemState;
+use bevy_cosmic_edit::CosmicFont;
 
-use crate::utils::ReflectableUuid;
+use crate::{resources::FontSystemState, utils::ReflectableUuid};
 
 use super::{spawn_node, AddRectEvent, MainPanel, NodeMeta, UiState};
 
@@ -11,8 +11,9 @@ pub fn create_new_node(
     mut ui_state: ResMut<UiState>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     asset_server: Res<AssetServer>,
-    mut font_system_state: ResMut<FontSystemState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
+    font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single_mut();
     for event in events.iter() {
@@ -21,7 +22,9 @@ pub fn create_new_node(
         let entity = spawn_node(
             &mut commands,
             &asset_server,
-            &mut font_system_state,
+            &mut cosmic_fonts,
+            font_system_state.0.clone().unwrap(),
+            window.scale_factor() as f32,
             NodeMeta {
                 size: (event.node.width, event.node.height),
                 id: ReflectableUuid(event.node.id),
@@ -33,7 +36,6 @@ pub fn create_new_node(
                 text_pos: event.node.text.pos.clone(),
                 z_index: event.node.z_index,
                 is_active: true,
-                scale_factor: window.scale_factor() as f32,
             },
         );
         commands.entity(main_panel_query.single()).add_child(entity);
