@@ -1,5 +1,5 @@
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_cosmic_edit::{CosmicEditEventer, CosmicFont};
+use bevy_cosmic_edit::CosmicFont;
 
 use crate::{resources::FontSystemState, utils::ReflectableUuid};
 
@@ -13,7 +13,6 @@ pub fn create_new_node(
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
     font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single_mut();
@@ -24,7 +23,6 @@ pub fn create_new_node(
             &mut commands,
             &asset_server,
             &mut cosmic_fonts,
-            &mut cosmic_edit_eventer,
             font_system_state.0.clone().unwrap(),
             window.scale_factor() as f32,
             NodeMeta {
