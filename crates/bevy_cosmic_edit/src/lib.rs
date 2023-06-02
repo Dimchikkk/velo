@@ -1,4 +1,4 @@
-use std::{cmp, collections::HashSet, path::PathBuf};
+use std::{cmp, path::PathBuf};
 
 use bevy::{
     prelude::*,
@@ -52,11 +52,9 @@ impl Plugin for CosmicEditPlugin {
             cosmic_edit_bevy_events,
             cosmic_edit_redraw_buffer,
             scale_factor_changed,
-            cosmic_edit_eventer,
-            cosmic_edit_set_redraw.run_if(resource_exists::<EntitiesToRedraw>()),
+            cosmic_edit_set_redraw,
         ))
         .init_resource::<ActiveEditor>()
-        .add_event::<CosmicEditEventer>()
         .add_asset::<CosmicFont>()
         .insert_resource(SwashCacheState {
             swash_cache: SwashCache::new(),
@@ -68,15 +66,6 @@ impl Plugin for CosmicEditPlugin {
 #[derive(Resource, Default)]
 pub struct ActiveEditor {
     pub entity: Option<Entity>,
-}
-
-pub struct CosmicEditEventer {
-    entity: Option<Entity>,
-}
-
-#[derive(Resource, Default)]
-struct EntitiesToRedraw {
-    pub entities: HashSet<Entity>,
 }
 
 /// Resource struct that holds configuration options for cosmic fonts.
@@ -365,31 +354,9 @@ fn cosmic_edit_bevy_events(
     }
 }
 
-fn cosmic_edit_set_redraw(
-    mut commands: Commands,
-    mut cosmic_edit_query: Query<&mut CosmicEdit, With<CosmicEdit>>,
-    entities_to_redraw: Res<EntitiesToRedraw>,
-) {
-    for entity in entities_to_redraw.entities.iter() {
-        if let Ok(mut cosmic_edit) = cosmic_edit_query.get_mut(*entity) {
-            cosmic_edit.editor.buffer_mut().set_redraw(true);
-        }
-    }
-    commands.remove_resource::<EntitiesToRedraw>();
-}
-
-fn cosmic_edit_eventer(
-    mut cosmic_edit_eventer: EventReader<CosmicEditEventer>,
-    mut commands: Commands,
-) {
-    let mut entities = HashSet::new();
-    for event in cosmic_edit_eventer.iter() {
-        if let Some(entity) = event.entity {
-            entities.insert(entity);
-        }
-    }
-    if !entities.is_empty() {
-        commands.insert_resource(EntitiesToRedraw { entities })
+fn cosmic_edit_set_redraw(mut cosmic_edit_query: Query<&mut CosmicEdit, Added<CosmicEdit>>) {
+    for mut cosmic_edit in cosmic_edit_query.iter_mut() {
+        cosmic_edit.editor.buffer_mut().set_redraw(true);
     }
 }
 
@@ -474,7 +441,6 @@ fn cosmic_edit_redraw_buffer(
 /// The `Entity` identifier of the spawned cosmic edit entity.
 pub fn spawn_cosmic_edit(
     commands: &mut Commands,
-    cosmic_edit_eventer: &mut EventWriter<CosmicEditEventer>,
     cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
     cosmic_edit_meta: CosmicEditMeta,
 ) -> Entity {
@@ -525,9 +491,6 @@ pub fn spawn_cosmic_edit(
             },
         ))
         .id();
-    cosmic_edit_eventer.send(CosmicEditEventer {
-        entity: Some(cosmic_edit),
-    });
     cosmic_edit
 }
 
@@ -589,7 +552,6 @@ mod tests {
     fn test_spawn_cosmic_edit_system(
         mut commands: Commands,
         mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
-        mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
     ) {
         let cosmic_font_config = CosmicFontConfig {
             fonts_dir_path: None,
@@ -612,12 +574,7 @@ mod tests {
             text_pos: CosmicTextPos::Center,
             initial_size: None,
         };
-        spawn_cosmic_edit(
-            &mut commands,
-            &mut cosmic_edit_eventer,
-            &mut cosmic_fonts,
-            cosmic_edit_meta,
-        );
+        spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     }
 
     #[test]
@@ -633,7 +590,6 @@ mod tests {
         app.insert_resource(mouse_input);
         app.add_asset::<Image>();
         app.add_asset::<CosmicFont>();
-        app.add_event::<CosmicEditEventer>();
 
         app.add_event::<ReceivedCharacter>();
 
