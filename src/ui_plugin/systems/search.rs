@@ -95,12 +95,12 @@ pub fn search_box_text_changed(
                 let result = fuzzy_search(index, str.as_str());
                 match result {
                     Ok(docs) => {
-                        let mut doc_ids = docs
+                        let node_ids: HashSet<ReflectableUuid> = docs
                             .clone()
                             .into_iter()
                             .map(|l| ReflectableUuid(l.node_id))
-                            .collect::<Vec<_>>();
-                        highlight_search_match_nodes(&mut doc_ids[..], &mut velo_node_query);
+                            .collect();
+                        highlight_search_match_nodes(&node_ids, &mut velo_node_query);
                         let doc_ids: HashSet<ReflectableUuid> = docs
                             .into_iter()
                             .map(|location| ReflectableUuid(location.doc_id))
@@ -111,6 +111,7 @@ pub fn search_box_text_changed(
                 }
             }
         } else if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
+            highlight_search_match_nodes(&HashSet::new(), &mut velo_node_query);
             let keys_in_storage: Vec<_> = names.keys().collect();
             let keys_in_memory: Vec<_> = app_state.docs.keys().cloned().collect();
             let mut combined_keys = keys_in_memory;
@@ -263,7 +264,7 @@ pub fn fuzzy_search(index: &Index, query: &str) -> tantivy::Result<Vec<NodeSearc
 }
 
 pub fn highlight_search_match_nodes(
-    node_ids: &mut [ReflectableUuid],
+    node_ids: &HashSet<ReflectableUuid>,
     velo_node_query: &mut Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
 ) {
     let highlight_color = Color::TEAL;
