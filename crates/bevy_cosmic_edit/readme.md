@@ -24,7 +24,7 @@ cargo r --example font_per_widget
 
 | bevy | bevy_cosmic_edit |
 | ---- | ---------------- |
-| 0.10 | 0.3              |
+| 0.10 | 0.4              |
 
 ## License
 
