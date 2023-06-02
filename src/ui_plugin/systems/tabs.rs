@@ -3,7 +3,7 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
-use bevy_cosmic_edit::{CosmicEditEventer, CosmicFont};
+use bevy_cosmic_edit::CosmicFont;
 
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
@@ -149,7 +149,6 @@ pub fn delete_tab_handler(
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
     font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
@@ -173,7 +172,6 @@ pub fn delete_tab_handler(
                 let entity = spawn_modal(
                     &mut commands,
                     &mut cosmic_fonts,
-                    &mut cosmic_edit_eventer,
                     font_system_state.0.clone().unwrap(),
                     window,
                     id,

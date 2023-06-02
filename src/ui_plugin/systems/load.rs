@@ -4,7 +4,7 @@ use bevy::{
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     window::PrimaryWindow,
 };
-use bevy_cosmic_edit::{CosmicEditEventer, CosmicFont};
+use bevy_cosmic_edit::CosmicFont;
 
 use super::{
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
@@ -97,7 +97,6 @@ pub fn load_tab(
     main_panel_query: Query<Entity, With<MainPanel>>,
     mut delete_tab: Query<(&mut Visibility, &DeleteTab), (With<DeleteTab>, Without<ArrowMeta>)>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
     font_system_state: ResMut<FontSystemState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
@@ -172,7 +171,6 @@ pub fn load_tab(
                     &mut commands,
                     &asset_server,
                     &mut cosmic_fonts,
-                    &mut cosmic_edit_eventer,
                     font_system_state.0.clone().unwrap(),
                     window.scale_factor() as f32,
                     NodeMeta {

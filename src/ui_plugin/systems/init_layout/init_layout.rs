@@ -1,9 +1,7 @@
 use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
-use bevy_cosmic_edit::{
-    create_cosmic_font_system, CosmicEditEventer, CosmicFont, CosmicFontConfig,
-};
+use bevy_cosmic_edit::{create_cosmic_font_system, CosmicFont, CosmicFontConfig};
 use bevy_ui_borders::BorderColor;
 use std::time::Duration;
 
@@ -63,7 +61,6 @@ pub fn init_layout(
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut fonts: ResMut<Assets<Font>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
 ) {
     // font setup
     let custom_font_data = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
@@ -304,7 +301,6 @@ pub fn init_layout(
     let search_box = add_search_box(
         &mut commands,
         &mut cosmic_fonts,
-        &mut cosmic_edit_eventer,
         cosmic_font_handle,
         primary_window.scale_factor() as f32,
     );
