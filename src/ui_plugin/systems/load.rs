@@ -4,13 +4,16 @@ use bevy::{
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     window::PrimaryWindow,
 };
-use bevy_cosmic_edit::FontSystemState;
+use bevy_cosmic_edit::CosmicFont;
 
 use super::{
     ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
     DeleteDoc, DeleteTab, MainPanel, VeloNodeContainer,
 };
-use crate::{canvas::arrow::components::ArrowMeta, resources::LoadTabRequest};
+use crate::{
+    canvas::arrow::components::ArrowMeta,
+    resources::{FontSystemState, LoadTabRequest},
+};
 use crate::{canvas::arrow::events::CreateArrowEvent, utils::load_doc_to_memory};
 
 use crate::resources::{AppState, LoadDocRequest};
@@ -93,7 +96,8 @@ pub fn load_tab(
     mut create_arrow: EventWriter<CreateArrowEvent>,
     main_panel_query: Query<Entity, With<MainPanel>>,
     mut delete_tab: Query<(&mut Visibility, &DeleteTab), (With<DeleteTab>, Without<ArrowMeta>)>,
-    mut font_system_state: ResMut<FontSystemState>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
+    font_system_state: ResMut<FontSystemState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     *ui_state = UiState::default();
@@ -166,7 +170,9 @@ pub fn load_tab(
                 let entity = spawn_node(
                     &mut commands,
                     &asset_server,
-                    &mut font_system_state,
+                    &mut cosmic_fonts,
+                    font_system_state.0.clone().unwrap(),
+                    window.scale_factor() as f32,
                     NodeMeta {
                         size: (json_node.width, json_node.height),
                         node_type: json_node.node_type,
@@ -178,7 +184,6 @@ pub fn load_tab(
                         text_pos: json_node.text.pos,
                         z_index: json_node.z_index,
                         is_active: false,
-                        scale_factor: window.scale_factor() as f32,
                     },
                 );
                 commands.entity(main_panel_query.single()).add_child(entity);

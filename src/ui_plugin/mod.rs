@@ -68,6 +68,10 @@ pub use search::*;
 mod canvas_click;
 use canvas_click::*;
 
+#[path = "systems/active_editor_changed.rs"]
+mod active_editor_changed;
+use active_editor_changed::*;
+
 pub struct UiPlugin;
 
 pub struct AddRectEvent {
@@ -238,6 +242,7 @@ impl Plugin for UiPlugin {
             particles_effect,
             save_to_store.after(save_tab),
             canvas_click,
+            active_editor_changed,
         ));
         app.add_systems((set_focused_entity, clickable_links).chain());
 
