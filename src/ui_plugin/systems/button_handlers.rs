@@ -4,7 +4,7 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::render::view::RenderLayers;
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use bevy_cosmic_edit::{CosmicEdit, CosmicEditEventer, CosmicFont};
+use bevy_cosmic_edit::{CosmicEdit, CosmicFont};
 use bevy_pkv::PkvStore;
 use cosmic_text::Edit;
 use serde::Serialize;
@@ -299,7 +299,6 @@ pub fn delete_doc_handler(
     windows: Query<&Window, With<PrimaryWindow>>,
     pkv: Res<PkvStore>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
     font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
@@ -331,7 +330,6 @@ pub fn delete_doc_handler(
                 let entity = spawn_modal(
                     &mut commands,
                     &mut cosmic_fonts,
-                    &mut cosmic_edit_eventer,
                     font_system_state.0.clone().unwrap(),
                     window,
                     id,
@@ -371,7 +369,6 @@ pub fn export_to_file(
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
     font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
@@ -385,7 +382,6 @@ pub fn export_to_file(
                 let entity = spawn_modal(
                     &mut commands,
                     &mut cosmic_fonts,
-                    &mut cosmic_edit_eventer,
                     font_system_state.0.clone().unwrap(),
                     window,
                     id,
@@ -496,7 +492,6 @@ pub fn import_from_file(
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
     font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
@@ -510,7 +505,6 @@ pub fn import_from_file(
                 let entity = spawn_modal(
                     &mut commands,
                     &mut cosmic_fonts,
-                    &mut cosmic_edit_eventer,
                     font_system_state.0.clone().unwrap(),
                     window,
                     id,
@@ -531,7 +525,6 @@ pub fn import_from_url(
     main_panel_query: Query<Entity, With<MainPanel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
     font_system_state: ResMut<FontSystemState>,
 ) {
     let window = windows.single();
@@ -545,7 +538,6 @@ pub fn import_from_url(
                 let entity = spawn_modal(
                     &mut commands,
                     &mut cosmic_fonts,
-                    &mut cosmic_edit_eventer,
                     font_system_state.0.clone().unwrap(),
                     window,
                     id,

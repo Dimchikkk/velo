@@ -3,15 +3,13 @@ use std::path::Path;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{
     create_cosmic_font_system, get_cosmic_text, spawn_cosmic_edit, ActiveEditor, CosmicEdit,
-    CosmicEditEventer, CosmicEditMeta, CosmicEditPlugin, CosmicFont, CosmicFontConfig,
-    CosmicTextPos,
+    CosmicEditMeta, CosmicEditPlugin, CosmicFont, CosmicFontConfig, CosmicTextPos,
 };
 
 fn setup(
     mut commands: Commands,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
-    mut cosmic_edit_eventer: EventWriter<CosmicEditEventer>,
 ) {
     commands.spawn(Camera2dBundle::default());
     let root = commands
@@ -48,12 +46,7 @@ fn setup(
         text_pos: CosmicTextPos::Center,
         initial_size: None,
     };
-    let cosmic_edit_1 = spawn_cosmic_edit(
-        &mut commands,
-        &mut cosmic_edit_eventer,
-        &mut cosmic_fonts,
-        cosmic_edit_meta_1,
-    );
+    let cosmic_edit_1 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta_1);
 
     let cosmic_font_config_2 = CosmicFontConfig {
         fonts_dir_path: Some(Path::new("assets/fonts").into()),
@@ -76,12 +69,7 @@ fn setup(
         text_pos: CosmicTextPos::Center,
         initial_size: None,
     };
-    let cosmic_edit_2 = spawn_cosmic_edit(
-        &mut commands,
-        &mut cosmic_edit_eventer,
-        &mut cosmic_fonts,
-        cosmic_edit_meta_2,
-    );
+    let cosmic_edit_2 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta_2);
 
     commands.entity(root).add_child(cosmic_edit_1);
     commands.entity(root).add_child(cosmic_edit_2);
