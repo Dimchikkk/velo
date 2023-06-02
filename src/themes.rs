@@ -1,38 +1,39 @@
 use bevy::prelude::*;
 use std::path::PathBuf;
 
+#[derive(Resource, Debug)]
 pub struct Theme {
-    font_color: Color,
-    btn_border_color: Color,
-    menu_bg: Color,
-    menu_btn_bg: Color,
-    left_panel_bg: Color,
-    canvas_bg_color: Option<Color>,
-    canvas_bg_img: Option<PathBuf>,
-    doc_list_bg: Color,
-    search_box_bg: Color,
-    search_box_border: Color,
-    add_circle_bg: Color,
-    add_rectangle_bg: Color,
-    remove_node_bg: Color,
-    arrow_btn_bg: Color,
-    test_pos_btn_bg: Color,
-    font_back_btn_bg: Color,
-    celebrate_btn_bg: Color,
-    tab_bg: Color,
-    add_tab_bg: Color,
-    bottom_panel_bg: Color,
-    node_bg: Color,
-    node_border: Color,
-    arrow_connector: Color,
-    arrow_color: Color,
-    selected_node_color: Color,
-    modal_bg: Color,
-    ok_cancel_bg: Color,
-    ok_cancel_font: Color,
-    shadow_color: Color,
-    modal_text_input_bg: Color,
-    tooltip_bg_color: Color,
+    pub font_color: Color,
+    pub btn_border_color: Color,
+    pub menu_bg: Color,
+    pub menu_btn_bg: Color,
+    pub left_panel_bg: Color,
+    pub canvas_bg_color: Option<Color>,
+    pub canvas_bg_img: Option<PathBuf>,
+    pub doc_list_bg: Color,
+    pub search_box_bg: Color,
+    pub search_box_border: Color,
+    pub add_circle_bg: Color,
+    pub add_rectangle_bg: Color,
+    pub remove_node_bg: Color,
+    pub arrow_btn_bg: Color,
+    pub test_pos_btn_bg: Color,
+    pub font_back_btn_bg: Color,
+    pub celebrate_btn_bg: Color,
+    pub tab_bg: Color,
+    pub add_tab_bg: Color,
+    pub bottom_panel_bg: Color,
+    pub node_bg: Color,
+    pub node_border: Color,
+    pub arrow_connector: Color,
+    pub arrow_color: Color,
+    pub selected_node_color: Color,
+    pub modal_bg: Color,
+    pub ok_cancel_bg: Color,
+    pub ok_cancel_font: Color,
+    pub shadow_color: Color,
+    pub modal_text_input_bg: Color,
+    pub tooltip_bg_color: Color,
 }
 
 pub fn velo_light() -> Theme {
@@ -104,5 +105,13 @@ pub fn velo_dark() -> Theme {
         shadow_color: Color::rgb(0.1, 0.1, 0.1),
         modal_text_input_bg: Color::rgb(0.2, 0.2, 0.2),
         tooltip_bg_color: Color::rgb(0.2, 0.2, 0.2),
+    }
+}
+
+pub fn get_theme_by_name(theme_name: &String) -> Theme {
+    match theme_name.as_str() {
+        "light" => velo_light(),
+        "dark" => velo_dark(),
+        _ => velo_light(),
     }
 }
