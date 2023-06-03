@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
-use crate::ui_plugin::ui_helpers::GenericButton;
+use crate::{themes::Theme, ui_plugin::ui_helpers::GenericButton};
 
 use super::ui_helpers::TextPosMode;
 
 pub fn add_text_pos(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     arrow_server: &Res<AssetServer>,
     text_pos_mode: TextPosMode,
 ) -> Entity {
@@ -23,14 +24,14 @@ pub fn add_text_pos(
                 size: Size::new(Val::Percent(15.), Val::Percent(100.)),
                 ..default()
             },
-            background_color: Color::BLACK.with_a(0.5).into(),
+            background_color: theme.shadow.into(),
             ..default()
         })
         .id();
     let button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
+                background_color: theme.text_pos_btn_bg.into(),
                 image: image.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
@@ -48,7 +49,7 @@ pub fn add_text_pos(
                 },
                 ..default()
             },
-            BorderColor(Color::BLACK),
+            BorderColor(theme.btn_border),
             text_pos_mode,
             GenericButton,
         ))

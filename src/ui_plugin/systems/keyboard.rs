@@ -12,6 +12,7 @@ use uuid::Uuid;
 
 use crate::{
     resources::{LoadTabRequest, SaveTabRequest},
+    themes::Theme,
     AddRectEvent, BlinkTimer, UiState,
 };
 
@@ -31,6 +32,7 @@ pub fn keyboard_input_system(
     mut editable_text_query: Query<(&mut Text, &EditableText), With<EditableText>>,
     mut blink_timer: ResMut<BlinkTimer>,
     time: Res<Time>,
+    theme: Res<Theme>,
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
@@ -45,6 +47,7 @@ pub fn keyboard_input_system(
             &mut editable_text_query,
             &mut events,
             scale_factor,
+            &theme,
         );
     } else if command && shift && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveDocRequest {
@@ -103,7 +106,7 @@ pub fn keyboard_input_system(
                 };
                 *deleting = is_del_mode;
                 if str != current_str {
-                    text.sections = get_sections(str.clone()).0;
+                    text.sections = get_sections(&theme, str.clone()).0;
                 }
                 if blink_timer.timer.finished() {
                     text.sections.last_mut().unwrap().value =
@@ -162,6 +165,7 @@ pub fn insert_from_clipboard(
     query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
     events: &mut EventWriter<AddRectEvent>,
     scale_factor: f64,
+    theme: &Res<Theme>,
 ) {
     use crate::JsonNode;
 
@@ -199,7 +203,7 @@ pub fn insert_from_clipboard(
                     text: "".to_string(),
                     pos: crate::TextPos::Center,
                 },
-                bg_color: Color::WHITE,
+                bg_color: theme.clipboard_image_bg,
                 z_index: 0,
             },
             image: Some(image.into()),
@@ -215,7 +219,7 @@ pub fn insert_from_clipboard(
                 for section in text_copy.sections.iter_mut() {
                     str = format!("{}{}", str, section.value.clone());
                 }
-                text.sections = get_sections(format!("{}{}", str, clipboard_text)).0;
+                text.sections = get_sections(&theme, format!("{}{}", str, clipboard_text)).0;
                 text.sections.last_mut().unwrap().value = " ".to_string();
             }
         }

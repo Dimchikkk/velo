@@ -13,6 +13,7 @@ use super::{
 use crate::{
     canvas::arrow::components::ArrowMeta,
     resources::{FontSystemState, LoadTabRequest},
+    themes::Theme,
 };
 use crate::{canvas::arrow::events::CreateArrowEvent, utils::load_doc_to_memory};
 
@@ -48,6 +49,7 @@ pub fn load_doc(
     asset_server: Res<AssetServer>,
     mut tabs_query: Query<Entity, With<TabContainer>>,
     mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
+    theme: Res<Theme>,
 ) {
     let bottom_panel = bottom_panel.single_mut();
     let doc_id = request.doc_id;
@@ -67,6 +69,7 @@ pub fn load_doc(
     for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter() {
         let tab_view: Entity = add_tab(
             &mut commands,
+            &theme,
             &asset_server,
             tab.name.clone(),
             tab.id,
@@ -99,6 +102,7 @@ pub fn load_tab(
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    theme: Res<Theme>,
 ) {
     *ui_state = UiState::default();
     commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
@@ -169,6 +173,7 @@ pub fn load_tab(
                 // ideally AddRect event should be fired instead of calling spawn_node directly
                 let entity = spawn_node(
                     &mut commands,
+                    &theme,
                     &asset_server,
                     &mut cosmic_fonts,
                     font_system_state.0.clone().unwrap(),

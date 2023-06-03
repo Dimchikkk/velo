@@ -9,6 +9,7 @@ use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
 use super::MainPanel;
 use crate::components::Tab;
 use crate::resources::{AppState, FontSystemState, LoadDocRequest, LoadTabRequest, SaveTabRequest};
+use crate::themes::Theme;
 use crate::utils::{get_timestamp, ReflectableUuid};
 use crate::UiState;
 
@@ -150,6 +151,7 @@ pub fn delete_tab_handler(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
+    theme: Res<Theme>,
 ) {
     let window = windows.single();
     for interaction in &mut interaction_query {
@@ -171,6 +173,7 @@ pub fn delete_tab_handler(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
+                    &theme,
                     &mut cosmic_fonts,
                     font_system_state.0.clone().unwrap(),
                     window,

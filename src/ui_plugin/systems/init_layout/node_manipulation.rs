@@ -1,11 +1,13 @@
 use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::ui_plugin::ui_helpers::{
-    get_tooltip, ButtonAction, GenericButton, Tooltip, TooltipPosition,
+use crate::{
+    themes::Theme,
+    ui_plugin::ui_helpers::{get_tooltip, ButtonAction, GenericButton, Tooltip, TooltipPosition},
 };
 
 pub fn node_manipulation(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     icon_font: &Handle<Font>,
     create_rec_component: ButtonAction,
     create_circle_component: ButtonAction,
@@ -25,7 +27,7 @@ pub fn node_manipulation(
         .id();
     let top_new_rec = commands
         .spawn(NodeBundle {
-            background_color: Color::BLACK.with_a(0.5).into(),
+            background_color: theme.shadow.into(),
             style: Style {
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
@@ -39,7 +41,7 @@ pub fn node_manipulation(
     let new_rec = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
+                background_color: theme.node_manipulation_bg.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
@@ -60,13 +62,18 @@ pub fn node_manipulation(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip("New Rectangle".to_string(), 14., TooltipPosition::Bottom),
+                get_tooltip(
+                    &theme,
+                    "New Rectangle".to_string(),
+                    14.,
+                    TooltipPosition::Bottom,
+                ),
                 Tooltip,
             ));
 
             let text_style = TextStyle {
                 font_size: 30.0,
-                color: Color::BLACK,
+                color: theme.node_manipulation.into(),
                 font: icon_font.clone(),
             };
             let text = Text {
@@ -93,7 +100,7 @@ pub fn node_manipulation(
         .id();
     let top_new_circle = commands
         .spawn(NodeBundle {
-            background_color: Color::BLACK.with_a(0.5).into(),
+            background_color: theme.shadow.into(),
             style: Style {
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
@@ -107,7 +114,7 @@ pub fn node_manipulation(
     let new_circle = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
+                background_color: theme.node_manipulation_bg.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
@@ -128,13 +135,18 @@ pub fn node_manipulation(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip("New Circle".to_string(), 14., TooltipPosition::Bottom),
+                get_tooltip(
+                    &theme,
+                    "New Circle".to_string(),
+                    14.,
+                    TooltipPosition::Bottom,
+                ),
                 Tooltip,
             ));
 
             let text_style = TextStyle {
                 font_size: 30.0,
-                color: Color::BLACK,
+                color: theme.node_manipulation.into(),
                 font: icon_font.clone(),
             };
             let text = Text {
@@ -161,7 +173,7 @@ pub fn node_manipulation(
         .id();
     let top_del = commands
         .spawn(NodeBundle {
-            background_color: Color::BLACK.with_a(0.5).into(),
+            background_color: theme.shadow.into(),
             style: Style {
                 flex_direction: FlexDirection::Column,
                 margin: UiRect::all(Val::Px(5.)),
@@ -175,7 +187,7 @@ pub fn node_manipulation(
     let del_rec = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
+                background_color: theme.node_manipulation_bg.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
@@ -196,13 +208,18 @@ pub fn node_manipulation(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip("Delete Rectangle".to_string(), 14., TooltipPosition::Bottom),
+                get_tooltip(
+                    &theme,
+                    "Delete Rectangle".to_string(),
+                    14.,
+                    TooltipPosition::Bottom,
+                ),
                 Tooltip,
             ));
 
             let text_style = TextStyle {
                 font_size: 30.0,
-                color: Color::BLACK,
+                color: theme.node_manipulation.into(),
                 font: icon_font.clone(),
             };
             let text = Text {

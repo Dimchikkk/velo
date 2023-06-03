@@ -8,12 +8,13 @@ use bevy::{
     prelude::*,
 };
 
-use crate::utils::ReflectableUuid;
+use crate::{themes::Theme, utils::ReflectableUuid};
 
 use super::{DeleteDoc, DocListItemButton, DocListItemContainer, EditableText, GenericButton};
 
 pub fn add_list_item(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     asset_server: &Res<AssetServer>,
     id: ReflectableUuid,
     name: String,
@@ -22,7 +23,7 @@ pub fn add_list_item(
     let root = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(255., 242., 230.).into(),
+                background_color: theme.doc_list_bg.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
@@ -33,14 +34,14 @@ pub fn add_list_item(
             },
             GenericButton,
             DocListItemContainer { id },
-            BorderColor(Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0)),
+            BorderColor(theme.btn_border),
             AccessibilityNode(NodeBuilder::new(Role::ListItem)),
         ))
         .id();
     let doc_button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(255., 242., 230.).into(),
+                background_color: theme.doc_list_bg.into(),
                 style: Style {
                     size: Size::new(Val::Percent(90.), Val::Percent(100.)),
                     justify_content: JustifyContent::Center,
@@ -62,7 +63,7 @@ pub fn add_list_item(
                             value: name,
                             style: TextStyle {
                                 font_size: 18.,
-                                color: Color::BLACK,
+                                color: theme.font.into(),
                                 ..default()
                             },
                         },
@@ -70,7 +71,7 @@ pub fn add_list_item(
                             value: " ".to_string(),
                             style: TextStyle {
                                 font_size: 18.,
-                                color: Color::BLACK,
+                                color: theme.font.into(),
                                 ..default()
                             },
                         },
@@ -91,7 +92,6 @@ pub fn add_list_item(
         .spawn((
             ButtonBundle {
                 visibility: Visibility::Hidden,
-                background_color: Color::rgb(255., 242., 230.).into(),
                 style: Style {
                     margin: UiRect {
                         left: Val::Px(3.),
@@ -118,7 +118,7 @@ pub fn add_list_item(
                         value: "\u{e14c}".to_string(),
                         style: TextStyle {
                             font_size: 24.,
-                            color: Color::BLACK,
+                            color: theme.del_button.into(),
                             font: icon_font,
                         },
                     }],

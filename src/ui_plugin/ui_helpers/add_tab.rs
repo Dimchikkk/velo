@@ -1,11 +1,12 @@
 use bevy::prelude::*;
 
-use crate::utils::ReflectableUuid;
+use crate::{themes::Theme, utils::ReflectableUuid};
 
 use super::{DeleteTab, EditableText, GenericButton, TabButton, TabContainer};
 
 pub fn add_tab(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     asset_server: &Res<AssetServer>,
     name: String,
     id: ReflectableUuid,
@@ -15,7 +16,7 @@ pub fn add_tab(
     let root = commands
         .spawn((
             NodeBundle {
-                background_color: Color::rgb(1., 193.0 / 255.0, 7.0 / 255.0).into(),
+                background_color: theme.add_tab_bg.into(),
                 style: Style {
                     size: Size::new(Val::Percent(8.), Val::Percent(90.)),
                     justify_content: JustifyContent::Center,
@@ -36,7 +37,7 @@ pub fn add_tab(
     let tab_button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(1., 193.0 / 255.0, 7.0 / 255.0).into(),
+                background_color: theme.add_tab_bg.into(),
                 style: Style {
                     size: Size::new(Val::Percent(90.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
@@ -59,7 +60,7 @@ pub fn add_tab(
                             value: name,
                             style: TextStyle {
                                 font_size: 18.,
-                                color: Color::BLACK,
+                                color: theme.font.into(),
                                 ..default()
                             },
                         },
@@ -67,7 +68,7 @@ pub fn add_tab(
                             value: " ".to_string(),
                             style: TextStyle {
                                 font_size: 18.,
-                                color: Color::BLACK,
+                                color: theme.font.into(),
                                 ..default()
                             },
                         },
@@ -86,7 +87,7 @@ pub fn add_tab(
     let del_button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(1., 193.0 / 255.0, 7.0 / 255.0).into(),
+                background_color: theme.add_tab_bg.into(),
                 visibility: if is_active {
                     Visibility::Visible
                 } else {
@@ -119,7 +120,7 @@ pub fn add_tab(
                         value: "\u{e14c}".to_string(),
                         style: TextStyle {
                             font_size: 18.,
-                            color: Color::BLACK,
+                            color: theme.del_button.into(),
                             font: icon_font,
                         },
                     }],

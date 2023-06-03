@@ -189,11 +189,14 @@ pub fn get_cosmic_text(editor: &Editor) -> String {
 }
 
 fn get_y_offset(editor: &Editor) -> i32 {
+    let mut num_of_lines = 0;
+    for line in editor.buffer().lines.iter() {
+        if let Some(layout_opt) = line.layout_opt().as_ref() {
+            num_of_lines += layout_opt.len();
+        }
+    }
     let text_height = editor.buffer().metrics().line_height
-        * cmp::min(
-            editor.buffer().visible_lines(),
-            editor.buffer().lines.len() as i32,
-        ) as f32;
+        * cmp::min(editor.buffer().visible_lines(), num_of_lines as i32) as f32;
     ((editor.buffer().size().1 - text_height) / 2.0) as i32
 }
 
