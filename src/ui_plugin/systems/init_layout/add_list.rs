@@ -10,13 +10,17 @@ use bevy::{
 use bevy_pkv::PkvStore;
 
 use super::ui_helpers::ScrollingList;
-use crate::components::{Doc, Tab};
 use crate::resources::{AppState, LoadDocRequest};
 use crate::ui_plugin::ui_helpers::DocList;
 use crate::utils::ReflectableUuid;
+use crate::{
+    components::{Doc, Tab},
+    themes::Theme,
+};
 
 pub fn add_list(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     app_state: &mut ResMut<AppState>,
     pkv: &mut ResMut<PkvStore>,
 ) -> Entity {
@@ -33,7 +37,7 @@ pub fn add_list(
                 overflow: Overflow::Hidden,
                 ..default()
             },
-            background_color: Color::rgb(158., 158., 158.).into(),
+            background_color: theme.doc_list_bg.into(),
             ..default()
         })
         .id();

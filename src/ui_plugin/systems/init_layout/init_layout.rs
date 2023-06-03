@@ -67,7 +67,9 @@ pub fn init_layout(
     // font setup
     let custom_font_data = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
     let font = Font::try_from_bytes(custom_font_data.to_vec()).unwrap();
-    fonts.set_untracked(TextStyle::default().font, font);
+    let mut text_style = TextStyle::default();
+    text_style.color = theme.font;
+    fonts.set_untracked(text_style.font, font);
     let cosmic_font_config = CosmicFontConfig {
         fonts_dir_path: None,
         load_system_fonts: false,
@@ -115,10 +117,16 @@ pub fn init_layout(
             BorderColor(theme.btn_border),
         ))
         .id();
-    let add_tab = add_menu_button(&mut commands, "New Tab".to_string(), &icon_font, AddTab);
+    let add_tab = add_menu_button(
+        &mut commands,
+        &theme,
+        "New Tab".to_string(),
+        &icon_font,
+        AddTab,
+    );
     commands.entity(bottom_panel).add_child(add_tab);
 
-    let docs = add_list(&mut commands, &mut app_state, &mut pkv);
+    let docs = add_list(&mut commands, &theme, &mut app_state, &mut pkv);
 
     let root_ui = commands
         .spawn((
@@ -164,12 +172,14 @@ pub fn init_layout(
         .id();
     let new_doc = add_menu_button(
         &mut commands,
+        &theme,
         "New Document".to_string(),
         &icon_font,
         NewDoc,
     );
     let save_doc = add_menu_button(
         &mut commands,
+        &theme,
         "Save Document".to_string(),
         &icon_font,
         SaveDoc,
@@ -177,6 +187,7 @@ pub fn init_layout(
     #[cfg(not(target_arch = "wasm32"))]
     let export_file = add_menu_button(
         &mut commands,
+        &theme,
         "Export To File".to_string(),
         &icon_font,
         ExportToFile,
@@ -184,6 +195,7 @@ pub fn init_layout(
     #[cfg(not(target_arch = "wasm32"))]
     let import_file = add_menu_button(
         &mut commands,
+        &theme,
         "Import From File".to_string(),
         &icon_font,
         ImportFromFile,
@@ -191,6 +203,7 @@ pub fn init_layout(
     #[cfg(not(target_arch = "wasm32"))]
     let import_url = add_menu_button(
         &mut commands,
+        &theme,
         "Import From URL".to_string(),
         &icon_font,
         ImportFromUrl,
@@ -213,6 +226,7 @@ pub fn init_layout(
     if app_state.github_token.is_some() {
         let share_doc = add_menu_button(
             &mut commands,
+            &theme,
             "Share Document (copy URL to clipboard)".to_string(),
             &icon_font,
             ShareDoc,
@@ -266,7 +280,7 @@ pub fn init_layout(
     let main_panel = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::WHITE.with_a(0.).into(),
+                background_color: Color::NONE.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
@@ -302,6 +316,7 @@ pub fn init_layout(
     #[cfg(not(target_arch = "wasm32"))]
     let search_box = add_search_box(
         &mut commands,
+        &theme,
         &mut cosmic_fonts,
         cosmic_font_handle,
         primary_window.scale_factor() as f32,
@@ -330,6 +345,7 @@ pub fn init_layout(
 
     let rectangle_creation = node_manipulation(
         &mut commands,
+        &theme,
         &icon_font,
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::AddRec,
@@ -355,6 +371,7 @@ pub fn init_layout(
         .id();
     let front = add_front_back(
         &mut commands,
+        &theme,
         &asset_server,
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Front,
@@ -362,6 +379,7 @@ pub fn init_layout(
     );
     let back = add_front_back(
         &mut commands,
+        &theme,
         &asset_server,
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Back,
@@ -382,21 +400,29 @@ pub fn init_layout(
             ..default()
         },))
         .id();
-    let color1 = add_color(&mut commands, Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0));
+    let color1 = add_color(
+        &mut commands,
+        &theme,
+        Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0),
+    );
     let color2 = add_color(
         &mut commands,
+        &theme,
         Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
     );
     let color3 = add_color(
         &mut commands,
+        &theme,
         Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
     );
     let color4 = add_color(
         &mut commands,
+        &theme,
         Color::rgb(207.0 / 255.0, 226.0 / 255.0, 243.0 / 255.0),
     );
     let color5 = add_color(
         &mut commands,
+        &theme,
         Color::rgb(245.0 / 255.0, 222.0 / 255.0, 179.0 / 255.0),
     );
 
@@ -420,6 +446,7 @@ pub fn init_layout(
         .id();
     let arrow1 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::Line,
@@ -427,6 +454,7 @@ pub fn init_layout(
     );
     let arrow2 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::Arrow,
@@ -434,6 +462,7 @@ pub fn init_layout(
     );
     let arrow3 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::DoubleArrow,
@@ -441,6 +470,7 @@ pub fn init_layout(
     );
     let arrow4 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::ParallelLine,
@@ -448,6 +478,7 @@ pub fn init_layout(
     );
     let arrow5 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::ParallelArrow,
@@ -455,6 +486,7 @@ pub fn init_layout(
     );
     let arrow6 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::ParallelDoubleArrow,
@@ -481,6 +513,7 @@ pub fn init_layout(
         .id();
     let text_pos1 = add_text_pos(
         &mut commands,
+        &theme,
         &asset_server,
         TextPosMode {
             text_pos: TextPos::Center,
@@ -488,6 +521,7 @@ pub fn init_layout(
     );
     let text_pos2 = add_text_pos(
         &mut commands,
+        &theme,
         &asset_server,
         TextPosMode {
             text_pos: TextPos::TopLeft,
@@ -511,7 +545,7 @@ pub fn init_layout(
         .id();
     #[cfg(not(target_arch = "wasm32"))]
     {
-        let effect1 = add_effect(&mut commands, &icon_font, ParticlesEffect);
+        let effect1 = add_effect(&mut commands, &theme, &icon_font, ParticlesEffect);
         commands.entity(effects).add_child(effect1);
     }
 

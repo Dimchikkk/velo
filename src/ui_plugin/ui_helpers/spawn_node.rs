@@ -4,6 +4,7 @@ use bevy_ui_borders::{BorderColor, Outline};
 
 use bevy::prelude::*;
 
+use crate::themes::Theme;
 use crate::ui_plugin::NodeType;
 use crate::TextPos;
 
@@ -30,6 +31,7 @@ pub struct NodeMeta {
 
 pub fn spawn_node(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     asset_server: &Res<AssetServer>,
     cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
     cosmic_font_handle: Handle<CosmicFont>,
@@ -51,7 +53,6 @@ pub fn spawn_node(
                     size: Size::new(item_meta.size.0, item_meta.size.1),
                     ..default()
                 },
-                // background_color: Color::BLACK.with_a(0.5).into(),
                 ..default()
             },
             VeloNodeContainer { id: item_meta.id },
@@ -82,8 +83,8 @@ pub fn spawn_node(
         ))
         .id();
     let outline_color = match item_meta.node_type {
-        NodeType::Rect => Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0),
-        NodeType::Circle => Color::rgba(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0, 0.),
+        NodeType::Rect => theme.node_border,
+        NodeType::Circle => theme.node_border.with_a(0.),
     };
     commands
         .entity(button)
@@ -91,7 +92,7 @@ pub fn spawn_node(
     let arrow_marker1 = commands
         .spawn((
             create_arrow_marker(50.0, 0., 0., 0.),
-            BorderColor(Color::BLUE.with_a(0.5)),
+            BorderColor(theme.arrow_connector),
             ArrowConnect {
                 pos: ArrowConnectPos::Top,
                 id: item_meta.id,
@@ -101,7 +102,7 @@ pub fn spawn_node(
     let arrow_marker2 = commands
         .spawn((
             create_arrow_marker(0., 0., 50., 0.),
-            BorderColor(Color::BLUE.with_a(0.5)),
+            BorderColor(theme.arrow_connector),
             ArrowConnect {
                 pos: ArrowConnectPos::Left,
                 id: item_meta.id,
@@ -111,7 +112,7 @@ pub fn spawn_node(
     let arrow_marker3 = commands
         .spawn((
             create_arrow_marker(50., 0., 100., 0.),
-            BorderColor(Color::BLUE.with_a(0.5)),
+            BorderColor(theme.arrow_connector),
             ArrowConnect {
                 pos: ArrowConnectPos::Bottom,
                 id: item_meta.id,
@@ -121,7 +122,7 @@ pub fn spawn_node(
     let arrow_marker4 = commands
         .spawn((
             create_arrow_marker(100., 0., 50., 0.),
-            BorderColor(Color::BLUE.with_a(0.5)),
+            BorderColor(theme.arrow_connector),
             ArrowConnect {
                 pos: ArrowConnectPos::Right,
                 id: item_meta.id,

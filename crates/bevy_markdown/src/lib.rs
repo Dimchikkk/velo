@@ -395,7 +395,6 @@ pub fn spawn_bevy_markdown(
     bevy_markdown: BevyMarkdown,
 ) -> Result<Entity, Vec<BevyMarkdownError>> {
     let node = markdown::to_mdast(bevy_markdown.text.as_str(), &markdown::ParseOptions::gfm());
-    // Load these once at the start of your program
     let ps = SyntaxSet::load_defaults_newlines();
     let ts = ThemeSet::load_defaults();
 
@@ -522,10 +521,7 @@ pub fn spawn_bevy_markdown(
                     links.push(link);
                 }
                 let text_bundle_id = Uuid::new_v4();
-                let top_style = Style {
-                    padding: UiRect::all(Val::Px(10.)),
-                    ..default()
-                };
+                let top_style = Style::default();
                 let mut text_bundle_style = Style::default();
                 // Main branch of bevy doesn't need setting max_size for wrapping to work
                 // bevy_markdown will spawn multiple text bundles with more markdown features supported
