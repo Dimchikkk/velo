@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
-use crate::ui_plugin::ui_helpers::GenericButton;
+use crate::{themes::Theme, ui_plugin::ui_helpers::GenericButton};
 
 use super::ui_helpers::ChangeColor;
 
-pub fn add_color(commands: &mut Commands, color: Color) -> Entity {
+pub fn add_color(commands: &mut Commands, theme: &Res<Theme>, color: Color) -> Entity {
     let top = commands
         .spawn(NodeBundle {
             style: Style {
@@ -15,7 +15,7 @@ pub fn add_color(commands: &mut Commands, color: Color) -> Entity {
                 size: Size::new(Val::Percent(20.), Val::Percent(100.)),
                 ..default()
             },
-            background_color: Color::BLACK.with_a(0.5).into(),
+            background_color: theme.shadow.into(),
             ..default()
         })
         .id();
@@ -39,7 +39,7 @@ pub fn add_color(commands: &mut Commands, color: Color) -> Entity {
                 },
                 ..default()
             },
-            BorderColor(Color::BLACK),
+            BorderColor(theme.btn_border.into()),
             ChangeColor { color },
             GenericButton,
         ))

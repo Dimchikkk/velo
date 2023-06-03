@@ -2,7 +2,7 @@ use linkify::{LinkFinder, LinkKind};
 
 use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::TextPos;
+use crate::{themes::Theme, TextPos};
 #[path = "components.rs"]
 mod components;
 pub use components::*;
@@ -34,10 +34,10 @@ fn get_marker_style(position: UiRect, size: f32) -> Style {
     }
 }
 
-pub fn add_rectangle_txt(text: String) -> TextBundle {
+pub fn add_rectangle_txt(theme: &Res<Theme>, text: String) -> TextBundle {
     let text_style = TextStyle {
         font_size: 18.0,
-        color: Color::BLACK,
+        color: theme.font,
         ..default()
     };
     TextBundle::from_section(text, text_style).with_style(Style {
@@ -112,20 +112,20 @@ fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonB
             },
             10.,
         ),
-        background_color: Color::rgba(0., 0., 0., 0.).into(),
+        background_color: Color::NONE.into(),
         ..default()
     }
 }
 
-pub fn get_sections(text: String) -> (Vec<TextSection>, Vec<bool>) {
+pub fn get_sections(theme: &Res<Theme>, text: String) -> (Vec<TextSection>, Vec<bool>) {
     let text_style = TextStyle {
         font_size: 18.0,
-        color: Color::rgb(33.0 / 255.0, 33.0 / 255.0, 33.0 / 255.0),
+        color: theme.font,
         ..default()
     };
     let link_style = TextStyle {
         font_size: 18.0,
-        color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0),
+        color: theme.font,
         ..default()
     };
     let mut finder = LinkFinder::new();
@@ -186,13 +186,18 @@ pub enum TooltipPosition {
     Bottom,
 }
 
-pub fn get_tooltip(text: String, size: f32, tooltip_position: TooltipPosition) -> TextBundle {
+pub fn get_tooltip(
+    theme: &Res<Theme>,
+    text: String,
+    size: f32,
+    tooltip_position: TooltipPosition,
+) -> TextBundle {
     let text = Text {
         sections: vec![TextSection {
             value: text,
             style: TextStyle {
                 font_size: size,
-                color: Color::BLACK,
+                color: theme.font,
                 ..default()
             },
         }],
@@ -217,12 +222,13 @@ pub fn get_tooltip(text: String, size: f32, tooltip_position: TooltipPosition) -
         padding: UiRect::all(Val::Px(0.)),
         position_type: PositionType::Relative,
         position,
+        size: Size::new(Val::Auto, Val::Px(size)),
         display: Display::None,
         ..default()
     };
     TextBundle {
         z_index: ZIndex::Global(1),
-        background_color: Color::WHITE.into(),
+        background_color: theme.tooltip_bg.into(),
         text,
         style: text_bundle_style,
         ..default()

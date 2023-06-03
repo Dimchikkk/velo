@@ -1,12 +1,16 @@
 use bevy::prelude::*;
 use bevy_ui_borders::BorderColor;
 
-use crate::ui_plugin::ui_helpers::{GenericButton, TooltipPosition};
+use crate::{
+    themes::Theme,
+    ui_plugin::ui_helpers::{GenericButton, TooltipPosition},
+};
 
 use super::ui_helpers::{get_tooltip, ButtonAction, ButtonTypes, Tooltip};
 
 pub fn add_front_back(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     asset_server: &Res<AssetServer>,
     button_action: ButtonAction,
 ) -> Entity {
@@ -24,14 +28,14 @@ pub fn add_front_back(
                 size: Size::new(Val::Percent(15.), Val::Percent(100.)),
                 ..default()
             },
-            background_color: Color::BLACK.with_a(0.5).into(),
+            background_color: theme.shadow.into(),
             ..default()
         })
         .id();
     let button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0).into(),
+                background_color: theme.front_back_btn_bg.into(),
                 image: image.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
@@ -49,13 +53,13 @@ pub fn add_front_back(
                 },
                 ..default()
             },
-            BorderColor(Color::BLACK),
+            BorderColor(theme.btn_border),
             button_action,
             GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip(text.to_string(), 14., TooltipPosition::Bottom),
+                get_tooltip(&theme, text.to_string(), 14., TooltipPosition::Bottom),
                 Tooltip,
             ));
         })

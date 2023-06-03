@@ -1,9 +1,10 @@
 use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::ui_plugin::ui_helpers::GenericButton;
+use crate::{themes::Theme, ui_plugin::ui_helpers::GenericButton};
 
 pub fn add_effect(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     icon_font: &Handle<Font>,
     component: impl Component,
 ) -> Entity {
@@ -22,7 +23,7 @@ pub fn add_effect(
     let button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(224.0 / 255.0, 224.0 / 255.0, 224.0 / 255.0).into(),
+                background_color: theme.celebrate_btn_bg.into(),
                 style: Style {
                     padding: UiRect {
                         left: Val::Px(10.),
@@ -43,7 +44,7 @@ pub fn add_effect(
         .with_children(|builder| {
             let text_style = TextStyle {
                 font_size: 25.0,
-                color: Color::RED,
+                color: theme.celebrate_btn.into(),
                 font: icon_font.clone(),
             };
             let text = Text {
