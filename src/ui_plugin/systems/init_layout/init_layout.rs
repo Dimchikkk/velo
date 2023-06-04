@@ -14,6 +14,7 @@ use super::ui_helpers::{
 use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
 use crate::resources::{AppState, FontSystemState};
+use crate::themes::Theme;
 use crate::{BlinkTimer, TextPos};
 
 #[path = "add_arrow.rs"]
@@ -61,18 +62,21 @@ pub fn init_layout(
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut fonts: ResMut<Assets<Font>>,
+    theme: Res<Theme>,
 ) {
     // font setup
-    let custom_font_data = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
-    let font = Font::try_from_bytes(custom_font_data.to_vec()).unwrap();
-    fonts.set_untracked(TextStyle::default().font, font);
+    let font_bytes = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
+    let font = Font::try_from_bytes(font_bytes.to_vec()).unwrap();
+    let text_style = TextStyle {
+        font: TextStyle::default().font,
+        font_size: 14.0,
+        color: theme.font,
+    };
+    fonts.set_untracked(text_style.font, font);
     let cosmic_font_config = CosmicFontConfig {
         fonts_dir_path: None,
         load_system_fonts: false,
-        custom_font_data: Some(custom_font_data),
-        monospace_family: Some("Source Code Pro".to_string()),
-        sans_serif_family: Some("Source Code Pro".to_string()),
-        serif_family: Some("Source Code Pro".to_string()),
+        font_bytes: Some(font_bytes),
     };
     let font_system = create_cosmic_font_system(cosmic_font_config);
     let cosmic_font_handle = cosmic_fonts.add(CosmicFont(font_system));
@@ -91,7 +95,7 @@ pub fn init_layout(
     let bottom_panel = commands
         .spawn((
             NodeBundle {
-                background_color: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0).into(),
+                background_color: theme.bottom_panel_bg.into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
                     position_type: PositionType::Absolute,
@@ -110,13 +114,19 @@ pub fn init_layout(
                 ..default()
             },
             BottomPanel,
-            BorderColor(Color::rgb(204.0 / 255.0, 204.0 / 255.0, 204.0 / 255.0)),
+            BorderColor(theme.btn_border),
         ))
         .id();
-    let add_tab = add_menu_button(&mut commands, "New Tab".to_string(), &icon_font, AddTab);
+    let add_tab = add_menu_button(
+        &mut commands,
+        &theme,
+        "New Tab".to_string(),
+        &icon_font,
+        AddTab,
+    );
     commands.entity(bottom_panel).add_child(add_tab);
 
-    let docs = add_list(&mut commands, &mut app_state, &mut pkv);
+    let docs = add_list(&mut commands, &theme, &mut app_state, &mut pkv);
 
     let root_ui = commands
         .spawn((
@@ -142,7 +152,7 @@ pub fn init_layout(
     let menu = commands
         .spawn((
             NodeBundle {
-                background_color: Color::rgb(245.0 / 255.0, 245.0 / 255.0, 245.0 / 255.0).into(),
+                background_color: theme.menu_bg.into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
                     size: Size::new(Val::Percent(100.0), Val::Percent(5.)),
@@ -156,18 +166,20 @@ pub fn init_layout(
                 },
                 ..default()
             },
-            BorderColor(Color::rgb(200.0 / 255.0, 200.0 / 255.0, 200.0 / 255.0)),
+            BorderColor(theme.btn_border),
             Menu,
         ))
         .id();
     let new_doc = add_menu_button(
         &mut commands,
+        &theme,
         "New Document".to_string(),
         &icon_font,
         NewDoc,
     );
     let save_doc = add_menu_button(
         &mut commands,
+        &theme,
         "Save Document".to_string(),
         &icon_font,
         SaveDoc,
@@ -175,6 +187,7 @@ pub fn init_layout(
     #[cfg(not(target_arch = "wasm32"))]
     let export_file = add_menu_button(
         &mut commands,
+        &theme,
         "Export To File".to_string(),
         &icon_font,
         ExportToFile,
@@ -182,6 +195,7 @@ pub fn init_layout(
     #[cfg(not(target_arch = "wasm32"))]
     let import_file = add_menu_button(
         &mut commands,
+        &theme,
         "Import From File".to_string(),
         &icon_font,
         ImportFromFile,
@@ -189,6 +203,7 @@ pub fn init_layout(
     #[cfg(not(target_arch = "wasm32"))]
     let import_url = add_menu_button(
         &mut commands,
+        &theme,
         "Import From URL".to_string(),
         &icon_font,
         ImportFromUrl,
@@ -196,6 +211,7 @@ pub fn init_layout(
     #[cfg(target_arch = "wasm32")]
     let set_window_prop = add_menu_button(
         &mut commands,
+        &theme,
         "Save Document to window.velo object".to_string(),
         &icon_font,
         super::SetWindowProperty,
@@ -211,6 +227,7 @@ pub fn init_layout(
     if app_state.github_token.is_some() {
         let share_doc = add_menu_button(
             &mut commands,
+            &theme,
             "Share Document (copy URL to clipboard)".to_string(),
             &icon_font,
             ShareDoc,
@@ -234,7 +251,7 @@ pub fn init_layout(
     let left_panel = commands
         .spawn((
             NodeBundle {
-                background_color: Color::rgb(224.0 / 255.0, 224.0 / 255.0, 224.0 / 255.0).into(),
+                background_color: theme.left_panel_bg.into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
                     size: Size::new(Val::Percent(15.), Val::Percent(100.)),
@@ -245,7 +262,7 @@ pub fn init_layout(
                 },
                 ..default()
             },
-            BorderColor(Color::rgb(192.0 / 255.0, 192.0 / 255.0, 192.0 / 255.0)),
+            BorderColor(theme.btn_border),
             LeftPanel,
         ))
         .id();
@@ -264,7 +281,7 @@ pub fn init_layout(
     let main_panel = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::WHITE.with_a(0.).into(),
+                background_color: Color::NONE.into(),
                 style: Style {
                     size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     align_items: AlignItems::Center,
@@ -300,6 +317,7 @@ pub fn init_layout(
     #[cfg(not(target_arch = "wasm32"))]
     let search_box = add_search_box(
         &mut commands,
+        &theme,
         &mut cosmic_fonts,
         cosmic_font_handle,
         primary_window.scale_factor() as f32,
@@ -328,6 +346,7 @@ pub fn init_layout(
 
     let rectangle_creation = node_manipulation(
         &mut commands,
+        &theme,
         &icon_font,
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::AddRec,
@@ -353,6 +372,7 @@ pub fn init_layout(
         .id();
     let front = add_front_back(
         &mut commands,
+        &theme,
         &asset_server,
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Front,
@@ -360,6 +380,7 @@ pub fn init_layout(
     );
     let back = add_front_back(
         &mut commands,
+        &theme,
         &asset_server,
         ButtonAction {
             button_type: ui_helpers::ButtonTypes::Back,
@@ -380,21 +401,29 @@ pub fn init_layout(
             ..default()
         },))
         .id();
-    let color1 = add_color(&mut commands, Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0));
+    let color1 = add_color(
+        &mut commands,
+        &theme,
+        Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0),
+    );
     let color2 = add_color(
         &mut commands,
+        &theme,
         Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
     );
     let color3 = add_color(
         &mut commands,
+        &theme,
         Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
     );
     let color4 = add_color(
         &mut commands,
+        &theme,
         Color::rgb(207.0 / 255.0, 226.0 / 255.0, 243.0 / 255.0),
     );
     let color5 = add_color(
         &mut commands,
+        &theme,
         Color::rgb(245.0 / 255.0, 222.0 / 255.0, 179.0 / 255.0),
     );
 
@@ -418,6 +447,7 @@ pub fn init_layout(
         .id();
     let arrow1 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::Line,
@@ -425,6 +455,7 @@ pub fn init_layout(
     );
     let arrow2 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::Arrow,
@@ -432,6 +463,7 @@ pub fn init_layout(
     );
     let arrow3 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::DoubleArrow,
@@ -439,6 +471,7 @@ pub fn init_layout(
     );
     let arrow4 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::ParallelLine,
@@ -446,6 +479,7 @@ pub fn init_layout(
     );
     let arrow5 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::ParallelArrow,
@@ -453,6 +487,7 @@ pub fn init_layout(
     );
     let arrow6 = add_arrow(
         &mut commands,
+        &theme,
         &asset_server,
         ArrowMode {
             arrow_type: ArrowType::ParallelDoubleArrow,
@@ -479,6 +514,7 @@ pub fn init_layout(
         .id();
     let text_pos1 = add_text_pos(
         &mut commands,
+        &theme,
         &asset_server,
         TextPosMode {
             text_pos: TextPos::Center,
@@ -486,6 +522,7 @@ pub fn init_layout(
     );
     let text_pos2 = add_text_pos(
         &mut commands,
+        &theme,
         &asset_server,
         TextPosMode {
             text_pos: TextPos::TopLeft,
@@ -509,7 +546,7 @@ pub fn init_layout(
         .id();
     #[cfg(not(target_arch = "wasm32"))]
     {
-        let effect1 = add_effect(&mut commands, &icon_font, ParticlesEffect);
+        let effect1 = add_effect(&mut commands, &theme, &icon_font, ParticlesEffect);
         commands.entity(effects).add_child(effect1);
     }
 

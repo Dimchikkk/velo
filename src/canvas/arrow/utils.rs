@@ -6,10 +6,17 @@ use bevy_prototype_lyon::{
     shapes,
 };
 
-// use crate::chart_plugin::ui_helpers::ArrowConnectPos;
+use crate::themes::Theme;
 
 use super::components::{ArrowConnectPos, ArrowMeta, ArrowType};
-pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta: ArrowMeta) {
+
+pub fn create_arrow(
+    commands: &mut Commands,
+    theme: &Res<Theme>,
+    start: Vec2,
+    end: Vec2,
+    arrow_meta: ArrowMeta,
+) {
     let arrow_path = build_arrow(start, end, arrow_meta);
     commands.spawn((
         ShapeBundle {
@@ -17,7 +24,7 @@ pub fn create_arrow(commands: &mut Commands, start: Vec2, end: Vec2, arrow_meta:
             ..default()
         },
         arrow_meta,
-        Stroke::new(Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0), 1.5),
+        Stroke::new(theme.arrow, 1.5),
     ));
 }
 fn parallel_arrow_mid(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> (Vec2, Vec2) {

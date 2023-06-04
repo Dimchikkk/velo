@@ -1,10 +1,14 @@
 use bevy::{prelude::*, text::BreakLineOn};
 use bevy_ui_borders::BorderColor;
 
-use crate::ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip, TooltipPosition};
+use crate::{
+    themes::Theme,
+    ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip, TooltipPosition},
+};
 
 pub fn add_menu_button(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     label: String,
     icon_font: &Handle<Font>,
     component: impl Component,
@@ -45,13 +49,11 @@ pub fn add_menu_button(
             let button = commands
                 .spawn((
                     ButtonBundle {
-                        background_color: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0)
-                            .into(),
+                        background_color: theme.new_tab_btn_bg.into(),
                         style: Style {
                             size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
-                            // overflow: Overflow::Hidden,
                             ..default()
                         },
                         ..default()
@@ -62,7 +64,7 @@ pub fn add_menu_button(
                 .with_children(|builder| {
                     let text_style = TextStyle {
                         font_size: 30.0,
-                        color: Color::BLACK,
+                        color: theme.menu_btn,
                         font: icon_font.clone(),
                     };
                     let text = Text {
@@ -84,7 +86,7 @@ pub fn add_menu_button(
             let top = commands
                 .spawn((
                     NodeBundle {
-                        background_color: Color::BLACK.with_a(0.1).into(),
+                        background_color: theme.shadow.into(),
                         style: Style {
                             flex_direction: FlexDirection::Column,
                             align_self: AlignSelf::Stretch,
@@ -100,14 +102,13 @@ pub fn add_menu_button(
                         },
                         ..default()
                     },
-                    BorderColor(Color::BLACK),
+                    BorderColor(theme.btn_border),
                 ))
                 .id();
             let button = commands
                 .spawn((
                     ButtonBundle {
-                        background_color: Color::rgb(0.0 / 255.0, 150.0 / 255.0, 136.0 / 255.0)
-                            .into(),
+                        background_color: theme.menu_btn_bg.into(),
                         style: Style {
                             size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                             justify_content: JustifyContent::Center,
@@ -119,7 +120,6 @@ pub fn add_menu_button(
                                 top: Val::Px(-2.),
                                 bottom: Val::Px(0.),
                             },
-                            // overflow: Overflow::Hidden,
                             ..default()
                         },
                         ..default()
@@ -128,11 +128,14 @@ pub fn add_menu_button(
                     GenericButton,
                 ))
                 .with_children(|builder| {
-                    builder.spawn((get_tooltip(label, 14., TooltipPosition::Bottom), Tooltip));
+                    builder.spawn((
+                        get_tooltip(theme, label, 14., TooltipPosition::Bottom),
+                        Tooltip,
+                    ));
 
                     let text_style = TextStyle {
                         font_size: 30.0,
-                        color: Color::BLACK,
+                        color: theme.menu_btn,
                         font: icon_font.clone(),
                     };
                     let text = Text {

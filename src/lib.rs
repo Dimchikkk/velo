@@ -2,6 +2,7 @@ mod canvas;
 mod components;
 mod resources;
 mod systems;
+mod themes;
 mod ui_plugin;
 mod utils;
 use bevy::{prelude::*, window::PresentMode};
@@ -22,8 +23,8 @@ pub static APP_NAME: &str = "velo";
 pub struct VeloPlugin;
 impl Plugin for VeloPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_camera)
-            .add_startup_system(setup_background)
+        app.add_startup_systems((setup_camera, setup_background))
+            .add_startup_system(setup_velo_theme.in_base_set(StartupSet::PreStartup))
             .add_plugins(
                 DefaultPlugins
                     .set(WindowPlugin {

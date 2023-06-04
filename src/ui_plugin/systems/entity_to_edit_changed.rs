@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEdit};
-use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
+use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown, BevyMarkdownFonts, BevyMarkdownTheme};
 
 use crate::{
     resources::{AppState, SaveDocRequest},
+    themes::Theme,
     utils::ReflectableUuid,
 };
 use bevy_ui_borders::Outline;
@@ -22,6 +23,7 @@ pub fn entity_to_edit_changed(
     mut markdown_text_node_query: Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    theme: Res<Theme>,
 ) {
     if ui_state.is_changed() && ui_state.entity_to_edit != *last_entity_to_edit {
         match ui_state.entity_to_edit {
@@ -33,6 +35,7 @@ pub fn entity_to_edit_changed(
                     &mut markdown_text_node_query,
                     &mut commands,
                     &asset_server,
+                    &theme,
                 );
             }
             None => {
@@ -41,6 +44,7 @@ pub fn entity_to_edit_changed(
                     &mut raw_text_node_query,
                     &mut commands,
                     &asset_server,
+                    &theme,
                 );
                 if let Some(current_document) = app_state.current_document {
                     commands.insert_resource(SaveDocRequest {
@@ -64,19 +68,20 @@ fn handle_entity_selection(
     markdown_text_node_query: &mut Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
+    theme: &Res<Theme>,
 ) {
     // Change border for selected node
     for (mut outline, node, _) in velo_node_query.iter_mut() {
         if node.id == entity_to_edit {
-            outline.color = Color::rgba(33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0, 1.0);
+            outline.color = theme.selected_node_border;
             outline.thickness = UiRect::all(Val::Px(2.));
         } else {
             match node.node_type {
                 NodeType::Rect => {
-                    outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                    outline.color = theme.node_border;
                 }
                 NodeType::Circle => {
-                    outline.color = Color::rgba(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0, 0.);
+                    outline.color = theme.node_border.with_a(0.);
                 }
             }
 
@@ -98,16 +103,25 @@ fn handle_entity_selection(
         }
         style.display = Display::None;
         let str = get_cosmic_text(&editor.editor);
+        let fonts = BevyMarkdownFonts {
+            regular_font: TextStyle::default().font,
+            code_font: TextStyle::default().font,
+            bold_font: asset_server.load("fonts/SourceCodePro-Bold.ttf"),
+            italic_font: asset_server.load("fonts/SourceCodePro-Italic.ttf"),
+            semi_bold_italic_font: asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
+            extra_bold_font: asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
+        };
+        let theme = BevyMarkdownTheme {
+            code_theme: theme.code_theme.clone(),
+            code_default_lang: theme.code_default_lang.clone(),
+            font: theme.font,
+            link: theme.link,
+            inline_code: theme.inline_code,
+        };
         let bevy_markdown = BevyMarkdown {
             text: str,
-            regular_font: Some(TextStyle::default().font),
-            code_font: Some(TextStyle::default().font),
-            bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-            italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
-            semi_bold_italic_font: Some(
-                asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-            ),
-            extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
+            fonts,
+            theme,
             size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
@@ -137,15 +151,16 @@ fn handle_no_entity_selection(
     >,
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
+    theme: &Res<Theme>,
 ) {
     // Reset border colors and thickness for all nodes
     for (mut outline, node, _) in velo_node_query.iter_mut() {
         match node.node_type {
             NodeType::Rect => {
-                outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                outline.color = theme.node_border;
             }
             NodeType::Circle => {
-                outline.color = Color::rgba(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0, 0.);
+                outline.color = theme.node_border.with_a(0.);
             }
         }
         outline.thickness = UiRect::all(Val::Px(1.));
@@ -158,16 +173,25 @@ fn handle_no_entity_selection(
         }
         style.display = Display::None;
         let str = get_cosmic_text(&editor.editor);
+        let fonts = BevyMarkdownFonts {
+            regular_font: TextStyle::default().font,
+            code_font: TextStyle::default().font,
+            bold_font: asset_server.load("fonts/SourceCodePro-Bold.ttf"),
+            italic_font: asset_server.load("fonts/SourceCodePro-Italic.ttf"),
+            semi_bold_italic_font: asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
+            extra_bold_font: asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
+        };
+        let theme = BevyMarkdownTheme {
+            code_theme: theme.code_theme.clone(),
+            code_default_lang: theme.code_default_lang.clone(),
+            font: theme.font,
+            link: theme.link,
+            inline_code: theme.inline_code,
+        };
         let bevy_markdown = BevyMarkdown {
             text: str,
-            regular_font: Some(TextStyle::default().font),
-            code_font: Some(TextStyle::default().font),
-            bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-            italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
-            semi_bold_italic_font: Some(
-                asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-            ),
-            extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
+            fonts,
+            theme,
             size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown).unwrap();

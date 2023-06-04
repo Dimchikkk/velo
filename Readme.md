@@ -92,7 +92,7 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 - resize node by dragging its corners
 - click on canvas to deselect node
 - move node by dragging it (only unselected node can be dragged to allow mouse text selection for selected nodes)
-- click on little arrow connection icon to connect nodes, arrow connection icons are placed on each side of node
+- click on little arrow connector icon to connect nodes, arrow connector icons are placed on each side of node
 - for native target there is search box that allows to filter documents by text in nodes (fuzzy search)
 - for wasm target you can use url query parameter `?document=<url>` to load document from url
 - click save icon to save document to database on native platform or to localhost on wasm target
