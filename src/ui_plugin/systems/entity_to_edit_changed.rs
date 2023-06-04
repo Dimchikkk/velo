@@ -114,9 +114,9 @@ fn handle_entity_selection(
         let theme = BevyMarkdownTheme {
             code_theme: theme.code_theme.clone(),
             code_default_lang: theme.code_default_lang.clone(),
-            font: theme.font.clone(),
-            link: theme.link.clone(),
-            inline_code: theme.inline_code.clone(),
+            font: theme.font,
+            link: theme.link,
+            inline_code: theme.inline_code,
         };
         let bevy_markdown = BevyMarkdown {
             text: str,
@@ -157,7 +157,7 @@ fn handle_no_entity_selection(
     for (mut outline, node, _) in velo_node_query.iter_mut() {
         match node.node_type {
             NodeType::Rect => {
-                outline.color = theme.node_border.into();
+                outline.color = theme.node_border;
             }
             NodeType::Circle => {
                 outline.color = theme.node_border.with_a(0.);
@@ -184,9 +184,9 @@ fn handle_no_entity_selection(
         let theme = BevyMarkdownTheme {
             code_theme: theme.code_theme.clone(),
             code_default_lang: theme.code_default_lang.clone(),
-            font: theme.font.clone(),
-            link: theme.link.clone(),
-            inline_code: theme.inline_code.clone(),
+            font: theme.font,
+            link: theme.link,
+            inline_code: theme.inline_code,
         };
         let bevy_markdown = BevyMarkdown {
             text: str,

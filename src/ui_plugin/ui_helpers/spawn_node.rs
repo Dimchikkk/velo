@@ -162,7 +162,7 @@ pub fn spawn_node(
     commands.entity(button).add_child(resize_marker4);
     let mut attrs = cosmic_text::Attrs::new();
     attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
-    attrs = attrs.color(bevy_color_to_cosmic(theme.font.clone()));
+    attrs = attrs.color(bevy_color_to_cosmic(theme.font));
     let metrics = cosmic_text::Metrics::new(14., 18.).scale(scale_factor);
     let cosmic_edit_meta = CosmicEditMeta {
         text: item_meta.text.clone(),
@@ -201,9 +201,9 @@ pub fn spawn_node(
             let theme = BevyMarkdownTheme {
                 code_theme: theme.code_theme.clone(),
                 code_default_lang: theme.code_default_lang.clone(),
-                font: theme.font.clone(),
-                link: theme.link.clone(),
-                inline_code: theme.inline_code.clone(),
+                font: theme.font,
+                link: theme.link,
+                inline_code: theme.inline_code,
             };
             let bevy_markdown = BevyMarkdown {
                 text: item_meta.text.clone(),

@@ -219,7 +219,7 @@ pub fn insert_from_clipboard(
                 for section in text_copy.sections.iter_mut() {
                     str = format!("{}{}", str, section.value.clone());
                 }
-                text.sections = get_sections(&theme, format!("{}{}", str, clipboard_text)).0;
+                text.sections = get_sections(theme, format!("{}{}", str, clipboard_text)).0;
                 text.sections.last_mut().unwrap().value = " ".to_string();
             }
         }

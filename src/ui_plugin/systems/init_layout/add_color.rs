@@ -39,7 +39,7 @@ pub fn add_color(commands: &mut Commands, theme: &Res<Theme>, color: Color) -> E
                 },
                 ..default()
             },
-            BorderColor(theme.btn_border.into()),
+            BorderColor(theme.btn_border),
             ChangeColor { color },
             GenericButton,
         ))
