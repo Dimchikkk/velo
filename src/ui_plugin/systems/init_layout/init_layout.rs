@@ -65,18 +65,15 @@ pub fn init_layout(
     theme: Res<Theme>,
 ) {
     // font setup
-    let custom_font_data = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
-    let font = Font::try_from_bytes(custom_font_data.to_vec()).unwrap();
+    let font_bytes = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
+    let font = Font::try_from_bytes(font_bytes.to_vec()).unwrap();
     let mut text_style = TextStyle::default();
     text_style.color = theme.font;
     fonts.set_untracked(text_style.font, font);
     let cosmic_font_config = CosmicFontConfig {
         fonts_dir_path: None,
         load_system_fonts: false,
-        custom_font_data: Some(custom_font_data),
-        monospace_family: Some("Source Code Pro".to_string()),
-        sans_serif_family: Some("Source Code Pro".to_string()),
-        serif_family: Some("Source Code Pro".to_string()),
+        font_bytes: Some(font_bytes),
     };
     let font_system = create_cosmic_font_system(cosmic_font_config);
     let cosmic_font_handle = cosmic_fonts.add(CosmicFont(font_system));

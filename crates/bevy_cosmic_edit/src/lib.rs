@@ -7,21 +7,20 @@ use bevy::{
     window::{PrimaryWindow, WindowScaleFactorChanged},
 };
 use cosmic_text::{
-    Action, Affinity, Attrs, Buffer, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
+    Action, Affinity, Buffer, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
 };
 use image::{ImageBuffer, RgbaImage};
 
 /// Contains metadata for spawning cosmic edit, including text content, position, size, and style.
-pub struct CosmicEditMeta {
+pub struct CosmicEditMeta<'a> {
     pub text: String,
-    pub font_system_handle: Handle<CosmicFont>,
     pub text_pos: CosmicTextPos,
-    pub initial_size: Option<(f32, f32)>,
-    pub initial_background: Option<UiImage>,
-    pub font_size: f32,
-    pub line_height: f32,
-    pub scale_factor: f32,
+    pub attrs: cosmic_text::Attrs<'a>,
+    pub metrics: cosmic_text::Metrics,
     pub display_none: bool,
+    pub font_system_handle: Handle<CosmicFont>,
+    pub initial_background: Option<UiImage>,
+    pub initial_size: Option<(f32, f32)>,
 }
 
 /// Enum representing the position of the cosmic text.
@@ -72,11 +71,8 @@ pub struct ActiveEditor {
 #[derive(Resource, Default)]
 pub struct CosmicFontConfig {
     pub fonts_dir_path: Option<PathBuf>,
-    pub custom_font_data: Option<&'static [u8]>,
-    pub load_system_fonts: bool,
-    pub monospace_family: Option<String>,
-    pub sans_serif_family: Option<String>,
-    pub serif_family: Option<String>,
+    pub font_bytes: Option<&'static [u8]>,
+    pub load_system_fonts: bool, // caution: this can be relatively slow
 }
 
 #[derive(Resource)]
@@ -87,19 +83,10 @@ struct SwashCacheState {
 pub fn create_cosmic_font_system(cosmic_font_config: CosmicFontConfig) -> FontSystem {
     let locale = sys_locale::get_locale().unwrap_or_else(|| String::from("en-US"));
     let mut db = cosmic_text::fontdb::Database::new();
-    if let Some(monospace_family) = cosmic_font_config.monospace_family.clone() {
-        db.set_monospace_family(monospace_family);
-    }
-    if let Some(sans_serif_family) = cosmic_font_config.sans_serif_family.clone() {
-        db.set_sans_serif_family(sans_serif_family);
-    }
-    if let Some(serif_family) = cosmic_font_config.serif_family.clone() {
-        db.set_serif_family(serif_family);
-    }
     if let Some(dir_path) = cosmic_font_config.fonts_dir_path.clone() {
         db.load_fonts_dir(dir_path);
     }
-    if let Some(custom_font_data) = &cosmic_font_config.custom_font_data {
+    if let Some(custom_font_data) = &cosmic_font_config.font_bytes {
         db.load_font_data(custom_font_data.to_vec());
     }
     if cosmic_font_config.load_system_fonts {
@@ -186,6 +173,15 @@ pub fn get_cosmic_text(editor: &Editor) -> String {
     }
 
     text
+}
+
+pub fn bevy_color_to_cosmic(color: bevy::prelude::Color) -> cosmic_text::Color {
+    cosmic_text::Color::rgba(
+        (color.r() * 255.) as u8,
+        (color.g() * 255.) as u8,
+        (color.b() * 255.) as u8,
+        (color.a() * 255.) as u8,
+    )
 }
 
 fn get_y_offset(editor: &Editor) -> i32 {
@@ -450,15 +446,14 @@ pub fn spawn_cosmic_edit(
     let font_system = cosmic_fonts
         .get_mut(&cosmic_edit_meta.font_system_handle)
         .unwrap();
-    let metrics = Metrics::new(cosmic_edit_meta.font_size, cosmic_edit_meta.line_height)
-        .scale(cosmic_edit_meta.scale_factor);
-    let buffer = Buffer::new(&mut font_system.0, metrics);
+    let buffer = Buffer::new(&mut font_system.0, cosmic_edit_meta.metrics);
     let mut editor = Editor::new(buffer);
     editor.buffer_mut().lines.clear();
-    let attrs = Attrs::new();
-    editor
-        .buffer_mut()
-        .set_text(&mut font_system.0, cosmic_edit_meta.text.as_str(), attrs);
+    editor.buffer_mut().set_text(
+        &mut font_system.0,
+        cosmic_edit_meta.text.as_str(),
+        cosmic_edit_meta.attrs,
+    );
     if let Some(initial_size) = cosmic_edit_meta.initial_size {
         editor
             .buffer_mut()
@@ -489,8 +484,8 @@ pub fn spawn_cosmic_edit(
                 editor,
                 font_system: cosmic_edit_meta.font_system_handle,
                 text_pos: cosmic_edit_meta.text_pos,
-                font_line_height: cosmic_edit_meta.line_height,
-                font_size: cosmic_edit_meta.font_size,
+                font_line_height: cosmic_edit_meta.metrics.line_height,
+                font_size: cosmic_edit_meta.metrics.font_size,
             },
         ))
         .id();
@@ -558,23 +553,19 @@ mod tests {
     ) {
         let cosmic_font_config = CosmicFontConfig {
             fonts_dir_path: None,
-            custom_font_data: None,
+            font_bytes: None,
             load_system_fonts: true,
-            monospace_family: None,
-            sans_serif_family: None,
-            serif_family: None,
         };
         let font_system = create_cosmic_font_system(cosmic_font_config);
         let font_system_handle = cosmic_fonts.add(CosmicFont(font_system));
         let cosmic_edit_meta = CosmicEditMeta {
             text: "Blah".to_string(),
-            font_size: 18.,
-            line_height: 20.,
-            scale_factor: 1.,
+            metrics: cosmic_text::Metrics::new(14., 18.).scale(1.),
+            attrs: cosmic_text::Attrs::new(),
+            text_pos: CosmicTextPos::Center,
             font_system_handle,
             display_none: false,
             initial_background: None,
-            text_pos: CosmicTextPos::Center,
             initial_size: None,
         };
         spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
