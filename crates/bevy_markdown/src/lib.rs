@@ -126,7 +126,7 @@ pub fn handle_block_styling(
                     style: TextStyle {
                         font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                         font_size: 18.0,
-                        color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
+                        color: bevy_markdown.theme.as_ref().unwrap().font,
                     },
                 },
                 None,
@@ -151,7 +151,7 @@ pub fn handle_block_styling(
                     style: TextStyle {
                         font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                         font_size: 18.0,
-                        color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
+                        color: bevy_markdown.theme.as_ref().unwrap().font,
                     },
                 },
                 None,
@@ -164,7 +164,7 @@ pub fn handle_block_styling(
                             style: TextStyle {
                                 font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                                 font_size: 18.0,
-                                color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
+                                color: bevy_markdown.theme.as_ref().unwrap().font,
                             },
                         },
                         None,
@@ -176,7 +176,7 @@ pub fn handle_block_styling(
                         style: TextStyle {
                             font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                             font_size: 18.0,
-                            color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
+                            color: bevy_markdown.theme.as_ref().unwrap().font,
                         },
                     };
                     text_sections.push((text_section, None));
@@ -233,7 +233,7 @@ pub fn handle_inline_styling(
                     color: if let Some(color) = force_color {
                         color
                     } else {
-                        bevy_markdown.theme.as_ref().unwrap().inline_code.clone()
+                        bevy_markdown.theme.as_ref().unwrap().inline_code
                     },
                 },
             };
@@ -276,7 +276,7 @@ pub fn handle_inline_styling(
                     color: if let Some(color) = force_color {
                         color
                     } else {
-                        bevy_markdown.theme.as_ref().unwrap().font.clone()
+                        bevy_markdown.theme.as_ref().unwrap().font
                     },
                 },
             };
@@ -289,7 +289,7 @@ pub fn handle_inline_styling(
                 text_sections,
                 errors,
                 applied_style,
-                Some(bevy_markdown.theme.as_ref().unwrap().link.clone()),
+                Some(bevy_markdown.theme.as_ref().unwrap().link),
                 force_size,
                 &Some(link.url.clone()),
             );
@@ -352,7 +352,7 @@ fn handle_list_recursive(
                         style: TextStyle {
                             font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                             font_size: 18.0,
-                            color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
+                            color: bevy_markdown.theme.as_ref().unwrap().font,
                         },
                     },
                     None,
