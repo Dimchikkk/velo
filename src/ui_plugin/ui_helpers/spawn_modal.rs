@@ -85,7 +85,7 @@ pub fn spawn_modal(
                 },
                 ..default()
             },
-            BorderColor(theme.btn_border.into()),
+            BorderColor(theme.btn_border),
             GenericButton,
             ModalConfirm {
                 id,
@@ -95,7 +95,7 @@ pub fn spawn_modal(
         .with_children(|builder| {
             let text_style = TextStyle {
                 font_size: 18.0,
-                color: theme.font.into(),
+                color: theme.font,
                 ..default()
             };
 
@@ -127,7 +127,7 @@ pub fn spawn_modal(
         .with_children(|builder| {
             let text_style = TextStyle {
                 font_size: 18.0,
-                color: theme.font.into(),
+                color: theme.font,
                 ..default()
             };
 
@@ -173,7 +173,7 @@ pub fn spawn_modal(
                     ..default()
                 })
                 .with_children(|builder| {
-                    builder.spawn(add_rectangle_txt(&theme, modal_action.to_string()));
+                    builder.spawn(add_rectangle_txt(theme, modal_action.to_string()));
                 })
                 .id();
             let width = 180.;
@@ -203,7 +203,7 @@ pub fn spawn_modal(
                 .id();
             let mut attrs = cosmic_text::Attrs::new();
             attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
-            attrs = attrs.color(bevy_color_to_cosmic(theme.font.clone()));
+            attrs = attrs.color(bevy_color_to_cosmic(theme.font));
             let metrics = cosmic_text::Metrics::new(14., 18.).scale(window.scale_factor() as f32);
             let cosmic_edit_meta = CosmicEditMeta {
                 text: default_value,
@@ -252,7 +252,7 @@ pub fn spawn_modal(
                 .id();
             let node_label = commands
                 .spawn(add_rectangle_txt(
-                    &theme,
+                    theme,
                     format!("Are you sure you want to {}?", modal_action),
                 ))
                 .id();

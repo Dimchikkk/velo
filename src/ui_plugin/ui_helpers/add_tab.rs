@@ -60,7 +60,7 @@ pub fn add_tab(
                             value: name,
                             style: TextStyle {
                                 font_size: 18.,
-                                color: theme.font.into(),
+                                color: theme.font,
                                 ..default()
                             },
                         },
@@ -68,7 +68,7 @@ pub fn add_tab(
                             value: " ".to_string(),
                             style: TextStyle {
                                 font_size: 18.,
-                                color: theme.font.into(),
+                                color: theme.font,
                                 ..default()
                             },
                         },
@@ -120,7 +120,7 @@ pub fn add_tab(
                         value: "\u{e14c}".to_string(),
                         style: TextStyle {
                             font_size: 18.,
-                            color: theme.del_button.into(),
+                            color: theme.del_button,
                             font: icon_font,
                         },
                     }],

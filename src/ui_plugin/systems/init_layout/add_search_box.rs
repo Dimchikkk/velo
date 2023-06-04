@@ -35,7 +35,7 @@ pub fn add_search_box(
         .id();
     let mut attrs = cosmic_text::Attrs::new();
     attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
-    attrs = attrs.color(bevy_color_to_cosmic(theme.font.clone()));
+    attrs = attrs.color(bevy_color_to_cosmic(theme.font));
     let metrics = cosmic_text::Metrics::new(14., 18.).scale(scale_factor);
     let cosmic_edit_meta = CosmicEditMeta {
         text: "".to_string(),
@@ -57,7 +57,7 @@ pub fn add_search_box(
     let tooltip = commands
         .spawn((
             get_tooltip(
-                &theme,
+                theme,
                 "Filter documents by text in nodes".to_string(),
                 14.,
                 TooltipPosition::Top,

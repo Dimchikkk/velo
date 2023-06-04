@@ -64,7 +64,7 @@ pub fn add_menu_button(
                 .with_children(|builder| {
                     let text_style = TextStyle {
                         font_size: 30.0,
-                        color: theme.menu_btn.into(),
+                        color: theme.menu_btn,
                         font: icon_font.clone(),
                     };
                     let text = Text {
@@ -102,7 +102,7 @@ pub fn add_menu_button(
                         },
                         ..default()
                     },
-                    BorderColor(theme.btn_border.into()),
+                    BorderColor(theme.btn_border),
                 ))
                 .id();
             let button = commands
@@ -129,13 +129,13 @@ pub fn add_menu_button(
                 ))
                 .with_children(|builder| {
                     builder.spawn((
-                        get_tooltip(&theme, label, 14., TooltipPosition::Bottom),
+                        get_tooltip(theme, label, 14., TooltipPosition::Bottom),
                         Tooltip,
                     ));
 
                     let text_style = TextStyle {
                         font_size: 30.0,
-                        color: theme.menu_btn.into(),
+                        color: theme.menu_btn,
                         font: icon_font.clone(),
                     };
                     let text = Text {
