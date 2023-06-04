@@ -23,7 +23,7 @@ jobs:
       - name: Install wasm-bindgen
         run: |
           mkdir wasm-bindgen
-          curl -sSL "https://github.com/rustwasm/wasm-bindgen/releases/download/0.2.84/wasm-bindgen-0.2.84-x86_64-unknown-linux-musl.tar.gz" | tar xvz -C ./wasm-bindgen wasm-bindgen-0.2.84-x86_64-unknown-linux-musl --strip=1
+          curl -sSL "https://github.com/rustwasm/wasm-bindgen/releases/download/0.2.86/wasm-bindgen-0.2.86-x86_64-unknown-linux-musl.tar.gz" | tar xvz -C ./wasm-bindgen wasm-bindgen-0.2.86-x86_64-unknown-linux-musl --strip=1
           echo `pwd`/wasm-bindgen >> $GITHUB_PATH
           
       - name: Install wasm-opt
