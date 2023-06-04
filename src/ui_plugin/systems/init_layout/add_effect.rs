@@ -44,7 +44,7 @@ pub fn add_effect(
         .with_children(|builder| {
             let text_style = TextStyle {
                 font_size: 25.0,
-                color: theme.celebrate_btn.into(),
+                color: theme.celebrate_btn,
                 font: icon_font.clone(),
             };
             let text = Text {

@@ -30,7 +30,7 @@ pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>, 
         sprite_bundle.texture = asset_server.load(bg_img);
     }
     if let Some(bg_color) = theme.canvas_bg_color {
-        sprite_bundle.sprite.color = bg_color.into();
+        sprite_bundle.sprite.color = bg_color;
     }
     commands.spawn(sprite_bundle);
 }

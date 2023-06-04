@@ -68,13 +68,13 @@ pub fn add_arrow(
                 },
                 ..default()
             },
-            BorderColor(theme.btn_border.into()),
+            BorderColor(theme.btn_border),
             arrow_mode,
             GenericButton,
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip(&theme, text.to_string(), 14., TooltipPosition::Bottom),
+                get_tooltip(theme, text.to_string(), 14., TooltipPosition::Bottom),
                 Tooltip,
             ));
         })

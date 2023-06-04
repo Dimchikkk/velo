@@ -63,7 +63,7 @@ pub fn node_manipulation(
         .with_children(|builder| {
             builder.spawn((
                 get_tooltip(
-                    &theme,
+                    theme,
                     "New Rectangle".to_string(),
                     14.,
                     TooltipPosition::Bottom,
@@ -73,7 +73,7 @@ pub fn node_manipulation(
 
             let text_style = TextStyle {
                 font_size: 30.0,
-                color: theme.node_manipulation.into(),
+                color: theme.node_manipulation,
                 font: icon_font.clone(),
             };
             let text = Text {
@@ -136,7 +136,7 @@ pub fn node_manipulation(
         .with_children(|builder| {
             builder.spawn((
                 get_tooltip(
-                    &theme,
+                    theme,
                     "New Circle".to_string(),
                     14.,
                     TooltipPosition::Bottom,
@@ -146,7 +146,7 @@ pub fn node_manipulation(
 
             let text_style = TextStyle {
                 font_size: 30.0,
-                color: theme.node_manipulation.into(),
+                color: theme.node_manipulation,
                 font: icon_font.clone(),
             };
             let text = Text {
@@ -209,7 +209,7 @@ pub fn node_manipulation(
         .with_children(|builder| {
             builder.spawn((
                 get_tooltip(
-                    &theme,
+                    theme,
                     "Delete Rectangle".to_string(),
                     14.,
                     TooltipPosition::Bottom,
@@ -219,7 +219,7 @@ pub fn node_manipulation(
 
             let text_style = TextStyle {
                 font_size: 30.0,
-                color: theme.node_manipulation.into(),
+                color: theme.node_manipulation,
                 font: icon_font.clone(),
             };
             let text = Text {

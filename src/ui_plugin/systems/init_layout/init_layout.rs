@@ -67,8 +67,11 @@ pub fn init_layout(
     // font setup
     let font_bytes = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
     let font = Font::try_from_bytes(font_bytes.to_vec()).unwrap();
-    let mut text_style = TextStyle::default();
-    text_style.color = theme.font;
+    let text_style = TextStyle {
+        font: TextStyle::default().font,
+        font_size: 14.0,
+        color: theme.font,
+    };
     fonts.set_untracked(text_style.font, font);
     let cosmic_font_config = CosmicFontConfig {
         fonts_dir_path: None,
