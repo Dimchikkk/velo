@@ -207,8 +207,8 @@ pub fn spawn_node(
             };
             let bevy_markdown = BevyMarkdown {
                 text: item_meta.text.clone(),
-                fonts: Some(fonts),
-                theme: Some(theme),
+                fonts,
+                theme,
                 size: Some(item_meta.size),
             };
             let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)

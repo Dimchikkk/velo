@@ -120,8 +120,8 @@ fn handle_entity_selection(
         };
         let bevy_markdown = BevyMarkdown {
             text: str,
-            fonts: Some(fonts),
-            theme: Some(theme),
+            fonts,
+            theme,
             size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
@@ -190,8 +190,8 @@ fn handle_no_entity_selection(
         };
         let bevy_markdown = BevyMarkdown {
             text: str,
-            fonts: Some(fonts),
-            theme: Some(theme),
+            fonts,
+            theme,
             size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown).unwrap();
