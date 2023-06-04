@@ -14,7 +14,7 @@ pub struct Theme {
     pub celebrate_btn_bg: Color,
     pub celebrate_btn: Color,
     pub clipboard_image_bg: Color,
-    pub code_theme_name: String,
+
     pub del_button: Color,
     pub doc_list_bg: Color,
     pub font: Color,
@@ -39,6 +39,10 @@ pub struct Theme {
     pub tab_bg: Color,
     pub text_pos_btn_bg: Color,
     pub tooltip_bg: Color,
+    pub code_theme: String,
+    pub code_default_lang: String,
+    pub link: Color,
+    pub inline_code: Color,
 }
 
 pub fn velo_light() -> Theme {
@@ -54,7 +58,7 @@ pub fn velo_light() -> Theme {
         celebrate_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         celebrate_btn: Color::RED,
         clipboard_image_bg: Color::WHITE,
-        code_theme_name: "base16-ocean.dark".to_string(),
+        code_theme: "Solarized (light)".to_string(),
         del_button: Color::BLACK,
         doc_list_bg: Color::rgb(158., 158., 158.),
         font: Color::rgb(0.0, 0.0, 0.0),
@@ -66,7 +70,7 @@ pub fn velo_light() -> Theme {
         modal_bg: Color::WHITE,
         modal_text_input_bg: Color::rgb(0.9, 0.9, 0.9),
         new_tab_btn_bg: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0),
-        node_bg: Color::rgb(0.9, 0.9, 0.9),
+        node_bg: Color::rgb(0.98, 0.98, 0.98),
         node_border: Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0),
         node_found_color: Color::TEAL,
         node_manipulation_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
@@ -79,6 +83,9 @@ pub fn velo_light() -> Theme {
         tab_bg: Color::rgb(0.9, 0.9, 0.9),
         text_pos_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
         tooltip_bg: Color::rgb(1., 1., 1.),
+        code_default_lang: "rs".to_string(),
+        link: Color::BLUE,
+        inline_code: Color::GRAY,
     }
 }
 
@@ -95,10 +102,10 @@ pub fn velo_dark() -> Theme {
         celebrate_btn_bg: Color::rgb(0.2, 0.2, 0.2),
         celebrate_btn: Color::RED,
         clipboard_image_bg: Color::BLACK,
-        code_theme_name: "base16-ocean.dark".to_string(),
+        code_theme: "base16-ocean.dark".to_string(),
         del_button: Color::BLACK,
         doc_list_bg: Color::rgb(0.2, 0.2, 0.2),
-        font: Color::rgb(1.0, 1.0, 1.0),
+        font: Color::WHITE,
         front_back_btn_bg: Color::rgb(0.2, 0.2, 0.2),
         left_panel_bg: Color::rgb(224.0 / 255.0, 224.0 / 255.0, 224.0 / 255.0),
         menu_bg: Color::rgb(245.0 / 255.0, 245.0 / 255.0, 245.0 / 255.0),
@@ -107,7 +114,7 @@ pub fn velo_dark() -> Theme {
         modal_bg: Color::rgb(0.2, 0.2, 0.2),
         modal_text_input_bg: Color::rgb(0.2, 0.2, 0.2),
         new_tab_btn_bg: Color::rgb(0.2, 0.2, 0.2),
-        node_bg: Color::rgb(0.2, 0.2, 0.2),
+        node_bg: Color::BLACK,
         node_border: Color::rgb(0.3, 0.3, 0.3),
         node_found_color: Color::TEAL,
         node_manipulation_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
@@ -120,6 +127,9 @@ pub fn velo_dark() -> Theme {
         tab_bg: Color::rgb(0.2, 0.2, 0.2),
         text_pos_btn_bg: Color::rgb(0.2, 0.2, 0.2),
         tooltip_bg: Color::rgb(0.2, 0.2, 0.2),
+        code_default_lang: "rs".to_string(),
+        link: Color::BLUE,
+        inline_code: Color::WHITE,
     }
 }
 

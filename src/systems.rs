@@ -18,7 +18,7 @@ pub fn setup_velo_theme(mut commands: Commands, pkv: Res<PkvStore>) {
             "light".to_string()
         }
     } else {
-        "light".to_string()
+        "dark".to_string()
     };
     let theme = get_theme_by_name(&theme_name);
     commands.insert_resource(theme);

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEdit};
-use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
+use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown, BevyMarkdownFonts, BevyMarkdownTheme};
 
 use crate::{
     resources::{AppState, SaveDocRequest},
@@ -103,16 +103,25 @@ fn handle_entity_selection(
         }
         style.display = Display::None;
         let str = get_cosmic_text(&editor.editor);
+        let fonts = BevyMarkdownFonts {
+            regular_font: TextStyle::default().font,
+            code_font: TextStyle::default().font,
+            bold_font: asset_server.load("fonts/SourceCodePro-Bold.ttf"),
+            italic_font: asset_server.load("fonts/SourceCodePro-Italic.ttf"),
+            semi_bold_italic_font: asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
+            extra_bold_font: asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
+        };
+        let theme = BevyMarkdownTheme {
+            code_theme: theme.code_theme.clone(),
+            code_default_lang: theme.code_default_lang.clone(),
+            font: theme.font.clone(),
+            link: theme.link.clone(),
+            inline_code: theme.inline_code.clone(),
+        };
         let bevy_markdown = BevyMarkdown {
             text: str,
-            regular_font: Some(TextStyle::default().font),
-            code_font: Some(TextStyle::default().font),
-            bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-            italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
-            semi_bold_italic_font: Some(
-                asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-            ),
-            extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
+            fonts: Some(fonts),
+            theme: Some(theme),
             size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
@@ -164,16 +173,25 @@ fn handle_no_entity_selection(
         }
         style.display = Display::None;
         let str = get_cosmic_text(&editor.editor);
+        let fonts = BevyMarkdownFonts {
+            regular_font: TextStyle::default().font,
+            code_font: TextStyle::default().font,
+            bold_font: asset_server.load("fonts/SourceCodePro-Bold.ttf"),
+            italic_font: asset_server.load("fonts/SourceCodePro-Italic.ttf"),
+            semi_bold_italic_font: asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
+            extra_bold_font: asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
+        };
+        let theme = BevyMarkdownTheme {
+            code_theme: theme.code_theme.clone(),
+            code_default_lang: theme.code_default_lang.clone(),
+            font: theme.font.clone(),
+            link: theme.link.clone(),
+            inline_code: theme.inline_code.clone(),
+        };
         let bevy_markdown = BevyMarkdown {
             text: str,
-            regular_font: Some(TextStyle::default().font),
-            code_font: Some(TextStyle::default().font),
-            bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-            italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
-            semi_bold_italic_font: Some(
-                asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-            ),
-            extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
+            fonts: Some(fonts),
+            theme: Some(theme),
             size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
         };
         let markdown_text = spawn_bevy_markdown(commands, bevy_markdown).unwrap();

@@ -1,5 +1,5 @@
 use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont};
-use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown};
+use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown, BevyMarkdownFonts, BevyMarkdownTheme};
 use bevy_ui_borders::{BorderColor, Outline};
 
 use bevy::prelude::*;
@@ -185,16 +185,25 @@ pub fn spawn_node(
             });
         }
         false => {
+            let fonts = BevyMarkdownFonts {
+                regular_font: TextStyle::default().font,
+                code_font: TextStyle::default().font,
+                bold_font: asset_server.load("fonts/SourceCodePro-Bold.ttf"),
+                italic_font: asset_server.load("fonts/SourceCodePro-Italic.ttf"),
+                semi_bold_italic_font: asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
+                extra_bold_font: asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
+            };
+            let theme = BevyMarkdownTheme {
+                code_theme: theme.code_theme.clone(),
+                code_default_lang: theme.code_default_lang.clone(),
+                font: theme.font.clone(),
+                link: theme.link.clone(),
+                inline_code: theme.inline_code.clone(),
+            };
             let bevy_markdown = BevyMarkdown {
                 text: item_meta.text.clone(),
-                regular_font: Some(TextStyle::default().font),
-                code_font: Some(TextStyle::default().font),
-                bold_font: Some(asset_server.load("fonts/SourceCodePro-Bold.ttf")),
-                italic_font: Some(asset_server.load("fonts/SourceCodePro-Italic.ttf")),
-                extra_bold_font: Some(asset_server.load("fonts/SourceCodePro-ExtraBold.ttf")),
-                semi_bold_italic_font: Some(
-                    asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-                ),
+                fonts: Some(fonts),
+                theme: Some(theme),
                 size: Some(item_meta.size),
             };
             let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
