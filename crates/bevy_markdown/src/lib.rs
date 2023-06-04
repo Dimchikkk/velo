@@ -6,15 +6,28 @@ use syntect::parsing::SyntaxSet;
 use syntect::util::LinesWithEndings;
 use uuid::Uuid;
 
+pub struct BevyMarkdownFonts {
+    pub regular_font: Handle<Font>,
+    pub bold_font: Handle<Font>,
+    pub italic_font: Handle<Font>,
+    pub semi_bold_italic_font: Handle<Font>,
+    pub extra_bold_font: Handle<Font>,
+    pub code_font: Handle<Font>,
+}
+
+pub struct BevyMarkdownTheme {
+    pub code_theme: String,
+    pub code_default_lang: String,
+    pub font: Color,
+    pub link: Color,
+    pub inline_code: Color,
+}
+
 #[derive(Default)]
 pub struct BevyMarkdown {
     pub text: String,
-    pub regular_font: Option<Handle<Font>>,
-    pub bold_font: Option<Handle<Font>>,
-    pub italic_font: Option<Handle<Font>>,
-    pub semi_bold_italic_font: Option<Handle<Font>>,
-    pub extra_bold_font: Option<Handle<Font>>,
-    pub code_font: Option<Handle<Font>>,
+    pub fonts: Option<BevyMarkdownFonts>,
+    pub theme: Option<BevyMarkdownTheme>,
     pub size: Option<(Val, Val)>,
 }
 
@@ -76,10 +89,15 @@ pub fn get_resultant_style(
     style_mask: u8,
 ) -> bevy::prelude::Handle<bevy::prelude::Font> {
     match InlineStyleType::from_u8(style_mask) {
-        InlineStyleType::Strong => bevy_markdown.bold_font.clone().unwrap(),
-        InlineStyleType::Emphasis => bevy_markdown.italic_font.clone().unwrap(),
-        InlineStyleType::StrongEmphasis => bevy_markdown.semi_bold_italic_font.clone().unwrap(),
-        _ => bevy_markdown.regular_font.clone().unwrap(),
+        InlineStyleType::Strong => bevy_markdown.fonts.as_ref().unwrap().bold_font.clone(),
+        InlineStyleType::Emphasis => bevy_markdown.fonts.as_ref().unwrap().italic_font.clone(),
+        InlineStyleType::StrongEmphasis => bevy_markdown
+            .fonts
+            .as_ref()
+            .unwrap()
+            .semi_bold_italic_font
+            .clone(),
+        _ => bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
     }
 }
 
@@ -106,9 +124,9 @@ pub fn handle_block_styling(
                 TextSection {
                     value: "\n".to_string(),
                     style: TextStyle {
-                        font: bevy_markdown.regular_font.clone().unwrap(),
+                        font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                         font_size: 18.0,
-                        color: Color::BLACK,
+                        color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
                     },
                 },
                 None,
@@ -131,9 +149,9 @@ pub fn handle_block_styling(
                 TextSection {
                     value: "\n".to_string(),
                     style: TextStyle {
-                        font: bevy_markdown.regular_font.clone().unwrap(),
+                        font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                         font_size: 18.0,
-                        color: Color::BLACK,
+                        color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
                     },
                 },
                 None,
@@ -144,9 +162,9 @@ pub fn handle_block_styling(
                         TextSection {
                             value: "\n".to_string(),
                             style: TextStyle {
-                                font: bevy_markdown.regular_font.clone().unwrap(),
+                                font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                                 font_size: 18.0,
-                                color: Color::BLACK,
+                                color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
                             },
                         },
                         None,
@@ -156,9 +174,9 @@ pub fn handle_block_styling(
                     let text_section = TextSection {
                         value: text.value.clone(),
                         style: TextStyle {
-                            font: bevy_markdown.regular_font.clone().unwrap(),
+                            font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                             font_size: 18.0,
-                            color: Color::BLACK,
+                            color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
                         },
                     };
                     text_sections.push((text_section, None));
@@ -206,7 +224,7 @@ pub fn handle_inline_styling(
             let text_section = TextSection {
                 value: code.value.clone(),
                 style: TextStyle {
-                    font: bevy_markdown.code_font.clone().unwrap(),
+                    font: bevy_markdown.fonts.as_ref().unwrap().code_font.clone(),
                     font_size: if let Some(size) = force_size {
                         size
                     } else {
@@ -215,7 +233,7 @@ pub fn handle_inline_styling(
                     color: if let Some(color) = force_color {
                         color
                     } else {
-                        Color::GRAY
+                        bevy_markdown.theme.as_ref().unwrap().inline_code.clone()
                     },
                 },
             };
@@ -258,7 +276,7 @@ pub fn handle_inline_styling(
                     color: if let Some(color) = force_color {
                         color
                     } else {
-                        Color::BLACK
+                        bevy_markdown.theme.as_ref().unwrap().font.clone()
                     },
                 },
             };
@@ -271,7 +289,7 @@ pub fn handle_inline_styling(
                 text_sections,
                 errors,
                 applied_style,
-                Some(Color::BLUE),
+                Some(bevy_markdown.theme.as_ref().unwrap().link.clone()),
                 force_size,
                 &Some(link.url.clone()),
             );
@@ -296,9 +314,9 @@ fn handle_list_recursive(
         TextSection {
             value: "\n".to_string(),
             style: TextStyle {
-                font: bevy_markdown.regular_font.clone().unwrap(),
+                font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                 font_size: 18.0,
-                color: Color::BLACK,
+                color: Color::NONE,
             },
         },
         None,
@@ -332,9 +350,9 @@ fn handle_list_recursive(
                     TextSection {
                         value: indent_char,
                         style: TextStyle {
-                            font: bevy_markdown.regular_font.clone().unwrap(),
+                            font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                             font_size: 18.0,
-                            color: Color::BLACK,
+                            color: bevy_markdown.theme.as_ref().unwrap().font.clone(),
                         },
                     },
                     None,
@@ -373,9 +391,9 @@ fn handle_list_recursive(
                     TextSection {
                         value: "\n".to_string(),
                         style: TextStyle {
-                            font: bevy_markdown.regular_font.clone().unwrap(),
+                            font: bevy_markdown.fonts.as_ref().unwrap().regular_font.clone(),
                             font_size: 18.0,
-                            color: Color::BLACK,
+                            color: Color::NONE,
                         },
                     },
                     None,
@@ -406,7 +424,12 @@ pub fn spawn_bevy_markdown(
                 markdown::mdast::Node::Root(root) => {
                     root.children.iter().for_each(|child| match child {
                         markdown::mdast::Node::Code(code) => {
-                            let default_lang = "rs".to_string();
+                            let default_lang = bevy_markdown
+                                .theme
+                                .as_ref()
+                                .unwrap()
+                                .code_default_lang
+                                .clone();
                             let lang = code.lang.as_ref().unwrap_or(&default_lang);
                             let syntax = vec![
                                 ps.find_syntax_by_name(lang.as_str()),
@@ -416,20 +439,23 @@ pub fn spawn_bevy_markdown(
                             .find(|&o| o.is_some())
                             .unwrap()
                             .unwrap();
-                            let mut h =
-                                HighlightLines::new(syntax, &ts.themes["Solarized (light)"]);
+                            let mut h = HighlightLines::new(
+                                syntax,
+                                &ts.themes
+                                    [&bevy_markdown.theme.as_ref().unwrap().code_theme.clone()],
+                            );
                             text_sections.push((
                                 TextSection {
                                     value: "\n\n".to_string(),
                                     style: TextStyle {
-                                        font: bevy_markdown.regular_font.clone().unwrap(),
+                                        font: bevy_markdown
+                                            .fonts
+                                            .as_ref()
+                                            .unwrap()
+                                            .regular_font
+                                            .clone(),
                                         font_size: 18.0,
-                                        color: Color::Rgba {
-                                            red: 0.,
-                                            green: 0.,
-                                            blue: 0.,
-                                            alpha: 0.,
-                                        },
+                                        color: Color::NONE,
                                     },
                                 },
                                 None,
@@ -440,16 +466,27 @@ pub fn spawn_bevy_markdown(
 
                                 for &(style, text) in ranges.iter() {
                                     let font = match style.font_style {
-                                        FontStyle::BOLD => {
-                                            bevy_markdown.extra_bold_font.clone().unwrap()
+                                        FontStyle::BOLD => bevy_markdown
+                                            .fonts
+                                            .as_ref()
+                                            .unwrap()
+                                            .extra_bold_font
+                                            .clone(),
+                                        FontStyle::ITALIC => bevy_markdown
+                                            .fonts
+                                            .as_ref()
+                                            .unwrap()
+                                            .italic_font
+                                            .clone(),
+                                        FontStyle::UNDERLINE => bevy_markdown
+                                            .fonts
+                                            .as_ref()
+                                            .unwrap()
+                                            .regular_font
+                                            .clone(),
+                                        _ => {
+                                            bevy_markdown.fonts.as_ref().unwrap().bold_font.clone()
                                         }
-                                        FontStyle::ITALIC => {
-                                            bevy_markdown.italic_font.clone().unwrap()
-                                        }
-                                        FontStyle::UNDERLINE => {
-                                            bevy_markdown.regular_font.clone().unwrap()
-                                        }
-                                        _ => bevy_markdown.bold_font.clone().unwrap(),
                                     };
                                     let color = style.foreground;
                                     let text_section = TextSection {
@@ -472,14 +509,14 @@ pub fn spawn_bevy_markdown(
                                 TextSection {
                                     value: "\n".to_string(),
                                     style: TextStyle {
-                                        font: bevy_markdown.regular_font.clone().unwrap(),
+                                        font: bevy_markdown
+                                            .fonts
+                                            .as_ref()
+                                            .unwrap()
+                                            .regular_font
+                                            .clone(),
                                         font_size: 18.0,
-                                        color: Color::Rgba {
-                                            red: 0.,
-                                            green: 0.,
-                                            blue: 0.,
-                                            alpha: 0.,
-                                        },
+                                        color: Color::NONE,
                                     },
                                 },
                                 None,
@@ -524,8 +561,8 @@ pub fn spawn_bevy_markdown(
                 let top_style = Style::default();
                 let mut text_bundle_style = Style::default();
                 // Main branch of bevy doesn't need setting max_size for wrapping to work
-                // bevy_markdown will spawn multiple text bundles with more markdown features supported
-                // this is temp solution make wrapping to work
+                // bevy_markdown will spawn multiple text bundles with more markdown features supported (e.g. inline images)
+                // TODO: adjust it after moving to 0.11 bevy
                 if let Some((x, y)) = bevy_markdown.size {
                     text_bundle_style.max_size = Size::new(x, y);
                 }
@@ -569,15 +606,26 @@ mod tests {
         let test_render_text_style_system =
             move |mut commands: Commands, asset_server: Res<AssetServer>| {
                 let font = asset_server.load("fonts/SourceCodePro-Regular.ttf");
+                let fonts = BevyMarkdownFonts {
+                    regular_font: font.clone(),
+                    bold_font: font.clone(),
+                    italic_font: font.clone(),
+                    semi_bold_italic_font: font.clone(),
+                    extra_bold_font: font.clone(),
+                    code_font: font.clone(),
+                };
+                let theme = BevyMarkdownTheme {
+                    code_theme: "Solarized (light)".to_string(),
+                    code_default_lang: "rs".to_string(),
+                    font: Color::BLACK,
+                    link: Color::BLUE,
+                    inline_code: Color::GRAY,
+                };
                 let bevy_markdown = BevyMarkdown {
-                    regular_font: Some(font.clone()),
-                    bold_font: Some(font.clone()),
-                    italic_font: Some(font.clone()),
-                    semi_bold_italic_font: Some(font.clone()),
-                    extra_bold_font: Some(font.clone()),
-                    code_font: Some(font.clone()),
-                    size: None,
                     text: input.clone(),
+                    fonts: Some(fonts),
+                    theme: Some(theme),
+                    size: None,
                 };
                 spawn_bevy_markdown(&mut commands, bevy_markdown).unwrap();
             };
