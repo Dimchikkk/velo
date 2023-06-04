@@ -21,6 +21,7 @@ use tantivy::Index;
 use uuid::Uuid;
 
 use crate::resources::AppState;
+use crate::themes::Theme;
 use crate::ui_plugin::NodeType;
 use crate::utils::ReflectableUuid;
 use crate::APP_NAME;
@@ -86,6 +87,7 @@ pub fn search_box_text_changed(
     mut app_state: ResMut<AppState>,
     pkv: Res<PkvStore>,
     mut velo_node_query: Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
+    theme: Res<Theme>,
 ) {
     let str = get_cosmic_text(&text_query.single().editor);
     if str != *previous_search_text {
@@ -103,7 +105,7 @@ pub fn search_box_text_changed(
                             })
                             .map(|l| ReflectableUuid(l.node_id))
                             .collect();
-                        highlight_search_match_nodes(&node_ids, &mut velo_node_query);
+                        highlight_search_match_nodes(&node_ids, &mut velo_node_query, &theme);
                         let doc_ids: HashSet<ReflectableUuid> = docs
                             .into_iter()
                             .map(|location| ReflectableUuid(location.doc_id))
@@ -114,7 +116,7 @@ pub fn search_box_text_changed(
                 }
             }
         } else if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-            highlight_search_match_nodes(&HashSet::new(), &mut velo_node_query);
+            highlight_search_match_nodes(&HashSet::new(), &mut velo_node_query, &theme);
             let keys_in_storage: Vec<_> = names.keys().collect();
             let keys_in_memory: Vec<_> = app_state.docs.keys().cloned().collect();
             let mut combined_keys = keys_in_memory;
@@ -266,12 +268,13 @@ pub fn fuzzy_search(index: &Index, query: &str) -> tantivy::Result<Vec<NodeSearc
     Ok(ids)
 }
 
-pub fn highlight_search_match_nodes(
+fn highlight_search_match_nodes(
     node_ids: &HashSet<ReflectableUuid>,
     velo_node_query: &mut Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
+    theme: &Res<Theme>,
 ) {
-    let highlight_color = Color::TEAL;
-    let highlight_thickness = UiRect::all(Val::Px(4.));
+    let highlight_color = theme.node_found_color;
+    let highlight_thickness = UiRect::all(Val::Px(3.));
     for (mut outline, node, _) in velo_node_query.iter_mut() {
         if node_ids.contains(&node.id) {
             outline.color = highlight_color;
@@ -280,10 +283,10 @@ pub fn highlight_search_match_nodes(
             // revert
             match node.node_type {
                 NodeType::Rect => {
-                    outline.color = Color::rgb(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0);
+                    outline.color = theme.node_border;
                 }
                 NodeType::Circle => {
-                    outline.color = Color::rgba(158.0 / 255.0, 157.0 / 255.0, 36.0 / 255.0, 0.);
+                    outline.color = theme.node_border.with_a(0.);
                 }
             }
 

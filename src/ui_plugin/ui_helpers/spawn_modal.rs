@@ -1,4 +1,6 @@
-use bevy_cosmic_edit::{spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont};
+use bevy_cosmic_edit::{
+    bevy_color_to_cosmic, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont,
+};
 use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
@@ -8,12 +10,14 @@ use super::{
     ModalTop,
 };
 use crate::{
+    themes::Theme,
     ui_plugin::TextPos,
     utils::{to_cosmic_text_pos, ReflectableUuid},
 };
 
 pub fn spawn_modal(
     commands: &mut Commands,
+    theme: &Res<Theme>,
     cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
     cosmic_font_handle: Handle<CosmicFont>,
     window: &Window,
@@ -44,7 +48,7 @@ pub fn spawn_modal(
                     size: Size::new(Val::Px(width), Val::Px(height)),
                     ..default()
                 },
-                background_color: Color::BLACK.with_a(0.5).into(),
+                background_color: theme.shadow.into(),
                 ..default()
             },
             ModalTop {
@@ -71,18 +75,17 @@ pub fn spawn_modal(
     let ok_button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0).into(),
+                background_color: theme.ok_cancel_bg.into(),
                 style: Style {
                     justify_content: JustifyContent::Center,
                     border: UiRect::all(Val::Px(1.)),
                     align_items: AlignItems::Center,
                     padding: UiRect::all(Val::Px(5.)),
-                    // overflow: Overflow::Hidden,
                     ..default()
                 },
                 ..default()
             },
-            BorderColor(Color::BLACK),
+            BorderColor(theme.btn_border),
             GenericButton,
             ModalConfirm {
                 id,
@@ -92,7 +95,7 @@ pub fn spawn_modal(
         .with_children(|builder| {
             let text_style = TextStyle {
                 font_size: 18.0,
-                color: Color::rgb(1., 1., 1.),
+                color: theme.font,
                 ..default()
             };
 
@@ -107,7 +110,7 @@ pub fn spawn_modal(
     let cancel_button = commands
         .spawn((
             ButtonBundle {
-                background_color: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0).into(),
+                background_color: theme.ok_cancel_bg.into(),
                 style: Style {
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
@@ -118,13 +121,13 @@ pub fn spawn_modal(
                 ..default()
             },
             GenericButton,
-            BorderColor(Color::BLACK),
+            BorderColor(theme.btn_border),
             ModalCancel { id },
         ))
         .with_children(|builder| {
             let text_style = TextStyle {
                 font_size: 18.0,
-                color: Color::rgb(1., 1., 1.),
+                color: theme.font,
                 ..default()
             };
 
@@ -170,7 +173,7 @@ pub fn spawn_modal(
                     ..default()
                 })
                 .with_children(|builder| {
-                    builder.spawn(add_rectangle_txt(modal_action.to_string()));
+                    builder.spawn(add_rectangle_txt(theme, modal_action.to_string()));
                 })
                 .id();
             let width = 180.;
@@ -195,19 +198,22 @@ pub fn spawn_modal(
                         },
                         ..default()
                     },
-                    BorderColor(Color::BLACK),
+                    BorderColor(theme.btn_border),
                 ))
                 .id();
+            let mut attrs = cosmic_text::Attrs::new();
+            attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
+            attrs = attrs.color(bevy_color_to_cosmic(theme.font));
+            let metrics = cosmic_text::Metrics::new(14., 18.).scale(window.scale_factor() as f32);
             let cosmic_edit_meta = CosmicEditMeta {
                 text: default_value,
                 font_system_handle: cosmic_font_handle,
                 text_pos: to_cosmic_text_pos(TextPos::TopLeft),
                 initial_size: Some((width, height)),
                 initial_background: None,
-                font_size: 14.,
-                line_height: 18.,
-                scale_factor: window.scale_factor() as f32,
                 display_none: false,
+                attrs,
+                metrics,
             };
             let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
             commands.entity(cosmic_edit).insert(EditableText { id });
@@ -245,10 +251,10 @@ pub fn spawn_modal(
                 })
                 .id();
             let node_label = commands
-                .spawn(add_rectangle_txt(format!(
-                    "Are you sure you want to {}?",
-                    modal_action
-                )))
+                .spawn(add_rectangle_txt(
+                    theme,
+                    format!("Are you sure you want to {}?", modal_action),
+                ))
                 .id();
             commands.entity(node).add_child(node_label);
             commands.entity(top).add_child(node);
@@ -258,7 +264,7 @@ pub fn spawn_modal(
     let modal = commands
         .spawn((
             NodeBundle {
-                background_color: Color::WHITE.into(),
+                background_color: theme.modal_bg.into(),
                 style: Style {
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
@@ -276,7 +282,7 @@ pub fn spawn_modal(
                 },
                 ..default()
             },
-            BorderColor(Color::BLACK),
+            BorderColor(theme.btn_border),
         ))
         .id();
     commands.entity(modal).add_child(modal_dynamic);

@@ -6,6 +6,7 @@ use super::components::{ArrowConnect, ArrowMeta};
 use super::events::{CreateArrowEvent, RedrawArrowEvent};
 use super::utils::{build_arrow, create_arrow, get_pos};
 use crate::components::MainCamera;
+use crate::themes::Theme;
 use crate::ui_plugin::UiState;
 use bevy_prototype_lyon::prelude::Path;
 
@@ -53,6 +54,7 @@ pub fn create_arrow_end(
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    theme: Res<Theme>,
 ) {
     let primary_window = windows.single();
     let (camera, camera_transform) = camera_q.single();
@@ -69,6 +71,7 @@ pub fn create_arrow_end(
             if let (Some(start), Some(end)) = (start, end) {
                 create_arrow(
                     &mut commands,
+                    &theme,
                     start,
                     end,
                     ArrowMeta {
