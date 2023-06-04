@@ -135,8 +135,8 @@ pub fn velo_dark() -> Theme {
     }
 }
 
-pub fn get_theme_by_name(theme_name: &String) -> Theme {
-    match theme_name.as_str() {
+pub fn get_theme_by_name(theme_name: &str) -> Theme {
+    match theme_name {
         "light" => velo_light(),
         "dark" => velo_dark(),
         _ => velo_light(),
