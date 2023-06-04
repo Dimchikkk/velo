@@ -8,6 +8,8 @@ Emoji, ligatures, and other fancy stuff is supported!
 
 ## Usage
 
+⚠️ *Warning: This plugin is currently in early development, and its API is subject to change.*
+
 Explore examples folder for basic usage.
 
 ```rust
@@ -24,7 +26,7 @@ cargo r --example font_per_widget
 
 | bevy | bevy_cosmic_edit |
 | ---- | ---------------- |
-| 0.10 | 0.4              |
+| 0.10 | 0.5              |
 
 ## License
 
