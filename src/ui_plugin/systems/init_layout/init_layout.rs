@@ -211,6 +211,7 @@ pub fn init_layout(
     #[cfg(target_arch = "wasm32")]
     let set_window_prop = add_menu_button(
         &mut commands,
+        &theme,
         "Save Document to window.velo object".to_string(),
         &icon_font,
         super::SetWindowProperty,
