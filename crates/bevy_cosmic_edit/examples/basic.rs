@@ -24,25 +24,26 @@ fn setup(
             ..default()
         })
         .id();
+
     let cosmic_font_config = CosmicFontConfig {
         fonts_dir_path: Some(Path::new("assets/fonts").into()),
-        custom_font_data: None,
+        font_bytes: None,
         load_system_fonts: true,
-        monospace_family: Some("Fira Code".to_string()),
-        sans_serif_family: Some("Fira Code".to_string()),
-        serif_family: Some("Fira Code".to_string()),
     };
     let font_system = create_cosmic_font_system(cosmic_font_config);
     let font_system_handle = cosmic_fonts.add(CosmicFont(font_system));
+    let mut attrs = cosmic_text::Attrs::new();
+    attrs = attrs.family(cosmic_text::Family::Name("Fira Code"));
+    attrs = attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3));
+    let metrics = cosmic_text::Metrics::new(14., 18.).scale(primary_window.scale_factor() as f32);
     let cosmic_edit_meta = CosmicEditMeta {
         text: "😀😀😀 x => y".to_string(),
-        font_size: 18.,
-        line_height: 20.,
-        scale_factor: primary_window.scale_factor() as f32,
+        text_pos: CosmicTextPos::Center,
+        attrs,
+        metrics,
         font_system_handle,
         display_none: false,
         initial_background: None,
-        text_pos: CosmicTextPos::Center,
         initial_size: None,
     };
     let cosmic_edit = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);

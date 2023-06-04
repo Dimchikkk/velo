@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_cosmic_edit::{spawn_cosmic_edit, CosmicEditMeta, CosmicFont};
+use bevy_cosmic_edit::{bevy_color_to_cosmic, spawn_cosmic_edit, CosmicEditMeta, CosmicFont};
 use bevy_ui_borders::BorderColor;
 
 use crate::{
@@ -33,16 +33,19 @@ pub fn add_search_box(
             ..default()
         },))
         .id();
+    let mut attrs = cosmic_text::Attrs::new();
+    attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
+    attrs = attrs.color(bevy_color_to_cosmic(theme.font.clone()));
+    let metrics = cosmic_text::Metrics::new(14., 18.).scale(scale_factor);
     let cosmic_edit_meta = CosmicEditMeta {
         text: "".to_string(),
         text_pos: to_cosmic_text_pos(TextPos::Center),
         initial_background: None,
-        font_size: 14.,
-        line_height: 18.,
-        scale_factor,
         font_system_handle: cosmic_font_handle,
         display_none: false,
         initial_size: None,
+        attrs,
+        metrics,
     };
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands
