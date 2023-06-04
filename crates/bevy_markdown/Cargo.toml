@@ -1,9 +1,9 @@
 [package]
 name = "bevy_markdown"
-version = "0.1.0"
+version = "0.2.0"
 license = "MIT OR Apache-2.0"
 description = "Bevy markdown renderer"
-repository = "https://github.com/StaffEngineer/velo.git"
+repository = "https://github.com/StaffEngineer/velo/tree/main/crates/bevy_markdown"
 edition = "2021"
 keywords = ["bevy"]
 

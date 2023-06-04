@@ -11,6 +11,7 @@ use serde::Serialize;
 use serde_json::{json, Value};
 use uuid::Uuid;
 
+use crate::themes::Theme;
 use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
@@ -34,6 +35,7 @@ pub fn rec_button_handlers(
     mut arrows: Query<(Entity, &ArrowMeta, &mut Visibility), (With<ArrowMeta>, Without<Tooltip>)>,
     mut state: ResMut<UiState>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    theme: Res<Theme>,
 ) {
     let window = windows.single();
     for (interaction, button_action) in &mut interaction_query {
@@ -52,7 +54,7 @@ pub fn rec_button_handlers(
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
                             },
-                            bg_color: Color::rgb(1.0, 1.0, 1.0),
+                            bg_color: theme.node_bg,
                             z_index: 0,
                         },
                         image: None,
@@ -71,7 +73,7 @@ pub fn rec_button_handlers(
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
                             },
-                            bg_color: Color::rgb(1.0, 1.0, 1.0),
+                            bg_color: theme.node_bg,
                             z_index: 0,
                         },
                         image: None,
@@ -300,6 +302,7 @@ pub fn delete_doc_handler(
     pkv: Res<PkvStore>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
+    theme: Res<Theme>,
 ) {
     let window = windows.single();
     for interaction in &mut delete_doc_query.iter_mut() {
@@ -329,6 +332,7 @@ pub fn delete_doc_handler(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
+                    &theme,
                     &mut cosmic_fonts,
                     font_system_state.0.clone().unwrap(),
                     window,
@@ -370,6 +374,7 @@ pub fn export_to_file(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
+    theme: Res<Theme>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -381,6 +386,7 @@ pub fn export_to_file(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
+                    &theme,
                     &mut cosmic_fonts,
                     font_system_state.0.clone().unwrap(),
                     window,
@@ -493,6 +499,7 @@ pub fn import_from_file(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
+    theme: Res<Theme>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -504,6 +511,7 @@ pub fn import_from_file(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
+                    &theme,
                     &mut cosmic_fonts,
                     font_system_state.0.clone().unwrap(),
                     window,
@@ -526,6 +534,7 @@ pub fn import_from_url(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
+    theme: Res<Theme>,
 ) {
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
@@ -537,6 +546,7 @@ pub fn import_from_url(
                 ui_state.modal_id = Some(id);
                 let entity = spawn_modal(
                     &mut commands,
+                    &theme,
                     &mut cosmic_fonts,
                     font_system_state.0.clone().unwrap(),
                     window,
