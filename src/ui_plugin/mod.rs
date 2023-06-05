@@ -221,7 +221,7 @@ impl Plugin for UiPlugin {
             rename_doc_handler,
             delete_doc_handler,
             save_doc_handler,
-            keyboard_input_system,
+            keyboard_input_system.after(bevy_cosmic_edit::cosmic_edit_bevy_events),
         ));
         app.add_systems((doc_list_del_button_update, doc_list_ui_changed).chain());
 
