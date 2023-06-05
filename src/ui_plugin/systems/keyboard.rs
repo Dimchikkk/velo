@@ -41,14 +41,7 @@ pub fn keyboard_input_system(
     blink_timer.timer.tick(time.delta());
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
-        insert_from_clipboard(
-            &mut images,
-            &mut ui_state,
-            &mut editable_text_query,
-            &mut events,
-            scale_factor,
-            &theme,
-        );
+        insert_from_clipboard(&mut images, &mut events, scale_factor, &theme);
     } else if command && shift && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveDocRequest {
             doc_id: app_state.current_document.unwrap(),
@@ -161,67 +154,51 @@ fn get_text_val(
 #[cfg(not(target_arch = "wasm32"))]
 pub fn insert_from_clipboard(
     images: &mut ResMut<Assets<Image>>,
-    state: &mut ResMut<UiState>,
-    query: &mut Query<(&mut Text, &EditableText), With<EditableText>>,
     events: &mut EventWriter<AddRectEvent>,
     scale_factor: f64,
     theme: &Res<Theme>,
 ) {
     use crate::JsonNode;
 
-    let mut clipboard = arboard::Clipboard::new().unwrap();
-    if let Ok(image) = clipboard.get_image() {
-        let image: RgbaImage = ImageBuffer::from_raw(
-            image.width.try_into().unwrap(),
-            image.height.try_into().unwrap(),
-            image.bytes.into_owned(),
-        )
-        .unwrap();
-        let width = image.width();
-        let height = image.height();
-        let size: Extent3d = Extent3d {
-            width,
-            height,
-            ..Default::default()
-        };
-        let image = Image::new(
-            size,
-            TextureDimension::D2,
-            image.to_vec(),
-            TextureFormat::Rgba8UnormSrgb,
-        );
-        let image = images.add(image);
-        events.send(AddRectEvent {
-            node: JsonNode {
-                id: Uuid::new_v4(),
-                node_type: crate::NodeType::Rect,
-                left: Val::Px(0.0),
-                bottom: Val::Px(0.0),
-                width: Val::Px(width as f32 / scale_factor as f32),
-                height: Val::Px(height as f32 / scale_factor as f32),
-                text: crate::JsonNodeText {
-                    text: "".to_string(),
-                    pos: crate::TextPos::Center,
+    if let Ok(mut clipboard) = arboard::Clipboard::new() {
+        if let Ok(image) = clipboard.get_image() {
+            let image: RgbaImage = ImageBuffer::from_raw(
+                image.width.try_into().unwrap(),
+                image.height.try_into().unwrap(),
+                image.bytes.into_owned(),
+            )
+            .unwrap();
+            let width = image.width();
+            let height = image.height();
+            let size: Extent3d = Extent3d {
+                width,
+                height,
+                ..Default::default()
+            };
+            let image = Image::new(
+                size,
+                TextureDimension::D2,
+                image.to_vec(),
+                TextureFormat::Rgba8UnormSrgb,
+            );
+            let image = images.add(image);
+            events.send(AddRectEvent {
+                node: JsonNode {
+                    id: Uuid::new_v4(),
+                    node_type: crate::NodeType::Rect,
+                    left: Val::Px(0.0),
+                    bottom: Val::Px(0.0),
+                    width: Val::Px(width as f32 / scale_factor as f32),
+                    height: Val::Px(height as f32 / scale_factor as f32),
+                    text: crate::JsonNodeText {
+                        text: "".to_string(),
+                        pos: crate::TextPos::Center,
+                    },
+                    bg_color: theme.clipboard_image_bg,
+                    z_index: 0,
                 },
-                bg_color: theme.clipboard_image_bg,
-                z_index: 0,
-            },
-            image: Some(image.into()),
-        });
-    }
-
-    if let Ok(clipboard_text) = clipboard.get_text() {
-        for (mut text, editable_text) in &mut query.iter_mut() {
-            if Some(editable_text.id) == state.entity_to_edit {
-                let mut str = "".to_string();
-                let mut text_copy = text.clone();
-                text_copy.sections.pop();
-                for section in text_copy.sections.iter_mut() {
-                    str = format!("{}{}", str, section.value.clone());
-                }
-                text.sections = get_sections(theme, format!("{}{}", str, clipboard_text)).0;
-                text.sections.last_mut().unwrap().value = " ".to_string();
-            }
+                image: Some(image.into()),
+            });
         }
     }
 }
