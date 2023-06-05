@@ -212,7 +212,7 @@ fn get_x_offset(editor: &Editor) -> i32 {
         / 2.0) as i32
 }
 
-fn cosmic_edit_bevy_events(
+pub fn cosmic_edit_bevy_events(
     windows: Query<&Window, With<PrimaryWindow>>,
     active_editor: Res<ActiveEditor>,
     keys: Res<Input<KeyCode>>,
@@ -297,6 +297,37 @@ fn cosmic_edit_bevy_events(
                         .action(&mut font_system.0, Action::NextWord);
                     // RETURN
                     return;
+                }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    if let Ok(mut clipboard) = arboard::Clipboard::new() {
+                        if command && keys.just_pressed(KeyCode::C) {
+                            if let Some(text) = cosmic_edit.editor.copy_selection() {
+                                clipboard.set_text(text).unwrap();
+                            }
+                            // RETURN
+                            return;
+                        }
+                        if command && keys.just_pressed(KeyCode::X) {
+                            if let Some(text) = cosmic_edit.editor.copy_selection() {
+                                clipboard.set_text(text).unwrap();
+                                cosmic_edit.editor.delete_selection();
+                            }
+                            // RETURN
+                            return;
+                        }
+                        if command && keys.just_pressed(KeyCode::V) {
+                            if let Ok(text) = clipboard.get_text() {
+                                for c in text.chars() {
+                                    cosmic_edit
+                                        .editor
+                                        .action(&mut font_system.0, Action::Insert(c));
+                                }
+                            }
+                            // RETURN
+                            return;
+                        }
+                    }
                 }
                 let (offset_y, offset_x) = match cosmic_edit.text_pos {
                     CosmicTextPos::Center => (
