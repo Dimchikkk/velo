@@ -65,9 +65,9 @@ pub struct CosmicEdit {
     pub editor: Editor,
     pub font_system: Handle<CosmicFont>,
     pub size: Option<(f32, f32)>,
+    pub bg: Color,
     font_size: f32,
     font_line_height: f32,
-    bg: Color,
     is_ui_node: bool,
 }
 
