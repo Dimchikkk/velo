@@ -75,7 +75,7 @@ pub fn spawn_node(
         .spawn((
             create_rectangle_btn(
                 item_meta.bg_color,
-                image.clone(),
+                image,
                 item_meta.z_index,
                 item_meta.text_pos.clone(),
             ),
@@ -165,7 +165,7 @@ pub fn spawn_node(
     attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
     attrs = attrs.color(bevy_color_to_cosmic(theme.font));
     let cosmic_edit_meta = CosmicEditMeta {
-        text: CosmicText::OneStyle((item_meta.text.clone().to_string(), attrs)),
+        text: CosmicText::OneStyle((item_meta.text.clone(), attrs)),
         font_system_handle: cosmic_font_handle,
         text_pos: to_cosmic_text_pos(item_meta.text_pos),
         size: Some((
