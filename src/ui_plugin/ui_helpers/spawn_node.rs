@@ -180,7 +180,7 @@ pub fn spawn_node(
             line_height: 18.,
             scale_factor,
         },
-        bg: theme.node_bg,
+        bg: item_meta.bg_color,
     };
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands
