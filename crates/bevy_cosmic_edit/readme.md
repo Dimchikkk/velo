@@ -16,17 +16,11 @@ Explore examples folder for basic usage.
 cargo r --example basic
 ```
 
-or
-
-```rust
-cargo r --example font_per_widget
-```
-
 ## Compatibility
 
 | bevy | bevy_cosmic_edit |
 | ---- | ---------------- |
-| 0.10 | 0.5              |
+| 0.10 | 0.6              |
 
 ## License
 
