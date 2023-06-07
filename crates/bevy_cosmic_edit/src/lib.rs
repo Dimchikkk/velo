@@ -538,7 +538,7 @@ fn cosmic_edit_redraw_buffer_ui(
     for (mut cosmic_edit, mut img, node) in &mut cosmic_edit_query.iter_mut() {
         cosmic_edit.size = Some((node.size().x, node.size().y));
         redraw_buffer_common(
-            &window,
+            window,
             &mut images,
             &mut swash_cache_state,
             &mut cosmic_edit,
@@ -558,7 +558,7 @@ fn cosmic_edit_redraw_buffer(
     let window = windows.single();
     for (mut cosmic_edit, mut handle) in &mut cosmic_edit_query.iter_mut() {
         redraw_buffer_common(
-            &window,
+            window,
             &mut images,
             &mut swash_cache_state,
             &mut cosmic_edit,
@@ -649,8 +649,10 @@ pub fn spawn_cosmic_edit(
             commands.spawn((button_bundle, cosmic_edit_component)).id()
         }
         CosmicNode::Sprite(sprite_node) => {
-            let mut sprite = SpriteBundle::default();
-            sprite.transform = sprite_node.transform;
+            let sprite = SpriteBundle {
+                transform: sprite_node.transform,
+                ..default()
+            };
             commands.spawn((sprite, cosmic_edit_component)).id()
         }
     }
