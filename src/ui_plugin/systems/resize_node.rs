@@ -4,7 +4,7 @@ use super::{
 };
 use crate::{utils::convert_from_val_px, UiState};
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
-use bevy_cosmic_edit::{CosmicEdit, CosmicFont};
+use bevy_cosmic_edit::CosmicEdit;
 use bevy_markdown::BevyMarkdownNode;
 use cosmic_text::Edit;
 
@@ -74,10 +74,7 @@ pub fn resize_entity_end(
     >,
     markdown_view_query: Query<(&BevyMarkdownView, Entity), With<BevyMarkdownView>>,
     mut events: EventWriter<RedrawArrowEvent>,
-    windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
 ) {
-    let primary_window = windows.single();
     for event in mouse_motion_events.iter() {
         if let Some((id, resize_marker)) = state.entity_to_resize {
             for (rectangle, mut button_style) in &mut node_query {
@@ -146,20 +143,11 @@ pub fn resize_entity_end(
                     };
                     for (text, mut cosmic_edit) in &mut raw_text_query.iter_mut() {
                         if text.id == id {
-                            if let Some(font_system) =
-                                cosmic_fonts.get_mut(&cosmic_edit.font_system)
-                            {
-                                let scale_factor = primary_window.scale_factor() as f32;
-                                let width = convert_from_val_px(button_style.size.width);
-                                let height = convert_from_val_px(button_style.size.height);
-                                cosmic_edit.editor.buffer_mut().set_size(
-                                    &mut font_system.0,
-                                    width * scale_factor,
-                                    height * scale_factor,
-                                );
-                                cosmic_edit.editor.buffer_mut().set_redraw(true);
-                                break;
-                            }
+                            let width = convert_from_val_px(button_style.size.width);
+                            let height = convert_from_val_px(button_style.size.height);
+                            cosmic_edit.size = Some((width, height));
+                            cosmic_edit.editor.buffer_mut().set_redraw(true);
+                            break;
                         }
                     }
                     for (node, entity) in markdown_view_query.iter() {
