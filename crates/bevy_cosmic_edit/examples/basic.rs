@@ -3,7 +3,8 @@ use std::path::Path;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{
     create_cosmic_font_system, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicEditPlugin,
-    CosmicFont, CosmicFontConfig, CosmicTextPos,
+    CosmicEditUi, CosmicFont, CosmicFontConfig, CosmicMetrics, CosmicNode, CosmicText,
+    CosmicTextPos,
 };
 
 fn setup(
@@ -15,7 +16,6 @@ fn setup(
     commands.spawn(Camera2dBundle::default());
     let root = commands
         .spawn(NodeBundle {
-            background_color: Color::WHITE.into(),
             style: Style {
                 display: Display::Flex,
                 size: Size::new(Val::Percent(100.), Val::Percent(100.)),
@@ -35,16 +35,20 @@ fn setup(
     let mut attrs = cosmic_text::Attrs::new();
     attrs = attrs.family(cosmic_text::Family::Name("Fira Code"));
     attrs = attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3));
-    let metrics = cosmic_text::Metrics::new(14., 18.).scale(primary_window.scale_factor() as f32);
     let cosmic_edit_meta = CosmicEditMeta {
-        text: "😀😀😀 x => y".to_string(),
+        text: CosmicText::OneStyle(("😀😀😀 x => y".to_string(), attrs)),
         text_pos: CosmicTextPos::Center,
-        attrs,
-        metrics,
+        bg: Color::WHITE,
+        metrics: CosmicMetrics {
+            font_size: 14.,
+            line_height: 18.,
+            scale_factor: primary_window.scale_factor() as f32,
+        },
         font_system_handle,
-        display_none: false,
-        initial_background: None,
-        initial_size: None,
+        node: CosmicNode::Ui(CosmicEditUi {
+            display_none: false,
+        }),
+        size: None,
     };
     let cosmic_edit = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     commands.entity(root).add_child(cosmic_edit);

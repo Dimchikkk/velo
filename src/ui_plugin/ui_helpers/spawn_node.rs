@@ -1,5 +1,6 @@
 use bevy_cosmic_edit::{
-    bevy_color_to_cosmic, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont,
+    bevy_color_to_cosmic, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicEditUi,
+    CosmicFont, CosmicMetrics, CosmicNode, CosmicText,
 };
 use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown, BevyMarkdownFonts, BevyMarkdownTheme};
 use bevy_ui_borders::{BorderColor, Outline};
@@ -163,19 +164,23 @@ pub fn spawn_node(
     let mut attrs = cosmic_text::Attrs::new();
     attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
     attrs = attrs.color(bevy_color_to_cosmic(theme.font));
-    let metrics = cosmic_text::Metrics::new(14., 18.).scale(scale_factor);
     let cosmic_edit_meta = CosmicEditMeta {
-        text: item_meta.text.clone(),
+        text: CosmicText::OneStyle((item_meta.text.clone().to_string(), attrs)),
         font_system_handle: cosmic_font_handle,
         text_pos: to_cosmic_text_pos(item_meta.text_pos),
-        initial_size: Some((
+        size: Some((
             convert_from_val_px(item_meta.size.0),
             convert_from_val_px(item_meta.size.1),
         )),
-        initial_background: image,
-        display_none: !item_meta.is_active,
-        attrs,
-        metrics,
+        node: CosmicNode::Ui(CosmicEditUi {
+            display_none: !item_meta.is_active,
+        }),
+        metrics: CosmicMetrics {
+            font_size: 14.,
+            line_height: 18.,
+            scale_factor,
+        },
+        bg: theme.node_bg,
     };
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands
