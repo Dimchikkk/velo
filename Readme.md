@@ -23,7 +23,7 @@ would it allow me to learn the language, but it would also be an
 enjoyable project to work on.
 
 ## What\'s implemented:
--   support rectangle/circle nodes
+-   support rectangle/circle nodes (circle was temporarily removed, will be added back soon with proper border)
 -   add/remove node
 -   node resizing
 -   node repositioning
