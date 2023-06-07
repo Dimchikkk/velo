@@ -1,5 +1,6 @@
 use bevy_cosmic_edit::{
-    bevy_color_to_cosmic, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont,
+    bevy_color_to_cosmic, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicEditUi,
+    CosmicFont, CosmicMetrics, CosmicNode, CosmicText,
 };
 use bevy_ui_borders::BorderColor;
 
@@ -204,16 +205,20 @@ pub fn spawn_modal(
             let mut attrs = cosmic_text::Attrs::new();
             attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
             attrs = attrs.color(bevy_color_to_cosmic(theme.font));
-            let metrics = cosmic_text::Metrics::new(14., 18.).scale(window.scale_factor() as f32);
             let cosmic_edit_meta = CosmicEditMeta {
-                text: default_value,
+                text: CosmicText::OneStyle((default_value, attrs)),
                 font_system_handle: cosmic_font_handle,
                 text_pos: to_cosmic_text_pos(TextPos::TopLeft),
-                initial_size: Some((width, height)),
-                initial_background: None,
-                display_none: false,
-                attrs,
-                metrics,
+                size: Some((width, height)),
+                metrics: CosmicMetrics {
+                    font_size: 14.,
+                    line_height: 18.,
+                    scale_factor: window.scale_factor() as f32,
+                },
+                bg: theme.modal_text_input_bg,
+                node: CosmicNode::Ui(CosmicEditUi {
+                    display_none: false,
+                }),
             };
             let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
             commands.entity(cosmic_edit).insert(EditableText { id });

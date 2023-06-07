@@ -2,10 +2,11 @@ use std::path::Path;
 
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{
-    bevy_color_to_cosmic, create_cosmic_font_system, get_cosmic_text, spawn_cosmic_edit,
-    ActiveEditor, CosmicEdit, CosmicEditMeta, CosmicEditPlugin, CosmicFont, CosmicFontConfig,
-    CosmicTextPos,
+    create_cosmic_font_system, get_cosmic_text, spawn_cosmic_edit, ActiveEditor, CosmicEdit,
+    CosmicEditMeta, CosmicEditPlugin, CosmicEditUi, CosmicFont, CosmicFontConfig, CosmicMetrics,
+    CosmicNode, CosmicText, CosmicTextPos,
 };
+use cosmic_text::*;
 
 fn setup(
     mut commands: Commands,
@@ -15,8 +16,7 @@ fn setup(
     commands.spawn(Camera2dBundle::default());
     let root = commands
         .spawn(NodeBundle {
-            background_color: Color::WHITE.into(),
-            style: Style {
+            style: bevy::prelude::Style {
                 position_type: PositionType::Absolute,
                 size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                 ..default()
@@ -33,35 +33,156 @@ fn setup(
     let font_system = create_cosmic_font_system(cosmic_font_config);
     let font_system_handle = cosmic_fonts.add(CosmicFont(font_system));
 
-    let mut attrs_1 = cosmic_text::Attrs::new();
-    attrs_1 = attrs_1.family(cosmic_text::Family::Name("Fira Code"));
-    attrs_1 = attrs_1.color(bevy_color_to_cosmic(Color::BLACK));
-    let metrics_1 = cosmic_text::Metrics::new(14., 18.).scale(primary_window.scale_factor() as f32);
+    let attrs = Attrs::new();
+    let serif_attrs = attrs.family(Family::Serif);
+    let mono_attrs = attrs.family(Family::Monospace);
+    let comic_attrs = attrs.family(Family::Name("Comic Neue"));
+    let lines: Vec<Vec<(&str, Attrs)>> = vec![
+        vec![
+            ("B", attrs.weight(cosmic_text::Weight::BOLD)),
+            ("old ", attrs),
+            ("I", attrs.style(cosmic_text::Style::Italic)),
+            ("talic ", attrs),
+            ("f", attrs),
+            ("i ", attrs),
+            ("f", attrs.weight(Weight::BOLD)),
+            ("i ", attrs),
+            ("f", attrs.style(cosmic_text::Style::Italic)),
+            ("i ", attrs),
+        ],
+        vec![
+            ("Sans-Serif Normal ", attrs),
+            ("Sans-Serif Bold ", attrs.weight(Weight::BOLD)),
+            (
+                "Sans-Serif Italic ",
+                attrs.style(cosmic_text::Style::Italic),
+            ),
+            (
+                "Sans-Serif Bold Italic",
+                attrs.weight(Weight::BOLD).style(cosmic_text::Style::Italic),
+            ),
+        ],
+        vec![
+            ("Serif Normal ", serif_attrs),
+            ("Serif Bold ", serif_attrs.weight(Weight::BOLD)),
+            (
+                "Serif Italic ",
+                serif_attrs.style(cosmic_text::Style::Italic),
+            ),
+            (
+                "Serif Bold Italic",
+                serif_attrs
+                    .weight(Weight::BOLD)
+                    .style(cosmic_text::Style::Italic),
+            ),
+        ],
+        vec![
+            ("Mono Normal ", mono_attrs),
+            ("Mono Bold ", mono_attrs.weight(Weight::BOLD)),
+            ("Mono Italic ", mono_attrs.style(cosmic_text::Style::Italic)),
+            (
+                "Mono Bold Italic",
+                mono_attrs
+                    .weight(Weight::BOLD)
+                    .style(cosmic_text::Style::Italic),
+            ),
+        ],
+        vec![
+            ("Comic Normal ", comic_attrs),
+            ("Comic Bold ", comic_attrs.weight(Weight::BOLD)),
+            (
+                "Comic Italic ",
+                comic_attrs.style(cosmic_text::Style::Italic),
+            ),
+            (
+                "Comic Bold Italic",
+                comic_attrs
+                    .weight(Weight::BOLD)
+                    .style(cosmic_text::Style::Italic),
+            ),
+        ],
+        vec![
+            ("R", attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00))),
+            ("A", attrs.color(cosmic_text::Color::rgb(0xFF, 0x7F, 0x00))),
+            ("I", attrs.color(cosmic_text::Color::rgb(0xFF, 0xFF, 0x00))),
+            ("N", attrs.color(cosmic_text::Color::rgb(0x00, 0xFF, 0x00))),
+            ("B", attrs.color(cosmic_text::Color::rgb(0x00, 0x00, 0xFF))),
+            ("O", attrs.color(cosmic_text::Color::rgb(0x4B, 0x00, 0x82))),
+            ("W ", attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3))),
+            (
+                "Red ",
+                attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00)),
+            ),
+            (
+                "Orange ",
+                attrs.color(cosmic_text::Color::rgb(0xFF, 0x7F, 0x00)),
+            ),
+            (
+                "Yellow ",
+                attrs.color(cosmic_text::Color::rgb(0xFF, 0xFF, 0x00)),
+            ),
+            (
+                "Green ",
+                attrs.color(cosmic_text::Color::rgb(0x00, 0xFF, 0x00)),
+            ),
+            (
+                "Blue ",
+                attrs.color(cosmic_text::Color::rgb(0x00, 0x00, 0xFF)),
+            ),
+            (
+                "Indigo ",
+                attrs.color(cosmic_text::Color::rgb(0x4B, 0x00, 0x82)),
+            ),
+            (
+                "Violet ",
+                attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3)),
+            ),
+            ("U", attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3))),
+            ("N", attrs.color(cosmic_text::Color::rgb(0x4B, 0x00, 0x82))),
+            ("I", attrs.color(cosmic_text::Color::rgb(0x00, 0x00, 0xFF))),
+            ("C", attrs.color(cosmic_text::Color::rgb(0x00, 0xFF, 0x00))),
+            ("O", attrs.color(cosmic_text::Color::rgb(0xFF, 0xFF, 0x00))),
+            ("R", attrs.color(cosmic_text::Color::rgb(0xFF, 0x7F, 0x00))),
+            ("N", attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00))),
+        ],
+        vec![(
+            "生活,삶,जिंदगी 😀 FPS",
+            attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00)),
+        )],
+    ];
     let cosmic_edit_meta_1 = CosmicEditMeta {
-        text: "😀😀😀 x => y".to_string(),
+        text: CosmicText::MultiStyle((lines, attrs)),
         text_pos: CosmicTextPos::Center,
-        attrs: attrs_1,
-        metrics: metrics_1,
+        metrics: CosmicMetrics {
+            font_size: 18.,
+            line_height: 22.,
+            scale_factor: primary_window.scale_factor() as f32,
+        },
         font_system_handle: font_system_handle.clone(),
-        display_none: false,
-        initial_background: None,
-        initial_size: None,
+        node: CosmicNode::Ui(CosmicEditUi {
+            display_none: false,
+        }),
+        size: None,
+        bg: bevy::prelude::Color::WHITE,
     };
     let cosmic_edit_1 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta_1);
 
     let mut attrs_2 = cosmic_text::Attrs::new();
-    attrs_2 = attrs_2.family(cosmic_text::Family::Name("Source Code Pro"));
-    attrs_2 = attrs_2.weight(cosmic_text::Weight::BOLD);
-    let metrics_2 = cosmic_text::Metrics::new(18., 20.).scale(primary_window.scale_factor() as f32);
+    attrs_2 = attrs_2.family(cosmic_text::Family::Name("Fira Code"));
     let cosmic_edit_meta_2 = CosmicEditMeta {
-        text: "Widget 2.\nClick on me".to_string(),
-        attrs: attrs_2,
-        metrics: metrics_2,
+        text: CosmicText::OneStyle(("Widget 2.\nClick on me =>".to_string(), attrs_2)),
+        metrics: CosmicMetrics {
+            font_size: 14.,
+            line_height: 18.,
+            scale_factor: primary_window.scale_factor() as f32,
+        },
         font_system_handle: font_system_handle.clone(),
-        display_none: false,
-        initial_background: None,
+        node: CosmicNode::Ui(CosmicEditUi {
+            display_none: false,
+        }),
         text_pos: CosmicTextPos::Center,
-        initial_size: None,
+        size: None,
+        bg: bevy::prelude::Color::WHITE.with_a(0.8),
     };
     let cosmic_edit_2 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta_2);
 
