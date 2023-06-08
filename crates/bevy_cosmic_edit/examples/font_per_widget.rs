@@ -164,6 +164,7 @@ fn setup(
         }),
         size: None,
         bg: bevy::prelude::Color::WHITE,
+        readonly: false,
     };
     let cosmic_edit_1 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta_1);
 
@@ -183,6 +184,7 @@ fn setup(
         text_pos: CosmicTextPos::Center,
         size: None,
         bg: bevy::prelude::Color::WHITE.with_a(0.8),
+        readonly: false,
     };
     let cosmic_edit_2 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta_2);
 

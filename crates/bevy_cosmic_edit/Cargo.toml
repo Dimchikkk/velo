@@ -1,6 +1,6 @@
 [package]
 name = "bevy_cosmic_edit"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Bevy cosmic-text multiline text input"
@@ -25,7 +25,7 @@ bevy = { version = "0.10.1", default-features = false, features = [
   "png",
   "x11",
 ] }
-cosmic-text = "0.8.0"
+cosmic-text = { git = "https://github.com/StaffEngineer/cosmic-text", rev = "1fc6aa3" }
 image = "0.24.6"
 sys-locale = "0.3.0"
 
@@ -43,3 +43,6 @@ name = "font_per_widget"
 
 [[example]]
 name = "text_sprites"
+
+[[example]]
+name = "readonly"

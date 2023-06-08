@@ -426,14 +426,14 @@ dependencies = [
 
 [[package]]
 name = "bevy_cosmic_edit"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "arboard",
  "bevy",
  "cosmic-text",
  "image",
  "insta",
- "sys-locale 0.3.0",
+ "sys-locale",
 ]
 
 [[package]]
@@ -1335,8 +1335,7 @@ dependencies = [
 [[package]]
 name = "cosmic-text"
 version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5002459813686f08a09bc78f9dce85ff12467db48f8f3f75ebe0242e0f063fdb"
+source = "git+https://github.com/StaffEngineer/cosmic-text?rev=1fc6aa3#1fc6aa3a2d4af8141a548ce15bbd58fdcb7e5c71"
 dependencies = [
  "fontdb",
  "libm",
@@ -1345,7 +1344,7 @@ dependencies = [
  "rangemap",
  "rustybuzz",
  "swash",
- "sys-locale 0.2.4",
+ "sys-locale",
  "unicode-bidi",
  "unicode-linebreak",
  "unicode-script",
@@ -3615,19 +3614,6 @@ dependencies = [
  "thiserror",
  "walkdir",
  "yaml-rust",
-]
-
-[[package]]
-name = "sys-locale"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8a11bd9c338fdba09f7881ab41551932ad42e405f61d01e8406baea71c07aee"
-dependencies = [
- "js-sys",
- "libc",
- "wasm-bindgen",
- "web-sys",
- "windows-sys 0.45.0",
 ]
 
 [[package]]
