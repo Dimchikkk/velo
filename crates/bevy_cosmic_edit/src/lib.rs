@@ -2,6 +2,7 @@ use std::{cmp, path::PathBuf};
 
 use bevy::{
     asset::HandleId,
+    input::mouse::{MouseScrollUnit, MouseWheel},
     prelude::*,
     reflect::TypeUuid,
     render::render_resource::Extent3d,
@@ -272,6 +273,7 @@ pub fn cosmic_edit_bevy_events(
     mut cosmic_edit_query: Query<(&mut CosmicEdit, &GlobalTransform, Entity), With<CosmicEdit>>,
     mut is_deleting: Local<bool>,
     mut font_system_assets: ResMut<Assets<CosmicFont>>,
+    mut scroll_evr: EventReader<MouseWheel>,
 ) {
     let window = windows.single();
     for (mut cosmic_edit, node_transform, entity) in &mut cosmic_edit_query.iter_mut() {
@@ -321,20 +323,13 @@ pub fn cosmic_edit_bevy_events(
                         .action(&mut font_system.0, Action::Escape);
                 }
                 if command && keys.just_pressed(KeyCode::A) {
-                    let color = cosmic_edit.bg;
                     cosmic_edit
                         .editor
                         .action(&mut font_system.0, Action::BufferStart);
                     cosmic_edit
                         .editor
                         .action(&mut font_system.0, Action::BufferEnd);
-                    cosmic_edit
-                        .editor
-                        .set_select_opt(Some(Cursor::new_with_color(
-                            0,
-                            0,
-                            bevy_color_to_cosmic(color),
-                        )));
+                    cosmic_edit.editor.set_select_opt(Some(Cursor::default()));
                     // RETURN
                     return;
                 }
@@ -429,6 +424,27 @@ pub fn cosmic_edit_bevy_events(
                     }
                     // RETURN
                     return;
+                }
+                for ev in scroll_evr.iter() {
+                    match ev.unit {
+                        MouseScrollUnit::Line => {
+                            cosmic_edit.editor.action(
+                                &mut font_system.0,
+                                Action::Scroll {
+                                    lines: -ev.y as i32,
+                                },
+                            );
+                        }
+                        MouseScrollUnit::Pixel => {
+                            let line_height = cosmic_edit.font_line_height;
+                            cosmic_edit.editor.action(
+                                &mut font_system.0,
+                                Action::Scroll {
+                                    lines: -(ev.y / line_height) as i32,
+                                },
+                            );
+                        }
+                    }
                 }
                 if cosmic_edit.readonly {
                     // RETURN
