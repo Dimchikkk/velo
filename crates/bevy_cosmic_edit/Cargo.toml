@@ -25,7 +25,7 @@ bevy = { version = "0.10.1", default-features = false, features = [
   "png",
   "x11",
 ] }
-cosmic-text = { git = "https://github.com/StaffEngineer/cosmic-text", rev = "1fc6aa3" }
+cosmic-text = { git = "https://github.com/pop-os/cosmic-text", rev = "a93ec8a" }
 image = "0.24.6"
 sys-locale = "0.3.0"
 
