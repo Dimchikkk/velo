@@ -8,8 +8,7 @@ use bevy::{
     window::{PrimaryWindow, WindowScaleFactorChanged},
 };
 use cosmic_text::{
-    Action, Affinity, AttrsList, Buffer, BufferLine, Cursor, Edit, Editor, FontSystem, Metrics,
-    SwashCache,
+    Action, AttrsList, Buffer, BufferLine, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
 };
 
 pub struct CosmicEditUi {
@@ -50,7 +49,8 @@ pub struct CosmicEditMeta<'a> {
     pub font_system_handle: Handle<CosmicFont>,
     pub size: Option<(f32, f32)>, // None used for bevy-ui nodes to use parent size
     pub node: CosmicNode,
-    pub bg: Color,
+    pub bg: bevy::prelude::Color,
+    pub readonly: bool,
 }
 
 /// Enum representing the position of the cosmic text.
@@ -65,10 +65,11 @@ pub struct CosmicEdit {
     pub editor: Editor,
     pub font_system: Handle<CosmicFont>,
     pub size: Option<(f32, f32)>,
-    pub bg: Color,
+    pub bg: bevy::prelude::Color,
     font_size: f32,
     font_line_height: f32,
     is_ui_node: bool,
+    readonly: bool,
 }
 
 #[derive(TypeUuid)]
@@ -289,7 +290,7 @@ pub fn cosmic_edit_bevy_events(
                 if keys.just_pressed(KeyCode::Down) {
                     cosmic_edit.editor.action(&mut font_system.0, Action::Down);
                 }
-                if keys.just_pressed(KeyCode::Back) {
+                if !cosmic_edit.readonly && keys.just_pressed(KeyCode::Back) {
                     // there is ReceivedCharacter event for backspace on wasm
                     #[cfg(target_arch = "wasm32")]
                     cosmic_edit
@@ -297,15 +298,15 @@ pub fn cosmic_edit_bevy_events(
                         .action(&mut font_system.0, Action::Backspace);
                     *is_deleting = true;
                 }
-                if keys.just_released(KeyCode::Back) {
+                if !cosmic_edit.readonly && keys.just_released(KeyCode::Back) {
                     *is_deleting = false;
                 }
-                if keys.just_pressed(KeyCode::Delete) {
+                if !cosmic_edit.readonly && keys.just_pressed(KeyCode::Delete) {
                     cosmic_edit
                         .editor
                         .action(&mut font_system.0, Action::Delete);
                 }
-                if keys.just_pressed(KeyCode::Return) {
+                if !cosmic_edit.readonly && keys.just_pressed(KeyCode::Return) {
                     // to have new line on wasm rather than E
                     cosmic_edit
                         .editor
@@ -319,14 +320,20 @@ pub fn cosmic_edit_bevy_events(
                         .action(&mut font_system.0, Action::Escape);
                 }
                 if command && keys.just_pressed(KeyCode::A) {
+                    let color = cosmic_edit.bg;
+                    cosmic_edit
+                        .editor
+                        .action(&mut font_system.0, Action::BufferStart);
                     cosmic_edit
                         .editor
                         .action(&mut font_system.0, Action::BufferEnd);
-                    cosmic_edit.editor.set_select_opt(Some(Cursor {
-                        line: 0,
-                        index: 0,
-                        affinity: Affinity::Before,
-                    }));
+                    cosmic_edit
+                        .editor
+                        .set_select_opt(Some(Cursor::new_with_color(
+                            0,
+                            0,
+                            bevy_color_to_cosmic(color),
+                        )));
                     // RETURN
                     return;
                 }
@@ -354,7 +361,7 @@ pub fn cosmic_edit_bevy_events(
                             // RETURN
                             return;
                         }
-                        if command && keys.just_pressed(KeyCode::X) {
+                        if !cosmic_edit.readonly && command && keys.just_pressed(KeyCode::X) {
                             if let Some(text) = cosmic_edit.editor.copy_selection() {
                                 clipboard.set_text(text).unwrap();
                                 cosmic_edit.editor.delete_selection();
@@ -362,7 +369,7 @@ pub fn cosmic_edit_bevy_events(
                             // RETURN
                             return;
                         }
-                        if command && keys.just_pressed(KeyCode::V) {
+                        if !cosmic_edit.readonly && command && keys.just_pressed(KeyCode::V) {
                             if let Ok(text) = clipboard.get_text() {
                                 for c in text.chars() {
                                     cosmic_edit
@@ -419,6 +426,10 @@ pub fn cosmic_edit_bevy_events(
                             },
                         );
                     }
+                    // RETURN
+                    return;
+                }
+                if cosmic_edit.readonly {
                     // RETURN
                     return;
                 }
@@ -587,7 +598,13 @@ pub fn spawn_cosmic_edit(
     )
     .scale(cosmic_edit_meta.metrics.scale_factor);
     let buffer = Buffer::new(&mut font_system.0, metrics);
-    let mut editor = Editor::new(buffer);
+    let mut editor = match cosmic_edit_meta.readonly {
+        true => Editor::new_with_cursor(
+            buffer,
+            Cursor::new_with_color(0, 0, bevy_color_to_cosmic(cosmic_edit_meta.bg)),
+        ),
+        false => Editor::new(buffer),
+    };
     if let Some((width, height)) = cosmic_edit_meta.size {
         editor
             .buffer_mut()
@@ -627,6 +644,7 @@ pub fn spawn_cosmic_edit(
         bg: cosmic_edit_meta.bg,
         size: cosmic_edit_meta.size,
         is_ui_node: false,
+        readonly: cosmic_edit_meta.readonly,
     };
     match cosmic_edit_meta.node {
         CosmicNode::Ui(ui_node) => {
@@ -737,7 +755,8 @@ mod tests {
                 display_none: false,
             }),
             size: None,
-            bg: Color::NONE,
+            bg: bevy::prelude::Color::NONE,
+            readonly: false,
         };
         spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     }

@@ -36,7 +36,7 @@ fn setup(
     attrs = attrs.family(cosmic_text::Family::Name("Fira Code"));
     attrs = attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3));
     let cosmic_edit_meta = CosmicEditMeta {
-        text: CosmicText::OneStyle(("😀😀😀 x => y".to_string(), attrs)),
+        text: CosmicText::OneStyle(("😀😀😀 x => y\nRead only widget".to_string(), attrs)),
         text_pos: CosmicTextPos::Center,
         bg: Color::WHITE,
         metrics: CosmicMetrics {
@@ -49,7 +49,7 @@ fn setup(
             display_none: false,
         }),
         size: None,
-        readonly: false,
+        readonly: true,
     };
     let cosmic_edit = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     commands.entity(root).add_child(cosmic_edit);

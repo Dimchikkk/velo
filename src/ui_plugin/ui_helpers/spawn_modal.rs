@@ -219,6 +219,7 @@ pub fn spawn_modal(
                 node: CosmicNode::Ui(CosmicEditUi {
                     display_none: false,
                 }),
+                readonly: false,
             };
             let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
             commands.entity(cosmic_edit).insert(EditableText { id });

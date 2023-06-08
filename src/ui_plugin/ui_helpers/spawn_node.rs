@@ -181,6 +181,7 @@ pub fn spawn_node(
             scale_factor,
         },
         bg: item_meta.bg_color,
+        readonly: false,
     };
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands
