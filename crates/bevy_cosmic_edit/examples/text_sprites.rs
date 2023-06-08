@@ -50,6 +50,7 @@ fn setup(
         }),
         size: Some((primary_window.width() / 2., primary_window.height())),
         bg: Color::WHITE,
+        readonly: false,
     };
     let cosmic_edit_1 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     let cosmic_edit_meta = CosmicEditMeta {
@@ -70,6 +71,7 @@ fn setup(
         }),
         size: Some((primary_window.width() / 2., primary_window.height() / 2.)),
         bg: Color::GRAY.with_a(0.5),
+        readonly: false,
     };
     let _ = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     let cosmic_edit_meta = CosmicEditMeta {
@@ -90,6 +92,7 @@ fn setup(
         }),
         size: Some((primary_window.width() / 2., primary_window.height() / 2.)),
         bg: Color::GRAY.with_a(0.8),
+        readonly: false,
     };
     let _ = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     commands.insert_resource(ActiveEditor {
