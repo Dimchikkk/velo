@@ -8,7 +8,8 @@ use bevy::{
     window::{PrimaryWindow, WindowScaleFactorChanged},
 };
 use cosmic_text::{
-    Action, AttrsList, Buffer, BufferLine, Cursor, Edit, Editor, FontSystem, Metrics, SwashCache,
+    Action, AttrsList, Buffer, BufferLine, Cursor, Edit, Editor, FontSystem, Metrics, Shaping,
+    SwashCache,
 };
 
 pub struct CosmicEditUi {
@@ -613,9 +614,12 @@ pub fn spawn_cosmic_edit(
     editor.buffer_mut().lines.clear();
     match cosmic_edit_meta.text {
         CosmicText::OneStyle((text, attrs)) => {
-            editor
-                .buffer_mut()
-                .set_text(&mut font_system.0, text.as_str(), attrs);
+            editor.buffer_mut().set_text(
+                &mut font_system.0,
+                text.as_str(),
+                attrs,
+                Shaping::Advanced,
+            );
         }
         CosmicText::MultiStyle((lines, attrs)) => {
             for line in lines {
@@ -627,10 +631,11 @@ pub fn spawn_cosmic_edit(
                     let end = line_text.len();
                     attrs_list.add_span(start..end, attrs);
                 }
-                editor
-                    .buffer_mut()
-                    .lines
-                    .push(BufferLine::new(line_text, attrs_list));
+                editor.buffer_mut().lines.push(BufferLine::new(
+                    line_text,
+                    attrs_list,
+                    Shaping::Advanced,
+                ));
             }
         }
     }
