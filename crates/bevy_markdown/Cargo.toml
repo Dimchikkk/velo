@@ -11,21 +11,8 @@ keywords = ["bevy"]
 
 [dependencies]
 markdown = "1.0.0-alpha.9"
-bevy = { version = "0.10.1", default-features = false, features = [
-  "bevy_asset",
-  "bevy_core_pipeline",
-  "bevy_render",
-  "bevy_scene",
-  "bevy_sprite",
-  "bevy_text",
-  "bevy_ui",
-  "bevy_winit",
-  "png",
-  "x11",
-] }
-uuid = { version = "1.3.0", default-features = false, features = ["v4", "js"] }
-serde = { version = "1.0", features = ["derive"] }
 syntect = { version = "5.0.0", default-features = false, features = ["default-fancy"] }
+cosmic-text = { git = "https://github.com/pop-os/cosmic-text", rev = "79275d1" }
 
 [dev-dependencies]
 insta = "1.29.0"

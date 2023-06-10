@@ -1,0 +1,51 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+expression: "generate_markdown_lines(BevyMarkdown {\n        markdown_theme,\n        text: input.clone(),\n        attrs: AttrsOwned::new(Attrs::new()),\n    })"
+---
+Ok(
+    BevyMarkdownLines {
+        lines: [
+            [
+                (
+                    "Hello world",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 0,
+                    },
+                ),
+            ],
+            [
+                (
+                    "hello world",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 2,
+                    },
+                ),
+            ],
+        ],
+        span_metadata: [
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+        ],
+    },
+)

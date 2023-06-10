@@ -6,6 +6,7 @@ use bevy_cosmic_edit::{
     CosmicEditPlugin, CosmicEditSprite, CosmicFont, CosmicFontConfig, CosmicMetrics, CosmicNode,
     CosmicText, CosmicTextPos,
 };
+use cosmic_text::AttrsOwned;
 
 fn setup(
     mut commands: Commands,
@@ -28,7 +29,7 @@ fn setup(
     let font_system = create_cosmic_font_system(cosmic_font_config);
     let font_system_handle = cosmic_fonts.add(CosmicFont(font_system));
     let mut attrs = cosmic_text::Attrs::new();
-    attrs = attrs.family(cosmic_text::Family::Name("Fira Code"));
+    attrs = attrs.family(cosmic_text::Family::Name("Victor Mono"));
     attrs = attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3));
     let scale_factor = primary_window.scale_factor() as f32;
     let metrics = CosmicMetrics {
@@ -37,7 +38,8 @@ fn setup(
         scale_factor: primary_window.scale_factor() as f32,
     };
     let cosmic_edit_meta = CosmicEditMeta {
-        text: CosmicText::OneStyle(("😀😀😀 x => y".to_string(), attrs)),
+        text: CosmicText::OneStyle("😀😀😀 x => y".to_string()),
+        attrs: AttrsOwned::new(attrs),
         text_pos: CosmicTextPos::Center,
         metrics: metrics.clone(),
         font_system_handle: font_system_handle.clone(),
@@ -51,10 +53,12 @@ fn setup(
         size: Some((primary_window.width() / 2., primary_window.height())),
         bg: Color::WHITE,
         readonly: false,
+        bg_image: None,
     };
     let cosmic_edit_1 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     let cosmic_edit_meta = CosmicEditMeta {
-        text: CosmicText::OneStyle(("Widget_2. Click on me".to_string(), attrs)),
+        text: CosmicText::OneStyle("Widget_2. Click on me".to_string()),
+        attrs: AttrsOwned::new(attrs),
         text_pos: CosmicTextPos::Center,
         metrics: metrics.clone(),
         font_system_handle: font_system_handle.clone(),
@@ -72,10 +76,12 @@ fn setup(
         size: Some((primary_window.width() / 2., primary_window.height() / 2.)),
         bg: Color::GRAY.with_a(0.5),
         readonly: false,
+        bg_image: None,
     };
     let _ = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     let cosmic_edit_meta = CosmicEditMeta {
-        text: CosmicText::OneStyle(("Widget_3. Click on me".to_string(), attrs)),
+        text: CosmicText::OneStyle("Widget_3. Click on me".to_string()),
+        attrs: AttrsOwned::new(attrs),
         text_pos: CosmicTextPos::Center,
         metrics: metrics.clone(),
         font_system_handle: font_system_handle.clone(),
@@ -93,6 +99,7 @@ fn setup(
         size: Some((primary_window.width() / 2., primary_window.height() / 2.)),
         bg: Color::GRAY.with_a(0.8),
         readonly: false,
+        bg_image: None,
     };
     let _ = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     commands.insert_resource(ActiveEditor {

@@ -9,31 +9,29 @@ use bevy::{
     window::{PrimaryWindow, WindowScaleFactorChanged},
 };
 use cosmic_text::{
-    Action, AttrsList, Buffer, BufferLine, Cursor, Edit, Editor, FontSystem, Metrics, Shaping,
-    SwashCache,
+    Action, AttrsList, AttrsOwned, Buffer, BufferLine, Cursor, Edit, Editor, FontSystem, Metrics,
+    Shaping, SwashCache,
 };
+use image::{imageops::FilterType, GenericImageView};
 
-pub struct CosmicEditUi {
-    pub display_none: bool,
-}
+#[derive(Clone)]
+pub struct CosmicEditUi;
 
+#[derive(Clone)]
 pub struct CosmicEditSprite {
     pub transform: Transform,
 }
 
+#[derive(Clone)]
 pub enum CosmicNode {
-    Ui(CosmicEditUi),
+    Ui,
     Sprite(CosmicEditSprite),
 }
 
-pub enum CosmicText<'a> {
-    OneStyle((String, cosmic_text::Attrs<'a>)),
-    MultiStyle(
-        (
-            Vec<Vec<(&'a str, cosmic_text::Attrs<'a>)>>,
-            cosmic_text::Attrs<'a>,
-        ),
-    ),
+#[derive(Clone)]
+pub enum CosmicText {
+    OneStyle(String),
+    MultiStyle(Vec<Vec<(String, cosmic_text::AttrsOwned)>>),
 }
 
 #[derive(Clone)]
@@ -44,18 +42,22 @@ pub struct CosmicMetrics {
 }
 
 /// Contains metadata for spawning cosmic edit, including text content, position, size, and style.
-pub struct CosmicEditMeta<'a> {
-    pub text: CosmicText<'a>,
+#[derive(Clone)]
+pub struct CosmicEditMeta {
+    pub text: CosmicText,
     pub text_pos: CosmicTextPos,
+    pub attrs: cosmic_text::AttrsOwned,
     pub metrics: CosmicMetrics,
     pub font_system_handle: Handle<CosmicFont>,
     pub size: Option<(f32, f32)>, // None used for bevy-ui nodes to use parent size
     pub node: CosmicNode,
     pub bg: bevy::prelude::Color,
+    pub bg_image: Option<Handle<Image>>,
     pub readonly: bool,
 }
 
 /// Enum representing the position of the cosmic text.
+#[derive(Clone)]
 pub enum CosmicTextPos {
     Center,
     TopLeft,
@@ -68,10 +70,12 @@ pub struct CosmicEdit {
     pub font_system: Handle<CosmicFont>,
     pub size: Option<(f32, f32)>,
     pub bg: bevy::prelude::Color,
-    font_size: f32,
-    font_line_height: f32,
+    pub bg_image: Option<Handle<Image>>,
+    pub readonly: bool,
+    pub font_size: f32,
+    pub font_line_height: f32,
+    pub attrs: cosmic_text::AttrsOwned,
     is_ui_node: bool,
-    readonly: bool,
 }
 
 #[derive(TypeUuid)]
@@ -110,7 +114,7 @@ pub struct ActiveEditor {
 #[derive(Resource, Default)]
 pub struct CosmicFontConfig {
     pub fonts_dir_path: Option<PathBuf>,
-    pub font_bytes: Option<&'static [u8]>,
+    pub font_bytes: Option<Vec<&'static [u8]>>,
     pub load_system_fonts: bool, // caution: this can be relatively slow
 }
 
@@ -126,7 +130,9 @@ pub fn create_cosmic_font_system(cosmic_font_config: CosmicFontConfig) -> FontSy
         db.load_fonts_dir(dir_path);
     }
     if let Some(custom_font_data) = &cosmic_font_config.font_bytes {
-        db.load_font_data(custom_font_data.to_vec());
+        for elem in custom_font_data {
+            db.load_font_data(elem.to_vec());
+        }
     }
     if cosmic_font_config.load_system_fonts {
         db.load_system_fonts();
@@ -227,7 +233,7 @@ pub fn get_cosmic_text(editor: &Editor) -> String {
     text
 }
 
-pub fn bevy_color_to_cosmic(color: bevy::prelude::Color) -> cosmic_text::Color {
+fn bevy_color_to_cosmic(color: bevy::prelude::Color) -> cosmic_text::Color {
     cosmic_text::Color::rgba(
         (color.r() * 255.) as u8,
         (color.g() * 255.) as u8,
@@ -325,11 +331,15 @@ pub fn cosmic_edit_bevy_events(
                 if command && keys.just_pressed(KeyCode::A) {
                     cosmic_edit
                         .editor
-                        .action(&mut font_system.0, Action::BufferStart);
+                        .action(&mut font_system.0, Action::BufferEnd);
+                    let bg = cosmic_edit.bg;
                     cosmic_edit
                         .editor
-                        .action(&mut font_system.0, Action::BufferEnd);
-                    cosmic_edit.editor.set_select_opt(Some(Cursor::default()));
+                        .set_select_opt(Some(Cursor::new_with_color(
+                            0,
+                            0,
+                            bevy_color_to_cosmic(bg),
+                        )));
                     // RETURN
                     return;
                 }
@@ -492,14 +502,37 @@ fn redraw_buffer_common(
                 .buffer_mut()
                 .set_size(&mut font_system.0, width, height);
             let font_color = cosmic_text::Color::rgb(0, 0, 0);
+
             let mut pixels = vec![0; width as usize * height as usize * 4];
-            let bg = cosmic_edit.bg;
-            for pixel in pixels.chunks_exact_mut(4) {
-                pixel[0] = (bg.r() * 255.) as u8; // Red component
-                pixel[1] = (bg.g() * 255.) as u8; // Green component
-                pixel[2] = (bg.b() * 255.) as u8; // Blue component
-                pixel[3] = (bg.a() * 255.) as u8; // Alpha component
+            if let Some(bg_image) = cosmic_edit.bg_image.clone() {
+                let image = images.get(&bg_image).unwrap();
+
+                let mut dynamic_image = image.clone().try_into_dynamic().unwrap();
+                if image.size().x != width || image.size().y != height {
+                    dynamic_image = dynamic_image.resize_to_fill(
+                        width as u32,
+                        height as u32,
+                        FilterType::Triangle,
+                    );
+                }
+                for (i, (_, _, rgba)) in dynamic_image.pixels().enumerate() {
+                    if let Some(p) = pixels.get_mut(i * 4..(i + 1) * 4) {
+                        p[0] = rgba[0];
+                        p[1] = rgba[1];
+                        p[2] = rgba[2];
+                        p[3] = rgba[3];
+                    }
+                }
+            } else {
+                let bg = cosmic_edit.bg;
+                for pixel in pixels.chunks_exact_mut(4) {
+                    pixel[0] = (bg.r() * 255.) as u8; // Red component
+                    pixel[1] = (bg.g() * 255.) as u8; // Green component
+                    pixel[2] = (bg.b() * 255.) as u8; // Blue component
+                    pixel[3] = (bg.a() * 255.) as u8; // Alpha component
+                }
             }
+
             let (offset_y, offset_x) = match cosmic_edit.text_pos {
                 CosmicTextPos::Center => (
                     get_y_offset(&cosmic_edit.editor),
@@ -527,6 +560,7 @@ fn redraw_buffer_common(
                 },
             );
             cosmic_edit.editor.buffer_mut().set_redraw(false);
+
             if let Some(prev_image) = images.get_mut(img_handle) {
                 if *img_handle == bevy::render::texture::DEFAULT_IMAGE_HANDLE.typed() {
                     let mut prev_image = prev_image.clone();
@@ -540,7 +574,7 @@ fn redraw_buffer_common(
                     let handle_id: HandleId = HandleId::random::<Image>();
                     let new_handle: Handle<Image> = Handle::weak(handle_id);
                     let new_handle = images.set(new_handle, prev_image);
-                    *img_handle = new_handle;
+                    *img_handle = new_handle.clone();
                 } else {
                     prev_image.data.clear();
                     prev_image.data.extend_from_slice(pixels.as_slice());
@@ -596,6 +630,42 @@ fn cosmic_edit_redraw_buffer(
     }
 }
 
+pub fn cosmic_edit_set_text(
+    text: CosmicText,
+    attrs: AttrsOwned,
+    editor: &mut Editor,
+    font_system: &mut FontSystem,
+) {
+    editor.buffer_mut().lines.clear();
+    match text {
+        CosmicText::OneStyle(text) => {
+            editor.buffer_mut().set_text(
+                font_system,
+                text.as_str(),
+                attrs.as_attrs(),
+                Shaping::Advanced,
+            );
+        }
+        CosmicText::MultiStyle(lines) => {
+            for line in lines {
+                let mut line_text = String::new();
+                let mut attrs_list = AttrsList::new(attrs.as_attrs());
+                for (text, attrs) in line.iter() {
+                    let start = line_text.len();
+                    line_text.push_str(text);
+                    let end = line_text.len();
+                    attrs_list.add_span(start..end, attrs.as_attrs().clone());
+                }
+                editor.buffer_mut().lines.push(BufferLine::new(
+                    line_text,
+                    attrs_list,
+                    Shaping::Advanced,
+                ));
+            }
+        }
+    }
+}
+
 /// Spawns a cosmic edit entity with the provided configuration.
 ///
 /// # Returns
@@ -615,47 +685,25 @@ pub fn spawn_cosmic_edit(
     )
     .scale(cosmic_edit_meta.metrics.scale_factor);
     let buffer = Buffer::new(&mut font_system.0, metrics);
-    let mut editor = match cosmic_edit_meta.readonly {
-        true => Editor::new_with_cursor(
-            buffer,
-            Cursor::new_with_color(0, 0, bevy_color_to_cosmic(cosmic_edit_meta.bg)),
-        ),
-        false => Editor::new(buffer),
-    };
+    let mut editor = Editor::new(buffer);
+    if cosmic_edit_meta.readonly {
+        editor.set_cursor(Cursor::new_with_color(
+            0,
+            0,
+            bevy_color_to_cosmic(cosmic_edit_meta.bg),
+        ))
+    }
     if let Some((width, height)) = cosmic_edit_meta.size {
         editor
             .buffer_mut()
             .set_size(&mut font_system.0, width, height);
     }
-    editor.buffer_mut().lines.clear();
-    match cosmic_edit_meta.text {
-        CosmicText::OneStyle((text, attrs)) => {
-            editor.buffer_mut().set_text(
-                &mut font_system.0,
-                text.as_str(),
-                attrs,
-                Shaping::Advanced,
-            );
-        }
-        CosmicText::MultiStyle((lines, attrs)) => {
-            for line in lines {
-                let mut line_text = String::new();
-                let mut attrs_list = AttrsList::new(attrs);
-                for (text, attrs) in line {
-                    let start = line_text.len();
-                    line_text.push_str(text);
-                    let end = line_text.len();
-                    attrs_list.add_span(start..end, attrs);
-                }
-                editor.buffer_mut().lines.push(BufferLine::new(
-                    line_text,
-                    attrs_list,
-                    Shaping::Advanced,
-                ));
-            }
-        }
-    }
-
+    cosmic_edit_set_text(
+        cosmic_edit_meta.text,
+        cosmic_edit_meta.attrs.clone(),
+        &mut editor,
+        &mut font_system.0,
+    );
     let mut cosmic_edit_component = CosmicEdit {
         editor,
         font_system: cosmic_edit_meta.font_system_handle,
@@ -666,20 +714,19 @@ pub fn spawn_cosmic_edit(
         size: cosmic_edit_meta.size,
         is_ui_node: false,
         readonly: cosmic_edit_meta.readonly,
+        attrs: cosmic_edit_meta.attrs.clone(),
+        bg_image: cosmic_edit_meta.bg_image,
     };
     match cosmic_edit_meta.node {
-        CosmicNode::Ui(ui_node) => {
+        CosmicNode::Ui => {
             cosmic_edit_component.is_ui_node = true;
-            let mut style = Style {
+            let style = Style {
                 size: Size {
                     width: Val::Percent(100.),
                     height: Val::Percent(100.),
                 },
                 ..default()
             };
-            if ui_node.display_none {
-                style.display = Display::None;
-            }
             let button_bundle = ButtonBundle {
                 focus_policy: bevy::ui::FocusPolicy::Pass,
                 style,
@@ -749,6 +796,7 @@ fn draw_pixel(
 #[cfg(test)]
 mod tests {
     use bevy::prelude::*;
+    use cosmic_text::{Attrs, AttrsOwned};
 
     use crate::*;
 
@@ -764,7 +812,8 @@ mod tests {
         let font_system = create_cosmic_font_system(cosmic_font_config);
         let font_system_handle = cosmic_fonts.add(CosmicFont(font_system));
         let cosmic_edit_meta = CosmicEditMeta {
-            text: CosmicText::OneStyle(("Blah".to_string(), cosmic_text::Attrs::new())),
+            text: CosmicText::OneStyle("Blah".to_string()),
+            attrs: AttrsOwned::new(Attrs::new()),
             metrics: CosmicMetrics {
                 font_size: 14.,
                 line_height: 18.,
@@ -772,12 +821,11 @@ mod tests {
             },
             text_pos: CosmicTextPos::Center,
             font_system_handle,
-            node: CosmicNode::Ui(CosmicEditUi {
-                display_none: false,
-            }),
+            node: CosmicNode::Ui,
             size: None,
             bg: bevy::prelude::Color::NONE,
             readonly: false,
+            bg_image: None,
         };
         spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     }

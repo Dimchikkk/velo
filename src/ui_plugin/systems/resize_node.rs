@@ -1,11 +1,7 @@
-use super::{
-    ui_helpers::ResizeMarker, BevyMarkdownView, RawText, RedrawArrowEvent, VeloNode,
-    VeloNodeContainer,
-};
+use super::{ui_helpers::ResizeMarker, RawText, RedrawArrowEvent, VeloNode, VeloNodeContainer};
 use crate::{utils::convert_from_val_px, UiState};
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::CosmicEdit;
-use bevy_markdown::BevyMarkdownNode;
 use cosmic_text::Edit;
 
 pub fn resize_entity_start(
@@ -50,29 +46,12 @@ pub fn resize_entity_end(
     state: Res<UiState>,
     mut node_query: Query<
         (&VeloNodeContainer, &mut Style),
-        (
-            With<VeloNodeContainer>,
-            Without<BevyMarkdownNode>,
-            Without<RawText>,
-        ),
+        (With<VeloNodeContainer>, Without<RawText>),
     >,
     mut raw_text_query: Query<
         (&RawText, &mut CosmicEdit),
-        (
-            Without<VeloNodeContainer>,
-            Without<BevyMarkdownNode>,
-            With<RawText>,
-        ),
+        (Without<VeloNodeContainer>, With<RawText>),
     >,
-    mut markdown_text_input_query: Query<
-        (&Parent, &mut Style),
-        (
-            With<BevyMarkdownNode>,
-            Without<VeloNodeContainer>,
-            Without<RawText>,
-        ),
-    >,
-    markdown_view_query: Query<(&BevyMarkdownView, Entity), With<BevyMarkdownView>>,
     mut events: EventWriter<RedrawArrowEvent>,
 ) {
     for event in mouse_motion_events.iter() {
@@ -148,17 +127,6 @@ pub fn resize_entity_end(
                             cosmic_edit.size = Some((width, height));
                             cosmic_edit.editor.buffer_mut().set_redraw(true);
                             break;
-                        }
-                    }
-                    for (node, entity) in markdown_view_query.iter() {
-                        if node.id == id {
-                            for (parent, mut text_style) in &mut markdown_text_input_query {
-                                if parent.get() == entity {
-                                    text_style.max_size.width = button_style.size.width;
-                                    text_style.max_size.height = button_style.size.height;
-                                    break;
-                                }
-                            }
                         }
                     }
                 }
