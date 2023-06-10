@@ -1,7 +1,6 @@
 use base64::{engine::general_purpose, Engine};
 use bevy::prelude::*;
 
-use bevy_cosmic_edit::{get_cosmic_text, CosmicEdit};
 use bevy_pkv::PkvStore;
 use image::*;
 
@@ -141,7 +140,7 @@ pub fn save_tab(
     arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
     request: Res<SaveTabRequest>,
     mut app_state: ResMut<AppState>,
-    text_query: Query<(&RawText, &CosmicEdit), With<RawText>>,
+    text_query: Query<&RawText, With<RawText>>,
 ) {
     #[cfg(not(target_arch = "wasm32"))]
     if let Some(index) = &mut app_state.search_index {
@@ -167,9 +166,8 @@ pub fn save_tab(
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
     for (node, _, bg_color, z_index, parent, test_pos_style) in node_query.iter() {
-        for (editable_text, editor) in text_query.iter() {
+        for editable_text in text_query.iter() {
             if node.id == editable_text.id {
-                let str = get_cosmic_text(&editor.editor);
                 let (style, node_container): (&Style, &Node) =
                     node_container_query.get(parent.get()).unwrap();
                 let left = style.position.left;
@@ -188,7 +186,7 @@ pub fn save_tab(
                     height: Val::Px(node_container.size().y),
                     bg_color,
                     text: JsonNodeText {
-                        text: str.clone(),
+                        text: editable_text.last_text.clone(),
                         pos: style_to_pos((
                             test_pos_style.justify_content,
                             test_pos_style.align_items
@@ -204,7 +202,7 @@ pub fn save_tab(
                             tab_id: request.tab_id.0,
                             node_id: node.id.0,
                         },
-                        str.clone(),
+                        editable_text.last_text.clone(),
                     );
                 }
             }

@@ -1,0 +1,84 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+expression: "generate_markdown_lines(BevyMarkdown {\n        markdown_theme,\n        text: input.clone(),\n        attrs: AttrsOwned::new(Attrs::new()),\n    })"
+---
+Ok(
+    BevyMarkdownLines {
+        lines: [
+            [
+                (
+                    "(link)[",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 0,
+                    },
+                ),
+                (
+                    "https://example.com",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4278848010,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 1,
+                    },
+                ),
+                (
+                    "]",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 2,
+                    },
+                ),
+                (
+                    "hello world",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 3,
+                    },
+                ),
+            ],
+        ],
+        span_metadata: [
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: Some(
+                    "https://example.com",
+                ),
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+        ],
+    },
+)

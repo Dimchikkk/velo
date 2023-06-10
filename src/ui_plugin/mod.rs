@@ -1,11 +1,11 @@
 use async_channel::{Receiver, Sender};
-use bevy::{prelude::*, text::BreakLineOn};
+use bevy::prelude::*;
 
 use serde::{Deserialize, Serialize};
 
 use crate::resources::AppState;
 
-use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos, ArrowType};
+use crate::canvas::arrow::components::{ArrowConnect, ArrowType};
 use crate::canvas::arrow::events::{CreateArrowEvent, RedrawArrowEvent};
 use crate::utils::ReflectableUuid;
 use std::path::PathBuf;
@@ -43,9 +43,9 @@ use tabs::*;
 #[path = "systems/doc_list.rs"]
 mod doc_list;
 use doc_list::*;
-#[path = "systems/clickable_links.rs"]
-mod clickable_links;
-use clickable_links::*;
+// #[path = "systems/clickable_links.rs"]
+// mod clickable_links;
+// use clickable_links::*;
 #[path = "systems/entity_to_edit_changed.rs"]
 mod entity_to_edit_changed;
 use entity_to_edit_changed::*;
@@ -76,7 +76,7 @@ pub struct UiPlugin;
 
 pub struct AddRectEvent {
     pub node: JsonNode,
-    pub image: Option<UiImage>,
+    pub image: Option<Handle<Image>>,
 }
 
 pub struct SaveStoreEvent {
@@ -149,17 +149,6 @@ impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiState>();
         app.init_resource::<AppState>();
-
-        app.register_type::<VeloNode>();
-        app.register_type::<EditableText>();
-        app.register_type::<ArrowConnect>();
-        app.register_type::<ResizeMarker>();
-        app.register_type::<ReflectableUuid>();
-        app.register_type_data::<ReflectableUuid, ReflectSerialize>();
-        app.register_type_data::<ReflectableUuid, ReflectDeserialize>();
-        app.register_type::<ArrowConnectPos>();
-
-        app.register_type::<BreakLineOn>();
 
         app.add_event::<AddRectEvent>();
         app.add_event::<CreateArrowEvent>();
@@ -244,7 +233,8 @@ impl Plugin for UiPlugin {
             canvas_click,
             active_editor_changed,
         ));
-        app.add_systems((set_focused_entity, clickable_links).chain());
+        // app.add_systems((set_focused_entity, clickable_links).chain());
+        app.add_system(set_focused_entity);
 
         app.add_system(
             entity_to_edit_changed

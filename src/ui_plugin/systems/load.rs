@@ -147,7 +147,7 @@ pub fn load_tab(
             let nodes = json["nodes"].as_array().unwrap();
             for node in nodes.iter() {
                 let json_node: JsonNode = serde_json::from_value(node.clone()).unwrap();
-                let image: Option<UiImage> = match images.get(&json_node.id.to_string()) {
+                let image: Option<Handle<Image>> = match images.get(&json_node.id.to_string()) {
                     Some(image) => {
                         let image_bytes = general_purpose::STANDARD
                             .decode(image.as_str().unwrap().as_bytes())
@@ -166,7 +166,7 @@ pub fn load_tab(
                             TextureFormat::Rgba8UnormSrgb,
                         );
                         let image_handle = res_images.add(image);
-                        Some(image_handle.into())
+                        Some(image_handle)
                     }
                     None => None,
                 };
@@ -182,7 +182,7 @@ pub fn load_tab(
                         size: (json_node.width, json_node.height),
                         node_type: json_node.node_type,
                         id: ReflectableUuid(json_node.id),
-                        image: image.clone(),
+                        image: image,
                         text: json_node.text.text.clone(),
                         bg_color: json_node.bg_color,
                         position: (json_node.left, json_node.bottom),
