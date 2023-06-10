@@ -65,8 +65,14 @@ pub fn init_layout(
     theme: Res<Theme>,
 ) {
     // font setup
-    let font_bytes = include_bytes!("../../../../assets/fonts/SourceCodePro-Regular.ttf");
-    let font = Font::try_from_bytes(font_bytes.to_vec()).unwrap();
+    let font_bytes_regular = include_bytes!("../../../../assets/fonts/VictorMono-Regular.ttf");
+    let font_bytes_bold = include_bytes!("../../../../assets/fonts/VictorMono-Bold.ttf");
+    let font_bytes_italic = include_bytes!("../../../../assets/fonts/VictorMono-Italic.ttf");
+    let font_bytes_bold_italic =
+        include_bytes!("../../../../assets/fonts/VictorMono-BoldItalic.ttf");
+    let font_bytes_medium = include_bytes!("../../../../assets/fonts/VictorMono-Medium.ttf");
+    let font_bytes_semibold = include_bytes!("../../../../assets/fonts/VictorMono-SemiBold.ttf");
+    let font = Font::try_from_bytes(font_bytes_regular.to_vec()).unwrap();
     let text_style = TextStyle {
         font: TextStyle::default().font,
         font_size: 14.0,
@@ -75,8 +81,15 @@ pub fn init_layout(
     fonts.set_untracked(text_style.font, font);
     let cosmic_font_config = CosmicFontConfig {
         fonts_dir_path: None,
-        load_system_fonts: false,
-        font_bytes: Some(font_bytes),
+        load_system_fonts: true,
+        font_bytes: Some(vec![
+            font_bytes_regular,
+            font_bytes_italic,
+            font_bytes_bold,
+            font_bytes_bold_italic,
+            font_bytes_medium,
+            font_bytes_semibold,
+        ]),
     };
     let font_system = create_cosmic_font_system(cosmic_font_config);
     let cosmic_font_handle = cosmic_fonts.add(CosmicFont(font_system));

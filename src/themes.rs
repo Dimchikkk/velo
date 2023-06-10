@@ -20,6 +20,8 @@ pub struct Theme {
     pub doc_list_bg: Color,
     pub font: Color,
     pub font_name: String,
+    pub font_size: f32,
+    pub line_height: f32,
     pub front_back_btn_bg: Color,
     pub inline_code: Color,
     pub left_panel_bg: Color,
@@ -63,7 +65,7 @@ pub fn velo_light() -> Theme {
         del_button: Color::BLACK,
         doc_list_bg: Color::rgb(158., 158., 158.),
         font: Color::rgb(0.0, 0.0, 0.0),
-        font_name: "Source Code Pro".to_string(),
+        font_name: "Victor Mono".to_string(),
         front_back_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
         inline_code: Color::GRAY,
         left_panel_bg: Color::rgb(224.0 / 255.0, 224.0 / 255.0, 224.0 / 255.0),
@@ -87,11 +89,15 @@ pub fn velo_light() -> Theme {
         tab_bg: Color::rgb(0.9, 0.9, 0.9),
         text_pos_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
         tooltip_bg: Color::rgb(1., 1., 1.),
+        font_size: 14.,
+        line_height: 18.,
     }
 }
 
 pub fn velo_dark() -> Theme {
     Theme {
+        font_size: 14.,
+        line_height: 18.,
         add_tab_bg: Color::rgb(0.2, 0.2, 0.2),
         arrow_btn_bg: Color::rgb(0.2, 0.2, 0.2),
         arrow_connector: Color::rgb(0.8, 0.8, 0.8),

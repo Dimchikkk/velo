@@ -1,5 +1,6 @@
 use crate::{ui_plugin::NodeType, utils::ReflectableUuid};
 use bevy::prelude::*;
+use bevy_markdown::TextSpanMetadata;
 
 use crate::TextPos;
 
@@ -114,14 +115,12 @@ pub struct LeftPanelControls;
 #[derive(Component)]
 pub struct LeftPanelExplorer;
 
-#[derive(Component, Default, Reflect, Debug)]
-#[reflect(Component)]
+#[derive(Component, Default, Debug)]
 pub struct VeloNodeContainer {
     pub id: ReflectableUuid,
 }
 
-#[derive(Component, Default, Reflect, Debug)]
-#[reflect(Component)]
+#[derive(Component, Default, Debug)]
 pub struct VeloNode {
     pub id: ReflectableUuid,
     pub node_type: NodeType,
@@ -146,20 +145,19 @@ pub struct EditableText {
     pub id: ReflectableUuid,
 }
 
-#[derive(Component, Default, Reflect)]
-#[reflect(Component)]
+#[derive(Component, Default)]
 pub struct RawText {
     pub id: ReflectableUuid,
+    pub last_text: String,
 }
 
-#[derive(Component, Default, Reflect)]
-#[reflect(Component)]
+#[derive(Component, Default)]
 pub struct BevyMarkdownView {
     pub id: ReflectableUuid,
+    pub span_metadata: Vec<TextSpanMetadata>,
 }
 
-#[derive(Component, Copy, Clone, Debug, Reflect, Default)]
-#[reflect(Component)]
+#[derive(Component, Copy, Clone, Debug, Default)]
 pub enum ResizeMarker {
     #[default]
     TopLeft,

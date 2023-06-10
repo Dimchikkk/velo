@@ -50,7 +50,7 @@ bevy_pkv = { git = "https://github.com/johanhelsing/bevy_pkv.git", default-featu
 ehttp = "0.1.0"
 async-channel = "1.8"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
-cosmic-text = { git = "https://github.com/pop-os/cosmic-text", rev = "a93ec8a" }
+cosmic-text = { git = "https://github.com/pop-os/cosmic-text", rev = "79275d1" }
 bevy_markdown = { path = "crates/bevy_markdown" }
 bevy_cosmic_edit = { path = "crates/bevy_cosmic_edit" }
 

@@ -63,12 +63,11 @@ pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
 
 fn create_rectangle_btn(
     bg_color: Color,
-    image: Option<UiImage>,
     z_index: i32,
     text_pos: TextPos,
 ) -> ButtonBundle {
     let (justify_content, align_items) = pos_to_style(text_pos);
-    let mut button = ButtonBundle {
+    let button = ButtonBundle {
         background_color: bg_color.into(),
         z_index: ZIndex::Local(z_index),
         style: Style {
@@ -80,9 +79,6 @@ fn create_rectangle_btn(
         },
         ..default()
     };
-    if let Some(image) = image {
-        button.image = image;
-    }
     button
 }
 

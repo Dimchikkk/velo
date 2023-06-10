@@ -1,12 +1,14 @@
 use bevy::prelude::*;
-use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEdit};
-use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown, BevyMarkdownFonts, BevyMarkdownTheme};
-use cosmic_text::Edit;
+use bevy_cosmic_edit::{
+    cosmic_edit_set_text, get_cosmic_text, ActiveEditor, CosmicEdit, CosmicFont, CosmicText,
+};
+use bevy_markdown::{generate_markdown_lines, BevyMarkdown, BevyMarkdownTheme};
+use cosmic_text::{Cursor, Edit};
 
 use crate::{
     resources::{AppState, SaveDocRequest},
     themes::Theme,
-    utils::ReflectableUuid,
+    utils::{bevy_color_to_cosmic, ReflectableUuid},
 };
 use bevy_ui_borders::Outline;
 
@@ -15,45 +17,148 @@ use super::{BevyMarkdownView, NodeType, RawText, UiState, VeloNode};
 pub fn entity_to_edit_changed(
     ui_state: Res<UiState>,
     app_state: Res<AppState>,
+    theme: Res<Theme>,
     mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
     mut velo_node_query: Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
-    mut raw_text_node_query: Query<
-        (
-            &mut Style,
-            &RawText,
-            &Parent,
-            Entity,
-            &mut CosmicEdit,
-            &Node,
-        ),
-        With<RawText>,
-    >,
-    mut markdown_text_node_query: Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
+    mut raw_text_node_query: Query<(Entity, &mut RawText, &mut CosmicEdit), With<RawText>>,
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    theme: Res<Theme>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
 ) {
     if ui_state.is_changed() && ui_state.entity_to_edit != *last_entity_to_edit {
         match ui_state.entity_to_edit {
             Some(entity_to_edit) => {
-                handle_entity_selection(
-                    entity_to_edit,
-                    &mut velo_node_query,
-                    &mut raw_text_node_query,
-                    &mut markdown_text_node_query,
-                    &mut commands,
-                    &asset_server,
-                    &theme,
-                );
+                // Change border for selected node
+                for (mut outline, node, _) in velo_node_query.iter_mut() {
+                    if node.id == entity_to_edit {
+                        outline.color = theme.selected_node_border;
+                        outline.thickness = UiRect::all(Val::Px(2.));
+                    } else {
+                        match node.node_type {
+                            NodeType::Rect => {
+                                outline.color = theme.node_border;
+                            }
+                            NodeType::Circle => {
+                                outline.color = theme.node_border.with_a(0.);
+                            }
+                        }
+
+                        outline.thickness = UiRect::all(Val::Px(1.));
+                    }
+                }
+
+                for (entity, mut raw_text, mut cosmic_edit) in raw_text_node_query.iter_mut() {
+                    // cosmic-edit editing mode
+                    if raw_text.id == entity_to_edit {
+                        cosmic_edit.readonly = false;
+                        cosmic_edit.editor.set_cursor(Cursor::default());
+                        let text = raw_text.last_text.clone();
+                        let font = cosmic_fonts
+                            .get_mut(&cosmic_edit.font_system.clone())
+                            .unwrap();
+                        cosmic_edit_set_text(
+                            CosmicText::OneStyle(text),
+                            cosmic_edit.attrs.clone(),
+                            &mut cosmic_edit.editor,
+                            &mut font.0,
+                        );
+                        commands.insert_resource(ActiveEditor {
+                            entity: Some(entity),
+                        });
+                        cosmic_edit.editor.buffer_mut().set_redraw(true);
+                    }
+                    // cosmic-edit readonly mode
+                    if Some(raw_text.id) == *last_entity_to_edit {
+                        cosmic_edit.readonly = true;
+                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                            0,
+                            0,
+                            bevy_color_to_cosmic(theme.node_bg),
+                        ));
+                        let text = get_cosmic_text(&cosmic_edit.editor);
+                        raw_text.last_text = text.clone();
+                        let markdown_theme = BevyMarkdownTheme {
+                            code_theme: theme.code_theme.clone(),
+                            code_default_lang: theme.code_default_lang.clone(),
+                            link: bevy_color_to_cosmic(theme.link),
+                            inline_code: bevy_color_to_cosmic(theme.inline_code),
+                        };
+                        let markdown_lines = generate_markdown_lines(BevyMarkdown {
+                            text,
+                            markdown_theme,
+                            attrs: cosmic_edit.attrs.clone(),
+                        })
+                        .expect("should handle markdown convertion");
+                        let font = cosmic_fonts
+                            .get_mut(&cosmic_edit.font_system.clone())
+                            .unwrap();
+                        cosmic_edit_set_text(
+                            CosmicText::MultiStyle(markdown_lines.lines),
+                            cosmic_edit.attrs.clone(),
+                            &mut cosmic_edit.editor,
+                            &mut font.0,
+                        );
+                        commands.entity(entity).insert(BevyMarkdownView {
+                            id: raw_text.id,
+                            span_metadata: markdown_lines.span_metadata,
+                        });
+                        cosmic_edit.editor.buffer_mut().set_redraw(true);
+                    }
+                }
             }
             None => {
-                handle_no_entity_selection(
-                    &mut velo_node_query,
-                    &mut raw_text_node_query,
-                    &mut commands,
-                    &asset_server,
-                    &theme,
-                );
+                // Reset border colors and thickness for all nodes
+                for (mut outline, node, _) in velo_node_query.iter_mut() {
+                    match node.node_type {
+                        NodeType::Rect => {
+                            outline.color = theme.node_border;
+                        }
+                        NodeType::Circle => {
+                            outline.color = theme.node_border.with_a(0.);
+                        }
+                    }
+                    outline.thickness = UiRect::all(Val::Px(1.));
+                }
+                for (entity, mut raw_text, mut cosmic_edit) in raw_text_node_query.iter_mut() {
+                    // cosmic-edit readonly mode
+                    if Some(raw_text.id) == *last_entity_to_edit {
+                        cosmic_edit.readonly = true;
+                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                            0,
+                            0,
+                            bevy_color_to_cosmic(theme.node_bg),
+                        ));
+                        let text = get_cosmic_text(&cosmic_edit.editor);
+                        raw_text.last_text = text.clone();
+                        let markdown_theme = BevyMarkdownTheme {
+                            code_theme: theme.code_theme.clone(),
+                            code_default_lang: theme.code_default_lang.clone(),
+                            link: bevy_color_to_cosmic(theme.link),
+                            inline_code: bevy_color_to_cosmic(theme.inline_code),
+                        };
+                        let markdown_lines = generate_markdown_lines(BevyMarkdown {
+                            text,
+                            markdown_theme,
+                            attrs: cosmic_edit.attrs.clone(),
+                        })
+                        .expect("should handle markdown convertion");
+                        let font = cosmic_fonts
+                            .get_mut(&cosmic_edit.font_system.clone())
+                            .unwrap();
+                        cosmic_edit.attrs = cosmic_edit.attrs.clone();
+                        cosmic_edit_set_text(
+                            CosmicText::MultiStyle(markdown_lines.lines),
+                            cosmic_edit.attrs.clone(),
+                            &mut cosmic_edit.editor,
+                            &mut font.0,
+                        );
+                        commands.entity(entity).insert(BevyMarkdownView {
+                            id: raw_text.id,
+                            span_metadata: markdown_lines.span_metadata,
+                        });
+                        cosmic_edit.editor.buffer_mut().set_redraw(true);
+                    }
+                }
+
                 if let Some(current_document) = app_state.current_document {
                     commands.insert_resource(SaveDocRequest {
                         doc_id: current_document,
@@ -63,168 +168,5 @@ pub fn entity_to_edit_changed(
             }
         }
         *last_entity_to_edit = ui_state.entity_to_edit;
-    }
-}
-
-fn handle_entity_selection(
-    entity_to_edit: ReflectableUuid,
-    velo_node_query: &mut Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
-    raw_text_node_query: &mut Query<
-        (
-            &mut Style,
-            &RawText,
-            &Parent,
-            Entity,
-            &mut CosmicEdit,
-            &Node,
-        ),
-        With<RawText>,
-    >,
-    markdown_text_node_query: &mut Query<(Entity, &BevyMarkdownView), With<BevyMarkdownView>>,
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    theme: &Res<Theme>,
-) {
-    // Change border for selected node
-    for (mut outline, node, _) in velo_node_query.iter_mut() {
-        if node.id == entity_to_edit {
-            outline.color = theme.selected_node_border;
-            outline.thickness = UiRect::all(Val::Px(2.));
-        } else {
-            match node.node_type {
-                NodeType::Rect => {
-                    outline.color = theme.node_border;
-                }
-                NodeType::Circle => {
-                    outline.color = theme.node_border.with_a(0.);
-                }
-            }
-
-            outline.thickness = UiRect::all(Val::Px(1.));
-        }
-    }
-
-    // Hide raw text and have markdown view for all nodes (except selected)
-    for (mut style, raw_text, parent, entity, mut cosmic_editor, node) in
-        raw_text_node_query.iter_mut()
-    {
-        if raw_text.id == entity_to_edit {
-            commands.insert_resource(ActiveEditor {
-                entity: Some(entity),
-            });
-            cosmic_editor.editor.buffer_mut().set_redraw(true);
-            style.display = Display::Flex;
-            continue;
-        }
-        if style.display == Display::None {
-            continue;
-        }
-        style.display = Display::None;
-        let str = get_cosmic_text(&cosmic_editor.editor);
-        let fonts = BevyMarkdownFonts {
-            regular_font: TextStyle::default().font,
-            code_font: TextStyle::default().font,
-            bold_font: asset_server.load("fonts/SourceCodePro-Bold.ttf"),
-            italic_font: asset_server.load("fonts/SourceCodePro-Italic.ttf"),
-            semi_bold_italic_font: asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-            extra_bold_font: asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
-        };
-        let theme = BevyMarkdownTheme {
-            code_theme: theme.code_theme.clone(),
-            code_default_lang: theme.code_default_lang.clone(),
-            font: theme.font,
-            link: theme.link,
-            inline_code: theme.inline_code,
-        };
-        let bevy_markdown = BevyMarkdown {
-            text: str,
-            fonts,
-            theme,
-            size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
-        };
-        let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
-            .expect("should handle markdown conversion");
-        commands
-            .get_entity(markdown_text)
-            .unwrap()
-            .insert(BevyMarkdownView { id: raw_text.id });
-        let (_, _, entity) = velo_node_query.get(parent.get()).unwrap();
-        commands.entity(entity).add_child(markdown_text);
-    }
-
-    // Remove markdown view for selected node
-    for (entity, node) in markdown_text_node_query.iter_mut() {
-        if node.id == entity_to_edit {
-            commands.entity(entity).despawn_recursive();
-            break;
-        }
-    }
-}
-
-fn handle_no_entity_selection(
-    velo_node_query: &mut Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
-    raw_text_node_query: &mut Query<
-        (
-            &mut Style,
-            &RawText,
-            &Parent,
-            Entity,
-            &mut CosmicEdit,
-            &Node,
-        ),
-        With<RawText>,
-    >,
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    theme: &Res<Theme>,
-) {
-    // Reset border colors and thickness for all nodes
-    for (mut outline, node, _) in velo_node_query.iter_mut() {
-        match node.node_type {
-            NodeType::Rect => {
-                outline.color = theme.node_border;
-            }
-            NodeType::Circle => {
-                outline.color = theme.node_border.with_a(0.);
-            }
-        }
-        outline.thickness = UiRect::all(Val::Px(1.));
-    }
-
-    // Hide raw text and have markdown view for all nodes
-    for (mut style, raw_text, parent, _, editor, node) in raw_text_node_query.iter_mut() {
-        if style.display == Display::None {
-            continue;
-        }
-        style.display = Display::None;
-        let str = get_cosmic_text(&editor.editor);
-        let fonts = BevyMarkdownFonts {
-            regular_font: TextStyle::default().font,
-            code_font: TextStyle::default().font,
-            bold_font: asset_server.load("fonts/SourceCodePro-Bold.ttf"),
-            italic_font: asset_server.load("fonts/SourceCodePro-Italic.ttf"),
-            semi_bold_italic_font: asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-            extra_bold_font: asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
-        };
-        let theme = BevyMarkdownTheme {
-            code_theme: theme.code_theme.clone(),
-            code_default_lang: theme.code_default_lang.clone(),
-            font: theme.font,
-            link: theme.link,
-            inline_code: theme.inline_code,
-        };
-        let bevy_markdown = BevyMarkdown {
-            text: str,
-            fonts,
-            theme,
-            size: Some((Val::Px(node.size().x), Val::Px(node.size().y))),
-        };
-        let markdown_text = spawn_bevy_markdown(commands, bevy_markdown).unwrap();
-        commands
-            .get_entity(markdown_text)
-            .unwrap()
-            .insert(BevyMarkdownView { id: raw_text.id });
-        let (_, _, entity) = velo_node_query.get(parent.get()).unwrap();
-        commands.entity(entity).add_child(markdown_text);
     }
 }
