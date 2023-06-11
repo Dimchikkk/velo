@@ -575,7 +575,7 @@ fn redraw_buffer_common(
                     let handle_id: HandleId = HandleId::random::<Image>();
                     let new_handle: Handle<Image> = Handle::weak(handle_id);
                     let new_handle = images.set(new_handle, prev_image);
-                    *img_handle = new_handle.clone();
+                    *img_handle = new_handle;
                 } else {
                     prev_image.data.clear();
                     prev_image.data.extend_from_slice(pixels.as_slice());
@@ -655,7 +655,7 @@ pub fn cosmic_edit_set_text(
                     let start = line_text.len();
                     line_text.push_str(text);
                     let end = line_text.len();
-                    attrs_list.add_span(start..end, attrs.as_attrs().clone());
+                    attrs_list.add_span(start..end, attrs.as_attrs());
                 }
                 editor.buffer_mut().lines.push(BufferLine::new(
                     line_text,
