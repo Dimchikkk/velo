@@ -491,7 +491,7 @@ pub fn generate_markdown_lines(
                         lines
                             .last_mut()
                             .unwrap()
-                            .push((temp, AttrsOwned::new(attrs.clone())));
+                            .push((temp, AttrsOwned::new(attrs)));
                     }
                 }
                 Ok(BevyMarkdownLines {
