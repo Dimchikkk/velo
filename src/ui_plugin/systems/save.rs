@@ -1,6 +1,7 @@
 use base64::{engine::general_purpose, Engine};
 use bevy::prelude::*;
 
+use bevy_cosmic_edit::CosmicEdit;
 use bevy_pkv::PkvStore;
 use image::*;
 
@@ -140,7 +141,7 @@ pub fn save_tab(
     arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
     request: Res<SaveTabRequest>,
     mut app_state: ResMut<AppState>,
-    text_query: Query<&RawText, With<RawText>>,
+    text_query: Query<(&RawText, &CosmicEdit), With<RawText>>,
 ) {
     #[cfg(not(target_arch = "wasm32"))]
     if let Some(index) = &mut app_state.search_index {
@@ -152,22 +153,23 @@ pub fn save_tab(
         "arrows": [],
     });
     let json_images = json["images"].as_object_mut().unwrap();
-    for (rect, image, _, _, _, _) in node_query.iter() {
-        if let Some(image) = images.get(&image.texture) {
+    for (raw_text, cosmic_edit) in text_query.iter() {
+        if let Some(handle) = cosmic_edit.bg_image.clone() {
+            let image = images.get(&handle).unwrap();
             if let Ok(img) = image.clone().try_into_dynamic() {
                 let mut image_data: Vec<u8> = Vec::new();
                 img.write_to(&mut Cursor::new(&mut image_data), ImageOutputFormat::Png)
                     .unwrap();
                 let res_base64 = general_purpose::STANDARD.encode(image_data);
-                json_images.insert(rect.id.0.to_string(), json!(res_base64));
+                json_images.insert(raw_text.id.0.to_string(), json!(res_base64));
             }
         }
     }
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
     for (node, _, bg_color, z_index, parent, test_pos_style) in node_query.iter() {
-        for editable_text in text_query.iter() {
-            if node.id == editable_text.id {
+        for (raw_text, _) in text_query.iter() {
+            if node.id == raw_text.id {
                 let (style, node_container): (&Style, &Node) =
                     node_container_query.get(parent.get()).unwrap();
                 let left = style.position.left;
@@ -186,7 +188,7 @@ pub fn save_tab(
                     height: Val::Px(node_container.size().y),
                     bg_color,
                     text: JsonNodeText {
-                        text: editable_text.last_text.clone(),
+                        text: raw_text.last_text.clone(),
                         pos: style_to_pos((
                             test_pos_style.justify_content,
                             test_pos_style.align_items
@@ -202,7 +204,7 @@ pub fn save_tab(
                             tab_id: request.tab_id.0,
                             node_id: node.id.0,
                         },
-                        editable_text.last_text.clone(),
+                        raw_text.last_text.clone(),
                     );
                 }
             }
