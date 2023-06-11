@@ -40,13 +40,15 @@ pub fn clickable_links(
                                 let end = (x_start + glyph.x + glyph.w) / scale_factor;
                                 if pos.0 > start && pos.0 < end {
                                     let idx = glyph.metadata;
-                                    let text_span =
-                                        bevy_markdown_view.span_metadata.get(idx).unwrap();
-                                    if let Some(link) = text_span.link.clone() {
-                                        #[cfg(not(target_arch = "wasm32"))]
-                                        open::that(link.clone()).unwrap();
-                                        #[cfg(target_arch = "wasm32")]
-                                        open_url_in_new_tab(link.clone().as_str()).unwrap();
+                                    if let Some(text_span) =
+                                        bevy_markdown_view.span_metadata.get(idx)
+                                    {
+                                        if let Some(link) = text_span.link.clone() {
+                                            #[cfg(not(target_arch = "wasm32"))]
+                                            open::that(link.clone()).unwrap();
+                                            #[cfg(target_arch = "wasm32")]
+                                            open_url_in_new_tab(link.clone().as_str()).unwrap();
+                                        }
                                     }
                                 }
                             }
