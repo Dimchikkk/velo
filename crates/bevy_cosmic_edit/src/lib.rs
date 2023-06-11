@@ -333,14 +333,7 @@ pub fn cosmic_edit_bevy_events(
                     cosmic_edit
                         .editor
                         .action(&mut font_system.0, Action::BufferEnd);
-                    let bg = cosmic_edit.bg;
-                    cosmic_edit
-                        .editor
-                        .set_select_opt(Some(Cursor::new_with_color(
-                            0,
-                            0,
-                            bevy_color_to_cosmic(bg),
-                        )));
+                    cosmic_edit.editor.set_select_opt(Some(Cursor::default()));
                     // RETURN
                     return;
                 }
