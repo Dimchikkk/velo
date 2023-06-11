@@ -816,6 +816,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_smud"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5381becd3b32f13fa94c60fc44270a289bef56c9448df6a1e802c05fbfc9461c"
+dependencies = [
+ "bevy",
+ "bitflags",
+ "bytemuck",
+ "copyless",
+]
+
+[[package]]
 name = "bevy_sprite"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4099,6 +4111,7 @@ dependencies = [
  "bevy_markdown",
  "bevy_pkv",
  "bevy_prototype_lyon",
+ "bevy_smud",
  "bevy_ui_borders",
  "console_error_panic_hook",
  "cosmic-text",
