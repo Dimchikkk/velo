@@ -51,7 +51,7 @@ pub fn velo_light() -> Theme {
     Theme {
         add_tab_bg: Color::rgb(1., 193.0 / 255.0, 7.0 / 255.0),
         arrow_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
-        arrow_connector: Color::BLUE.with_a(0.5),
+        arrow_connector: Color::BLUE.with_a(0.8),
         arrow: Color::rgb(63.0 / 255.0, 81.0 / 255.0, 181.0 / 255.0),
         bottom_panel_bg: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0),
         btn_border: Color::rgb(0.5, 0.5, 0.5),

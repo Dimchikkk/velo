@@ -128,14 +128,7 @@ pub fn save_tab(
     images: Res<Assets<Image>>,
     node_container_query: Query<(&Style, &Node), With<VeloNodeContainer>>,
     node_query: Query<
-        (
-            &VeloNode,
-            &UiImage,
-            &BackgroundColor,
-            &ZIndex,
-            &Parent,
-            &Style,
-        ),
+        (&VeloNode, &UiImage, &ZIndex, &Parent, &Style),
         (With<VeloNode>, Without<VeloNodeContainer>),
     >,
     arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
@@ -167,14 +160,14 @@ pub fn save_tab(
     }
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
-    for (node, _, bg_color, z_index, parent, test_pos_style) in node_query.iter() {
-        for (raw_text, _) in text_query.iter() {
+    for (node, _, z_index, parent, test_pos_style) in node_query.iter() {
+        for (raw_text, cosmic_text) in text_query.iter() {
             if node.id == raw_text.id {
                 let (style, node_container): (&Style, &Node) =
                     node_container_query.get(parent.get()).unwrap();
                 let left = style.position.left;
                 let bottom = style.position.bottom;
-                let bg_color = bg_color.0;
+                let bg_color = cosmic_text.bg;
                 let z_index = match *z_index {
                     ZIndex::Local(v) => v,
                     _ => -1,
