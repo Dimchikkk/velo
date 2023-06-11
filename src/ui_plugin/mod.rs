@@ -43,9 +43,9 @@ use tabs::*;
 #[path = "systems/doc_list.rs"]
 mod doc_list;
 use doc_list::*;
-// #[path = "systems/clickable_links.rs"]
-// mod clickable_links;
-// use clickable_links::*;
+#[path = "systems/clickable_links.rs"]
+mod clickable_links;
+use clickable_links::*;
 #[path = "systems/entity_to_edit_changed.rs"]
 mod entity_to_edit_changed;
 use entity_to_edit_changed::*;
@@ -233,8 +233,7 @@ impl Plugin for UiPlugin {
             canvas_click,
             active_editor_changed,
         ));
-        // app.add_systems((set_focused_entity, clickable_links).chain());
-        app.add_system(set_focused_entity);
+        app.add_systems((set_focused_entity, clickable_links).chain());
 
         app.add_system(
             entity_to_edit_changed

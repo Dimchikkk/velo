@@ -61,11 +61,7 @@ pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
     }
 }
 
-fn create_rectangle_btn(
-    bg_color: Color,
-    z_index: i32,
-    text_pos: TextPos,
-) -> ButtonBundle {
+fn create_rectangle_btn(bg_color: Color, z_index: i32, text_pos: TextPos) -> ButtonBundle {
     let (justify_content, align_items) = pos_to_style(text_pos);
     let button = ButtonBundle {
         background_color: bg_color.into(),
