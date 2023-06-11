@@ -137,7 +137,6 @@ pub fn change_color_pallete(
         (&Interaction, &ChangeColor),
         (Changed<Interaction>, With<ChangeColor>, Without<VeloNode>),
     >,
-    mut nodes: Query<(&mut BackgroundColor, &VeloNode), With<VeloNode>>,
     mut cosmic_nodes: Query<(&mut CosmicEdit, &RawText), With<RawText>>,
     state: Res<UiState>,
 ) {
@@ -146,11 +145,6 @@ pub fn change_color_pallete(
             Interaction::Clicked => {
                 let color = change_color.color;
                 if let Some(entity_to_edit) = state.entity_to_edit {
-                    for (mut bg_color, node) in nodes.iter_mut() {
-                        if node.id == entity_to_edit {
-                            bg_color.0 = color;
-                        }
-                    }
                     for (mut cosmic_edit, node) in cosmic_nodes.iter_mut() {
                         if node.id == entity_to_edit {
                             cosmic_edit.bg = color;
