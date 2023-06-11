@@ -3,7 +3,9 @@ use bevy_cosmic_edit::CosmicFont;
 
 use crate::{resources::FontSystemState, themes::Theme, utils::ReflectableUuid};
 
-use super::{spawn_node, AddRectEvent, MainPanel, NodeMeta, UiState};
+use super::{
+    spawn_node, ui_helpers::spawn_sprite_node, AddRectEvent, MainPanel, NodeMeta, UiState,
+};
 
 pub fn create_new_node(
     mut commands: Commands,
@@ -15,12 +17,16 @@ pub fn create_new_node(
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
     theme: Res<Theme>,
+    mut z_index_local: Local<i32>,
+    mut shaders: ResMut<Assets<Shader>>,
 ) {
     let window = windows.single_mut();
     for event in events.iter() {
+        *z_index_local += 1;
         *ui_state = UiState::default();
         ui_state.entity_to_edit = Some(ReflectableUuid(event.node.id));
-        let entity = spawn_node(
+        let entity = spawn_sprite_node(
+            &mut shaders,
             &mut commands,
             &theme,
             &asset_server,
@@ -36,10 +42,10 @@ pub fn create_new_node(
                 bg_color: event.node.bg_color,
                 position: (event.node.left, event.node.bottom),
                 text_pos: event.node.text.pos.clone(),
-                z_index: event.node.z_index,
+                z_index: *z_index_local as i32,
                 is_active: true,
             },
         );
-        commands.entity(main_panel_query.single()).add_child(entity);
+        // commands.entity(main_panel_query.single()).add_child(entity);
     }
 }
