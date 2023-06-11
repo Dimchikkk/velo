@@ -3,8 +3,8 @@ use std::path::Path;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{
     create_cosmic_font_system, get_cosmic_text, spawn_cosmic_edit, ActiveEditor, CosmicEdit,
-    CosmicEditMeta, CosmicEditPlugin, CosmicEditUi, CosmicFont, CosmicFontConfig, CosmicMetrics,
-    CosmicNode, CosmicText, CosmicTextPos,
+    CosmicEditMeta, CosmicEditPlugin, CosmicFont, CosmicFontConfig, CosmicMetrics, CosmicNode,
+    CosmicText, CosmicTextPos,
 };
 use cosmic_text::*;
 
@@ -37,121 +37,202 @@ fn setup(
     let serif_attrs = attrs.family(Family::Serif);
     let mono_attrs = attrs.family(Family::Monospace);
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
-    let lines: Vec<Vec<(&str, Attrs)>> = vec![
+    let lines: Vec<Vec<(String, AttrsOwned)>> = vec![
         vec![
-            ("B", attrs.weight(cosmic_text::Weight::BOLD)),
-            ("old ", attrs),
-            ("I", attrs.style(cosmic_text::Style::Italic)),
-            ("talic ", attrs),
-            ("f", attrs),
-            ("i ", attrs),
-            ("f", attrs.weight(Weight::BOLD)),
-            ("i ", attrs),
-            ("f", attrs.style(cosmic_text::Style::Italic)),
-            ("i ", attrs),
+            (
+                String::from("B"),
+                AttrsOwned::new(attrs.weight(cosmic_text::Weight::BOLD)),
+            ),
+            (String::from("old "), AttrsOwned::new(attrs)),
+            (
+                String::from("I"),
+                AttrsOwned::new(attrs.style(cosmic_text::Style::Italic)),
+            ),
+            (String::from("talic "), AttrsOwned::new(attrs)),
+            (String::from("f"), AttrsOwned::new(attrs)),
+            (String::from("i "), AttrsOwned::new(attrs)),
+            (
+                String::from("f"),
+                AttrsOwned::new(attrs.weight(cosmic_text::Weight::BOLD)),
+            ),
+            (String::from("i "), AttrsOwned::new(attrs)),
+            (
+                String::from("f"),
+                AttrsOwned::new(attrs.style(cosmic_text::Style::Italic)),
+            ),
+            (String::from("i "), AttrsOwned::new(attrs)),
         ],
         vec![
-            ("Sans-Serif Normal ", attrs),
-            ("Sans-Serif Bold ", attrs.weight(Weight::BOLD)),
+            (String::from("Sans-Serif Normal "), AttrsOwned::new(attrs)),
             (
-                "Sans-Serif Italic ",
-                attrs.style(cosmic_text::Style::Italic),
+                String::from("Sans-Serif Bold "),
+                AttrsOwned::new(attrs.weight(cosmic_text::Weight::BOLD)),
             ),
             (
-                "Sans-Serif Bold Italic",
-                attrs.weight(Weight::BOLD).style(cosmic_text::Style::Italic),
-            ),
-        ],
-        vec![
-            ("Serif Normal ", serif_attrs),
-            ("Serif Bold ", serif_attrs.weight(Weight::BOLD)),
-            (
-                "Serif Italic ",
-                serif_attrs.style(cosmic_text::Style::Italic),
+                String::from("Sans-Serif Italic "),
+                AttrsOwned::new(attrs.style(cosmic_text::Style::Italic)),
             ),
             (
-                "Serif Bold Italic",
-                serif_attrs
-                    .weight(Weight::BOLD)
-                    .style(cosmic_text::Style::Italic),
-            ),
-        ],
-        vec![
-            ("Mono Normal ", mono_attrs),
-            ("Mono Bold ", mono_attrs.weight(Weight::BOLD)),
-            ("Mono Italic ", mono_attrs.style(cosmic_text::Style::Italic)),
-            (
-                "Mono Bold Italic",
-                mono_attrs
-                    .weight(Weight::BOLD)
-                    .style(cosmic_text::Style::Italic),
+                String::from("Sans-Serif Bold Italic"),
+                AttrsOwned::new(
+                    attrs
+                        .weight(cosmic_text::Weight::BOLD)
+                        .style(cosmic_text::Style::Italic),
+                ),
             ),
         ],
         vec![
-            ("Comic Normal ", comic_attrs),
-            ("Comic Bold ", comic_attrs.weight(Weight::BOLD)),
+            (String::from("Serif Normal "), AttrsOwned::new(serif_attrs)),
             (
-                "Comic Italic ",
-                comic_attrs.style(cosmic_text::Style::Italic),
+                String::from("Serif Bold "),
+                AttrsOwned::new(serif_attrs.weight(cosmic_text::Weight::BOLD)),
             ),
             (
-                "Comic Bold Italic",
-                comic_attrs
-                    .weight(Weight::BOLD)
-                    .style(cosmic_text::Style::Italic),
+                String::from("Serif Italic "),
+                AttrsOwned::new(serif_attrs.style(cosmic_text::Style::Italic)),
+            ),
+            (
+                String::from("Serif Bold Italic"),
+                AttrsOwned::new(
+                    serif_attrs
+                        .weight(cosmic_text::Weight::BOLD)
+                        .style(cosmic_text::Style::Italic),
+                ),
             ),
         ],
         vec![
-            ("R", attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00))),
-            ("A", attrs.color(cosmic_text::Color::rgb(0xFF, 0x7F, 0x00))),
-            ("I", attrs.color(cosmic_text::Color::rgb(0xFF, 0xFF, 0x00))),
-            ("N", attrs.color(cosmic_text::Color::rgb(0x00, 0xFF, 0x00))),
-            ("B", attrs.color(cosmic_text::Color::rgb(0x00, 0x00, 0xFF))),
-            ("O", attrs.color(cosmic_text::Color::rgb(0x4B, 0x00, 0x82))),
-            ("W ", attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3))),
+            (String::from("Mono Normal "), AttrsOwned::new(mono_attrs)),
             (
-                "Red ",
-                attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00)),
+                String::from("Mono Bold "),
+                AttrsOwned::new(mono_attrs.weight(cosmic_text::Weight::BOLD)),
             ),
             (
-                "Orange ",
-                attrs.color(cosmic_text::Color::rgb(0xFF, 0x7F, 0x00)),
+                String::from("Mono Italic "),
+                AttrsOwned::new(mono_attrs.style(cosmic_text::Style::Italic)),
             ),
             (
-                "Yellow ",
-                attrs.color(cosmic_text::Color::rgb(0xFF, 0xFF, 0x00)),
+                String::from("Mono Bold Italic"),
+                AttrsOwned::new(
+                    mono_attrs
+                        .weight(cosmic_text::Weight::BOLD)
+                        .style(cosmic_text::Style::Italic),
+                ),
+            ),
+        ],
+        vec![
+            (String::from("Comic Normal "), AttrsOwned::new(comic_attrs)),
+            (
+                String::from("Comic Bold "),
+                AttrsOwned::new(comic_attrs.weight(cosmic_text::Weight::BOLD)),
             ),
             (
-                "Green ",
-                attrs.color(cosmic_text::Color::rgb(0x00, 0xFF, 0x00)),
+                String::from("Comic Italic "),
+                AttrsOwned::new(comic_attrs.style(cosmic_text::Style::Italic)),
             ),
             (
-                "Blue ",
-                attrs.color(cosmic_text::Color::rgb(0x00, 0x00, 0xFF)),
+                String::from("Comic Bold Italic"),
+                AttrsOwned::new(
+                    comic_attrs
+                        .weight(cosmic_text::Weight::BOLD)
+                        .style(cosmic_text::Style::Italic),
+                ),
+            ),
+        ],
+        vec![
+            (
+                String::from("R"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00))),
             ),
             (
-                "Indigo ",
-                attrs.color(cosmic_text::Color::rgb(0x4B, 0x00, 0x82)),
+                String::from("A"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0x7F, 0x00))),
             ),
             (
-                "Violet ",
-                attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3)),
+                String::from("I"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0xFF, 0x00))),
             ),
-            ("U", attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3))),
-            ("N", attrs.color(cosmic_text::Color::rgb(0x4B, 0x00, 0x82))),
-            ("I", attrs.color(cosmic_text::Color::rgb(0x00, 0x00, 0xFF))),
-            ("C", attrs.color(cosmic_text::Color::rgb(0x00, 0xFF, 0x00))),
-            ("O", attrs.color(cosmic_text::Color::rgb(0xFF, 0xFF, 0x00))),
-            ("R", attrs.color(cosmic_text::Color::rgb(0xFF, 0x7F, 0x00))),
-            ("N", attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00))),
+            (
+                String::from("N"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x00, 0xFF, 0x00))),
+            ),
+            (
+                String::from("B"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x00, 0x00, 0xFF))),
+            ),
+            (
+                String::from("O"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x4B, 0x00, 0x82))),
+            ),
+            (
+                String::from("W "),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3))),
+            ),
+            (
+                String::from("Red "),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00))),
+            ),
+            (
+                String::from("Orange "),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0x7F, 0x00))),
+            ),
+            (
+                String::from("Yellow "),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0xFF, 0x00))),
+            ),
+            (
+                String::from("Green "),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x00, 0xFF, 0x00))),
+            ),
+            (
+                String::from("Blue "),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x00, 0x00, 0xFF))),
+            ),
+            (
+                String::from("Indigo "),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x4B, 0x00, 0x82))),
+            ),
+            (
+                String::from("Violet "),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3))),
+            ),
+            (
+                String::from("U"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3))),
+            ),
+            (
+                String::from("N"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x4B, 0x00, 0x82))),
+            ),
+            (
+                String::from("I"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x00, 0x00, 0xFF))),
+            ),
+            (
+                String::from("C"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0x00, 0xFF, 0x00))),
+            ),
+            (
+                String::from("O"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0xFF, 0x00))),
+            ),
+            (
+                String::from("R"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0x7F, 0x00))),
+            ),
+            (
+                String::from("N"),
+                AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00))),
+            ),
         ],
         vec![(
-            "生活,삶,जिंदगी 😀 FPS",
-            attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00)),
+            String::from("生活,삶,जिंदगी 😀 FPS"),
+            AttrsOwned::new(attrs.color(cosmic_text::Color::rgb(0xFF, 0x00, 0x00))),
         )],
     ];
+
     let cosmic_edit_meta_1 = CosmicEditMeta {
-        text: CosmicText::MultiStyle((lines, attrs)),
+        text: CosmicText::MultiStyle(lines),
+        attrs: AttrsOwned::new(attrs),
         text_pos: CosmicTextPos::Center,
         metrics: CosmicMetrics {
             font_size: 18.,
@@ -159,32 +240,31 @@ fn setup(
             scale_factor: primary_window.scale_factor() as f32,
         },
         font_system_handle: font_system_handle.clone(),
-        node: CosmicNode::Ui(CosmicEditUi {
-            display_none: false,
-        }),
+        node: CosmicNode::Ui,
         size: None,
         bg: bevy::prelude::Color::WHITE,
         readonly: false,
+        bg_image: None,
     };
     let cosmic_edit_1 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta_1);
 
     let mut attrs_2 = cosmic_text::Attrs::new();
-    attrs_2 = attrs_2.family(cosmic_text::Family::Name("Fira Code"));
+    attrs_2 = attrs_2.family(cosmic_text::Family::Name("Victor Mono"));
     let cosmic_edit_meta_2 = CosmicEditMeta {
-        text: CosmicText::OneStyle(("Widget 2.\nClick on me =>".to_string(), attrs_2)),
+        text: CosmicText::OneStyle("Widget 2.\nClick on me =>".to_string()),
+        attrs: AttrsOwned::new(attrs_2),
         metrics: CosmicMetrics {
             font_size: 14.,
             line_height: 18.,
             scale_factor: primary_window.scale_factor() as f32,
         },
         font_system_handle: font_system_handle.clone(),
-        node: CosmicNode::Ui(CosmicEditUi {
-            display_none: false,
-        }),
+        node: CosmicNode::Ui,
         text_pos: CosmicTextPos::Center,
         size: None,
         bg: bevy::prelude::Color::WHITE.with_a(0.8),
         readonly: false,
+        bg_image: None,
     };
     let cosmic_edit_2 = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta_2);
 

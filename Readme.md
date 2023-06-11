@@ -10,7 +10,7 @@ WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
 mode is supported (tested on Chrome):
 
-  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/d5a5c4c8543a520e8751a91c29e4f5f2/raw/38fb5f9b935a5c5dee35261989c1ef9f7e54abe3/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/d5a5c4c8543a520e8751a91c29e4f5f2/raw/38fb5f9b935a5c5dee35261989c1ef9f7e54abe3/velo.json)
+  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/3e95a2276790cf84b388734c921e46f4/raw/ac3d56c3e02919b5f5a3b598423ee9bbf40ad553/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/3e95a2276790cf84b388734c921e46f4/raw/ac3d56c3e02919b5f5a3b598423ee9bbf40ad553/velo.json)
 
 ## Inspiration
 
@@ -49,12 +49,13 @@ enjoyable project to work on.
   - italic/bold text style
   - links
   - syntax highlighting
-  - headings
+  - headings (proper headings support was temporarily removed)
   - inline code
   - ordered/unordered lists
 - particles effect [native target only 🖥️]
 - filter documents by text in nodes (fuzzy search) [native target only 🖥️]
 - highlight nodes containing searched text [native target only 🖥️]
+- ligature/emoji rendering support [emoji native target only 🖥️]
 
 ## Run
 

@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use bevy_cosmic_edit::{
-    bevy_color_to_cosmic, spawn_cosmic_edit, CosmicEditMeta, CosmicEditUi, CosmicFont,
-    CosmicMetrics, CosmicNode, CosmicText,
+    spawn_cosmic_edit, CosmicEditMeta, CosmicFont, CosmicMetrics, CosmicNode, CosmicText,
 };
 use bevy_ui_borders::BorderColor;
+use cosmic_text::AttrsOwned;
 
 use crate::{
     themes::Theme,
@@ -13,7 +13,7 @@ use crate::{
         },
         TextPos,
     },
-    utils::{to_cosmic_text_pos, ReflectableUuid},
+    utils::{bevy_color_to_cosmic, to_cosmic_text_pos, ReflectableUuid},
 };
 
 pub fn add_search_box(
@@ -40,12 +40,11 @@ pub fn add_search_box(
     attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
     attrs = attrs.color(bevy_color_to_cosmic(theme.font));
     let cosmic_edit_meta = CosmicEditMeta {
-        text: CosmicText::OneStyle(("".to_string(), attrs)),
+        text: CosmicText::OneStyle("".to_string()),
+        attrs: AttrsOwned::new(attrs),
         text_pos: to_cosmic_text_pos(TextPos::Center),
         font_system_handle: cosmic_font_handle,
-        node: CosmicNode::Ui(CosmicEditUi {
-            display_none: false,
-        }),
+        node: CosmicNode::Ui,
         size: None,
         metrics: CosmicMetrics {
             font_size: 14.,
@@ -54,6 +53,7 @@ pub fn add_search_box(
         },
         bg: theme.search_box_bg,
         readonly: false,
+        bg_image: None,
     };
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands

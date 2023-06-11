@@ -1,10 +1,11 @@
 use bevy_cosmic_edit::{
-    bevy_color_to_cosmic, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicEditUi,
-    CosmicFont, CosmicMetrics, CosmicNode, CosmicText,
+    spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont, CosmicMetrics, CosmicNode,
+    CosmicText,
 };
 use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
+use cosmic_text::AttrsOwned;
 
 use super::{
     add_rectangle_txt, EditableText, GenericButton, ModalAction, ModalCancel, ModalConfirm,
@@ -13,7 +14,7 @@ use super::{
 use crate::{
     themes::Theme,
     ui_plugin::TextPos,
-    utils::{to_cosmic_text_pos, ReflectableUuid},
+    utils::{bevy_color_to_cosmic, to_cosmic_text_pos, ReflectableUuid},
 };
 
 pub fn spawn_modal(
@@ -206,20 +207,20 @@ pub fn spawn_modal(
             attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
             attrs = attrs.color(bevy_color_to_cosmic(theme.font));
             let cosmic_edit_meta = CosmicEditMeta {
-                text: CosmicText::OneStyle((default_value, attrs)),
+                text: CosmicText::OneStyle(default_value),
+                attrs: AttrsOwned::new(attrs),
                 font_system_handle: cosmic_font_handle,
                 text_pos: to_cosmic_text_pos(TextPos::TopLeft),
                 size: Some((width, height)),
                 metrics: CosmicMetrics {
-                    font_size: 14.,
-                    line_height: 18.,
+                    font_size: theme.font_size,
+                    line_height: theme.line_height,
                     scale_factor: window.scale_factor() as f32,
                 },
                 bg: theme.modal_text_input_bg,
-                node: CosmicNode::Ui(CosmicEditUi {
-                    display_none: false,
-                }),
+                node: CosmicNode::Ui,
                 readonly: false,
+                bg_image: None,
             };
             let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
             commands.entity(cosmic_edit).insert(EditableText { id });
