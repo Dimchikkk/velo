@@ -63,7 +63,8 @@ pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
 
 fn create_rectangle_btn(bg_color: Color, z_index: i32, text_pos: TextPos) -> ButtonBundle {
     let (justify_content, align_items) = pos_to_style(text_pos);
-    let button = ButtonBundle {
+
+    ButtonBundle {
         background_color: bg_color.into(),
         z_index: ZIndex::Local(z_index),
         style: Style {
@@ -74,8 +75,7 @@ fn create_rectangle_btn(bg_color: Color, z_index: i32, text_pos: TextPos) -> But
             ..default()
         },
         ..default()
-    };
-    button
+    }
 }
 
 fn create_arrow_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonBundle {
