@@ -1,12 +1,14 @@
 # bevy_markdown
 
+Built for `bevy_cosmic_edit` plugin.
+
 Features:
 
 - [x] bold text style
 - [x] italic text style
 - [x] links
 - [ ] inline images
-- [x] headings
+- [ ] headings (proper headings support was temporarily removed)
 - [x] inline code
 - [x] code block with syntax highlighting
 - [x] ordered/unordered lists

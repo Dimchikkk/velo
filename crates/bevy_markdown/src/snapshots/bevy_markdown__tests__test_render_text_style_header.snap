@@ -21,6 +21,7 @@ Ok(
                     },
                 ),
             ],
+            [],
             [
                 (
                     "Header 2",
@@ -32,10 +33,11 @@ Ok(
                         weight: Weight(
                             700,
                         ),
-                        metadata: 3,
+                        metadata: 4,
                     },
                 ),
             ],
+            [],
             [
                 (
                     "Header 3",
@@ -47,10 +49,11 @@ Ok(
                         weight: Weight(
                             700,
                         ),
-                        metadata: 5,
+                        metadata: 7,
                     },
                 ),
             ],
+            [],
             [
                 (
                     "Some header 4 ",
@@ -62,7 +65,7 @@ Ok(
                         weight: Weight(
                             700,
                         ),
-                        metadata: 7,
+                        metadata: 10,
                     },
                 ),
                 (
@@ -75,7 +78,7 @@ Ok(
                         weight: Weight(
                             700,
                         ),
-                        metadata: 8,
+                        metadata: 11,
                     },
                 ),
                 (
@@ -88,10 +91,11 @@ Ok(
                         weight: Weight(
                             700,
                         ),
-                        metadata: 9,
+                        metadata: 12,
                     },
                 ),
             ],
+            [],
             [
                 (
                     "another header ",
@@ -103,7 +107,7 @@ Ok(
                         weight: Weight(
                             700,
                         ),
-                        metadata: 11,
+                        metadata: 15,
                     },
                 ),
                 (
@@ -120,12 +124,25 @@ Ok(
                         weight: Weight(
                             700,
                         ),
-                        metadata: 12,
+                        metadata: 16,
                     },
                 ),
             ],
+            [],
         ],
         span_metadata: [
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
             TextSpanMetadata {
                 link: None,
             },
@@ -166,6 +183,9 @@ Ok(
                 link: Some(
                     "https://google.com",
                 ),
+            },
+            TextSpanMetadata {
+                link: None,
             },
         ],
     },
