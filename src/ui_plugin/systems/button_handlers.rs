@@ -137,7 +137,6 @@ pub fn change_color_pallete(
         (&Interaction, &ChangeColor),
         (Changed<Interaction>, With<ChangeColor>, Without<VeloNode>),
     >,
-    mut nodes: Query<(&mut BackgroundColor, &VeloNode), With<VeloNode>>,
     mut cosmic_nodes: Query<(&mut CosmicEdit, &RawText), With<RawText>>,
     state: Res<UiState>,
 ) {
@@ -146,11 +145,6 @@ pub fn change_color_pallete(
             Interaction::Clicked => {
                 let color = change_color.color;
                 if let Some(entity_to_edit) = state.entity_to_edit {
-                    for (mut bg_color, node) in nodes.iter_mut() {
-                        if node.id == entity_to_edit {
-                            bg_color.0 = color;
-                        }
-                    }
                     for (mut cosmic_edit, node) in cosmic_nodes.iter_mut() {
                         if node.id == entity_to_edit {
                             cosmic_edit.bg = color;
@@ -693,73 +687,4 @@ pub fn particles_effect(
             Interaction::None => {}
         }
     }
-}
-
-#[test]
-fn test_change_color_pallete() {
-    use bevy::ecs::event::Events;
-
-    // Set up a test app with the necessary resources and entities
-    let mut app = App::new();
-    let entity_id = crate::utils::ReflectableUuid::generate();
-
-    app.insert_resource(UiState {
-        entity_to_edit: Some(entity_id),
-        ..default()
-    });
-    app.add_event::<Interaction>();
-    app.add_event::<ChangeColor>();
-
-    app.add_system(change_color_pallete);
-
-    app.world
-        .spawn(NodeBundle {
-            style: Style {
-                size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                position: UiRect {
-                    left: Val::Px(0.0),
-                    bottom: Val::Px(0.0),
-                    ..Default::default()
-                },
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-        .insert(Interaction::Clicked)
-        .insert(ChangeColor { color: Color::RED });
-    app.world
-        .spawn(NodeBundle {
-            background_color: BackgroundColor(Color::BLUE),
-            style: Style {
-                size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                position: UiRect {
-                    left: Val::Px(0.0),
-                    bottom: Val::Px(0.0),
-                    ..Default::default()
-                },
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-        .insert(VeloNode {
-            id: entity_id,
-            node_type: default(),
-        });
-
-    app.world
-        .resource_mut::<Events<Interaction>>()
-        .send(Interaction::Clicked);
-    app.world
-        .resource_mut::<Events<ChangeColor>>()
-        .send(ChangeColor { color: Color::RED });
-
-    app.update();
-
-    let (bg_color, _) = app
-        .world
-        .query::<(&BackgroundColor, With<VeloNode>)>()
-        .iter_mut(&mut app.world)
-        .last()
-        .unwrap();
-    assert_eq!(bg_color.0, Color::RED);
 }

@@ -1,0 +1,238 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+expression: "generate_markdown_lines(BevyMarkdown {\n        markdown_theme,\n        text: input.clone(),\n        attrs: AttrsOwned::new(Attrs::new()),\n    })"
+---
+Ok(
+    BevyMarkdownLines {
+        lines: [
+            [],
+            [
+                (
+                    " 1. ",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 1,
+                    },
+                ),
+                (
+                    "Import a HTML file and watch it magically convert to Markdown",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 2,
+                    },
+                ),
+            ],
+            [
+                (
+                    " 2. ",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 4,
+                    },
+                ),
+                (
+                    "Drag and drop images (requires your Dropbox account be linked)",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 5,
+                    },
+                ),
+            ],
+            [
+                (
+                    "    ",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 7,
+                    },
+                ),
+                (
+                    " 1. ",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 8,
+                    },
+                ),
+                (
+                    "Import and save files from GitHub, Dropbox, Google Drive and One Drive",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 9,
+                    },
+                ),
+            ],
+            [
+                (
+                    "    ",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 11,
+                    },
+                ),
+                (
+                    " 2. ",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 12,
+                    },
+                ),
+                (
+                    "Drag and drop images (requires your Dropbox account be linked)",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 13,
+                    },
+                ),
+            ],
+            [],
+            [
+                (
+                    " 3. ",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 16,
+                    },
+                ),
+                (
+                    "Drag and drop images (requires your Dropbox account be linked)",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 17,
+                    },
+                ),
+            ],
+            [],
+        ],
+        span_metadata: [
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+        ],
+    },
+)

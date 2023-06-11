@@ -1,72 +1,58 @@
-use bevy::{
-    prelude::*,
-    text::{PositionedGlyph, TextLayoutInfo},
-    window::PrimaryWindow,
-};
-use bevy_markdown::BevyMarkdownNode;
+use bevy::{prelude::*, window::PrimaryWindow};
+use bevy_cosmic_edit::{get_node_cursor_pos, get_x_offset, get_y_offset, CosmicEdit};
+use cosmic_text::Edit;
 
-use super::{UiState, VeloNode};
+use super::{ui_helpers::BevyMarkdownView, UiState, VeloNode};
 
 pub fn clickable_links(
-    mut primary_window: Query<&mut Window, With<PrimaryWindow>>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut markdown_text_query: Query<
-        (
-            &Node,
-            &GlobalTransform,
-            &mut Text,
-            &TextLayoutInfo,
-            &BevyMarkdownNode,
-        ),
-        With<BevyMarkdownNode>,
+        (&Node, &GlobalTransform, &mut CosmicEdit, &BevyMarkdownView),
+        With<BevyMarkdownView>,
     >,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<VeloNode>)>,
-    mut ui_state: ResMut<UiState>,
+    ui_state: Res<UiState>,
 ) {
     if ui_state.hold_entity.is_some() {
         return;
     }
-    let mut primary_window = primary_window.iter_mut().next().unwrap();
+    let primary_window = windows.iter_mut().next().unwrap();
     let scale_factor = primary_window.scale_factor() as f32;
-
-    if let Some(cursor_position) = primary_window.cursor_position() {
-        let window_height = primary_window.height();
-        let pos = Vec2::new(cursor_position.x, window_height - cursor_position.y);
-        for (node, transform, text, text_layout_info, markdown_text) in
-            markdown_text_query.iter_mut()
-        {
-            let mut str = "".to_string();
-            let mut text_copy = text.clone();
-            for section in text_copy.sections.iter_mut() {
-                str = format!("{}{}", str, section.value.clone());
-            }
-            let link_sections = markdown_text.link_sections.clone();
-
-            let offset = transform.translation().truncate() - 0.5 * node.size();
-            for PositionedGlyph {
-                position,
-                section_index,
-                size,
-                ..
-            } in &text_layout_info.glyphs
+    for interaction in &mut interaction_query {
+        if *interaction == Interaction::Clicked {
+            for (node, transform, cosmic_edit, bevy_markdown_view) in markdown_text_query.iter_mut()
             {
-                let rect = bevy::math::Rect::from_center_size(
-                    offset + *position / scale_factor,
-                    *size / scale_factor,
-                );
-                if rect.contains(pos) {
-                    if let Some(link) = link_sections[*section_index].clone() {
-                        primary_window.cursor.icon = CursorIcon::Hand;
-                        for interaction in &mut interaction_query {
-                            if *interaction == Interaction::Clicked {
-                                #[cfg(not(target_arch = "wasm32"))]
-                                open::that(link.clone()).unwrap();
-                                #[cfg(target_arch = "wasm32")]
-                                open_url_in_new_tab(link.clone().as_str()).unwrap();
-                                ui_state.entity_to_edit = None;
+                let size = (node.size().x, node.size().y);
+                if let Some(pos) =
+                    get_node_cursor_pos(&primary_window, transform, size, cosmic_edit.is_ui_node)
+                {
+                    let font_size = cosmic_edit.editor.buffer().metrics().font_size;
+                    let line_height = cosmic_edit.editor.buffer().metrics().line_height;
+                    let y_start = get_y_offset(&cosmic_edit.editor) as f32;
+                    let x_start = get_x_offset(&cosmic_edit.editor) as f32;
+                    for layout_runs in cosmic_edit.editor.buffer().layout_runs() {
+                        let line_offset =
+                            (y_start + (layout_runs.line_y - font_size)) / scale_factor;
+                        if pos.1 < (line_offset + line_height / scale_factor) && pos.1 > line_offset
+                        {
+                            for glyph in layout_runs.glyphs {
+                                let start = (x_start + glyph.x) / scale_factor;
+                                let end = (x_start + glyph.x + glyph.w) / scale_factor;
+                                if pos.0 > start && pos.0 < end {
+                                    let idx = glyph.metadata;
+                                    if let Some(text_span) =
+                                        bevy_markdown_view.span_metadata.get(idx)
+                                    {
+                                        if let Some(link) = text_span.link.clone() {
+                                            #[cfg(not(target_arch = "wasm32"))]
+                                            open::that(link.clone()).unwrap();
+                                            #[cfg(target_arch = "wasm32")]
+                                            open_url_in_new_tab(link.clone().as_str()).unwrap();
+                                        }
+                                    }
+                                }
                             }
                         }
-                    } else {
-                        primary_window.cursor.icon = CursorIcon::Text;
                     }
                 }
             }

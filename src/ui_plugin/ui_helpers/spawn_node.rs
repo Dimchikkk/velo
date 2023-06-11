@@ -1,11 +1,12 @@
 use bevy_cosmic_edit::{
-    bevy_color_to_cosmic, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicEditUi,
-    CosmicFont, CosmicMetrics, CosmicNode, CosmicText,
+    spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont, CosmicMetrics, CosmicNode,
+    CosmicText,
 };
-use bevy_markdown::{spawn_bevy_markdown, BevyMarkdown, BevyMarkdownFonts, BevyMarkdownTheme};
+use bevy_markdown::{generate_markdown_lines, BevyMarkdown, BevyMarkdownTheme};
 use bevy_ui_borders::{BorderColor, Outline};
 
 use bevy::prelude::*;
+use cosmic_text::AttrsOwned;
 
 use crate::themes::Theme;
 use crate::ui_plugin::NodeType;
@@ -16,7 +17,9 @@ use super::{
     ResizeMarker, VeloNode, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
-use crate::utils::{convert_from_val_px, to_cosmic_text_pos, ReflectableUuid};
+use crate::utils::{
+    bevy_color_to_cosmic, convert_from_val_px, to_cosmic_text_pos, ReflectableUuid,
+};
 
 #[derive(Clone)]
 pub struct NodeMeta {
@@ -26,7 +29,7 @@ pub struct NodeMeta {
     pub position: (Val, Val),
     pub text: String,
     pub bg_color: Color,
-    pub image: Option<UiImage>,
+    pub image: Option<Handle<Image>>,
     pub text_pos: TextPos,
     pub z_index: i32,
     pub is_active: bool,
@@ -63,19 +66,12 @@ pub fn spawn_node(
         .id();
     let image = match item_meta.node_type {
         NodeType::Rect => item_meta.image,
-        NodeType::Circle => {
-            #[cfg(not(target_arch = "wasm32"))]
-            let image = Some(asset_server.load("circle-node.basis").into());
-            #[cfg(target_arch = "wasm32")]
-            let image = Some(asset_server.load("circle-node.png").into());
-            image
-        }
+        NodeType::Circle => Some(asset_server.load("circle-node.png")),
     };
     let button = commands
         .spawn((
             create_rectangle_btn(
                 item_meta.bg_color,
-                image,
                 item_meta.z_index,
                 item_meta.text_pos.clone(),
             ),
@@ -92,6 +88,72 @@ pub fn spawn_node(
     commands
         .entity(button)
         .insert(Outline::all(outline_color, Val::Px(1.)));
+
+    let mut attrs = cosmic_text::Attrs::new();
+    attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
+    attrs = attrs.color(bevy_color_to_cosmic(theme.font));
+    let (text, span_metadata) = match item_meta.is_active {
+        true => (CosmicText::OneStyle(item_meta.text.clone()), vec![]),
+        false => {
+            let markdown_theme = BevyMarkdownTheme {
+                code_theme: theme.code_theme.clone(),
+                code_default_lang: theme.code_default_lang.clone(),
+                link: bevy_color_to_cosmic(theme.link),
+                inline_code: bevy_color_to_cosmic(theme.inline_code),
+            };
+            let markdown_lines = generate_markdown_lines(BevyMarkdown {
+                text: item_meta.text.clone(),
+                attrs: AttrsOwned::new(attrs),
+                markdown_theme,
+            })
+            .expect("should handle markdown convertion");
+            (
+                CosmicText::MultiStyle(markdown_lines.lines),
+                markdown_lines.span_metadata,
+            )
+        }
+    };
+
+    let cosmic_edit_meta = CosmicEditMeta {
+        text,
+        font_system_handle: cosmic_font_handle,
+        text_pos: to_cosmic_text_pos(item_meta.text_pos.clone()),
+        size: Some((
+            convert_from_val_px(item_meta.size.0),
+            convert_from_val_px(item_meta.size.1),
+        )),
+        node: CosmicNode::Ui,
+        metrics: CosmicMetrics {
+            font_size: theme.font_size,
+            line_height: theme.line_height,
+            scale_factor,
+        },
+        bg: item_meta.bg_color,
+        bg_image: image,
+        readonly: !item_meta.is_active,
+        attrs: AttrsOwned::new(attrs),
+    };
+    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
+    commands.entity(cosmic_edit).insert(RawText {
+        id: item_meta.id,
+        last_text: item_meta.text.clone(),
+    });
+    commands.entity(button).add_child(cosmic_edit);
+
+    match item_meta.is_active {
+        true => {
+            commands.insert_resource(ActiveEditor {
+                entity: Some(cosmic_edit),
+            });
+        }
+        false => {
+            commands.entity(cosmic_edit).insert(BevyMarkdownView {
+                id: item_meta.id,
+                span_metadata,
+            });
+        }
+    }
+
     let arrow_marker1 = commands
         .spawn((
             create_arrow_marker(50.0, 0., 0., 0.),
@@ -161,71 +223,7 @@ pub fn spawn_node(
     commands.entity(button).add_child(resize_marker2);
     commands.entity(button).add_child(resize_marker3);
     commands.entity(button).add_child(resize_marker4);
-    let mut attrs = cosmic_text::Attrs::new();
-    attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
-    attrs = attrs.color(bevy_color_to_cosmic(theme.font));
-    let cosmic_edit_meta = CosmicEditMeta {
-        text: CosmicText::OneStyle((item_meta.text.clone(), attrs)),
-        font_system_handle: cosmic_font_handle,
-        text_pos: to_cosmic_text_pos(item_meta.text_pos),
-        size: Some((
-            convert_from_val_px(item_meta.size.0),
-            convert_from_val_px(item_meta.size.1),
-        )),
-        node: CosmicNode::Ui(CosmicEditUi {
-            display_none: !item_meta.is_active,
-        }),
-        metrics: CosmicMetrics {
-            font_size: 14.,
-            line_height: 18.,
-            scale_factor,
-        },
-        bg: item_meta.bg_color,
-        readonly: false,
-    };
-    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
-    commands
-        .entity(cosmic_edit)
-        .insert(RawText { id: item_meta.id });
-    commands.entity(button).add_child(cosmic_edit);
 
-    match item_meta.is_active {
-        true => {
-            commands.insert_resource(ActiveEditor {
-                entity: Some(cosmic_edit),
-            });
-        }
-        false => {
-            let fonts = BevyMarkdownFonts {
-                regular_font: TextStyle::default().font,
-                code_font: TextStyle::default().font,
-                bold_font: asset_server.load("fonts/SourceCodePro-Bold.ttf"),
-                italic_font: asset_server.load("fonts/SourceCodePro-Italic.ttf"),
-                semi_bold_italic_font: asset_server.load("fonts/SourceCodePro-SemiBoldItalic.ttf"),
-                extra_bold_font: asset_server.load("fonts/SourceCodePro-ExtraBold.ttf"),
-            };
-            let theme = BevyMarkdownTheme {
-                code_theme: theme.code_theme.clone(),
-                code_default_lang: theme.code_default_lang.clone(),
-                font: theme.font,
-                link: theme.link,
-                inline_code: theme.inline_code,
-            };
-            let bevy_markdown = BevyMarkdown {
-                text: item_meta.text.clone(),
-                fonts,
-                theme,
-                size: Some(item_meta.size),
-            };
-            let markdown_text = spawn_bevy_markdown(commands, bevy_markdown)
-                .expect("should handle markdown convertion");
-            commands
-                .get_entity(markdown_text)
-                .unwrap()
-                .insert(BevyMarkdownView { id: item_meta.id });
-            commands.entity(button).add_child(markdown_text);
-        }
-    }
     commands.entity(top).add_child(button);
     top
 }

@@ -1,0 +1,192 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+expression: "generate_markdown_lines(BevyMarkdown {\n        markdown_theme,\n        text: input.clone(),\n        attrs: AttrsOwned::new(Attrs::new()),\n    })"
+---
+Ok(
+    BevyMarkdownLines {
+        lines: [
+            [],
+            [
+                (
+                    "Header 1",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 1,
+                    },
+                ),
+            ],
+            [],
+            [
+                (
+                    "Header 2",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 4,
+                    },
+                ),
+            ],
+            [],
+            [
+                (
+                    "Header 3",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 7,
+                    },
+                ),
+            ],
+            [],
+            [
+                (
+                    "Some header 4 ",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 10,
+                    },
+                ),
+                (
+                    "as well",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Italic,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 11,
+                    },
+                ),
+                (
+                    " italicised",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 12,
+                    },
+                ),
+            ],
+            [],
+            [
+                (
+                    "another header ",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 15,
+                    },
+                ),
+                (
+                    "redirecting to google",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4278848010,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Italic,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 16,
+                    },
+                ),
+            ],
+            [],
+        ],
+        span_metadata: [
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: Some(
+                    "https://google.com",
+                ),
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+        ],
+    },
+)
