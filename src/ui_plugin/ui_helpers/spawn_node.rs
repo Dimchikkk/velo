@@ -171,7 +171,7 @@ pub fn spawn_sprite_node(
         return vec4<f32>(color.rgb, a * color.a);
     ",
     );
-    let sdf_expr = format!("sd_box(p, vec2<f32>({:.2}, {:.2}))", width, 10.);
+    let sdf_expr = format!("sd_box(p, vec2<f32>({:.2}, {:.2}))", width - 50., 10.);
     let sdf = shaders.add_sdf_expr(sdf_expr);
 
     let shadow = commands
