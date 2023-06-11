@@ -72,10 +72,8 @@ pub struct CosmicEdit {
     pub bg: bevy::prelude::Color,
     pub bg_image: Option<Handle<Image>>,
     pub readonly: bool,
-    pub font_size: f32,
-    pub font_line_height: f32,
     pub attrs: cosmic_text::AttrsOwned,
-    is_ui_node: bool,
+    pub is_ui_node: bool,
 }
 
 #[derive(TypeUuid)]
@@ -153,8 +151,11 @@ fn scale_factor_changed(
             if let Some(font_system) = cosmic_fonts.get_mut(&cosmic_edit.font_system) {
                 let font_system = &mut font_system.0;
                 let scale_factor = window.scale_factor() as f32;
-                let metrics = Metrics::new(cosmic_edit.font_size, cosmic_edit.font_line_height)
-                    .scale(scale_factor);
+                let metrics = Metrics::new(
+                    cosmic_edit.editor.buffer().metrics().font_size,
+                    cosmic_edit.editor.buffer().metrics().line_height,
+                )
+                .scale(scale_factor);
                 cosmic_edit
                     .editor
                     .buffer_mut()
@@ -170,7 +171,7 @@ fn scale_factor_changed(
     }
 }
 
-fn get_node_cursor_pos(
+pub fn get_node_cursor_pos(
     window: &Window,
     node_transform: &GlobalTransform,
     size: (f32, f32),
@@ -242,7 +243,7 @@ fn bevy_color_to_cosmic(color: bevy::prelude::Color) -> cosmic_text::Color {
     )
 }
 
-fn get_y_offset(editor: &Editor) -> i32 {
+pub fn get_y_offset(editor: &Editor) -> i32 {
     let mut num_of_lines = 0;
     for line in editor.buffer().lines.iter() {
         if let Some(layout_opt) = line.layout_opt().as_ref() {
@@ -254,7 +255,7 @@ fn get_y_offset(editor: &Editor) -> i32 {
     ((editor.buffer().size().1 - text_height) / 2.0) as i32
 }
 
-fn get_x_offset(editor: &Editor) -> i32 {
+pub fn get_x_offset(editor: &Editor) -> i32 {
     let mut max_line_width = 0.;
     for line in editor.buffer().lines.iter() {
         if let Some(layout_opt) = line.layout_opt().as_ref() {
@@ -446,7 +447,7 @@ pub fn cosmic_edit_bevy_events(
                             );
                         }
                         MouseScrollUnit::Pixel => {
-                            let line_height = cosmic_edit.font_line_height;
+                            let line_height = cosmic_edit.editor.buffer().metrics().line_height;
                             cosmic_edit.editor.action(
                                 &mut font_system.0,
                                 Action::Scroll {
@@ -708,8 +709,6 @@ pub fn spawn_cosmic_edit(
         editor,
         font_system: cosmic_edit_meta.font_system_handle,
         text_pos: cosmic_edit_meta.text_pos,
-        font_line_height: cosmic_edit_meta.metrics.line_height,
-        font_size: cosmic_edit_meta.metrics.font_size,
         bg: cosmic_edit_meta.bg,
         size: cosmic_edit_meta.size,
         is_ui_node: false,
