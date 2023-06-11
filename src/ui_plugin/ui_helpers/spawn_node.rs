@@ -89,7 +89,7 @@ pub fn spawn_sprite_node(
                 path: bevy_prototype_lyon::prelude::GeometryBuilder::build_as(&shape),
                 ..default()
             },
-            Stroke::new(theme.node_border, 2.),
+            Stroke::new(theme.node_border, 1.),
             Fill::color(theme.node_bg),
         ))
         .id();
