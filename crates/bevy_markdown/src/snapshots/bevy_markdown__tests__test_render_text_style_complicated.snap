@@ -1,0 +1,151 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+expression: "generate_markdown_lines(BevyMarkdown {\n        markdown_theme,\n        text: input.clone(),\n        attrs: AttrsOwned::new(Attrs::new()),\n    })"
+---
+Ok(
+    BevyMarkdownLines {
+        lines: [
+            [
+                (
+                    "bold1",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 0,
+                    },
+                ),
+                (
+                    " normal text",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 1,
+                    },
+                ),
+            ],
+            [
+                (
+                    "Italic",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Italic,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 2,
+                    },
+                ),
+                (
+                    " and then italic again",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Italic,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 3,
+                    },
+                ),
+            ],
+            [
+                (
+                    "Inner links ",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4278848010,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 5,
+                    },
+                ),
+                (
+                    "can be styled",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4278848010,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 6,
+                    },
+                ),
+                (
+                    "too",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4278848010,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Italic,
+                        weight: Weight(
+                            700,
+                        ),
+                        metadata: 7,
+                    },
+                ),
+            ],
+        ],
+        span_metadata: [
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: Some(
+                    "https://google.com",
+                ),
+            },
+            TextSpanMetadata {
+                link: Some(
+                    "https://google.com",
+                ),
+            },
+            TextSpanMetadata {
+                link: Some(
+                    "https://google.com",
+                ),
+            },
+        ],
+    },
+)

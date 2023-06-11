@@ -3,9 +3,9 @@ use std::path::Path;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{
     create_cosmic_font_system, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicEditPlugin,
-    CosmicEditUi, CosmicFont, CosmicFontConfig, CosmicMetrics, CosmicNode, CosmicText,
-    CosmicTextPos,
+    CosmicFont, CosmicFontConfig, CosmicMetrics, CosmicNode, CosmicText, CosmicTextPos,
 };
+use cosmic_text::AttrsOwned;
 
 fn setup(
     mut commands: Commands,
@@ -31,12 +31,13 @@ fn setup(
         load_system_fonts: true,
     };
     let font_system = create_cosmic_font_system(cosmic_font_config);
-    let font_system_handle = cosmic_fonts.add(CosmicFont(font_system));
+    let font_system_handle: Handle<CosmicFont> = cosmic_fonts.add(CosmicFont(font_system));
     let mut attrs = cosmic_text::Attrs::new();
-    attrs = attrs.family(cosmic_text::Family::Name("Fira Code"));
+    attrs = attrs.family(cosmic_text::Family::Name("Victor Mono"));
     attrs = attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3));
     let cosmic_edit_meta = CosmicEditMeta {
-        text: CosmicText::OneStyle(("😀😀😀 x => y".to_string(), attrs)),
+        text: CosmicText::OneStyle("😀😀😀 x => y".to_string()),
+        attrs: AttrsOwned::new(attrs),
         text_pos: CosmicTextPos::Center,
         bg: Color::WHITE,
         metrics: CosmicMetrics {
@@ -45,11 +46,10 @@ fn setup(
             scale_factor: primary_window.scale_factor() as f32,
         },
         font_system_handle,
-        node: CosmicNode::Ui(CosmicEditUi {
-            display_none: false,
-        }),
+        node: CosmicNode::Ui,
         size: None,
         readonly: false,
+        bg_image: None,
     };
     let cosmic_edit = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
     commands.entity(root).add_child(cosmic_edit);

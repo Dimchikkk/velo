@@ -99,3 +99,12 @@ pub fn to_cosmic_text_pos(pos: TextPos) -> CosmicTextPos {
         TextPos::TopLeft => CosmicTextPos::TopLeft,
     }
 }
+
+pub fn bevy_color_to_cosmic(color: bevy::prelude::Color) -> cosmic_text::Color {
+    cosmic_text::Color::rgba(
+        (color.r() * 255.) as u8,
+        (color.g() * 255.) as u8,
+        (color.b() * 255.) as u8,
+        (color.a() * 255.) as u8,
+    )
+}

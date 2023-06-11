@@ -197,7 +197,7 @@ pub fn insert_from_clipboard(
                     bg_color: theme.clipboard_image_bg,
                     z_index: 0,
                 },
-                image: Some(image.into()),
+                image: Some(image),
             });
         }
     }

@@ -1,0 +1,370 @@
+---
+source: crates/bevy_markdown/src/lib.rs
+expression: "generate_markdown_lines(BevyMarkdown {\n        markdown_theme,\n        text: input.clone(),\n        attrs: AttrsOwned::new(Attrs::new()),\n    })"
+---
+Ok(
+    BevyMarkdownLines {
+        lines: [
+            [
+                (
+                    "My rust code:",
+                    AttrsOwned {
+                        color_opt: None,
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            400,
+                        ),
+                        metadata: 0,
+                    },
+                ),
+            ],
+            [],
+            [
+                (
+                    "fn",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4280716242,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 2,
+                    },
+                ),
+                (
+                    " ",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 3,
+                    },
+                ),
+                (
+                    "main",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4290087168,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 4,
+                    },
+                ),
+                (
+                    "(",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 5,
+                    },
+                ),
+                (
+                    ")",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 6,
+                    },
+                ),
+                (
+                    " ",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 7,
+                    },
+                ),
+                (
+                    "{",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 8,
+                    },
+                ),
+            ],
+            [
+                (
+                    "    ",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 10,
+                    },
+                ),
+                (
+                    "println!",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4286945536,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 11,
+                    },
+                ),
+                (
+                    "(",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 12,
+                    },
+                ),
+                (
+                    "\"",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4286813334,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 13,
+                    },
+                ),
+                (
+                    "Hello world",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4280983960,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 14,
+                    },
+                ),
+                (
+                    "\"",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4286813334,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 15,
+                    },
+                ),
+                (
+                    ")",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 16,
+                    },
+                ),
+                (
+                    ";",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 17,
+                    },
+                ),
+            ],
+            [
+                (
+                    "}",
+                    AttrsOwned {
+                        color_opt: Some(
+                            Color(
+                                4284840835,
+                            ),
+                        ),
+                        family_owned: SansSerif,
+                        stretch: Normal,
+                        style: Normal,
+                        weight: Weight(
+                            600,
+                        ),
+                        metadata: 19,
+                    },
+                ),
+            ],
+            [],
+        ],
+        span_metadata: [
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+            TextSpanMetadata {
+                link: None,
+            },
+        ],
+    },
+)
