@@ -24,7 +24,7 @@ pub fn clickable_links(
             {
                 let size = (node.size().x, node.size().y);
                 if let Some(pos) =
-                    get_node_cursor_pos(&primary_window, &transform, size, cosmic_edit.is_ui_node)
+                    get_node_cursor_pos(&primary_window, transform, size, cosmic_edit.is_ui_node)
                 {
                     let font_size = cosmic_edit.editor.buffer().metrics().font_size;
                     let line_height = cosmic_edit.editor.buffer().metrics().line_height;

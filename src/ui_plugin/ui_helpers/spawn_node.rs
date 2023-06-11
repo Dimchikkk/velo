@@ -185,7 +185,7 @@ pub fn spawn_node(
 
     let cosmic_edit_meta = CosmicEditMeta {
         text,
-        font_system_handle: cosmic_font_handle.clone(),
+        font_system_handle: cosmic_font_handle,
         text_pos: to_cosmic_text_pos(item_meta.text_pos.clone()),
         size: Some((
             convert_from_val_px(item_meta.size.0),
@@ -202,7 +202,7 @@ pub fn spawn_node(
         readonly: !item_meta.is_active,
         attrs: AttrsOwned::new(attrs),
     };
-    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta.clone());
+    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands.entity(cosmic_edit).insert(RawText {
         id: item_meta.id,
         last_text: item_meta.text.clone(),

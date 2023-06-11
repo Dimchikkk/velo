@@ -49,7 +49,7 @@ enjoyable project to work on.
   - italic/bold text style
   - links
   - syntax highlighting
-  - headings
+  - headings (proper headings support was temporarily removed)
   - inline code
   - ordered/unordered lists
 - particles effect [native target only 🖥️]

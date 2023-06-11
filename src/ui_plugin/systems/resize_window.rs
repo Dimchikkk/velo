@@ -10,7 +10,8 @@ pub fn resize_notificator(
     app_state: Res<AppState>,
 ) {
     let mut reader = resize_event.get_reader();
-    for _ in reader.iter(&resize_event) {
+    let resize_events: Vec<_> = reader.iter(&resize_event).collect();
+    if !resize_events.is_empty() {
         if let Some(current_doc) = app_state.docs.get(&app_state.current_document.unwrap()) {
             if let Some(active_tab) = current_doc.tabs.iter().find(|t| t.is_active) {
                 commands.insert_resource(LoadTabRequest {

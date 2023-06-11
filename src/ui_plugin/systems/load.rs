@@ -182,7 +182,7 @@ pub fn load_tab(
                         size: (json_node.width, json_node.height),
                         node_type: json_node.node_type,
                         id: ReflectableUuid(json_node.id),
-                        image: image,
+                        image,
                         text: json_node.text.text.clone(),
                         bg_color: json_node.bg_color,
                         position: (json_node.left, json_node.bottom),
