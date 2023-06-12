@@ -1,11 +1,9 @@
-use std::fmt::format;
-
 use bevy_cosmic_edit::{
     spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicEditSprite, CosmicFont, CosmicMetrics,
     CosmicNode, CosmicText,
 };
 use bevy_markdown::{generate_markdown_lines, BevyMarkdown, BevyMarkdownTheme};
-use bevy_prototype_lyon::prelude::{Fill, Stroke};
+use bevy_prototype_lyon::prelude::{Fill, Path, Stroke};
 use bevy_smud::prelude::SdfAssets;
 use bevy_smud::{Frame, ShapeBundle};
 use bevy_ui_borders::{BorderColor, Outline};
@@ -44,7 +42,6 @@ pub fn spawn_sprite_node(
     shaders: &mut ResMut<Assets<Shader>>,
     commands: &mut Commands,
     theme: &Res<Theme>,
-    asset_server: &Res<AssetServer>,
     cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
     cosmic_font_handle: Handle<CosmicFont>,
     scale_factor: f32,
@@ -73,12 +70,28 @@ pub fn spawn_sprite_node(
         Vec2::new(pos.x + width / 2., pos.y - height / 2.),
     ];
 
-    let shape = bevy_prototype_lyon::shapes::RoundedPolygon {
-        points: points.into_iter().collect(),
-        radius: 10.,
-        closed: true,
+    let path: Path = match item_meta.node_type {
+        NodeType::Rect => bevy_prototype_lyon::prelude::GeometryBuilder::build_as(
+            &bevy_prototype_lyon::shapes::RoundedPolygon {
+                points: points.into_iter().collect(),
+                closed: true,
+                radius: 10.,
+            },
+        ),
+        NodeType::Paper => bevy_prototype_lyon::prelude::GeometryBuilder::build_as(
+            &bevy_prototype_lyon::shapes::Polygon {
+                points: points.into_iter().collect(),
+                closed: true,
+            },
+        ),
+        NodeType::Circle => bevy_prototype_lyon::prelude::GeometryBuilder::build_as(
+            &bevy_prototype_lyon::shapes::Circle {
+                radius: width / 2.,
+                center: Vec2::new(0., 0.),
+            },
+        ),
     };
-
+    let has_no_border = item_meta.node_type == NodeType::Paper;
     let border = commands
         .spawn((
             bevy_prototype_lyon::prelude::ShapeBundle {
@@ -86,11 +99,18 @@ pub fn spawn_sprite_node(
                     translation: Vec3::new(0.0, 0.0, 0.1),
                     ..default()
                 },
-                path: bevy_prototype_lyon::prelude::GeometryBuilder::build_as(&shape),
+                path,
                 ..default()
             },
-            Stroke::new(theme.node_border, 1.),
-            Fill::color(theme.node_bg),
+            Stroke::new(
+                if has_no_border {
+                    item_meta.bg_color
+                } else {
+                    theme.node_border
+                },
+                1.,
+            ),
+            Fill::color(item_meta.bg_color),
         ))
         .id();
 
@@ -161,41 +181,221 @@ pub fn spawn_sprite_node(
         }
     }
 
-    let fill = shaders.add_fill_body(
-        r"
-        let size = 100.;
-        let power = 3.0;
+    let has_shadow = item_meta.node_type == NodeType::Paper;
+
+    if has_shadow {
+        let fill = shaders.add_fill_body(format!(
+            "
+        let size = {:.2};
+        let power = 10.0;
         var a = (size - d) / size;
         a = clamp(a, 0.0, 1.0);
         a = pow(a, power);
         return vec4<f32>(color.rgb, a * color.a);
     ",
-    );
-    let sdf_expr = format!("sd_box(p, vec2<f32>({:.2}, {:.2}))", width - 50., 10.);
-    let sdf = shaders.add_sdf_expr(sdf_expr);
+            width
+        ));
+        let sdf_expr = format!(
+            "sd_box(p, vec2<f32>({:.2}, {:.2}))",
+            0.7 * (width / 2.),
+            0.7 * (height / 2.),
+        );
+        let sdf = shaders.add_sdf_expr(sdf_expr);
+        let translation = Vec3::new(-0.025 * width, -0.10 * height, 0.09);
 
-    let shadow = commands
-        .spawn(ShapeBundle {
-            transform: Transform {
-                translation: Vec3::new(0.0, -height / 2. + 15., 0.09),
-                scale,
+        let shadow = commands
+            .spawn(ShapeBundle {
+                transform: Transform {
+                    translation,
+                    ..default()
+                },
+                shape: bevy_smud::SmudShape {
+                    color: Color::BLACK,
+                    sdf,
+                    fill,
+                    frame: Frame::Quad(width),
+                    ..default()
+                },
+                ..default()
+            })
+            .id();
+        commands.entity(top).add_child(shadow);
+    }
+
+    let arrow_marker_1 = commands
+        .spawn(SpriteBundle {
+            sprite: Sprite {
+                color: theme.arrow_connector,
+                custom_size: Some(Vec2::new(
+                    theme.arrow_connector_size,
+                    theme.arrow_connector_size,
+                )),
                 ..default()
             },
-            shape: bevy_smud::SmudShape {
-                color: Color::BLACK,
-                sdf,
-                fill,
-                frame: Frame::Quad(width + 2.),
+            transform: Transform {
+                translation: Vec3 {
+                    x: -width / 2.,
+                    y: 0.,
+                    z: 0.3,
+                },
                 ..default()
             },
             ..default()
         })
         .id();
+    commands.entity(arrow_marker_1).insert(ArrowConnect {
+        pos: ArrowConnectPos::Left,
+        id: item_meta.id,
+    });
+    let arrow_marker_1 = spawn_arrow_marker(
+        commands,
+        theme,
+        item_meta.id,
+        width,
+        height,
+        ArrowConnectPos::Left,
+    );
+    let arrow_marker_2 = spawn_arrow_marker(
+        commands,
+        theme,
+        item_meta.id,
+        width,
+        height,
+        ArrowConnectPos::Right,
+    );
+    let arrow_marker_3 = spawn_arrow_marker(
+        commands,
+        theme,
+        item_meta.id,
+        width,
+        height,
+        ArrowConnectPos::Top,
+    );
+    let arrow_marker_4 = spawn_arrow_marker(
+        commands,
+        theme,
+        item_meta.id,
+        width,
+        height,
+        ArrowConnectPos::Bottom,
+    );
+
+    let resize_marker_1 = spawn_resize_marker(
+        commands,
+        theme,
+        item_meta.id,
+        width,
+        height,
+        ResizeMarker::TopLeft,
+    );
+    let resize_marker_2 = spawn_resize_marker(
+        commands,
+        theme,
+        item_meta.id,
+        width,
+        height,
+        ResizeMarker::TopRight,
+    );
+    let resize_marker_3 = spawn_resize_marker(
+        commands,
+        theme,
+        item_meta.id,
+        width,
+        height,
+        ResizeMarker::BottomLeft,
+    );
+    let resize_marker_4 = spawn_resize_marker(
+        commands,
+        theme,
+        item_meta.id,
+        width,
+        height,
+        ResizeMarker::BottomRight,
+    );
 
     commands.entity(top).add_child(border);
-    commands.entity(top).add_child(shadow);
     commands.entity(border).add_child(cosmic_edit);
+    commands.entity(top).add_child(arrow_marker_1);
+    commands.entity(top).add_child(arrow_marker_2);
+    commands.entity(top).add_child(arrow_marker_3);
+    commands.entity(top).add_child(arrow_marker_4);
+    commands.entity(top).add_child(resize_marker_1);
+    commands.entity(top).add_child(resize_marker_2);
+    commands.entity(top).add_child(resize_marker_3);
+    commands.entity(top).add_child(resize_marker_4);
     border
+}
+
+fn spawn_resize_marker(
+    commands: &mut Commands,
+    theme: &Res<Theme>,
+    id: ReflectableUuid,
+    width: f32,
+    height: f32,
+    pos: ResizeMarker,
+) -> Entity {
+    let (x, y) = match pos {
+        ResizeMarker::TopLeft => (-width / 2., -height / 2.),
+        ResizeMarker::TopRight => (width / 2., -height / 2.),
+        ResizeMarker::BottomLeft => (-width / 2., height / 2.),
+        ResizeMarker::BottomRight => (width / 2., height / 2.),
+    };
+    let resize_marker = commands
+        .spawn(SpriteBundle {
+            sprite: Sprite {
+                color: Color::NONE,
+                custom_size: Some(Vec2::new(
+                    theme.resize_marker_size,
+                    theme.resize_marker_size,
+                )),
+                ..default()
+            },
+            transform: Transform {
+                translation: Vec3 { x, y, z: 0.3 },
+                ..default()
+            },
+            ..default()
+        })
+        .id();
+    commands.entity(resize_marker).insert(pos);
+    resize_marker
+}
+
+fn spawn_arrow_marker(
+    commands: &mut Commands,
+    theme: &Res<Theme>,
+    id: ReflectableUuid,
+    width: f32,
+    height: f32,
+    pos: ArrowConnectPos,
+) -> Entity {
+    let (x, y) = match pos {
+        ArrowConnectPos::Left => (-width / 2., 0.),
+        ArrowConnectPos::Top => (0., -height / 2.),
+        ArrowConnectPos::Bottom => (0., height / 2.),
+        ArrowConnectPos::Right => (width / 2., 0.),
+    };
+    let arrow_marker = commands
+        .spawn(SpriteBundle {
+            sprite: Sprite {
+                color: theme.arrow_connector,
+                custom_size: Some(Vec2::new(
+                    theme.arrow_connector_size,
+                    theme.arrow_connector_size,
+                )),
+                ..default()
+            },
+            transform: Transform {
+                translation: Vec3 { x, y, z: 0.3 },
+                ..default()
+            },
+            ..default()
+        })
+        .id();
+    commands
+        .entity(arrow_marker)
+        .insert(ArrowConnect { pos, id });
+    arrow_marker
 }
 
 pub fn spawn_node(
@@ -227,10 +427,6 @@ pub fn spawn_node(
             VeloNodeContainer { id: item_meta.id },
         ))
         .id();
-    let image = match item_meta.node_type {
-        NodeType::Rect => item_meta.image,
-        NodeType::Circle => Some(asset_server.load("circle-node.png")),
-    };
     let button = commands
         .spawn((
             create_rectangle_btn(
@@ -247,6 +443,7 @@ pub fn spawn_node(
     let outline_color = match item_meta.node_type {
         NodeType::Rect => theme.node_border,
         NodeType::Circle => theme.node_border.with_a(0.),
+        NodeType::Paper => todo!(),
     };
     commands
         .entity(button)
@@ -292,7 +489,7 @@ pub fn spawn_node(
             scale_factor,
         },
         bg: item_meta.bg_color,
-        bg_image: image,
+        bg_image: item_meta.image,
         readonly: !item_meta.is_active,
         attrs: AttrsOwned::new(attrs),
     };
