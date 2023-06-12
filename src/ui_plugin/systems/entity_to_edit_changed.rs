@@ -40,6 +40,7 @@ pub fn entity_to_edit_changed(
                             NodeType::Circle => {
                                 outline.color = theme.node_border.with_a(0.);
                             }
+                            NodeType::Paper => todo!(),
                         }
 
                         outline.thickness = UiRect::all(Val::Px(1.));
@@ -115,6 +116,7 @@ pub fn entity_to_edit_changed(
                         NodeType::Circle => {
                             outline.color = theme.node_border.with_a(0.);
                         }
+                        NodeType::Paper => todo!(),
                     }
                     outline.thickness = UiRect::all(Val::Px(1.));
                 }
