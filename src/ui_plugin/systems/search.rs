@@ -288,6 +288,7 @@ fn highlight_search_match_nodes(
                 NodeType::Circle => {
                     outline.color = theme.node_border.with_a(0.);
                 }
+                NodeType::Paper => todo!(),
             }
 
             outline.thickness = UiRect::all(Val::Px(1.));

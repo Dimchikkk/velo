@@ -96,6 +96,7 @@ pub struct CommChannels {
 pub enum NodeType {
     #[default]
     Rect,
+    Paper,
     Circle,
 }
 
