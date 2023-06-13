@@ -203,3 +203,9 @@ pub struct ModalConfirm {
 pub struct ModalCancel {
     pub id: ReflectableUuid,
 }
+
+#[derive(Component)]
+pub struct InteractiveNode;
+
+#[derive(Component)]
+pub struct Background;
