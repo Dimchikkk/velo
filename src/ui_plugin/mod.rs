@@ -46,6 +46,9 @@ use doc_list::*;
 #[path = "systems/clickable_links.rs"]
 mod clickable_links;
 use clickable_links::*;
+#[path = "systems/interactive_sprites.rs"]
+mod interactive_sprites;
+use interactive_sprites::*;
 #[path = "systems/entity_to_edit_changed.rs"]
 mod entity_to_edit_changed;
 use entity_to_edit_changed::*;
@@ -82,6 +85,22 @@ pub struct AddRectEvent {
 pub struct SaveStoreEvent {
     pub doc_id: ReflectableUuid,
     pub path: Option<PathBuf>, // Save current document to file
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum NodeInteractionType {
+    Hover,
+    LeftClick,
+    LeftDoubleClick,
+    LeftMouseHoldAndDrag,
+    LeftMouseRelease,
+    RightClick,
+}
+
+#[derive(Debug)]
+pub struct NodeInteractionEvent {
+    pub entity: Entity,
+    pub node_interaction_type: NodeInteractionType,
 }
 
 pub struct UpdateDeleteDocBtnEvent;
@@ -156,6 +175,7 @@ impl Plugin for UiPlugin {
         app.add_event::<RedrawArrowEvent>();
         app.add_event::<SaveStoreEvent>();
         app.add_event::<UpdateDeleteDocBtnEvent>();
+        app.add_event::<NodeInteractionEvent>();
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_startup_systems((read_native_config, init_search_index).before(init_layout));
@@ -233,6 +253,8 @@ impl Plugin for UiPlugin {
             save_to_store.after(save_tab),
             canvas_click,
             active_editor_changed,
+            interactive_sprite,
+            my_test_system,
         ));
         app.add_systems((set_focused_entity, clickable_links).chain());
 

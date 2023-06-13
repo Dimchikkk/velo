@@ -1,6 +1,7 @@
 use crate::{
     components::{EffectsCamera, MainCamera},
     themes::{get_theme_by_name, Theme},
+    ui_plugin::ui_helpers::{Background, InteractiveNode},
     utils::UserPreferences,
 };
 use bevy::{
@@ -32,7 +33,7 @@ pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>, 
     if let Some(bg_color) = theme.canvas_bg_color {
         sprite_bundle.sprite.color = bg_color;
     }
-    commands.spawn(sprite_bundle);
+    commands.spawn((sprite_bundle, Background, InteractiveNode));
 }
 
 pub fn setup_camera(mut commands: Commands) {

@@ -1,14 +1,17 @@
 use bevy::prelude::*;
 
-use super::{ui_helpers::MainPanel, UiState};
+use super::{ui_helpers::Background, NodeInteractionEvent, UiState};
 
 pub fn canvas_click(
-    interaction_query: Query<&Interaction, (Changed<Interaction>, With<MainPanel>)>,
     mut ui_state: ResMut<UiState>,
+    background_query: Query<With<Background>>,
+    mut node_interaction_events: EventReader<NodeInteractionEvent>,
 ) {
-    for interaction in interaction_query.iter() {
-        if *interaction == Interaction::Clicked {
-            ui_state.entity_to_edit = None;
+    for event in node_interaction_events.iter() {
+        if let Ok(_) = background_query.get(event.entity) {
+            if event.node_interaction_type == crate::ui_plugin::NodeInteractionType::LeftClick {
+                ui_state.entity_to_edit = None;
+            }
         }
     }
 }
