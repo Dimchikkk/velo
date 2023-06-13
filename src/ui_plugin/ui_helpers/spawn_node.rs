@@ -16,8 +16,8 @@ use crate::ui_plugin::NodeType;
 use crate::TextPos;
 
 use super::{
-    create_arrow_marker, create_rectangle_btn, create_resize_marker, BevyMarkdownView, RawText,
-    ResizeMarker, VeloNode, VeloNodeContainer,
+    create_arrow_marker, create_rectangle_btn, create_resize_marker, BevyMarkdownView,
+    InteractiveNode, RawText, ResizeMarker, VeloNode, VeloNodeContainer,
 };
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
 use crate::utils::{
@@ -54,13 +54,19 @@ pub fn spawn_sprite_node(
     let height = convert_from_val_px(item_meta.size.1);
 
     let top = commands
-        .spawn(SpriteBundle {
-            transform: Transform {
-                translation: pos,
-                ..default()
+        .spawn((
+            SpriteBundle {
+                transform: Transform {
+                    translation: pos,
+                    ..default()
+                },
+                ..Default::default()
             },
-            ..Default::default()
-        })
+            VeloNode {
+                id: item_meta.id,
+                node_type: item_meta.node_type.clone(),
+            },
+        ))
         .id();
 
     let points = [
@@ -162,10 +168,13 @@ pub fn spawn_sprite_node(
         attrs: AttrsOwned::new(attrs),
     };
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
-    commands.entity(cosmic_edit).insert(RawText {
-        id: item_meta.id,
-        last_text: item_meta.text.clone(),
-    });
+    commands
+        .entity(cosmic_edit)
+        .insert(RawText {
+            id: item_meta.id,
+            last_text: item_meta.text.clone(),
+        })
+        .insert(InteractiveNode);
 
     match item_meta.is_active {
         true => {
@@ -222,31 +231,6 @@ pub fn spawn_sprite_node(
         commands.entity(top).add_child(shadow);
     }
 
-    let arrow_marker_1 = commands
-        .spawn(SpriteBundle {
-            sprite: Sprite {
-                color: theme.arrow_connector,
-                custom_size: Some(Vec2::new(
-                    theme.arrow_connector_size,
-                    theme.arrow_connector_size,
-                )),
-                ..default()
-            },
-            transform: Transform {
-                translation: Vec3 {
-                    x: -width / 2.,
-                    y: 0.,
-                    z: 0.3,
-                },
-                ..default()
-            },
-            ..default()
-        })
-        .id();
-    commands.entity(arrow_marker_1).insert(ArrowConnect {
-        pos: ArrowConnectPos::Left,
-        id: item_meta.id,
-    });
     let arrow_marker_1 = spawn_arrow_marker(
         commands,
         theme,
@@ -280,38 +264,14 @@ pub fn spawn_sprite_node(
         ArrowConnectPos::Bottom,
     );
 
-    let resize_marker_1 = spawn_resize_marker(
-        commands,
-        theme,
-        item_meta.id,
-        width,
-        height,
-        ResizeMarker::TopLeft,
-    );
-    let resize_marker_2 = spawn_resize_marker(
-        commands,
-        theme,
-        item_meta.id,
-        width,
-        height,
-        ResizeMarker::TopRight,
-    );
-    let resize_marker_3 = spawn_resize_marker(
-        commands,
-        theme,
-        item_meta.id,
-        width,
-        height,
-        ResizeMarker::BottomLeft,
-    );
-    let resize_marker_4 = spawn_resize_marker(
-        commands,
-        theme,
-        item_meta.id,
-        width,
-        height,
-        ResizeMarker::BottomRight,
-    );
+    let resize_marker_1 =
+        spawn_resize_marker(commands, theme, width, height, ResizeMarker::TopLeft);
+    let resize_marker_2 =
+        spawn_resize_marker(commands, theme, width, height, ResizeMarker::TopRight);
+    let resize_marker_3 =
+        spawn_resize_marker(commands, theme, width, height, ResizeMarker::BottomLeft);
+    let resize_marker_4 =
+        spawn_resize_marker(commands, theme, width, height, ResizeMarker::BottomRight);
 
     commands.entity(top).add_child(border);
     commands.entity(border).add_child(cosmic_edit);
@@ -329,16 +289,15 @@ pub fn spawn_sprite_node(
 fn spawn_resize_marker(
     commands: &mut Commands,
     theme: &Res<Theme>,
-    id: ReflectableUuid,
     width: f32,
     height: f32,
     pos: ResizeMarker,
 ) -> Entity {
     let (x, y) = match pos {
-        ResizeMarker::TopLeft => (-width / 2., -height / 2.),
-        ResizeMarker::TopRight => (width / 2., -height / 2.),
-        ResizeMarker::BottomLeft => (-width / 2., height / 2.),
-        ResizeMarker::BottomRight => (width / 2., height / 2.),
+        ResizeMarker::BottomLeft => (-width / 2., -height / 2.),
+        ResizeMarker::BottomRight => (width / 2., -height / 2.),
+        ResizeMarker::TopLeft => (-width / 2., height / 2.),
+        ResizeMarker::TopRight => (width / 2., height / 2.),
     };
     let resize_marker = commands
         .spawn(SpriteBundle {
@@ -357,7 +316,10 @@ fn spawn_resize_marker(
             ..default()
         })
         .id();
-    commands.entity(resize_marker).insert(pos);
+    commands
+        .entity(resize_marker)
+        .insert(pos)
+        .insert(InteractiveNode);
     resize_marker
 }
 
@@ -371,8 +333,8 @@ fn spawn_arrow_marker(
 ) -> Entity {
     let (x, y) = match pos {
         ArrowConnectPos::Left => (-width / 2., 0.),
-        ArrowConnectPos::Top => (0., -height / 2.),
-        ArrowConnectPos::Bottom => (0., height / 2.),
+        ArrowConnectPos::Bottom => (0., -height / 2.),
+        ArrowConnectPos::Top => (0., height / 2.),
         ArrowConnectPos::Right => (width / 2., 0.),
     };
     let arrow_marker = commands
@@ -394,7 +356,8 @@ fn spawn_arrow_marker(
         .id();
     commands
         .entity(arrow_marker)
-        .insert(ArrowConnect { pos, id });
+        .insert(ArrowConnect { pos, id })
+        .insert(InteractiveNode);
     arrow_marker
 }
 
