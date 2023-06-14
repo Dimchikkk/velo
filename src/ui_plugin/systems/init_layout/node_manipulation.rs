@@ -48,9 +48,9 @@ pub fn node_manipulation(
                     justify_content: JustifyContent::Center,
                     position_type: PositionType::Absolute,
                     position: UiRect {
-                        left: Val::Px(-2.),
+                        left: Val::Px(1.),
                         right: Val::Px(0.),
-                        top: Val::Px(-2.),
+                        top: Val::Px(-1.),
                         bottom: Val::Px(0.),
                     },
                     ..default()
@@ -194,9 +194,9 @@ pub fn node_manipulation(
                     justify_content: JustifyContent::Center,
                     position_type: PositionType::Absolute,
                     position: UiRect {
-                        left: Val::Px(-2.),
+                        left: Val::Px(1.),
                         right: Val::Px(0.),
-                        top: Val::Px(-2.),
+                        top: Val::Px(-1.),
                         bottom: Val::Px(0.),
                     },
                     ..default()

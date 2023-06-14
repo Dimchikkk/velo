@@ -1,11 +1,8 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-// use super::utils::{build_arrow, create_arrow};
 use super::components::{ArrowConnect, ArrowMeta};
-// use crate::states::{AppState, MainCamera, RedrawArrow};
 use super::events::{CreateArrowEvent, RedrawArrowEvent};
-use super::utils::{build_arrow, create_arrow, get_pos};
-use crate::components::MainCamera;
+use super::utils::{build_arrow, create_arrow};
 use crate::themes::Theme;
 use crate::ui_plugin::{NodeInteractionEvent, UiState};
 use bevy_prototype_lyon::prelude::Path;
@@ -63,11 +60,9 @@ pub fn create_arrow_end(
         for (arrow_connect, global_transform) in &mut arrow_markers.iter() {
             if *arrow_connect == event.start {
                 start = Some(global_transform.affine().translation.truncate());
-                eprintln!("start {:?}", start);
             }
             if *arrow_connect == event.end {
                 end = Some(global_transform.affine().translation.truncate());
-                eprintln!("end {:?}", end);
             }
             if let (Some(start), Some(end)) = (start, end) {
                 create_arrow(

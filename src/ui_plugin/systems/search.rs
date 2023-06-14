@@ -281,17 +281,17 @@ fn highlight_search_match_nodes(
             outline.thickness = highlight_thickness;
         } else if outline.color == highlight_color && outline.thickness == highlight_thickness {
             // revert
-            match node.node_type {
-                NodeType::Rect => {
-                    outline.color = theme.node_border;
-                }
-                NodeType::Circle => {
-                    outline.color = theme.node_border.with_a(0.);
-                }
-                NodeType::Paper => todo!(),
-            }
+            // match node.node_type {
+            //     NodeType::Rect => {
+            //         outline.color = theme.node_border;
+            //     }
+            //     NodeType::Circle => {
+            //         outline.color = theme.node_border.with_a(0.);
+            //     }
+            //     NodeType::Paper => todo!(),
+            // }
 
-            outline.thickness = UiRect::all(Val::Px(1.));
+            // outline.thickness = UiRect::all(Val::Px(1.));
         }
     }
 }

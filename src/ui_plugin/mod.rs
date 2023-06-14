@@ -156,7 +156,7 @@ pub struct UiState {
     pub search_box_to_edit: Option<ReflectableUuid>,
     pub arrow_type: ArrowType,
     pub hold_entity: Option<ReflectableUuid>,
-    pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
+    pub entity_to_resize: Option<ReflectableUuid>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
 }
 
@@ -188,6 +188,7 @@ impl Plugin for UiPlugin {
             update_rectangle_position,
             create_new_node,
             resize_entity_start,
+            resize_entity_run,
             resize_entity_end,
             cancel_modal,
             confirm_modal,
@@ -254,7 +255,6 @@ impl Plugin for UiPlugin {
             canvas_click,
             active_editor_changed,
             interactive_sprite,
-            my_test_system,
         ));
         app.add_systems((set_focused_entity, clickable_links).chain());
 
