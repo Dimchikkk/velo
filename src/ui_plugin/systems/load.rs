@@ -7,7 +7,7 @@ use bevy::{
 use bevy_cosmic_edit::CosmicFont;
 
 use super::{
-    ui_helpers::{add_tab, spawn_node, BottomPanel, NodeMeta, TabContainer},
+    ui_helpers::{add_tab, spawn_sprite_node, BottomPanel, NodeMeta, TabContainer},
     DeleteDoc, DeleteTab, MainPanel, VeloNodeContainer,
 };
 use crate::{
@@ -88,7 +88,6 @@ pub fn load_doc(
 }
 
 pub fn load_tab(
-    asset_server: Res<AssetServer>,
     old_nodes: Query<Entity, With<VeloNodeContainer>>,
     mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
     request: Res<LoadTabRequest>,
@@ -102,6 +101,7 @@ pub fn load_tab(
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    mut shaders: ResMut<Assets<Shader>>,
     theme: Res<Theme>,
 ) {
     *ui_state = UiState::default();
@@ -171,10 +171,10 @@ pub fn load_tab(
                     None => None,
                 };
                 // ideally AddRect event should be fired instead of calling spawn_node directly
-                let entity = spawn_node(
+                let entity = spawn_sprite_node(
+                    &mut shaders,
                     &mut commands,
                     &theme,
-                    &asset_server,
                     &mut cosmic_fonts,
                     font_system_state.0.clone().unwrap(),
                     window.scale_factor() as f32,

@@ -165,8 +165,8 @@ pub fn save_tab(
             if node.id == raw_text.id {
                 let (style, node_container): (&Style, &Node) =
                     node_container_query.get(parent.get()).unwrap();
-                let left = style.position.left;
-                let bottom = style.position.bottom;
+                // let left = style.position.left;
+                // let bottom = style.position.bottom;
                 let bg_color = cosmic_text.bg;
                 let z_index = match *z_index {
                     ZIndex::Local(v) => v,
@@ -176,10 +176,10 @@ pub fn save_tab(
                     node_type: super::NodeType::Paper,
                     // node_type: node.node_type.clone(),
                     id: node.id.0,
-                    left,
-                    bottom,
-                    width: Val::Px(node_container.size().x),
-                    height: Val::Px(node_container.size().y),
+                    left: 3.,
+                    bottom: 3.,
+                    width: node_container.size().x,
+                    height: node_container.size().y,
                     bg_color,
                     text: JsonNodeText {
                         text: raw_text.last_text.clone(),
