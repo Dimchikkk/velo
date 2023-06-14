@@ -22,7 +22,6 @@ use uuid::Uuid;
 
 use crate::resources::AppState;
 use crate::themes::Theme;
-use crate::ui_plugin::NodeType;
 use crate::utils::ReflectableUuid;
 use crate::APP_NAME;
 use crate::ORG_NAME;
