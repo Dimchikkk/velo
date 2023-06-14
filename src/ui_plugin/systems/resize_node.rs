@@ -42,9 +42,7 @@ pub fn resize_entity_start(
                     let velo_node = velo_node_query.get(parent.get()).unwrap();
                     ui_state.entity_to_resize = Some(velo_node.id);
                 }
-                super::NodeInteractionType::LeftMouseRelease => {
-                    ui_state.entity_to_resize = None;
-                }
+                super::NodeInteractionType::LeftMouseRelease => {}
                 super::NodeInteractionType::RightClick => {}
             }
         }
@@ -108,7 +106,7 @@ pub fn resize_entity_run(
         (&mut Transform, &Children),
         (With<VeloNode>, Without<ResizeMarker>, Without<ArrowConnect>),
     >,
-    mut shadow_query: Query<Entity, With<VeloShadow>>,
+    shadow_query: Query<Entity, With<VeloShadow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let (camera, camera_transform) = camera_q.single();
@@ -178,9 +176,13 @@ pub fn resize_entity_run(
                                 }
                             }
                         }
-                        // remove shadow node (to add new shadow node on resize end)
-                        if let Ok(shadow) = shadow_query.get_mut(*child) {
-                            commands.entity(shadow).despawn();
+                    }
+
+                    // despawn shadow (to recreate it with new size on resize end)
+                    for child in children.iter() {
+                        if let Ok(shadow) = shadow_query.get(*child) {
+                            commands.entity(shadow).despawn_recursive();
+                            break;
                         }
                     }
 
