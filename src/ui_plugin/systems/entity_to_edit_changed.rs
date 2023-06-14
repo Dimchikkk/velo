@@ -33,15 +33,15 @@ pub fn entity_to_edit_changed(
                         outline.color = theme.selected_node_border;
                         outline.thickness = UiRect::all(Val::Px(2.));
                     } else {
-                        match node.node_type {
-                            NodeType::Rect => {
-                                outline.color = theme.node_border;
-                            }
-                            NodeType::Circle => {
-                                outline.color = theme.node_border.with_a(0.);
-                            }
-                            NodeType::Paper => todo!(),
-                        }
+                        // match node.node_type {
+                        //     NodeType::Rect => {
+                        //         outline.color = theme.node_border;
+                        //     }
+                        //     NodeType::Circle => {
+                        //         outline.color = theme.node_border.with_a(0.);
+                        //     }
+                        //     NodeType::Paper => todo!(),
+                        // }
 
                         outline.thickness = UiRect::all(Val::Px(1.));
                     }
@@ -108,18 +108,18 @@ pub fn entity_to_edit_changed(
             }
             None => {
                 // Reset border colors and thickness for all nodes
-                for (mut outline, node, _) in velo_node_query.iter_mut() {
-                    match node.node_type {
-                        NodeType::Rect => {
-                            outline.color = theme.node_border;
-                        }
-                        NodeType::Circle => {
-                            outline.color = theme.node_border.with_a(0.);
-                        }
-                        NodeType::Paper => todo!(),
-                    }
-                    outline.thickness = UiRect::all(Val::Px(1.));
-                }
+                // for (mut outline, node, _) in velo_node_query.iter_mut() {
+                //     match node.node_type {
+                //         NodeType::Rect => {
+                //             outline.color = theme.node_border;
+                //         }
+                //         NodeType::Circle => {
+                //             outline.color = theme.node_border.with_a(0.);
+                //         }
+                //         NodeType::Paper => todo!(),
+                //     }
+                //     outline.thickness = UiRect::all(Val::Px(1.));
+                // }
                 for (entity, mut raw_text, mut cosmic_edit) in raw_text_node_query.iter_mut() {
                     // cosmic-edit readonly mode
                     if Some(raw_text.id) == *last_entity_to_edit {

@@ -115,9 +115,9 @@ pub fn add_menu_button(
                             align_items: AlignItems::Center,
                             position_type: PositionType::Absolute,
                             position: UiRect {
-                                left: Val::Px(-2.),
+                                left: Val::Px(1.),
                                 right: Val::Px(0.),
-                                top: Val::Px(-2.),
+                                top: Val::Px(-3.),
                                 bottom: Val::Px(0.),
                             },
                             ..default()

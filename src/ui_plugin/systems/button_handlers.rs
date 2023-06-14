@@ -17,6 +17,7 @@ use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 use super::ui_helpers::{
     pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc, DocListItemButton,
     GenericButton, NewDoc, ParticlesEffect, RawText, SaveDoc, TextPosMode, Tooltip, VeloNode,
+    VeloShadow,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
@@ -604,6 +605,7 @@ pub fn particles_effect(
     mut effects: ResMut<Assets<bevy_hanabi::EffectAsset>>,
     mut effects_camera: Query<&mut Camera, With<EffectsCamera>>,
     mut effects_query: Query<(&Name, Entity)>,
+    mut shadow_query: Query<&mut Transform, With<VeloShadow>>,
 ) {
     use bevy_hanabi::prelude::*;
     use rand::Rng;
@@ -613,6 +615,10 @@ pub fn particles_effect(
             Interaction::Clicked => {
                 if effects_camera.single_mut().is_active {
                     effects_camera.single_mut().is_active = false;
+                    for mut transform in shadow_query.iter_mut() {
+                        // this is a hack to make bevy_hanabi work
+                        transform.translation.z = 0.09;
+                    }
                     for (name, entity) in effects_query.iter_mut() {
                         if name.as_str() == "effect:2d" {
                             commands.entity(entity).despawn_recursive();
@@ -620,6 +626,10 @@ pub fn particles_effect(
                     }
                 } else {
                     effects_camera.single_mut().is_active = true;
+                    for mut transform in shadow_query.iter_mut() {
+                        // this is a hack to make bevy_hanabi work
+                        transform.translation.z = -1000.;
+                    }
                     let mut gradient = Gradient::new();
                     let mut rng = rand::thread_rng();
                     gradient.add_key(

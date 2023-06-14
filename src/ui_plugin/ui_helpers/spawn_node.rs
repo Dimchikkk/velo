@@ -16,8 +16,9 @@ use crate::ui_plugin::NodeType;
 use crate::TextPos;
 
 use super::{
-    create_arrow_marker, create_rectangle_btn, create_resize_marker, BevyMarkdownView,
-    InteractiveNode, RawText, ResizeMarker, VeloNode, VeloNodeContainer,
+    create_arrow_marker, create_rectangle_btn, create_resize_marker, spawn_shadow,
+    BevyMarkdownView, InteractiveNode, RawText, ResizeMarker, VeloBorder, VeloNode,
+    VeloNodeContainer, VeloShadow,
 };
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
 use crate::utils::{
@@ -62,21 +63,18 @@ pub fn spawn_sprite_node(
                 },
                 ..Default::default()
             },
-            VeloNode {
-                id: item_meta.id,
-                node_type: item_meta.node_type.clone(),
-            },
+            VeloNode { id: item_meta.id },
         ))
         .id();
 
     let points = [
-        Vec2::new(pos.x - width / 2., pos.y - height / 2.),
-        Vec2::new(pos.x - width / 2., pos.y + height / 2.),
-        Vec2::new(pos.x + width / 2., pos.y + height / 2.),
-        Vec2::new(pos.x + width / 2., pos.y - height / 2.),
+        Vec2::new(-width / 2., -height / 2.),
+        Vec2::new(-width / 2., height / 2.),
+        Vec2::new(width / 2., height / 2.),
+        Vec2::new(width / 2., -height / 2.),
     ];
 
-    let path: Path = match item_meta.node_type {
+    let path: Path = match item_meta.node_type.clone() {
         NodeType::Rect => bevy_prototype_lyon::prelude::GeometryBuilder::build_as(
             &bevy_prototype_lyon::shapes::RoundedPolygon {
                 points: points.into_iter().collect(),
@@ -97,7 +95,7 @@ pub fn spawn_sprite_node(
             },
         ),
     };
-    let has_no_border = item_meta.node_type == NodeType::Paper;
+    let has_no_border = item_meta.node_type.clone() == NodeType::Paper;
     let border = commands
         .spawn((
             bevy_prototype_lyon::prelude::ShapeBundle {
@@ -117,6 +115,10 @@ pub fn spawn_sprite_node(
                 1.,
             ),
             Fill::color(item_meta.bg_color),
+            VeloBorder {
+                id: item_meta.id,
+                node_type: item_meta.node_type.clone(),
+            },
         ))
         .id();
 
@@ -190,44 +192,10 @@ pub fn spawn_sprite_node(
         }
     }
 
-    let has_shadow = item_meta.node_type == NodeType::Paper;
+    let has_shadow = item_meta.node_type.clone() == NodeType::Paper;
 
     if has_shadow {
-        let fill = shaders.add_fill_body(format!(
-            "
-        let size = {:.2};
-        let power = 10.0;
-        var a = (size - d) / size;
-        a = clamp(a, 0.0, 1.0);
-        a = pow(a, power);
-        return vec4<f32>(color.rgb, a * color.a);
-    ",
-            width
-        ));
-        let sdf_expr = format!(
-            "sd_box(p, vec2<f32>({:.2}, {:.2}))",
-            0.7 * (width / 2.),
-            0.7 * (height / 2.),
-        );
-        let sdf = shaders.add_sdf_expr(sdf_expr);
-        let translation = Vec3::new(-0.025 * width, -0.10 * height, 0.09);
-
-        let shadow = commands
-            .spawn(ShapeBundle {
-                transform: Transform {
-                    translation,
-                    ..default()
-                },
-                shape: bevy_smud::SmudShape {
-                    color: Color::BLACK,
-                    sdf,
-                    fill,
-                    frame: Frame::Quad(width),
-                    ..default()
-                },
-                ..default()
-            })
-            .id();
+        let shadow = spawn_shadow(commands, shaders, width, height, theme.shadow, item_meta.id);
         commands.entity(top).add_child(shadow);
     }
 
@@ -397,10 +365,7 @@ pub fn spawn_node(
                 item_meta.z_index,
                 item_meta.text_pos.clone(),
             ),
-            VeloNode {
-                id: item_meta.id,
-                node_type: item_meta.node_type.clone(),
-            },
+            VeloNode { id: item_meta.id },
         ))
         .id();
     let outline_color = match item_meta.node_type {
