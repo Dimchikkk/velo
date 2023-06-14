@@ -47,10 +47,10 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Rect,
-                            left: Val::Px(window.width() / 2. - 200.),
-                            bottom: Val::Px(window.height() / 2.),
-                            width: Val::Px(128.0),
-                            height: Val::Px(128.0),
+                            left: window.width() / 2. - 200.,
+                            bottom: window.height() / 2.,
+                            width: 128.0,
+                            height: 128.0,
                             text: JsonNodeText {
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
@@ -66,10 +66,10 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Circle,
-                            left: Val::Px(window.width() / 2. - 200.),
-                            bottom: Val::Px(window.height() / 2.),
-                            width: Val::Px(128.0),
-                            height: Val::Px(128.0),
+                            left: window.width() / 2. - 200.,
+                            bottom: window.height() / 2.,
+                            width: 128.0,
+                            height: 128.0,
                             text: JsonNodeText {
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
