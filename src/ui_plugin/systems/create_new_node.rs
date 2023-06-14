@@ -3,9 +3,7 @@ use bevy_cosmic_edit::CosmicFont;
 
 use crate::{resources::FontSystemState, themes::Theme, utils::ReflectableUuid};
 
-use super::{
-    spawn_node, ui_helpers::spawn_sprite_node, AddRectEvent, MainPanel, NodeMeta, UiState,
-};
+use super::{ui_helpers::spawn_sprite_node, AddRectEvent, MainPanel, NodeMeta, UiState};
 
 pub fn create_new_node(
     mut commands: Commands,

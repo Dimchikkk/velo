@@ -9,18 +9,19 @@ pub use components::*;
 #[path = "spawn_node.rs"]
 mod spawn_node;
 pub use spawn_node::*;
-
 #[path = "spawn_modal.rs"]
 mod spawn_modal;
 pub use spawn_modal::*;
-
 #[path = "add_tab.rs"]
 mod add_tab;
 pub use add_tab::*;
-
 #[path = "add_list_item.rs"]
 mod add_list_item;
 pub use add_list_item::*;
+
+#[path = "spawn_shadow.rs"]
+mod spawn_shadow;
+pub use spawn_shadow::*;
 
 fn get_marker_style(position: UiRect, size: f32) -> Style {
     Style {

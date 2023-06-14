@@ -120,10 +120,15 @@ pub struct VeloNodeContainer {
     pub id: ReflectableUuid,
 }
 
+#[derive(Component)]
+pub struct VeloBorder {
+    pub id: ReflectableUuid,
+    pub node_type: NodeType,
+}
+
 #[derive(Component, Default, Debug)]
 pub struct VeloNode {
     pub id: ReflectableUuid,
-    pub node_type: NodeType,
 }
 
 #[derive(PartialEq, Eq)]
@@ -209,3 +214,8 @@ pub struct InteractiveNode;
 
 #[derive(Component)]
 pub struct Background;
+
+#[derive(Component)]
+pub struct VeloShadow {
+    pub id: ReflectableUuid,
+}

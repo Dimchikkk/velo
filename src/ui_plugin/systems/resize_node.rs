@@ -1,224 +1,222 @@
-use super::{ui_helpers::ResizeMarker, RawText, RedrawArrowEvent, VeloNode, VeloNodeContainer};
-use crate::{utils::convert_from_val_px, UiState};
-use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
+use super::{
+    ui_helpers::{spawn_shadow, ResizeMarker, VeloBorder, VeloShadow},
+    NodeInteractionEvent, NodeType, RawText, RedrawArrowEvent, VeloNode,
+};
+use crate::{
+    canvas::arrow::components::ArrowConnect, components::MainCamera, themes::Theme, UiState,
+};
+use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::CosmicEdit;
+use bevy_prototype_lyon::prelude::Path;
 use cosmic_text::Edit;
 
 pub fn resize_entity_start(
-    mut interaction_query: Query<
-        (&Interaction, &Parent, &ResizeMarker),
-        (Changed<Interaction>, With<ResizeMarker>),
-    >,
-    mut button_query: Query<&VeloNode, With<VeloNode>>,
-    mut state: ResMut<UiState>,
+    mut ui_state: ResMut<UiState>,
+    mut node_interaction_events: EventReader<NodeInteractionEvent>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    resize_marker_query: Query<(&ResizeMarker, &Parent, &mut Transform), With<ResizeMarker>>,
+    velo_node_query: Query<&VeloNode, With<VeloNode>>,
 ) {
     let mut primary_window = windows.single_mut();
-    for (interaction, parent, resize_marker) in &mut interaction_query {
-        let rectangle = button_query.get_mut(parent.get()).unwrap();
-        match *interaction {
-            Interaction::Clicked => {
-                state.entity_to_resize = Some((rectangle.id, *resize_marker));
-            }
-            Interaction::Hovered => match *resize_marker {
-                ResizeMarker::TopLeft => {
-                    primary_window.cursor.icon = CursorIcon::NwseResize;
+
+    for event in node_interaction_events.iter() {
+        if let Ok((resize_marker, parent, _)) = resize_marker_query.get(event.entity) {
+            match event.node_interaction_type {
+                super::NodeInteractionType::Hover => match *resize_marker {
+                    ResizeMarker::TopLeft => {
+                        primary_window.cursor.icon = CursorIcon::NwseResize;
+                    }
+                    ResizeMarker::TopRight => {
+                        primary_window.cursor.icon = CursorIcon::NeswResize;
+                    }
+                    ResizeMarker::BottomLeft => {
+                        primary_window.cursor.icon = CursorIcon::NeswResize;
+                    }
+                    ResizeMarker::BottomRight => {
+                        primary_window.cursor.icon = CursorIcon::NwseResize;
+                    }
+                },
+                super::NodeInteractionType::LeftClick => {}
+                super::NodeInteractionType::LeftDoubleClick => {}
+                super::NodeInteractionType::LeftMouseHoldAndDrag => {
+                    let velo_node = velo_node_query.get(parent.get()).unwrap();
+                    ui_state.entity_to_resize = Some(velo_node.id);
                 }
-                ResizeMarker::TopRight => {
-                    primary_window.cursor.icon = CursorIcon::NeswResize;
+                super::NodeInteractionType::LeftMouseRelease => {
+                    ui_state.entity_to_resize = None;
                 }
-                ResizeMarker::BottomLeft => {
-                    primary_window.cursor.icon = CursorIcon::NeswResize;
-                }
-                ResizeMarker::BottomRight => {
-                    primary_window.cursor.icon = CursorIcon::NwseResize;
-                }
-            },
-            Interaction::None => {
-                primary_window.cursor.icon = CursorIcon::Default;
+                super::NodeInteractionType::RightClick => {}
             }
         }
     }
 }
 
 pub fn resize_entity_end(
-    mut mouse_motion_events: EventReader<MouseMotion>,
-    state: Res<UiState>,
-    mut node_query: Query<
-        (&VeloNodeContainer, &mut Style),
-        (With<VeloNodeContainer>, Without<RawText>),
-    >,
-    mut raw_text_query: Query<
-        (&RawText, &mut CosmicEdit),
-        (Without<VeloNodeContainer>, With<RawText>),
-    >,
-    mut events: EventWriter<RedrawArrowEvent>,
+    mut commands: Commands,
+    mut shaders: ResMut<Assets<Shader>>,
+    theme: ResMut<Theme>,
+    mut ui_state: ResMut<UiState>,
+    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    raw_text_query: Query<(&Parent, &RawText, &CosmicEdit), With<RawText>>,
+    border_query: Query<(&Parent, &VeloBorder), With<VeloBorder>>,
+    velo_node_query: Query<Entity, With<VeloNode>>,
 ) {
-    for event in mouse_motion_events.iter() {
-        if let Some((id, resize_marker)) = state.entity_to_resize {
-            for (rectangle, mut button_style) in &mut node_query {
-                if id == rectangle.id {
-                    events.send(RedrawArrowEvent { id });
-                    #[allow(unused)]
-                    let mut delta = event.delta;
-                    #[cfg(target_arch = "wasm32")]
-                    {
-                        // MouseMotion returns different values depending on platform
-                        delta = Vec2::new(delta.x / 2., delta.y / 2.);
-                    }
-                    match resize_marker {
-                        ResizeMarker::TopLeft => {
-                            if let Val::Px(width) = button_style.size.width {
-                                button_style.size.width = Val::Px(width - delta.x);
-                            }
-
-                            if let Val::Px(height) = button_style.size.height {
-                                button_style.size.height = Val::Px(height - delta.y);
-                            }
-
-                            if let Val::Px(x) = button_style.position.left {
-                                button_style.position.left = Val::Px(x + delta.x);
-                            }
-                        }
-                        ResizeMarker::TopRight => {
-                            if let Val::Px(width) = button_style.size.width {
-                                button_style.size.width = Val::Px(width + delta.x);
-                            }
-
-                            if let Val::Px(height) = button_style.size.height {
-                                button_style.size.height = Val::Px(height - delta.y);
-                            }
-                        }
-                        ResizeMarker::BottomLeft => {
-                            if let Val::Px(width) = button_style.size.width {
-                                button_style.size.width = Val::Px(width - delta.x);
-                            }
-
-                            if let Val::Px(height) = button_style.size.height {
-                                button_style.size.height = Val::Px(height + delta.y);
-                            }
-
-                            if let Val::Px(x) = button_style.position.left {
-                                button_style.position.left = Val::Px(x + delta.x);
-                            }
-
-                            if let Val::Px(y) = button_style.position.bottom {
-                                button_style.position.bottom = Val::Px(y - delta.y);
-                            }
-                        }
-                        ResizeMarker::BottomRight => {
-                            if let Val::Px(width) = button_style.size.width {
-                                button_style.size.width = Val::Px(width + delta.x);
-                            }
-
-                            if let Val::Px(height) = button_style.size.height {
-                                button_style.size.height = Val::Px(height + delta.y);
-                            }
-
-                            if let Val::Px(y) = button_style.position.bottom {
-                                button_style.position.bottom = Val::Px(y - delta.y);
-                            }
-                        }
-                    };
-                    for (text, mut cosmic_edit) in &mut raw_text_query.iter_mut() {
-                        if text.id == id {
-                            let width = convert_from_val_px(button_style.size.width);
-                            let height = convert_from_val_px(button_style.size.height);
-                            cosmic_edit.size = Some((width, height));
-                            cosmic_edit.editor.buffer_mut().set_redraw(true);
-                            break;
+    for event in node_interaction_events.iter() {
+        if event.node_interaction_type == super::NodeInteractionType::LeftMouseRelease {
+            if let Some(entity_to_resize) = ui_state.entity_to_resize {
+                for (raw_text_parent, raw_text, cosmic_edit) in raw_text_query.iter() {
+                    if raw_text.id == entity_to_resize {
+                        let (width, height) = cosmic_edit.size.unwrap();
+                        let (border_parent, border) =
+                            border_query.get(raw_text_parent.get()).unwrap();
+                        if border.node_type == NodeType::Paper {
+                            let top = velo_node_query.get(border_parent.get()).unwrap();
+                            let shadow = spawn_shadow(
+                                &mut commands,
+                                &mut shaders,
+                                width,
+                                height,
+                                theme.shadow,
+                                entity_to_resize,
+                            );
+                            commands.entity(top).add_child(shadow);
                         }
                     }
                 }
+                ui_state.entity_to_resize = None;
             }
         }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::{resize_entity_end, RedrawArrowEvent, VeloNodeContainer};
-    use crate::{ui_plugin::ui_helpers::ResizeMarker, UiState};
-    use bevy::{input::mouse::MouseMotion, prelude::*};
-    use bevy_cosmic_edit::CosmicFont;
+pub fn resize_entity_run(
+    mut commands: Commands,
+    ui_state: ResMut<UiState>,
+    mut cursor_moved_events: EventReader<CursorMoved>,
+    mut events: EventWriter<RedrawArrowEvent>,
+    mut resize_marker_query: Query<
+        (&ResizeMarker, &Parent, &mut Transform),
+        (With<ResizeMarker>, Without<VeloNode>, Without<ArrowConnect>),
+    >,
+    mut arrow_connector_query: Query<
+        (&ArrowConnect, &mut Transform),
+        (With<ArrowConnect>, Without<VeloNode>, Without<ResizeMarker>),
+    >,
+    mut raw_text_query: Query<(&Parent, &RawText, &mut CosmicEdit), With<RawText>>,
+    mut border_query: Query<(&Parent, &VeloBorder, &mut Path), With<VeloBorder>>,
+    mut velo_node_query: Query<
+        (&mut Transform, &Children),
+        (With<VeloNode>, Without<ResizeMarker>, Without<ArrowConnect>),
+    >,
+    mut shadow_query: Query<Entity, With<VeloShadow>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+) {
+    let (camera, camera_transform) = camera_q.single();
 
-    #[test]
-    fn test_resize_entity_end() {
-        // Set up a test app with the necessary resources and entities
-        let mut app = App::new();
-        app.add_plugin(AssetPlugin::default());
-        app.add_plugin(WindowPlugin::default());
-        let entity_id = crate::utils::ReflectableUuid::generate();
-
-        // Test all ResizeMarkers
-        for &marker in &[
-            ResizeMarker::TopLeft,
-            ResizeMarker::TopRight,
-            ResizeMarker::BottomLeft,
-            ResizeMarker::BottomRight,
-        ] {
-            app.insert_resource(UiState {
-                entity_to_resize: Some((entity_id, marker)),
-                ..default()
-            });
-
-            app.add_event::<MouseMotion>();
-            app.add_event::<RedrawArrowEvent>();
-            app.add_asset::<CosmicFont>();
-            app.world
-                .resource_mut::<Events<MouseMotion>>()
-                .send(MouseMotion {
-                    delta: Vec2::new(10.0, 5.0),
-                });
-
-            app.add_system(resize_entity_end);
-
-            app.world
-                .spawn(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                        position: UiRect {
-                            left: Val::Px(0.0),
-                            bottom: Val::Px(0.0),
-                            ..Default::default()
-                        },
-                        ..Default::default()
-                    },
-                    ..Default::default()
-                })
-                .insert(VeloNodeContainer { id: entity_id });
-
-            // Run the app
-            app.update();
-
-            // Check that the size and position of the rectangle have been updated correctly
-            let (_, style) = app
-                .world
-                .query::<(&VeloNodeContainer, &mut Style)>()
-                .iter_mut(&mut app.world)
-                .last()
-                .unwrap();
-
-            match marker {
-                ResizeMarker::TopLeft => {
-                    assert_eq!(style.size.width, Val::Px(90.0));
-                    assert_eq!(style.size.height, Val::Px(95.0));
-                    assert_eq!(style.position.left, Val::Px(10.0));
+    for event in cursor_moved_events.iter() {
+        if let Some(id) = ui_state.entity_to_resize {
+            for (raw_text_parent, raw_text, mut cosmic_edit) in &mut raw_text_query.iter_mut() {
+                if id != raw_text.id {
+                    continue;
                 }
-                ResizeMarker::TopRight => {
-                    assert_eq!(style.size.width, Val::Px(120.0));
-                    assert_eq!(style.size.height, Val::Px(90.0));
-                }
-                ResizeMarker::BottomLeft => {
-                    assert_eq!(style.size.width, Val::Px(70.0));
-                    assert_eq!(style.size.height, Val::Px(115.0));
-                    assert_eq!(style.position.left, Val::Px(30.0));
-                    assert_eq!(style.position.bottom, Val::Px(-15.0));
-                }
-                ResizeMarker::BottomRight => {
-                    assert_eq!(style.size.width, Val::Px(140.0));
-                    assert_eq!(style.size.height, Val::Px(120.0));
-                    assert_eq!(style.position.bottom, Val::Px(-20.0));
+                if let Some(cursor_pos) =
+                    camera.viewport_to_world_2d(camera_transform, event.position)
+                {
+                    let (border_parent, velo_border, mut path) =
+                        border_query.get_mut(raw_text_parent.get()).unwrap();
+                    let (velo_transform, children) =
+                        velo_node_query.get_mut(border_parent.get()).unwrap();
+                    let pos = velo_transform.translation.truncate();
+                    let width = (cursor_pos.x - pos.x).abs() * 2.;
+                    let height = (cursor_pos.y - pos.y).abs() * 2.;
+
+                    cosmic_edit.size = Some((width, height));
+                    cosmic_edit.editor.buffer_mut().set_redraw(true);
+
+                    for child in children.iter() {
+                        // update resize markers positions
+                        if let Ok(resize) = resize_marker_query.get_mut(*child) {
+                            let mut resize_transform = resize.2;
+                            match resize.0 {
+                                ResizeMarker::TopLeft => {
+                                    resize_transform.translation.x = -width / 2.;
+                                    resize_transform.translation.y = height / 2.;
+                                }
+                                ResizeMarker::TopRight => {
+                                    resize_transform.translation.x = width / 2.;
+                                    resize_transform.translation.y = height / 2.;
+                                }
+                                ResizeMarker::BottomLeft => {
+                                    resize_transform.translation.x = -width / 2.;
+                                    resize_transform.translation.y = -height / 2.;
+                                }
+                                ResizeMarker::BottomRight => {
+                                    resize_transform.translation.x = width / 2.;
+                                    resize_transform.translation.y = -height / 2.;
+                                }
+                            }
+                        }
+                        // update arrow connectors positions
+                        if let Ok(arrow_connect) = arrow_connector_query.get_mut(*child) {
+                            let mut arrow_transform = arrow_connect.1;
+                            match arrow_connect.0.pos {
+                                crate::canvas::arrow::components::ArrowConnectPos::Top => {
+                                    arrow_transform.translation.x = 0.;
+                                    arrow_transform.translation.y = height / 2.;
+                                }
+                                crate::canvas::arrow::components::ArrowConnectPos::Bottom => {
+                                    arrow_transform.translation.x = 0.;
+                                    arrow_transform.translation.y = -height / 2.;
+                                }
+                                crate::canvas::arrow::components::ArrowConnectPos::Left => {
+                                    arrow_transform.translation.x = -width / 2.;
+                                    arrow_transform.translation.y = 0.;
+                                }
+                                crate::canvas::arrow::components::ArrowConnectPos::Right => {
+                                    arrow_transform.translation.x = width / 2.;
+                                    arrow_transform.translation.y = 0.;
+                                }
+                            }
+                        }
+                        // remove shadow node (to add new shadow node on resize end)
+                        if let Ok(shadow) = shadow_query.get_mut(*child) {
+                            commands.entity(shadow).despawn();
+                        }
+                    }
+
+                    // update size of bevy_lyon node
+                    let points = [
+                        Vec2::new(-width / 2., -height / 2.),
+                        Vec2::new(-width / 2., height / 2.),
+                        Vec2::new(width / 2., height / 2.),
+                        Vec2::new(width / 2., -height / 2.),
+                    ];
+
+                    let new_path = match velo_border.node_type {
+                        NodeType::Rect => bevy_prototype_lyon::prelude::GeometryBuilder::build_as(
+                            &bevy_prototype_lyon::shapes::RoundedPolygon {
+                                points: points.into_iter().collect(),
+                                closed: true,
+                                radius: 10.,
+                            },
+                        ),
+                        NodeType::Paper => bevy_prototype_lyon::prelude::GeometryBuilder::build_as(
+                            &bevy_prototype_lyon::shapes::Polygon {
+                                points: points.into_iter().collect(),
+                                closed: true,
+                            },
+                        ),
+                        NodeType::Circle => {
+                            bevy_prototype_lyon::prelude::GeometryBuilder::build_as(
+                                &bevy_prototype_lyon::shapes::Circle {
+                                    radius: width / 2.,
+                                    center: Vec2::new(0., 0.),
+                                },
+                            )
+                        }
+                    };
+                    *path = new_path;
+                    events.send(RedrawArrowEvent { id: raw_text.id });
                 }
             }
         }

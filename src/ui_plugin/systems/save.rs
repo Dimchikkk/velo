@@ -173,7 +173,8 @@ pub fn save_tab(
                     _ => -1,
                 };
                 json_nodes.push(json!(JsonNode {
-                    node_type: node.node_type.clone(),
+                    node_type: super::NodeType::Paper,
+                    // node_type: node.node_type.clone(),
                     id: node.id.0,
                     left,
                     bottom,
