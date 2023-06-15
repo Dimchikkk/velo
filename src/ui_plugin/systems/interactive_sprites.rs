@@ -104,9 +104,12 @@ pub fn interactive_sprite(
             });
         }
 
-        if buttons.pressed(MouseButton::Left) && !holding_state.is_holding
-                && Duration::from_millis(now_ms as u64) - holding_state.duration
-                    > Duration::from_millis(50) && holding_state.entity.is_some() {
+        if buttons.pressed(MouseButton::Left)
+            && !holding_state.is_holding
+            && Duration::from_millis(now_ms as u64) - holding_state.duration
+                > Duration::from_millis(50)
+            && holding_state.entity.is_some()
+        {
             is_hover = false;
             holding_state.is_holding = true;
             node_interaction_events.send(NodeInteractionEvent {
