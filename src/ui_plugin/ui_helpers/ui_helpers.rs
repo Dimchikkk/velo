@@ -2,37 +2,26 @@ use linkify::{LinkFinder, LinkKind};
 
 use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::{themes::Theme, TextPos};
+use crate::themes::Theme;
 #[path = "components.rs"]
 mod components;
 pub use components::*;
 #[path = "spawn_node.rs"]
 mod spawn_node;
 pub use spawn_node::*;
-
 #[path = "spawn_modal.rs"]
 mod spawn_modal;
 pub use spawn_modal::*;
-
 #[path = "add_tab.rs"]
 mod add_tab;
 pub use add_tab::*;
-
 #[path = "add_list_item.rs"]
 mod add_list_item;
 pub use add_list_item::*;
 
-fn get_marker_style(position: UiRect, size: f32) -> Style {
-    Style {
-        position_type: PositionType::Absolute,
-        position,
-        border: UiRect::all(Val::Px(1.)),
-        size: Size::new(Val::Px(size), Val::Px(size)),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
-    }
-}
+#[path = "spawn_shadow.rs"]
+mod spawn_shadow;
+pub use spawn_shadow::*;
 
 pub fn add_rectangle_txt(theme: &Res<Theme>, text: String) -> TextBundle {
     let text_style = TextStyle {
@@ -44,69 +33,6 @@ pub fn add_rectangle_txt(theme: &Res<Theme>, text: String) -> TextBundle {
         position_type: PositionType::Relative,
         ..default()
     })
-}
-
-pub fn pos_to_style(text_pos: TextPos) -> (JustifyContent, AlignItems) {
-    match text_pos {
-        TextPos::TopLeft => (JustifyContent::FlexStart, AlignItems::FlexStart),
-        TextPos::Center => (JustifyContent::Center, AlignItems::Center),
-    }
-}
-
-pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
-    match style {
-        (JustifyContent::FlexStart, AlignItems::FlexStart) => TextPos::TopLeft,
-        (JustifyContent::Center, AlignItems::Center) => TextPos::Center,
-        _ => panic!("Invalid style! {:?}", style),
-    }
-}
-
-fn create_rectangle_btn(bg_color: Color, z_index: i32, text_pos: TextPos) -> ButtonBundle {
-    let (justify_content, align_items) = pos_to_style(text_pos);
-
-    ButtonBundle {
-        background_color: bg_color.into(),
-        z_index: ZIndex::Local(z_index),
-        style: Style {
-            position_type: PositionType::Absolute,
-            size: Size::new(Val::Percent(100.), Val::Percent(100.)),
-            justify_content,
-            align_items,
-            ..default()
-        },
-        ..default()
-    }
-}
-
-fn create_arrow_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonBundle {
-    ButtonBundle {
-        style: get_marker_style(
-            UiRect {
-                left: Val::Percent(left),
-                right: Val::Percent(right),
-                top: Val::Percent(top),
-                bottom: Val::Percent(bottom),
-            },
-            4.,
-        ),
-        ..default()
-    }
-}
-
-fn create_resize_marker(left: f32, right: f32, top: f32, bottom: f32) -> ButtonBundle {
-    ButtonBundle {
-        style: get_marker_style(
-            UiRect {
-                left: Val::Percent(left),
-                right: Val::Percent(right),
-                top: Val::Percent(top),
-                bottom: Val::Percent(bottom),
-            },
-            10.,
-        ),
-        background_color: Color::NONE.into(),
-        ..default()
-    }
 }
 
 pub fn get_sections(theme: &Res<Theme>, text: String) -> (Vec<TextSection>, Vec<bool>) {

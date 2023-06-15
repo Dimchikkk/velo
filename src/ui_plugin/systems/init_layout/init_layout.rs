@@ -368,6 +368,9 @@ pub fn init_layout(
             button_type: ui_helpers::ButtonTypes::AddCircle,
         },
         ButtonAction {
+            button_type: ui_helpers::ButtonTypes::AddPaper,
+        },
+        ButtonAction {
             button_type: ui_helpers::ButtonTypes::Del,
         },
     );
@@ -375,7 +378,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
+                size: Size::new(Val::Percent(90.), Val::Percent(9.)),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -432,12 +435,12 @@ pub fn init_layout(
     let color4 = add_color(
         &mut commands,
         &theme,
-        Color::rgb(207.0 / 255.0, 226.0 / 255.0, 243.0 / 255.0),
+        Color::rgb(239., 68.0 / 255.0, 68.0 / 255.0),
     );
     let color5 = add_color(
         &mut commands,
         &theme,
-        Color::rgb(245.0 / 255.0, 222.0 / 255.0, 179.0 / 255.0),
+        Color::rgb(34.0 / 255.0, 197.0 / 255.0, 94.0 / 255.0),
     );
 
     commands.entity(color_picker).add_child(color1);
@@ -517,7 +520,7 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
+                size: Size::new(Val::Percent(90.), Val::Percent(9.)),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()

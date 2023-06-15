@@ -115,21 +115,22 @@ pub struct LeftPanelControls;
 #[derive(Component)]
 pub struct LeftPanelExplorer;
 
-#[derive(Component, Default, Debug)]
-pub struct VeloNodeContainer {
+#[derive(Component)]
+pub struct VeloBorder {
     pub id: ReflectableUuid,
+    pub node_type: NodeType,
 }
 
 #[derive(Component, Default, Debug)]
 pub struct VeloNode {
     pub id: ReflectableUuid,
-    pub node_type: NodeType,
 }
 
 #[derive(PartialEq, Eq)]
 pub enum ButtonTypes {
     AddRec,
     AddCircle,
+    AddPaper,
     Del,
     Front,
     Back,
@@ -201,5 +202,16 @@ pub struct ModalConfirm {
 
 #[derive(Component, Default)]
 pub struct ModalCancel {
+    pub id: ReflectableUuid,
+}
+
+#[derive(Component)]
+pub struct InteractiveNode;
+
+#[derive(Component)]
+pub struct Background;
+
+#[derive(Component)]
+pub struct VeloShadow {
     pub id: ReflectableUuid,
 }

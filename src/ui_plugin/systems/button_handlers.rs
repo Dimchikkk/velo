@@ -2,10 +2,12 @@ use std::collections::HashMap;
 use std::{collections::VecDeque, time::Duration};
 
 use bevy::render::view::RenderLayers;
+use bevy::sprite::collide_aabb::collide;
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use bevy_cosmic_edit::{CosmicEdit, CosmicFont};
 use bevy_pkv::PkvStore;
+use bevy_prototype_lyon::prelude::Fill;
 use cosmic_text::Edit;
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -15,14 +17,14 @@ use crate::themes::Theme;
 use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
-    pos_to_style, spawn_modal, ButtonAction, ChangeColor, DeleteDoc, DocListItemButton,
-    GenericButton, NewDoc, ParticlesEffect, RawText, SaveDoc, TextPosMode, Tooltip, VeloNode,
+    spawn_modal, ButtonAction, ChangeColor, DeleteDoc, DocListItemButton, GenericButton, NewDoc,
+    ParticlesEffect, RawText, SaveDoc, TextPosMode, Tooltip, VeloBorder, VeloNode, VeloShadow,
 };
-use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc, VeloNodeContainer};
+use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, EffectsCamera, Tab};
 use crate::resources::{AppState, FontSystemState, LoadDocRequest, SaveDocRequest};
-use crate::utils::{get_timestamp, load_doc_to_memory, to_cosmic_text_pos, ReflectableUuid};
+use crate::utils::{get_timestamp, load_doc_to_memory, ReflectableUuid};
 
 pub fn rec_button_handlers(
     mut commands: Commands,
@@ -31,13 +33,14 @@ pub fn rec_button_handlers(
         (&Interaction, &ButtonAction),
         (Changed<Interaction>, With<ButtonAction>),
     >,
-    mut nodes: Query<(Entity, &VeloNodeContainer, &mut ZIndex), With<VeloNodeContainer>>,
+    mut raw_text_query: Query<(&mut CosmicEdit, &RawText, &Parent), With<RawText>>,
+    border_query: Query<&Parent, With<VeloBorder>>,
+    mut velo_node_query: Query<(Entity, &VeloNode, &mut Transform), With<VeloNode>>,
     mut arrows: Query<(Entity, &ArrowMeta, &mut Visibility), (With<ArrowMeta>, Without<Tooltip>)>,
     mut state: ResMut<UiState>,
-    windows: Query<&Window, With<PrimaryWindow>>,
+    mut app_state: ResMut<AppState>,
     theme: Res<Theme>,
 ) {
-    let window = windows.single();
     for (interaction, button_action) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => match button_action.button_type {
@@ -46,16 +49,16 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Rect,
-                            left: Val::Px(window.width() / 2. - 200.),
-                            bottom: Val::Px(window.height() / 2.),
-                            width: Val::Px(128.0),
-                            height: Val::Px(128.0),
+                            x: 0.,
+                            y: 0.,
+                            width: theme.node_width,
+                            height: theme.node_height,
                             text: JsonNodeText {
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
                             },
                             bg_color: theme.node_bg,
-                            z_index: 0,
+                            ..default()
                         },
                         image: None,
                     });
@@ -65,16 +68,35 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Circle,
-                            left: Val::Px(window.width() / 2. - 200.),
-                            bottom: Val::Px(window.height() / 2.),
-                            width: Val::Px(128.0),
-                            height: Val::Px(128.0),
+                            x: 0.,
+                            y: 0.,
+                            width: theme.node_width,
+                            height: theme.node_height,
                             text: JsonNodeText {
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
                             },
                             bg_color: theme.node_bg,
-                            z_index: 0,
+                            ..default()
+                        },
+                        image: None,
+                    });
+                }
+                super::ui_helpers::ButtonTypes::AddPaper => {
+                    events.send(AddRectEvent {
+                        node: JsonNode {
+                            id: Uuid::new_v4(),
+                            node_type: NodeType::Paper,
+                            x: 0.,
+                            y: 0.,
+                            width: theme.node_width,
+                            height: theme.node_height,
+                            text: JsonNodeText {
+                                text: "".to_string(),
+                                pos: crate::TextPos::Center,
+                            },
+                            bg_color: theme.paper_node_bg,
+                            ..default()
                         },
                         image: None,
                     });
@@ -83,7 +105,7 @@ pub fn rec_button_handlers(
                     if let Some(id) = state.entity_to_edit {
                         commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                         *state = UiState::default();
-                        for (entity, node, _) in nodes.iter() {
+                        for (entity, node, _) in velo_node_query.iter() {
                             if node.id == id {
                                 commands.entity(entity).despawn_recursive();
                             }
@@ -104,23 +126,117 @@ pub fn rec_button_handlers(
                     }
                 }
                 super::ui_helpers::ButtonTypes::Front => {
+                    let current_document = app_state.current_document.unwrap();
+                    let mut tab = app_state
+                        .docs
+                        .get_mut(&current_document)
+                        .unwrap()
+                        .tabs
+                        .iter_mut()
+                        .find(|x| x.is_active)
+                        .unwrap();
                     if let Some(id) = state.entity_to_edit {
-                        for (_, node, mut z_index) in nodes.iter_mut() {
-                            if node.id == id {
-                                if let ZIndex::Local(i) = *z_index {
-                                    *z_index = ZIndex::Local(i + 1);
+                        let mut data = None;
+                        // fint current z_index
+                        for (cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
+                            if raw_text.id == id {
+                                let border = border_query.get(parent.get()).unwrap();
+                                let top = velo_node_query.get_mut(border.get()).unwrap();
+                                let size = Vec2::new(
+                                    cosmic_edit.size.unwrap().0,
+                                    cosmic_edit.size.unwrap().1,
+                                );
+                                let translation = top.2.translation;
+                                data = Some((size, translation));
+                                break;
+                            }
+                        }
+                        // find higher z_index if collide
+                        for (cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
+                            if raw_text.id != id {
+                                let border = border_query.get(parent.get()).unwrap();
+                                let top = velo_node_query.get_mut(border.get()).unwrap();
+                                let size = Vec2::new(
+                                    cosmic_edit.size.unwrap().0,
+                                    cosmic_edit.size.unwrap().1,
+                                );
+                                let translation = top.2.translation;
+                                if let Some((active_size, active_translation)) = data {
+                                    if collide(translation, size, active_translation, active_size)
+                                        .is_some()
+                                        && translation.z > active_translation.z
+                                    {
+                                        data = Some((size, translation));
+                                        break;
+                                    }
                                 }
+                            }
+                        }
+                        // update z_index
+                        for (_, node, mut transform) in velo_node_query.iter_mut() {
+                            if node.id == id {
+                                if let Some((_, translation)) = data {
+                                    transform.translation.z = (translation.z + 3.) % f32::MAX;
+                                } else {
+                                    transform.translation.z =
+                                        (transform.translation.z + 3.) % f32::MAX;
+                                }
+                                if tab.z_index < transform.translation.z {
+                                    tab.z_index = transform.translation.z;
+                                }
+                                break;
                             }
                         }
                     }
                 }
                 super::ui_helpers::ButtonTypes::Back => {
                     if let Some(id) = state.entity_to_edit {
-                        for (_, node, mut z_index) in nodes.iter_mut() {
-                            if node.id == id {
-                                if let ZIndex::Local(i) = *z_index {
-                                    *z_index = ZIndex::Local(i - 1);
+                        let mut data = None;
+                        // fint current z_index
+                        for (cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
+                            if raw_text.id == id {
+                                let border = border_query.get(parent.get()).unwrap();
+                                let top = velo_node_query.get_mut(border.get()).unwrap();
+                                let size = Vec2::new(
+                                    cosmic_edit.size.unwrap().0,
+                                    cosmic_edit.size.unwrap().1,
+                                );
+                                let translation = top.2.translation;
+                                data = Some((size, translation));
+                                break;
+                            }
+                        }
+                        // find lower z_index if collide
+                        for (cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
+                            if raw_text.id != id {
+                                let border = border_query.get(parent.get()).unwrap();
+                                let top = velo_node_query.get_mut(border.get()).unwrap();
+                                let size = Vec2::new(
+                                    cosmic_edit.size.unwrap().0,
+                                    cosmic_edit.size.unwrap().1,
+                                );
+                                let translation = top.2.translation;
+                                if let Some((active_size, active_translation)) = data {
+                                    if collide(translation, size, active_translation, active_size)
+                                        .is_some()
+                                        && translation.z < active_translation.z
+                                    {
+                                        data = Some((size, translation));
+                                        break;
+                                    }
                                 }
+                            }
+                        }
+                        // update z_index
+                        for (_, node, mut transform) in velo_node_query.iter_mut() {
+                            if node.id == id {
+                                if let Some((_, translation)) = data {
+                                    transform.translation.z = f32::max(translation.z - 3., 1.);
+                                } else {
+                                    transform.translation.z =
+                                        f32::max(transform.translation.z - 3., 1.);
+                                }
+                                break;
                             }
                         }
                     }
@@ -135,21 +251,18 @@ pub fn rec_button_handlers(
 pub fn change_color_pallete(
     mut interaction_query: Query<
         (&Interaction, &ChangeColor),
-        (Changed<Interaction>, With<ChangeColor>, Without<VeloNode>),
+        (Changed<Interaction>, With<ChangeColor>),
     >,
-    mut cosmic_nodes: Query<(&mut CosmicEdit, &RawText), With<RawText>>,
-    state: Res<UiState>,
+    mut velo_border: Query<(&mut Fill, &VeloBorder), With<VeloBorder>>,
+    ui_state: Res<UiState>,
 ) {
     for (interaction, change_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let color = change_color.color;
-                if let Some(entity_to_edit) = state.entity_to_edit {
-                    for (mut cosmic_edit, node) in cosmic_nodes.iter_mut() {
-                        if node.id == entity_to_edit {
-                            cosmic_edit.bg = color;
-                            cosmic_edit.editor.buffer_mut().set_redraw(true);
-                        }
+                for (mut stroke, velo_border) in velo_border.iter_mut() {
+                    if Some(velo_border.id) == ui_state.entity_to_edit {
+                        stroke.color = color;
                     }
                 }
             }
@@ -164,27 +277,17 @@ pub fn change_text_pos(
         (&Interaction, &TextPosMode),
         (Changed<Interaction>, With<TextPosMode>),
     >,
-    mut nodes: Query<(&mut Style, &VeloNode), With<VeloNode>>,
     state: Res<UiState>,
     mut raw_text_node_query: Query<(&RawText, &mut CosmicEdit), With<RawText>>,
 ) {
     for (interaction, text_pos_mode) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                if state.entity_to_edit.is_some() {
-                    for (mut style, node) in nodes.iter_mut() {
-                        if node.id == state.entity_to_edit.unwrap() {
-                            let (justify_content, align_items) =
-                                pos_to_style(text_pos_mode.text_pos.clone());
-                            style.justify_content = justify_content;
-                            style.align_items = align_items;
-                            for (raw_text, mut cosmic_edit) in &mut raw_text_node_query.iter_mut() {
-                                if raw_text.id == node.id {
-                                    cosmic_edit.text_pos =
-                                        to_cosmic_text_pos(text_pos_mode.text_pos.clone());
-                                    cosmic_edit.editor.buffer_mut().set_redraw(true)
-                                }
-                            }
+                if let Some(entity_to_edit) = state.entity_to_edit {
+                    for (raw_text, mut cosmit_edit) in raw_text_node_query.iter_mut() {
+                        if raw_text.id == entity_to_edit {
+                            cosmit_edit.text_pos = text_pos_mode.text_pos.clone().into();
+                            cosmit_edit.editor.buffer_mut().set_redraw(true);
                         }
                     }
                 }
@@ -238,6 +341,7 @@ pub fn new_doc_handler(
                     name: "Tab 1".to_string(),
                     checkpoints,
                     is_active: true,
+                    z_index: 10.,
                 }];
                 app_state.docs.insert(
                     doc_id,
@@ -604,6 +708,7 @@ pub fn particles_effect(
     mut effects: ResMut<Assets<bevy_hanabi::EffectAsset>>,
     mut effects_camera: Query<&mut Camera, With<EffectsCamera>>,
     mut effects_query: Query<(&Name, Entity)>,
+    mut shadow_query: Query<&mut Transform, With<VeloShadow>>,
 ) {
     use bevy_hanabi::prelude::*;
     use rand::Rng;
@@ -613,6 +718,10 @@ pub fn particles_effect(
             Interaction::Clicked => {
                 if effects_camera.single_mut().is_active {
                     effects_camera.single_mut().is_active = false;
+                    for mut transform in shadow_query.iter_mut() {
+                        // this is a hack to make bevy_hanabi work
+                        transform.translation.z = 0.09;
+                    }
                     for (name, entity) in effects_query.iter_mut() {
                         if name.as_str() == "effect:2d" {
                             commands.entity(entity).despawn_recursive();
@@ -620,6 +729,10 @@ pub fn particles_effect(
                     }
                 } else {
                     effects_camera.single_mut().is_active = true;
+                    for mut transform in shadow_query.iter_mut() {
+                        // this is a hack to make bevy_hanabi work
+                        transform.translation.z = -1000.;
+                    }
                     let mut gradient = Gradient::new();
                     let mut rng = rand::thread_rng();
                     gradient.add_key(

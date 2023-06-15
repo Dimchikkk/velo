@@ -3,6 +3,7 @@ use bevy_cosmic_edit::{
     cosmic_edit_set_text, get_cosmic_text, ActiveEditor, CosmicEdit, CosmicFont, CosmicText,
 };
 use bevy_markdown::{generate_markdown_lines, BevyMarkdown, BevyMarkdownTheme};
+use bevy_prototype_lyon::prelude::Stroke;
 use cosmic_text::{Cursor, Edit};
 
 use crate::{
@@ -10,16 +11,15 @@ use crate::{
     themes::Theme,
     utils::{bevy_color_to_cosmic, ReflectableUuid},
 };
-use bevy_ui_borders::Outline;
 
-use super::{BevyMarkdownView, NodeType, RawText, UiState, VeloNode};
+use super::{ui_helpers::VeloBorder, BevyMarkdownView, NodeType, RawText, UiState};
 
 pub fn entity_to_edit_changed(
     ui_state: Res<UiState>,
     app_state: Res<AppState>,
     theme: Res<Theme>,
     mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
-    mut velo_node_query: Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
+    mut velo_border: Query<(&mut Stroke, &VeloBorder), With<VeloBorder>>,
     mut raw_text_node_query: Query<(Entity, &mut RawText, &mut CosmicEdit), With<RawText>>,
     mut commands: Commands,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
@@ -28,21 +28,18 @@ pub fn entity_to_edit_changed(
         match ui_state.entity_to_edit {
             Some(entity_to_edit) => {
                 // Change border for selected node
-                for (mut outline, node, _) in velo_node_query.iter_mut() {
-                    if node.id == entity_to_edit {
-                        outline.color = theme.selected_node_border;
-                        outline.thickness = UiRect::all(Val::Px(2.));
+                for (mut stroke, velo_border) in velo_border.iter_mut() {
+                    if velo_border.id == entity_to_edit {
+                        stroke.color = theme.selected_node_border;
+                        stroke.options.line_width = 2.;
                     } else {
-                        match node.node_type {
-                            NodeType::Rect => {
-                                outline.color = theme.node_border;
-                            }
-                            NodeType::Circle => {
-                                outline.color = theme.node_border.with_a(0.);
-                            }
-                        }
-
-                        outline.thickness = UiRect::all(Val::Px(1.));
+                        let has_border = velo_border.node_type.clone() != NodeType::Paper;
+                        if has_border {
+                            stroke.color = theme.node_border;
+                        } else {
+                            stroke.color = Color::NONE;
+                        };
+                        stroke.options.line_width = 1.;
                     }
                 }
 
@@ -106,17 +103,14 @@ pub fn entity_to_edit_changed(
                 }
             }
             None => {
-                // Reset border colors and thickness for all nodes
-                for (mut outline, node, _) in velo_node_query.iter_mut() {
-                    match node.node_type {
-                        NodeType::Rect => {
-                            outline.color = theme.node_border;
-                        }
-                        NodeType::Circle => {
-                            outline.color = theme.node_border.with_a(0.);
-                        }
-                    }
-                    outline.thickness = UiRect::all(Val::Px(1.));
+                for (mut stroke, velo_border) in velo_border.iter_mut() {
+                    let has_border = velo_border.node_type.clone() != NodeType::Paper;
+                    if has_border {
+                        stroke.color = theme.node_border;
+                    } else {
+                        stroke.color = Color::NONE;
+                    };
+                    stroke.options.line_width = 1.;
                 }
                 for (entity, mut raw_text, mut cosmic_edit) in raw_text_node_query.iter_mut() {
                     // cosmic-edit readonly mode
