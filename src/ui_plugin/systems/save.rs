@@ -8,14 +8,14 @@ use image::*;
 use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
-use super::ui_helpers::VeloNode;
-use super::{RawText, SaveStoreEvent, VeloNodeContainer};
+use super::ui_helpers::{VeloBorder, VeloNode};
+use super::{RawText, SaveStoreEvent};
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::components::Doc;
 use crate::resources::SaveDocRequest;
 use crate::resources::{AppState, SaveTabRequest};
 use crate::utils::{load_doc_to_memory, ReflectableUuid};
-use crate::{ui_plugin::ui_helpers::style_to_pos, JsonNode, JsonNodeText, MAX_CHECKPOINTS};
+use crate::{JsonNode, JsonNodeText, MAX_CHECKPOINTS};
 
 pub fn should_save_doc(request: Option<Res<SaveDocRequest>>) -> bool {
     request.is_some()
@@ -126,15 +126,12 @@ pub fn save_to_store(
 
 pub fn save_tab(
     images: Res<Assets<Image>>,
-    node_container_query: Query<(&Style, &Node), With<VeloNodeContainer>>,
-    node_query: Query<
-        (&VeloNode, &UiImage, &ZIndex, &Parent, &Style),
-        (With<VeloNode>, Without<VeloNodeContainer>),
-    >,
     arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
     request: Res<SaveTabRequest>,
     mut app_state: ResMut<AppState>,
-    text_query: Query<(&RawText, &CosmicEdit), With<RawText>>,
+    raw_text_query: Query<(&RawText, &CosmicEdit, &Parent), With<RawText>>,
+    border_query: Query<(&Parent, &VeloBorder), With<VeloBorder>>,
+    velo_node_query: Query<&Transform, With<VeloNode>>,
 ) {
     #[cfg(not(target_arch = "wasm32"))]
     if let Some(index) = &mut app_state.search_index {
@@ -146,7 +143,7 @@ pub fn save_tab(
         "arrows": [],
     });
     let json_images = json["images"].as_object_mut().unwrap();
-    for (raw_text, cosmic_edit) in text_query.iter() {
+    for (raw_text, cosmic_edit, _) in raw_text_query.iter() {
         if let Some(handle) = cosmic_edit.bg_image.clone() {
             let image = images.get(&handle).unwrap();
             if let Ok(img) = image.clone().try_into_dynamic() {
@@ -160,48 +157,38 @@ pub fn save_tab(
     }
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
-    for (node, _, z_index, parent, test_pos_style) in node_query.iter() {
-        for (raw_text, cosmic_text) in text_query.iter() {
-            if node.id == raw_text.id {
-                let (style, node_container): (&Style, &Node) =
-                    node_container_query.get(parent.get()).unwrap();
-                // let left = style.position.left;
-                // let bottom = style.position.bottom;
-                let bg_color = cosmic_text.bg;
-                let z_index = match *z_index {
-                    ZIndex::Local(v) => v,
-                    _ => -1,
-                };
-                json_nodes.push(json!(JsonNode {
-                    node_type: super::NodeType::Paper,
-                    // node_type: node.node_type.clone(),
-                    id: node.id.0,
-                    left: 3.,
-                    bottom: 3.,
-                    width: node_container.size().x,
-                    height: node_container.size().y,
-                    bg_color,
-                    text: JsonNodeText {
-                        text: raw_text.last_text.clone(),
-                        pos: style_to_pos((
-                            test_pos_style.justify_content,
-                            test_pos_style.align_items
-                        )),
-                    },
-                    z_index,
-                }));
-                #[cfg(not(target_arch = "wasm32"))]
-                if let Some(index) = &mut app_state.search_index {
-                    index.node_updates.insert(
-                        super::NodeSearchLocation {
-                            doc_id: request.doc_id.0,
-                            tab_id: request.tab_id.0,
-                            node_id: node.id.0,
-                        },
-                        raw_text.last_text.clone(),
-                    );
-                }
-            }
+    for (raw_text, cosmic_edit, parent) in raw_text_query.iter() {
+        let (border_parent, border) = border_query.get(parent.get()).unwrap();
+        let top = velo_node_query.get(border_parent.get()).unwrap();
+        let bg_color = cosmic_edit.bg;
+        let x = top.translation.x;
+        let y = top.translation.y;
+        let z = top.translation.z;
+        let (width, height) = cosmic_edit.size.unwrap();
+        json_nodes.push(json!(JsonNode {
+            node_type: border.node_type.clone(),
+            id: raw_text.id.0,
+            x,
+            y,
+            z,
+            width,
+            height,
+            bg_color,
+            text: JsonNodeText {
+                text: raw_text.last_text.clone(),
+                pos: cosmic_edit.text_pos.clone().into()
+            },
+        }));
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Some(index) = &mut app_state.search_index {
+            index.node_updates.insert(
+                super::NodeSearchLocation {
+                    doc_id: request.doc_id.0,
+                    tab_id: request.tab_id.0,
+                    node_id: raw_text.id.0,
+                },
+                raw_text.last_text.clone(),
+            );
         }
     }
 
@@ -257,6 +244,7 @@ mod tests {
                     is_active: true,
                     name: "Test tab".to_string(),
                     checkpoints: std::collections::VecDeque::new(),
+                    z_index: 10.,
                 }],
             },
         );
@@ -312,6 +300,7 @@ mod tests {
                 tabs: vec![crate::components::Tab {
                     id: tab_id,
                     is_active: true,
+                    z_index: 1.,
                     name: "Test tab".to_string(),
                     checkpoints: std::collections::VecDeque::new(),
                 }],
@@ -374,6 +363,7 @@ mod tests {
                 tabs: vec![crate::components::Tab {
                     id: tab_id,
                     is_active: true,
+                    z_index: 1.,
                     name: "Test tab".to_string(),
                     checkpoints: std::collections::VecDeque::new(),
                 }],

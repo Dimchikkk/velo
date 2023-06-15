@@ -77,6 +77,7 @@ use active_editor_changed::*;
 
 pub struct UiPlugin;
 
+#[derive(Default)]
 pub struct AddRectEvent {
     pub node: JsonNode,
     pub image: Option<Handle<Image>>,
@@ -119,29 +120,30 @@ pub enum NodeType {
     Circle,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default)]
 pub enum TextPos {
+    #[default]
     Center,
     TopLeft,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct JsonNodeText {
     pub text: String,
     pub pos: TextPos,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct JsonNode {
     pub id: Uuid,
     pub node_type: NodeType,
-    pub left: f32,
-    pub bottom: f32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
     pub width: f32,
     pub height: f32,
     pub text: JsonNodeText,
     pub bg_color: Color,
-    pub z_index: i32,
 }
 
 pub const MAX_CHECKPOINTS: i32 = 7;

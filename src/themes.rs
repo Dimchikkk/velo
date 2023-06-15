@@ -38,7 +38,10 @@ pub struct Theme {
     pub node_shadow: Color,
     pub node_found_color: Color,
     pub node_manipulation_bg: Color,
+    pub node_width: f32,
+    pub node_height: f32,
     pub node_manipulation: Color,
+    pub paper_node_bg: Color,
     pub ok_cancel_bg: Color,
     pub resize_marker_size: f32,
     pub search_box_bg: Color,
@@ -97,6 +100,9 @@ pub fn velo_light() -> Theme {
         tooltip_bg: Color::rgb(1., 1., 1.),
         font_size: 14.,
         line_height: 18.,
+        paper_node_bg: Color::rgb(255. / 255., 236. / 255., 172. / 255.),
+        node_width: 144.,
+        node_height: 144.,
     }
 }
 
@@ -147,6 +153,9 @@ pub fn velo_dark() -> Theme {
         tab_bg: Color::rgb(0.2, 0.2, 0.2),
         text_pos_btn_bg: Color::rgb(0.2, 0.2, 0.2),
         tooltip_bg: Color::rgb(0.2, 0.2, 0.2),
+        paper_node_bg: Color::rgb(255. / 255., 236. / 255., 172. / 255.),
+        node_width: 180.,
+        node_height: 180.,
     }
 }
 

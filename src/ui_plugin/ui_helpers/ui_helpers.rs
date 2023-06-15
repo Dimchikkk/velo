@@ -2,7 +2,7 @@ use linkify::{LinkFinder, LinkKind};
 
 use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::{themes::Theme, TextPos};
+use crate::themes::Theme;
 #[path = "components.rs"]
 mod components;
 pub use components::*;
@@ -33,21 +33,6 @@ pub fn add_rectangle_txt(theme: &Res<Theme>, text: String) -> TextBundle {
         position_type: PositionType::Relative,
         ..default()
     })
-}
-
-pub fn pos_to_style(text_pos: TextPos) -> (JustifyContent, AlignItems) {
-    match text_pos {
-        TextPos::TopLeft => (JustifyContent::FlexStart, AlignItems::FlexStart),
-        TextPos::Center => (JustifyContent::Center, AlignItems::Center),
-    }
-}
-
-pub fn style_to_pos(style: (JustifyContent, AlignItems)) -> TextPos {
-    match style {
-        (JustifyContent::FlexStart, AlignItems::FlexStart) => TextPos::TopLeft,
-        (JustifyContent::Center, AlignItems::Center) => TextPos::Center,
-        _ => panic!("Invalid style! {:?}", style),
-    }
 }
 
 pub fn get_sections(theme: &Res<Theme>, text: String) -> (Vec<TextSection>, Vec<bool>) {

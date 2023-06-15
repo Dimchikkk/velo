@@ -68,6 +68,7 @@ pub fn add_list(
             id: tab_id,
             name: tab_name,
             checkpoints: VecDeque::new(),
+            z_index: 10.,
             is_active: true,
         }];
         let doc_id = ReflectableUuid::generate();

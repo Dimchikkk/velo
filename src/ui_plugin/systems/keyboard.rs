@@ -186,8 +186,8 @@ pub fn insert_from_clipboard(
                 node: JsonNode {
                     id: Uuid::new_v4(),
                     node_type: crate::NodeType::Rect,
-                    left: 0.0,
-                    bottom: 0.0,
+                    x: 0.0,
+                    y: 0.0,
                     width: width as f32 / scale_factor as f32,
                     height: height as f32 / scale_factor as f32,
                     text: crate::JsonNodeText {
@@ -195,7 +195,7 @@ pub fn insert_from_clipboard(
                         pos: crate::TextPos::Center,
                     },
                     bg_color: theme.clipboard_image_bg,
-                    z_index: 0,
+                    z: 0.,
                 },
                 image: Some(image),
             });

@@ -115,11 +115,6 @@ pub struct LeftPanelControls;
 #[derive(Component)]
 pub struct LeftPanelExplorer;
 
-#[derive(Component, Default, Debug)]
-pub struct VeloNodeContainer {
-    pub id: ReflectableUuid,
-}
-
 #[derive(Component)]
 pub struct VeloBorder {
     pub id: ReflectableUuid,
@@ -135,6 +130,7 @@ pub struct VeloNode {
 pub enum ButtonTypes {
     AddRec,
     AddCircle,
+    AddPaper,
     Del,
     Front,
     Back,
