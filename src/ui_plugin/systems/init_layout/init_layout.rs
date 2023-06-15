@@ -430,7 +430,7 @@ pub fn init_layout(
     let color3 = add_color(
         &mut commands,
         &theme,
-        Color::rgb(234.0 / 255.0, 179.0 / 255.0, 8.0 / 255.0),
+        Color::rgb(234. / 255., 179. / 255., 8. / 255.),
     );
     let color4 = add_color(
         &mut commands,

@@ -11,7 +11,6 @@ pub fn set_focused_entity(
     let mut primary_window = windows.single_mut();
 
     for event in node_interaction_events.iter() {
-        info!("event: {:?}", event.node_interaction_type);
         if let Ok(velo_node) = velo.get(event.entity) {
             match event.node_interaction_type {
                 crate::ui_plugin::NodeInteractionType::Hover => {
