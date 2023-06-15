@@ -162,7 +162,10 @@ pub fn rec_button_handlers(
                                 );
                                 let translation = top.2.translation;
                                 if let Some((active_size, active_translation)) = data {
-                                    if collide(translation, size, active_translation, active_size).is_some() && translation.z > active_translation.z {
+                                    if collide(translation, size, active_translation, active_size)
+                                        .is_some()
+                                        && translation.z > active_translation.z
+                                    {
                                         data = Some((size, translation));
                                         break;
                                     }
@@ -214,7 +217,10 @@ pub fn rec_button_handlers(
                                 );
                                 let translation = top.2.translation;
                                 if let Some((active_size, active_translation)) = data {
-                                    if collide(translation, size, active_translation, active_size).is_some() && translation.z < active_translation.z {
+                                    if collide(translation, size, active_translation, active_size)
+                                        .is_some()
+                                        && translation.z < active_translation.z
+                                    {
                                         data = Some((size, translation));
                                         break;
                                     }
