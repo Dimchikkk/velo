@@ -86,17 +86,21 @@ pub fn read_config_file() -> Option<Config> {
     Some(config)
 }
 
-pub fn convert_from_val_px(x: Val) -> f32 {
-    match x {
-        Val::Px(x) => x,
-        _ => 0.,
+impl From<TextPos> for CosmicTextPos {
+    fn from(pos: TextPos) -> Self {
+        match pos {
+            TextPos::Center => CosmicTextPos::Center,
+            TextPos::TopLeft => CosmicTextPos::TopLeft,
+        }
     }
 }
 
-pub fn to_cosmic_text_pos(pos: TextPos) -> CosmicTextPos {
-    match pos {
-        TextPos::Center => CosmicTextPos::Center,
-        TextPos::TopLeft => CosmicTextPos::TopLeft,
+impl From<CosmicTextPos> for TextPos {
+    fn from(pos: CosmicTextPos) -> Self {
+        match pos {
+            CosmicTextPos::Center => TextPos::Center,
+            CosmicTextPos::TopLeft => TextPos::TopLeft,
+        }
     }
 }
 

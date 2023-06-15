@@ -141,14 +141,3 @@ pub fn build_arrow(start: Vec2, end: Vec2, arrow_meta: ArrowMeta) -> Path {
         }
     }
 }
-
-pub fn get_pos(
-    global_transform: &GlobalTransform,
-    primary_window: &Window,
-    camera: &Camera,
-    camera_transform: &GlobalTransform,
-) -> Option<Vec2> {
-    let world_position = global_transform.affine().translation;
-    let point = Vec2::new(world_position.x, primary_window.height() - world_position.y);
-    camera.viewport_to_world_2d(camera_transform, point)
-}
