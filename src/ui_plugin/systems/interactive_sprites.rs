@@ -104,19 +104,15 @@ pub fn interactive_sprite(
             });
         }
 
-        if buttons.pressed(MouseButton::Left) {
-            if !holding_state.is_holding
+        if buttons.pressed(MouseButton::Left) && !holding_state.is_holding
                 && Duration::from_millis(now_ms as u64) - holding_state.duration
-                    > Duration::from_millis(50)
-                && holding_state.entity.is_some()
-            {
-                is_hover = false;
-                holding_state.is_holding = true;
-                node_interaction_events.send(NodeInteractionEvent {
-                    entity: active,
-                    node_interaction_type: NodeInteractionType::LeftMouseHoldAndDrag,
-                });
-            }
+                    > Duration::from_millis(50) && holding_state.entity.is_some() {
+            is_hover = false;
+            holding_state.is_holding = true;
+            node_interaction_events.send(NodeInteractionEvent {
+                entity: active,
+                node_interaction_type: NodeInteractionType::LeftMouseHoldAndDrag,
+            });
         }
 
         if buttons.just_released(MouseButton::Left) {
@@ -137,17 +133,15 @@ pub fn interactive_sprite(
                 node_interaction_type: NodeInteractionType::Hover,
             });
         }
-    } else {
-        if buttons.just_released(MouseButton::Left) {
-            *holding_state = HoldingState {
-                is_holding: false,
-                duration: Duration::ZERO,
-                entity: None,
-            };
-            node_interaction_events.send(NodeInteractionEvent {
-                entity: Entity::PLACEHOLDER,
-                node_interaction_type: NodeInteractionType::LeftMouseRelease,
-            });
-        }
+    } else if buttons.just_released(MouseButton::Left) {
+        *holding_state = HoldingState {
+            is_holding: false,
+            duration: Duration::ZERO,
+            entity: None,
+        };
+        node_interaction_events.send(NodeInteractionEvent {
+            entity: Entity::PLACEHOLDER,
+            node_interaction_type: NodeInteractionType::LeftMouseRelease,
+        });
     }
 }
