@@ -90,6 +90,7 @@ pub fn add_tab_handler(
                     name: "Tab ".to_string() + &(tabs_len + 1).to_string(),
                     checkpoints: VecDeque::new(),
                     is_active: true,
+                    z_index: 10.,
                 });
                 commands.insert_resource(LoadDocRequest {
                     doc_id: app_state.current_document.unwrap(),

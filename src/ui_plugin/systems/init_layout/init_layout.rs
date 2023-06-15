@@ -368,6 +368,9 @@ pub fn init_layout(
             button_type: ui_helpers::ButtonTypes::AddCircle,
         },
         ButtonAction {
+            button_type: ui_helpers::ButtonTypes::AddPaper,
+        },
+        ButtonAction {
             button_type: ui_helpers::ButtonTypes::Del,
         },
     );

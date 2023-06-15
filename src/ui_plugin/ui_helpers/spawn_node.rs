@@ -16,19 +16,18 @@ use super::{
     spawn_shadow, BevyMarkdownView, InteractiveNode, RawText, ResizeMarker, VeloBorder, VeloNode,
 };
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
-use crate::utils::{bevy_color_to_cosmic, to_cosmic_text_pos, ReflectableUuid};
+use crate::utils::{bevy_color_to_cosmic, ReflectableUuid};
 
 #[derive(Clone)]
 pub struct NodeMeta {
     pub id: ReflectableUuid,
     pub node_type: NodeType,
     pub size: (f32, f32),
-    pub position: (f32, f32),
+    pub position: (f32, f32, f32),
     pub text: String,
     pub bg_color: Color,
     pub image: Option<Handle<Image>>,
     pub text_pos: TextPos,
-    pub z_index: i32,
     pub is_active: bool,
 }
 
@@ -41,9 +40,12 @@ pub fn spawn_sprite_node(
     scale_factor: f32,
     item_meta: NodeMeta,
 ) -> Entity {
-    let z_index = item_meta.z_index as f32;
     let scale = Vec3::new(1. / scale_factor, 1. / scale_factor, 1.);
-    let pos: Vec3 = Vec3::new(0.0, 0.0, z_index);
+    let pos: Vec3 = Vec3::new(
+        item_meta.position.0,
+        item_meta.position.1,
+        item_meta.position.2,
+    );
     let width: f32 = item_meta.size.0;
     let height = item_meta.size.1;
 
@@ -143,7 +145,7 @@ pub fn spawn_sprite_node(
     let cosmic_edit_meta = CosmicEditMeta {
         text,
         font_system_handle: cosmic_font_handle,
-        text_pos: to_cosmic_text_pos(item_meta.text_pos.clone()),
+        text_pos: item_meta.text_pos.clone().into(),
         size: Some((width, height)),
         node: CosmicNode::Sprite(CosmicEditSprite {
             transform: Transform {

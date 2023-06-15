@@ -5,7 +5,7 @@ use bevy_cosmic_edit::get_cosmic_text;
 use bevy_cosmic_edit::ActiveEditor;
 use bevy_cosmic_edit::CosmicEdit;
 use bevy_pkv::PkvStore;
-use bevy_ui_borders::Outline;
+use bevy_prototype_lyon::prelude::Stroke;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::Path;
@@ -28,7 +28,8 @@ use crate::ORG_NAME;
 
 use super::ui_helpers::SearchButton;
 use super::ui_helpers::SearchText;
-use super::ui_helpers::VeloNode;
+use super::ui_helpers::VeloBorder;
+use super::NodeType;
 use super::UiState;
 
 pub struct SearchIndexState {
@@ -82,10 +83,10 @@ pub fn search_box_click(
 
 pub fn search_box_text_changed(
     text_query: Query<&CosmicEdit, With<SearchText>>,
+    mut velo_border: Query<(&mut Stroke, &VeloBorder), With<VeloBorder>>,
     mut previous_search_text: Local<String>,
     mut app_state: ResMut<AppState>,
     pkv: Res<PkvStore>,
-    mut velo_node_query: Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
     theme: Res<Theme>,
 ) {
     let str = get_cosmic_text(&text_query.single().editor);
@@ -104,7 +105,7 @@ pub fn search_box_text_changed(
                             })
                             .map(|l| ReflectableUuid(l.node_id))
                             .collect();
-                        highlight_search_match_nodes(&node_ids, &mut velo_node_query, &theme);
+                        highlight_search_match_nodes(&node_ids, &mut velo_border, &theme);
                         let doc_ids: HashSet<ReflectableUuid> = docs
                             .into_iter()
                             .map(|location| ReflectableUuid(location.doc_id))
@@ -115,7 +116,7 @@ pub fn search_box_text_changed(
                 }
             }
         } else if let Ok(names) = pkv.get::<HashMap<ReflectableUuid, String>>("names") {
-            highlight_search_match_nodes(&HashSet::new(), &mut velo_node_query, &theme);
+            highlight_search_match_nodes(&HashSet::new(), &mut velo_border, &theme);
             let keys_in_storage: Vec<_> = names.keys().collect();
             let keys_in_memory: Vec<_> = app_state.docs.keys().cloned().collect();
             let mut combined_keys = keys_in_memory;
@@ -269,28 +270,24 @@ pub fn fuzzy_search(index: &Index, query: &str) -> tantivy::Result<Vec<NodeSearc
 
 fn highlight_search_match_nodes(
     node_ids: &HashSet<ReflectableUuid>,
-    velo_node_query: &mut Query<(&mut Outline, &VeloNode, Entity), With<VeloNode>>,
+    velo_border: &mut Query<(&mut Stroke, &VeloBorder), With<VeloBorder>>,
     theme: &Res<Theme>,
 ) {
     let highlight_color = theme.node_found_color;
-    let highlight_thickness = UiRect::all(Val::Px(3.));
-    for (mut outline, node, _) in velo_node_query.iter_mut() {
-        if node_ids.contains(&node.id) {
-            outline.color = highlight_color;
-            outline.thickness = highlight_thickness;
-        } else if outline.color == highlight_color && outline.thickness == highlight_thickness {
+    let highlight_thickness = 3.;
+    for (mut stroke, velo_border) in velo_border.iter_mut() {
+        if node_ids.contains(&velo_border.id) {
+            stroke.color = highlight_color;
+            stroke.options.line_width = highlight_thickness;
+        } else {
             // revert
-            // match node.node_type {
-            //     NodeType::Rect => {
-            //         outline.color = theme.node_border;
-            //     }
-            //     NodeType::Circle => {
-            //         outline.color = theme.node_border.with_a(0.);
-            //     }
-            //     NodeType::Paper => todo!(),
-            // }
-
-            // outline.thickness = UiRect::all(Val::Px(1.));
+            let has_border = velo_border.node_type.clone() != NodeType::Paper;
+            if has_border {
+                stroke.color = theme.node_border;
+            } else {
+                stroke.color = Color::NONE;
+            };
+            stroke.options.line_width = 1.;
         }
     }
 }
