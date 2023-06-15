@@ -28,7 +28,7 @@ pub fn update_rectangle_position(
                     top.translation.x = pos.x;
                     top.translation.y = pos.y;
                     events.send(RedrawArrowEvent { id: raw_text.id });
-                    cosmic_edit.editor.buffer_mut().set_redraw(true);
+                    // cosmic_edit.editor.buffer_mut().set_redraw(true);
                 }
             }
         }
