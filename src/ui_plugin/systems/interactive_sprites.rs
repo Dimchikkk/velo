@@ -108,21 +108,6 @@ pub fn interactive_sprite(
             return;
         }
 
-        if buttons.just_released(MouseButton::Left) {
-            node_interaction_events.send(NodeInteractionEvent {
-                entity: active,
-                node_interaction_type: NodeInteractionType::LeftMouseRelease,
-            });
-            *holding_state = HoldingState {
-                duration: Duration::from_millis(0),
-                entity: None,
-                is_holding: false,
-            };
-
-            // RETURN
-            return;
-        }
-
         if !holding_state.is_holding
             && Duration::from_millis(now_ms as u64) - holding_state.duration
                 > Duration::from_millis(50)

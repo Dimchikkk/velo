@@ -2,11 +2,12 @@ use std::collections::HashMap;
 use std::{collections::VecDeque, time::Duration};
 
 use bevy::render::view::RenderLayers;
-use bevy::sprite::collide_aabb::{collide, Collision};
+use bevy::sprite::collide_aabb::collide;
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use bevy_cosmic_edit::{CosmicEdit, CosmicFont};
 use bevy_pkv::PkvStore;
+use bevy_prototype_lyon::prelude::Fill;
 use cosmic_text::Edit;
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -252,21 +253,18 @@ pub fn rec_button_handlers(
 pub fn change_color_pallete(
     mut interaction_query: Query<
         (&Interaction, &ChangeColor),
-        (Changed<Interaction>, With<ChangeColor>, Without<VeloNode>),
+        (Changed<Interaction>, With<ChangeColor>),
     >,
-    mut cosmic_nodes: Query<(&mut CosmicEdit, &RawText), With<RawText>>,
-    state: Res<UiState>,
+    mut velo_border: Query<(&mut Fill, &VeloBorder), With<VeloBorder>>,
+    ui_state: Res<UiState>,
 ) {
     for (interaction, change_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let color = change_color.color;
-                if let Some(entity_to_edit) = state.entity_to_edit {
-                    for (mut cosmic_edit, node) in cosmic_nodes.iter_mut() {
-                        if node.id == entity_to_edit {
-                            cosmic_edit.bg = color;
-                            cosmic_edit.editor.buffer_mut().set_redraw(true);
-                        }
+                for (mut stroke, velo_border) in velo_border.iter_mut() {
+                    if Some(velo_border.id) == ui_state.entity_to_edit {
+                        stroke.color = color;
                     }
                 }
             }

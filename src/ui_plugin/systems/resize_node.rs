@@ -42,7 +42,6 @@ pub fn resize_entity_start(
                     let velo_node = velo_node_query.get(parent.get()).unwrap();
                     ui_state.entity_to_resize = Some(velo_node.id);
                 }
-                super::NodeInteractionType::LeftMouseRelease => {}
                 super::NodeInteractionType::RightClick => {}
             }
         }
@@ -54,35 +53,32 @@ pub fn resize_entity_end(
     mut shaders: ResMut<Assets<Shader>>,
     theme: ResMut<Theme>,
     mut ui_state: ResMut<UiState>,
-    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    buttons: Res<Input<MouseButton>>,
     raw_text_query: Query<(&Parent, &RawText, &CosmicEdit), With<RawText>>,
     border_query: Query<(&Parent, &VeloBorder), With<VeloBorder>>,
     velo_node_query: Query<Entity, With<VeloNode>>,
 ) {
-    for event in node_interaction_events.iter() {
-        if event.node_interaction_type == super::NodeInteractionType::LeftMouseRelease {
-            if let Some(entity_to_resize) = ui_state.entity_to_resize {
-                for (raw_text_parent, raw_text, cosmic_edit) in raw_text_query.iter() {
-                    if raw_text.id == entity_to_resize {
-                        let (width, height) = cosmic_edit.size.unwrap();
-                        let (border_parent, border) =
-                            border_query.get(raw_text_parent.get()).unwrap();
-                        if border.node_type == NodeType::Paper {
-                            let top = velo_node_query.get(border_parent.get()).unwrap();
-                            let shadow = spawn_shadow(
-                                &mut commands,
-                                &mut shaders,
-                                width,
-                                height,
-                                theme.shadow,
-                                entity_to_resize,
-                            );
-                            commands.entity(top).add_child(shadow);
-                        }
+    if buttons.just_released(MouseButton::Left) {
+        if let Some(entity_to_resize) = ui_state.entity_to_resize {
+            for (raw_text_parent, raw_text, cosmic_edit) in raw_text_query.iter() {
+                if raw_text.id == entity_to_resize {
+                    let (width, height) = cosmic_edit.size.unwrap();
+                    let (border_parent, border) = border_query.get(raw_text_parent.get()).unwrap();
+                    if border.node_type == NodeType::Paper {
+                        let top = velo_node_query.get(border_parent.get()).unwrap();
+                        let shadow = spawn_shadow(
+                            &mut commands,
+                            &mut shaders,
+                            width,
+                            height,
+                            theme.shadow,
+                            entity_to_resize,
+                        );
+                        commands.entity(top).add_child(shadow);
                     }
                 }
-                ui_state.entity_to_resize = None;
             }
+            ui_state.entity_to_resize = None;
         }
     }
 }

@@ -18,7 +18,7 @@ pub fn node_manipulation(
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(14.)),
+                size: Size::new(Val::Percent(90.), Val::Percent(12.)),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
