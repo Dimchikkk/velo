@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_cosmic_edit::CosmicEdit;
-use cosmic_text::Edit;
+
 
 use crate::{canvas::arrow::events::RedrawArrowEvent, components::MainCamera};
 
@@ -20,7 +20,7 @@ pub fn update_rectangle_position(
 ) {
     let (camera, camera_transform) = camera_q.single();
     for event in cursor_moved_events.iter() {
-        for (mut cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
+        for (_cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
             if Some(raw_text.id) == state.hold_entity && state.entity_to_edit.is_none() {
                 if let Some(pos) = camera.viewport_to_world_2d(camera_transform, event.position) {
                     let border = border_query.get(parent.get()).unwrap();

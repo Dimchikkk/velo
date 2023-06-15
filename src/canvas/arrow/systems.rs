@@ -91,7 +91,7 @@ pub fn redraw_arrows(
                 let (arrow_hold_vec, arrow_move_vec): (Vec<_>, Vec<_>) = arrow_markers
                     .iter()
                     .filter(|(x, _)| x.id == arrow.end.id || x.id == arrow.start.id)
-                    .filter_map(|(ac, gt)| Some((ac, gt.affine().translation.truncate())))
+                    .map(|(ac, gt)| (ac, gt.affine().translation.truncate()))
                     .partition(|(x, _)| x.id == arrow.end.id);
                 let arrow_pos = arrow_hold_vec
                     .iter()
