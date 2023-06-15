@@ -150,7 +150,7 @@ pub fn rec_button_handlers(
                                 break;
                             }
                         }
-                        // find topest z_index if collide
+                        // find higher z_index if collide
                         for (cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
                             if raw_text.id != id {
                                 let border = border_query.get(parent.get()).unwrap();
@@ -206,7 +206,7 @@ pub fn rec_button_handlers(
                                 break;
                             }
                         }
-                        // find topest z_index if collide
+                        // find lower z_index if collide
                         for (cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
                             if raw_text.id != id {
                                 let border = border_query.get(parent.get()).unwrap();
