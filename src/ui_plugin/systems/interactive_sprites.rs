@@ -14,7 +14,7 @@ pub struct HoldingState {
 }
 
 pub fn interactive_sprite(
-    mut cursor_moved_events: EventReader<CursorMoved>,
+    cursor_moved_events: EventReader<CursorMoved>,
     windows: Query<&Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
     res_images: Res<Assets<Image>>,
@@ -31,7 +31,7 @@ pub fn interactive_sprite(
     let window = windows.single();
     let scale_factor = window.scale_factor() as f32;
     let mut active_entity = None;
-    for _ in cursor_moved_events.iter() {
+    if !cursor_moved_events.is_empty() {
         for (sprite, handle, node_transform, entity) in &mut sprite_query.iter_mut() {
             let size = match sprite.custom_size {
                 Some(size) => (size.x, size.y),
@@ -68,10 +68,13 @@ pub fn interactive_sprite(
             }
         }
     }
+
     if let Some((active, _)) = active_entity {
         let now_ms = get_timestamp();
+        let mut is_hover = true;
 
         if buttons.just_pressed(MouseButton::Left) {
+            is_hover = false;
             if double_click.1 == Some(active)
                 && Duration::from_millis(now_ms as u64) - double_click.0
                     < Duration::from_millis(500)
@@ -92,37 +95,59 @@ pub fn interactive_sprite(
                     is_holding: false,
                 };
             }
-
-            // RETURN
-            return;
         }
         if buttons.just_pressed(MouseButton::Right) {
+            is_hover = false;
             node_interaction_events.send(NodeInteractionEvent {
                 entity: active,
                 node_interaction_type: NodeInteractionType::RightClick,
             });
-            // RETURN
-            return;
         }
 
-        if !holding_state.is_holding
-            && Duration::from_millis(now_ms as u64) - holding_state.duration
-                > Duration::from_millis(50)
-            && holding_state.entity.is_some()
-        {
-            holding_state.is_holding = true;
+        if buttons.pressed(MouseButton::Left) {
+            if !holding_state.is_holding
+                && Duration::from_millis(now_ms as u64) - holding_state.duration
+                    > Duration::from_millis(50)
+                && holding_state.entity.is_some()
+            {
+                is_hover = false;
+                holding_state.is_holding = true;
+                node_interaction_events.send(NodeInteractionEvent {
+                    entity: active,
+                    node_interaction_type: NodeInteractionType::LeftMouseHoldAndDrag,
+                });
+            }
+        }
+
+        if buttons.just_released(MouseButton::Left) {
+            *holding_state = HoldingState {
+                is_holding: false,
+                duration: Duration::ZERO,
+                entity: None,
+            };
             node_interaction_events.send(NodeInteractionEvent {
                 entity: active,
-                node_interaction_type: NodeInteractionType::LeftMouseHoldAndDrag,
+                node_interaction_type: NodeInteractionType::LeftMouseRelease,
             });
-
-            // RETURN
-            return;
         }
 
-        node_interaction_events.send(NodeInteractionEvent {
-            entity: active,
-            node_interaction_type: NodeInteractionType::Hover,
-        });
+        if is_hover {
+            node_interaction_events.send(NodeInteractionEvent {
+                entity: active,
+                node_interaction_type: NodeInteractionType::Hover,
+            });
+        }
+    } else {
+        if buttons.just_released(MouseButton::Left) {
+            *holding_state = HoldingState {
+                is_holding: false,
+                duration: Duration::ZERO,
+                entity: None,
+            };
+            node_interaction_events.send(NodeInteractionEvent {
+                entity: Entity::PLACEHOLDER,
+                node_interaction_type: NodeInteractionType::LeftMouseRelease,
+            });
+        }
     }
 }

@@ -6,12 +6,12 @@ pub fn set_focused_entity(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut node_interaction_events: EventReader<NodeInteractionEvent>,
     mut ui_state: ResMut<UiState>,
-    buttons: Res<Input<MouseButton>>,
     velo: Query<&RawText, With<RawText>>,
 ) {
     let mut primary_window = windows.single_mut();
 
     for event in node_interaction_events.iter() {
+        info!("event: {:?}", event.node_interaction_type);
         if let Ok(velo_node) = velo.get(event.entity) {
             match event.node_interaction_type {
                 crate::ui_plugin::NodeInteractionType::Hover => {
@@ -34,11 +34,11 @@ pub fn set_focused_entity(
                     }
                 }
                 crate::ui_plugin::NodeInteractionType::RightClick => {}
+                crate::ui_plugin::NodeInteractionType::LeftMouseRelease => {}
             }
         }
-    }
-
-    if buttons.just_released(MouseButton::Left) {
-        ui_state.hold_entity = None;
+        if event.node_interaction_type == crate::ui_plugin::NodeInteractionType::LeftMouseRelease {
+            ui_state.hold_entity = None;
+        }
     }
 }

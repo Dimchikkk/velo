@@ -7,7 +7,7 @@ use super::{ui_helpers::BevyMarkdownView, UiState, VeloNode};
 pub fn clickable_links(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut markdown_text_query: Query<
-        (&Node, &GlobalTransform, &mut CosmicEdit, &BevyMarkdownView),
+        (&GlobalTransform, &mut CosmicEdit, &BevyMarkdownView),
         With<BevyMarkdownView>,
     >,
     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<VeloNode>)>,
@@ -20,9 +20,8 @@ pub fn clickable_links(
     let scale_factor = primary_window.scale_factor() as f32;
     for interaction in &mut interaction_query {
         if *interaction == Interaction::Clicked {
-            for (node, transform, cosmic_edit, bevy_markdown_view) in markdown_text_query.iter_mut()
-            {
-                let size = (node.size().x, node.size().y);
+            for (transform, cosmic_edit, bevy_markdown_view) in markdown_text_query.iter_mut() {
+                let size = cosmic_edit.size.unwrap();
                 if let Some(pos) =
                     get_node_cursor_pos(&primary_window, transform, size, cosmic_edit.is_ui_node)
                 {
