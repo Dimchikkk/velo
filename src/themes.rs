@@ -100,7 +100,7 @@ pub fn velo_light() -> Theme {
         tooltip_bg: Color::rgb(1., 1., 1.),
         font_size: 14.,
         line_height: 18.,
-        paper_node_bg: Color::rgb(255. / 255., 236. / 255., 172. / 255.),
+        paper_node_bg: Color::rgb(1., 236. / 255., 172. / 255.),
         node_width: 144.,
         node_height: 144.,
     }
@@ -153,7 +153,7 @@ pub fn velo_dark() -> Theme {
         tab_bg: Color::rgb(0.2, 0.2, 0.2),
         text_pos_btn_bg: Color::rgb(0.2, 0.2, 0.2),
         tooltip_bg: Color::rgb(0.2, 0.2, 0.2),
-        paper_node_bg: Color::rgb(255. / 255., 236. / 255., 172. / 255.),
+        paper_node_bg: Color::rgb(1., 236. / 255., 172. / 255.),
         node_width: 180.,
         node_height: 180.,
     }

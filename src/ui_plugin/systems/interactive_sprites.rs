@@ -53,22 +53,19 @@ pub fn interactive_sprite(
             let y_max = node_transform.affine().translation.y + size.1 / 2.;
             let z_current = node_transform.affine().translation.z;
 
-            window.cursor_position().and_then(|pos| {
-                Some({
-                    if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
-                        if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
-                            if let Some((_, z)) = active_entity {
-                                if z < z_current {
-                                    active_entity = Some((entity, z_current));
-                                }
-                            } else {
-                                active_entity =
-                                    Some((entity, node_transform.affine().translation.z));
+            if let Some(pos) = window.cursor_position() {
+                if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
+                    if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
+                        if let Some((_, z)) = active_entity {
+                            if z < z_current {
+                                active_entity = Some((entity, z_current));
                             }
+                        } else {
+                            active_entity = Some((entity, node_transform.affine().translation.z));
                         }
                     }
-                })
-            });
+                };
+            }
         }
     }
     if let Some((active, _)) = active_entity {

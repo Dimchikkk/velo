@@ -46,7 +46,6 @@ pub fn spawn_shadow(
                     sdf,
                     fill,
                     frame: Frame::Quad(width),
-                    ..default()
                 },
                 ..default()
             },
