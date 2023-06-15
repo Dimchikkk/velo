@@ -420,27 +420,27 @@ pub fn init_layout(
     let color1 = add_color(
         &mut commands,
         &theme,
-        Color::rgb(239., 68.0 / 255.0, 68.0 / 255.0),
+        Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0),
     );
     let color2 = add_color(
         &mut commands,
         &theme,
-        Color::rgb(34.0 / 255.0, 197.0 / 255.0, 94.0 / 255.0),
+        Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
     );
     let color3 = add_color(
         &mut commands,
         &theme,
-        Color::rgb(234. / 255., 179. / 255., 8. / 255.),
+        Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
     );
     let color4 = add_color(
         &mut commands,
         &theme,
-        Color::rgb(59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0),
+        Color::rgb(239., 68.0 / 255.0, 68.0 / 255.0),
     );
     let color5 = add_color(
         &mut commands,
         &theme,
-        Color::rgb(148.0 / 255.0, 163.0 / 255.0, 184.0 / 255.0),
+        Color::rgb(34.0 / 255.0, 197.0 / 255.0, 94.0 / 255.0),
     );
 
     commands.entity(color_picker).add_child(color1);
