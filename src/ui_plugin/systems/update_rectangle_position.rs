@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_cosmic_edit::CosmicEdit;
 
 use crate::{canvas::arrow::events::RedrawArrowEvent, components::MainCamera};
 
