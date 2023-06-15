@@ -510,9 +510,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_hanabi"
-version = "0.6.1"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0624f5ece27bcac695cd0b4bf87462e3fa8b6912e78468f9c22d1cd781d838d"
+checksum = "8c3cc32294fdd07c0b7ce3719b122437276f82cc81478e1b8522cdf6dea75b07"
 dependencies = [
  "anyhow",
  "bevy",
@@ -4099,7 +4099,7 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "velo"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "arboard",
  "async-channel",

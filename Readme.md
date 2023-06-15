@@ -5,12 +5,12 @@
 
 ## Demo
 
-This app is primarily designed for native desktop platforms, and its
+This app is primarily designed for native desktop platforms, ~~and its
 WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
-mode is supported (tested on Chrome):
+mode is supported (tested on Chrome):~~ wasm target is currently broken until bevy 0.11 release with https://github.com/bevyengine/bevy/issues/5732 fix.
 
-  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/3e95a2276790cf84b388734c921e46f4/raw/ac3d56c3e02919b5f5a3b598423ee9bbf40ad553/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/3e95a2276790cf84b388734c921e46f4/raw/ac3d56c3e02919b5f5a3b598423ee9bbf40ad553/velo.json)
+  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/680470528823044ccda3045113c9fa6c/raw/482ef70ac0905e0ee9bb921ac9440d01416c7043/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/680470528823044ccda3045113c9fa6c/raw/482ef70ac0905e0ee9bb921ac9440d01416c7043/velo.json)
 
 ## Inspiration
 
@@ -23,22 +23,22 @@ would it allow me to learn the language, but it would also be an
 enjoyable project to work on.
 
 ## What\'s implemented:
--   support rectangle/circle nodes (circle was temporarily removed, will be added back soon with proper border)
--   add/remove node
--   node resizing
--   node repositioning
+-   support rectangle/circle/paperlike notes
+-   add/remove note
+-   note resizing
+-   note repositioning
 -   wrapped text inside nodes
 -   paste screenshot from clipboard [native target only 🖥️] 
--   connect nodes with arrows
+-   connect notes with arrows
 -   make app snapshot in memory and load from it (MacOs: Command + s\[l\])
--   save app state to db and load from it
--   change background color of nodes
--   move node to front/back
--   positioning text inside node
+-   save app state to database and load from it
+-   change background color of notes
+-   move note to front/back
+-   positioning text inside note
 -   multiple documents/tabs support
 -   load app state from url
 -   ability to create sharable url of the document using \"Share
-    Document\" button (**.velo.toml** should be created in user home
+    Document\" button (**.velo.toml** should be created in user's home
     directory containing GitHub access token with \"gist\" scope) [native target only 🖥️]:
 
    ```toml
@@ -87,16 +87,16 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 
 ## Basic usage
 
-- click on rectangle icon to create rectangle node
-- double-click to select node
-- start typing to add text to selected node
-- resize node by dragging its corners
+- click on rectangle icon to create rectangle note
+- double-click to select note
+- start typing to add text to selected note
+- resize note by dragging its corners
 - click on canvas to deselect node
-- move node by dragging it (only unselected node can be dragged to allow mouse text selection for selected nodes)
-- click on little arrow connector icon to connect nodes, arrow connector icons are placed on each side of node
-- for native target there is search box that allows to filter documents by text in nodes (fuzzy search)
-- for wasm target you can use url query parameter `?document=<url>` to load document from url
-- click save icon to save document to database on native platform or to localhost on wasm target
+- move note by dragging it (only unselected node can be dragged to allow mouse text selection for selected notes)
+- click on little arrow connector icon to connect notes, arrow connector icons are placed on each side of note
+- for native target there is search box that allows to filter documents by text in notes (fuzzy search)
+- for wasm target there is url query parameter `?document=<url>` to load document from url
+- click save icon to save document to database on native platform or to localStorage on wasm target
 
 ![velo](./velo.gif)
 
