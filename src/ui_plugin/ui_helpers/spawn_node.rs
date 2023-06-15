@@ -69,7 +69,7 @@ pub fn spawn_sprite_node(
         Vec2::new(width / 2., -height / 2.),
     ];
 
-    let path: Path = match item_meta.node_type.clone() {
+    let path: Path = match item_meta.node_type {
         NodeType::Rect => bevy_prototype_lyon::prelude::GeometryBuilder::build_as(
             &bevy_prototype_lyon::shapes::RoundedPolygon {
                 points: points.into_iter().collect(),
@@ -90,7 +90,7 @@ pub fn spawn_sprite_node(
             },
         ),
     };
-    let has_border = item_meta.node_type.clone() != NodeType::Paper;
+    let has_border = item_meta.node_type != NodeType::Paper;
     let border = commands
         .spawn((
             bevy_prototype_lyon::prelude::ShapeBundle {
@@ -187,7 +187,7 @@ pub fn spawn_sprite_node(
         }
     }
 
-    let has_shadow = item_meta.node_type.clone() == NodeType::Paper;
+    let has_shadow = item_meta.node_type == NodeType::Paper;
 
     if has_shadow {
         let shadow = spawn_shadow(commands, shaders, width, height, theme.shadow, item_meta.id);
