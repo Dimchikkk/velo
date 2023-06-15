@@ -46,6 +46,9 @@ use doc_list::*;
 #[path = "systems/clickable_links.rs"]
 mod clickable_links;
 use clickable_links::*;
+#[path = "systems/interactive_sprites.rs"]
+mod interactive_sprites;
+use interactive_sprites::*;
 #[path = "systems/entity_to_edit_changed.rs"]
 mod entity_to_edit_changed;
 use entity_to_edit_changed::*;
@@ -74,6 +77,7 @@ use active_editor_changed::*;
 
 pub struct UiPlugin;
 
+#[derive(Default)]
 pub struct AddRectEvent {
     pub node: JsonNode,
     pub image: Option<Handle<Image>>,
@@ -82,6 +86,22 @@ pub struct AddRectEvent {
 pub struct SaveStoreEvent {
     pub doc_id: ReflectableUuid,
     pub path: Option<PathBuf>, // Save current document to file
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum NodeInteractionType {
+    Hover,
+    LeftClick,
+    LeftDoubleClick,
+    LeftMouseRelease,
+    LeftMouseHoldAndDrag,
+    RightClick,
+}
+
+#[derive(Debug)]
+pub struct NodeInteractionEvent {
+    pub entity: Entity,
+    pub node_interaction_type: NodeInteractionType,
 }
 
 pub struct UpdateDeleteDocBtnEvent;
@@ -96,32 +116,34 @@ pub struct CommChannels {
 pub enum NodeType {
     #[default]
     Rect,
+    Paper,
     Circle,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default)]
 pub enum TextPos {
+    #[default]
     Center,
     TopLeft,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct JsonNodeText {
     pub text: String,
     pub pos: TextPos,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct JsonNode {
     pub id: Uuid,
     pub node_type: NodeType,
-    pub left: Val,
-    pub bottom: Val,
-    pub width: Val,
-    pub height: Val,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub width: f32,
+    pub height: f32,
     pub text: JsonNodeText,
     pub bg_color: Color,
-    pub z_index: i32,
 }
 
 pub const MAX_CHECKPOINTS: i32 = 7;
@@ -136,7 +158,7 @@ pub struct UiState {
     pub search_box_to_edit: Option<ReflectableUuid>,
     pub arrow_type: ArrowType,
     pub hold_entity: Option<ReflectableUuid>,
-    pub entity_to_resize: Option<(ReflectableUuid, ResizeMarker)>,
+    pub entity_to_resize: Option<ReflectableUuid>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
 }
 
@@ -155,6 +177,7 @@ impl Plugin for UiPlugin {
         app.add_event::<RedrawArrowEvent>();
         app.add_event::<SaveStoreEvent>();
         app.add_event::<UpdateDeleteDocBtnEvent>();
+        app.add_event::<NodeInteractionEvent>();
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_startup_systems((read_native_config, init_search_index).before(init_layout));
@@ -167,6 +190,7 @@ impl Plugin for UiPlugin {
             update_rectangle_position,
             create_new_node,
             resize_entity_start,
+            resize_entity_run,
             resize_entity_end,
             cancel_modal,
             confirm_modal,
@@ -232,6 +256,7 @@ impl Plugin for UiPlugin {
             save_to_store.after(save_tab),
             canvas_click,
             active_editor_changed,
+            interactive_sprite.before(canvas_click),
         ));
         app.add_systems((set_focused_entity, clickable_links).chain());
 

@@ -11,6 +11,7 @@ use bevy_embedded_assets::EmbeddedAssetPlugin;
 #[cfg(not(target_arch = "wasm32"))]
 use bevy_hanabi::HanabiPlugin;
 use bevy_pkv::PkvStore;
+use bevy_smud::SmudPlugin;
 use bevy_ui_borders::BordersPlugin;
 use canvas::CanvasPlugin;
 use resources::FontSystemState;
@@ -42,6 +43,7 @@ impl Plugin for VeloPlugin {
                     .build()
                     .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
             )
+            .add_plugin(SmudPlugin)
             .add_plugin(CosmicEditPlugin)
             .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)

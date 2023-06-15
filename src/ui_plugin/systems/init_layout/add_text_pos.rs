@@ -38,9 +38,9 @@ pub fn add_text_pos(
                     align_items: AlignItems::Center,
                     position_type: PositionType::Absolute,
                     position: UiRect {
-                        left: Val::Px(-2.),
+                        left: Val::Px(1.),
                         right: Val::Px(0.),
-                        top: Val::Px(-2.),
+                        top: Val::Px(-1.),
                         bottom: Val::Px(0.),
                     },
                     border: UiRect::all(Val::Px(1.)),

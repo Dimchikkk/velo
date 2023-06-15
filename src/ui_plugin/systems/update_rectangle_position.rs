@@ -1,30 +1,32 @@
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::prelude::*;
 
-use crate::canvas::arrow::events::RedrawArrowEvent;
+use crate::{canvas::arrow::events::RedrawArrowEvent, components::MainCamera};
 
-use super::{LeftPanel, UiState, VeloNodeContainer};
+use super::{
+    ui_helpers::{RawText, VeloBorder, VeloNode},
+    UiState,
+};
 
 pub fn update_rectangle_position(
     mut cursor_moved_events: EventReader<CursorMoved>,
-    mut node_position: Query<(&mut Style, &VeloNodeContainer), With<VeloNodeContainer>>,
-    state: Res<UiState>,
-    mut query: Query<(&Style, &LeftPanel), Without<VeloNodeContainer>>,
+    raw_text_query: Query<(&RawText, &Parent), With<RawText>>,
+    border_query: Query<&Parent, With<VeloBorder>>,
+    mut velo_node_query: Query<&mut Transform, With<VeloNode>>,
     mut events: EventWriter<RedrawArrowEvent>,
-    windows: Query<&Window, With<PrimaryWindow>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    state: Res<UiState>,
 ) {
-    let primary_window = windows.single();
+    let (camera, camera_transform) = camera_q.single();
     for event in cursor_moved_events.iter() {
-        for (mut style, top) in &mut node_position.iter_mut() {
-            if Some(top.id) == state.hold_entity && state.entity_to_edit.is_none() {
-                let size = query.single_mut().0.size;
-                if let (Val::Percent(x), Val::Px(element_width)) = (size.width, style.size.width) {
-                    let width = (primary_window.width() * x) / 100.;
-                    style.position.left = Val::Px(event.position.x - width - element_width / 2.);
+        for (raw_text, parent) in &mut raw_text_query.iter() {
+            if Some(raw_text.id) == state.hold_entity && state.entity_to_edit.is_none() {
+                if let Some(pos) = camera.viewport_to_world_2d(camera_transform, event.position) {
+                    let border = border_query.get(parent.get()).unwrap();
+                    let mut top = velo_node_query.get_mut(border.get()).unwrap();
+                    top.translation.x = pos.x;
+                    top.translation.y = pos.y;
+                    events.send(RedrawArrowEvent { id: raw_text.id });
                 }
-                if let Val::Px(element_height) = style.size.height {
-                    style.position.bottom = Val::Px(event.position.y - element_height / 2.);
-                }
-                events.send(RedrawArrowEvent { id: top.id });
             }
         }
     }

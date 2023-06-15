@@ -510,9 +510,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_hanabi"
-version = "0.6.1"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0624f5ece27bcac695cd0b4bf87462e3fa8b6912e78468f9c22d1cd781d838d"
+checksum = "8c3cc32294fdd07c0b7ce3719b122437276f82cc81478e1b8522cdf6dea75b07"
 dependencies = [
  "anyhow",
  "bevy",
@@ -813,6 +813,18 @@ dependencies = [
  "serde",
  "thiserror",
  "uuid",
+]
+
+[[package]]
+name = "bevy_smud"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5381becd3b32f13fa94c60fc44270a289bef56c9448df6a1e802c05fbfc9461c"
+dependencies = [
+ "bevy",
+ "bitflags",
+ "bytemuck",
+ "copyless",
 ]
 
 [[package]]
@@ -4087,7 +4099,7 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "velo"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "arboard",
  "async-channel",
@@ -4099,6 +4111,7 @@ dependencies = [
  "bevy_markdown",
  "bevy_pkv",
  "bevy_prototype_lyon",
+ "bevy_smud",
  "bevy_ui_borders",
  "console_error_panic_hook",
  "cosmic-text",

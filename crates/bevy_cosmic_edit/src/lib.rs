@@ -177,23 +177,25 @@ pub fn get_node_cursor_pos(
     size: (f32, f32),
     is_ui_node: bool,
 ) -> Option<(f32, f32)> {
-    let (x_min, y_min) = match is_ui_node {
+    let (x_min, y_min, x_max, y_max) = match is_ui_node {
         true => (
             node_transform.affine().translation.x - size.0 / 2.,
             window.height() - node_transform.affine().translation.y - size.1 / 2.,
+            node_transform.affine().translation.x + size.0,
+            window.height() - node_transform.affine().translation.y - size.1 / 2. + size.1,
         ),
         false => (
+            node_transform.affine().translation.x - size.0 / 2.,
+            node_transform.affine().translation.y - size.1 / 2.,
             node_transform.affine().translation.x + size.0 / 2.,
-            if node_transform.affine().translation.y == 0. {
-                0.
-            } else {
-                node_transform.affine().translation.y + size.1 / 2.
-            },
+            node_transform.affine().translation.y + size.1 / 2.,
         ),
     };
-    let x_max = x_min + size.0;
-    let y_max = y_min + size.1;
-    window.cursor_position().and_then(|pos| {
+
+    window.cursor_position().and_then(|mut pos| {
+        if !is_ui_node {
+            pos = Vec2::new(pos.x - window.width() / 2., pos.y - window.height() / 2.);
+        }
         if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
             Some((pos.x - x_min, y_max - pos.y))
         } else {

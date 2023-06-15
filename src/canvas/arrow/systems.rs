@@ -1,48 +1,48 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-// use super::utils::{build_arrow, create_arrow};
 use super::components::{ArrowConnect, ArrowMeta};
-// use crate::states::{AppState, MainCamera, RedrawArrow};
 use super::events::{CreateArrowEvent, RedrawArrowEvent};
-use super::utils::{build_arrow, create_arrow, get_pos};
-use crate::components::MainCamera;
+use super::utils::{build_arrow, create_arrow};
 use crate::themes::Theme;
-use crate::ui_plugin::UiState;
+use crate::ui_plugin::{NodeInteractionEvent, UiState};
 use bevy_prototype_lyon::prelude::Path;
 
 pub fn create_arrow_start(
-    mut interaction_query: Query<
-        (&Interaction, &ArrowConnect),
-        (Changed<Interaction>, With<ArrowConnect>),
-    >,
+    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    arrow_connect_query: Query<&ArrowConnect, With<ArrowConnect>>,
     mut state: ResMut<UiState>,
     mut create_arrow: EventWriter<CreateArrowEvent>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let mut primary_window = windows.single_mut();
-    for (interaction, arrow_connect) in interaction_query.iter_mut() {
-        match interaction {
-            Interaction::Clicked => match state.arrow_to_draw_start {
-                Some(start_arrow) => {
-                    if start_arrow.id == arrow_connect.id {
-                        continue;
+    for event in node_interaction_events.iter() {
+        if let Ok(arrow_connect) = arrow_connect_query.get(event.entity) {
+            match event.node_interaction_type {
+                crate::ui_plugin::NodeInteractionType::Hover => {
+                    primary_window.cursor.icon = CursorIcon::Crosshair;
+                }
+                crate::ui_plugin::NodeInteractionType::LeftClick => {
+                    match state.arrow_to_draw_start {
+                        Some(start_arrow) => {
+                            if start_arrow.id == arrow_connect.id {
+                                continue;
+                            }
+                            state.arrow_to_draw_start = None;
+                            create_arrow.send(CreateArrowEvent {
+                                start: start_arrow,
+                                end: *arrow_connect,
+                                arrow_type: state.arrow_type,
+                            });
+                        }
+                        None => {
+                            state.arrow_to_draw_start = Some(*arrow_connect);
+                        }
                     }
-                    state.arrow_to_draw_start = None;
-                    create_arrow.send(CreateArrowEvent {
-                        start: start_arrow,
-                        end: *arrow_connect,
-                        arrow_type: state.arrow_type,
-                    });
                 }
-                None => {
-                    state.arrow_to_draw_start = Some(*arrow_connect);
-                }
-            },
-            Interaction::Hovered => {
-                primary_window.cursor.icon = CursorIcon::Crosshair;
-            }
-            Interaction::None => {
-                primary_window.cursor.icon = CursorIcon::Default;
+                crate::ui_plugin::NodeInteractionType::LeftDoubleClick => {}
+                crate::ui_plugin::NodeInteractionType::LeftMouseHoldAndDrag => {}
+                crate::ui_plugin::NodeInteractionType::RightClick => {}
+                crate::ui_plugin::NodeInteractionType::LeftMouseRelease => {}
             }
         }
     }
@@ -51,22 +51,18 @@ pub fn create_arrow_start(
 pub fn create_arrow_end(
     mut commands: Commands,
     mut events: EventReader<CreateArrowEvent>,
-    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
-    windows: Query<&Window, With<PrimaryWindow>>,
     theme: Res<Theme>,
 ) {
-    let primary_window = windows.single();
-    let (camera, camera_transform) = camera_q.single();
     for event in events.iter() {
         let mut start = None;
         let mut end = None;
         for (arrow_connect, global_transform) in &mut arrow_markers.iter() {
             if *arrow_connect == event.start {
-                start = get_pos(global_transform, primary_window, camera, camera_transform);
+                start = Some(global_transform.affine().translation.truncate());
             }
             if *arrow_connect == event.end {
-                end = get_pos(global_transform, primary_window, camera, camera_transform);
+                end = Some(global_transform.affine().translation.truncate());
             }
             if let (Some(start), Some(end)) = (start, end) {
                 create_arrow(
@@ -88,21 +84,15 @@ pub fn create_arrow_end(
 pub fn redraw_arrows(
     mut redraw_arrow: EventReader<RedrawArrowEvent>,
     mut arrow_query: Query<(&mut Path, &mut ArrowMeta), With<ArrowMeta>>,
-    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
-    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let primary_window = windows.single();
-    let (camera, camera_transform) = camera_q.single();
     for event in redraw_arrow.iter() {
         for (mut path, mut arrow) in arrow_query.iter_mut() {
             if arrow.start.id == event.id || arrow.end.id == event.id {
                 let (arrow_hold_vec, arrow_move_vec): (Vec<_>, Vec<_>) = arrow_markers
                     .iter()
                     .filter(|(x, _)| x.id == arrow.end.id || x.id == arrow.start.id)
-                    .filter_map(|(ac, gt)| {
-                        Some((ac, get_pos(gt, primary_window, camera, camera_transform)?))
-                    })
+                    .map(|(ac, gt)| (ac, gt.affine().translation.truncate()))
                     .partition(|(x, _)| x.id == arrow.end.id);
                 let arrow_pos = arrow_hold_vec
                     .iter()

@@ -14,7 +14,7 @@ use super::{
 use crate::{
     themes::Theme,
     ui_plugin::TextPos,
-    utils::{bevy_color_to_cosmic, to_cosmic_text_pos, ReflectableUuid},
+    utils::{bevy_color_to_cosmic, ReflectableUuid},
 };
 
 pub fn spawn_modal(
@@ -210,7 +210,7 @@ pub fn spawn_modal(
                 text: CosmicText::OneStyle(default_value),
                 attrs: AttrsOwned::new(attrs),
                 font_system_handle: cosmic_font_handle,
-                text_pos: to_cosmic_text_pos(TextPos::TopLeft),
+                text_pos: TextPos::TopLeft.into(),
                 size: Some((width, height)),
                 metrics: CosmicMetrics {
                     font_size: theme.font_size,

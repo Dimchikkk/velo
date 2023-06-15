@@ -2,15 +2,15 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{get_node_cursor_pos, get_x_offset, get_y_offset, CosmicEdit};
 use cosmic_text::Edit;
 
-use super::{ui_helpers::BevyMarkdownView, UiState, VeloNode};
+use super::{ui_helpers::BevyMarkdownView, NodeInteractionEvent, NodeInteractionType, UiState};
 
 pub fn clickable_links(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut markdown_text_query: Query<
-        (&Node, &GlobalTransform, &mut CosmicEdit, &BevyMarkdownView),
+        (&GlobalTransform, &mut CosmicEdit, &BevyMarkdownView),
         With<BevyMarkdownView>,
     >,
-    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<VeloNode>)>,
+    mut node_interaction_events: EventReader<NodeInteractionEvent>,
     ui_state: Res<UiState>,
 ) {
     if ui_state.hold_entity.is_some() {
@@ -18,11 +18,15 @@ pub fn clickable_links(
     }
     let primary_window = windows.iter_mut().next().unwrap();
     let scale_factor = primary_window.scale_factor() as f32;
-    for interaction in &mut interaction_query {
-        if *interaction == Interaction::Clicked {
-            for (node, transform, cosmic_edit, bevy_markdown_view) in markdown_text_query.iter_mut()
-            {
-                let size = (node.size().x, node.size().y);
+    for event in node_interaction_events.iter() {
+        if let Ok((transform, cosmic_edit, bevy_markdown_view)) =
+            markdown_text_query.get_mut(event.entity)
+        {
+            if event.node_interaction_type == NodeInteractionType::LeftClick {
+                if !cosmic_edit.readonly {
+                    return;
+                }
+                let size = cosmic_edit.size.unwrap();
                 if let Some(pos) =
                     get_node_cursor_pos(&primary_window, transform, size, cosmic_edit.is_ui_node)
                 {
