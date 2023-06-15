@@ -41,7 +41,6 @@ pub fn create_arrow_start(
                 }
                 crate::ui_plugin::NodeInteractionType::LeftDoubleClick => {}
                 crate::ui_plugin::NodeInteractionType::LeftMouseHoldAndDrag => {}
-                crate::ui_plugin::NodeInteractionType::LeftMouseRelease => {}
                 crate::ui_plugin::NodeInteractionType::RightClick => {}
             }
         }
