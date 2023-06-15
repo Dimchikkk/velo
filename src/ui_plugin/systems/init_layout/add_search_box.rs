@@ -13,7 +13,7 @@ use crate::{
         },
         TextPos,
     },
-    utils::{bevy_color_to_cosmic, to_cosmic_text_pos, ReflectableUuid},
+    utils::{bevy_color_to_cosmic, ReflectableUuid},
 };
 
 pub fn add_search_box(
@@ -42,7 +42,7 @@ pub fn add_search_box(
     let cosmic_edit_meta = CosmicEditMeta {
         text: CosmicText::OneStyle("".to_string()),
         attrs: AttrsOwned::new(attrs),
-        text_pos: to_cosmic_text_pos(TextPos::Center),
+        text_pos: TextPos::Center.into(),
         font_system_handle: cosmic_font_handle,
         node: CosmicNode::Ui,
         size: None,

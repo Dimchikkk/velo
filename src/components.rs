@@ -14,6 +14,7 @@ pub struct Tab {
     pub id: ReflectableUuid,
     pub name: String,
     pub checkpoints: VecDeque<String>,
+    pub z_index: f32,
 }
 
 #[derive(Default, Serialize, Deserialize, Clone, Debug)]

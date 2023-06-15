@@ -7,8 +7,8 @@ use bevy::{
 use bevy_cosmic_edit::CosmicFont;
 
 use super::{
-    ui_helpers::{add_tab, spawn_sprite_node, BottomPanel, NodeMeta, TabContainer},
-    DeleteDoc, DeleteTab, MainPanel, VeloNodeContainer,
+    ui_helpers::{add_tab, spawn_sprite_node, BottomPanel, NodeMeta, TabContainer, VeloNode},
+    DeleteDoc, DeleteTab,
 };
 use crate::{
     canvas::arrow::components::ArrowMeta,
@@ -88,7 +88,7 @@ pub fn load_doc(
 }
 
 pub fn load_tab(
-    old_nodes: Query<Entity, With<VeloNodeContainer>>,
+    old_nodes: Query<Entity, With<VeloNode>>,
     mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
     request: Res<LoadTabRequest>,
     mut app_state: ResMut<AppState>,
@@ -96,7 +96,6 @@ pub fn load_tab(
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
     mut create_arrow: EventWriter<CreateArrowEvent>,
-    main_panel_query: Query<Entity, With<MainPanel>>,
     mut delete_tab: Query<(&mut Visibility, &DeleteTab), (With<DeleteTab>, Without<ArrowMeta>)>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
@@ -170,8 +169,7 @@ pub fn load_tab(
                     }
                     None => None,
                 };
-                // ideally AddRect event should be fired instead of calling spawn_node directly
-                let entity = spawn_sprite_node(
+                let _ = spawn_sprite_node(
                     &mut shaders,
                     &mut commands,
                     &theme,
@@ -185,13 +183,11 @@ pub fn load_tab(
                         image,
                         text: json_node.text.text.clone(),
                         bg_color: json_node.bg_color,
-                        position: (json_node.left, json_node.bottom),
+                        position: (json_node.x, json_node.y, json_node.z),
                         text_pos: json_node.text.pos,
-                        z_index: json_node.z_index,
                         is_active: false,
                     },
                 );
-                commands.entity(main_panel_query.single()).add_child(entity);
             }
 
             let arrows = json["arrows"].as_array_mut().unwrap();
