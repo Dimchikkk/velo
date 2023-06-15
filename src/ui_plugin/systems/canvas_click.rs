@@ -16,7 +16,7 @@ pub fn canvas_click(
     for interaction in interaction_query.iter() {
         if *interaction == Interaction::Clicked {
             for event in node_interaction_events.iter() {
-                if let Ok(_) = raw_text.get(event.entity) {
+                if raw_text.get(event.entity).is_ok() {
                     return;
                 }
             }
