@@ -93,6 +93,7 @@ pub enum NodeInteractionType {
     Hover,
     LeftClick,
     LeftDoubleClick,
+    LeftMouseRelease,
     LeftMouseHoldAndDrag,
     RightClick,
 }
