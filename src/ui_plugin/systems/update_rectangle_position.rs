@@ -10,7 +10,7 @@ use super::{
 
 pub fn update_rectangle_position(
     mut cursor_moved_events: EventReader<CursorMoved>,
-    mut raw_text_query: Query<(&mut CosmicEdit, &RawText, &Parent), With<RawText>>,
+    raw_text_query: Query<(&RawText, &Parent), With<RawText>>,
     border_query: Query<&Parent, With<VeloBorder>>,
     mut velo_node_query: Query<&mut Transform, With<VeloNode>>,
     mut events: EventWriter<RedrawArrowEvent>,
@@ -19,7 +19,7 @@ pub fn update_rectangle_position(
 ) {
     let (camera, camera_transform) = camera_q.single();
     for event in cursor_moved_events.iter() {
-        for (_cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
+        for (raw_text, parent) in &mut raw_text_query.iter() {
             if Some(raw_text.id) == state.hold_entity && state.entity_to_edit.is_none() {
                 if let Some(pos) = camera.viewport_to_world_2d(camera_transform, event.position) {
                     let border = border_query.get(parent.get()).unwrap();
@@ -27,7 +27,6 @@ pub fn update_rectangle_position(
                     top.translation.x = pos.x;
                     top.translation.y = pos.y;
                     events.send(RedrawArrowEvent { id: raw_text.id });
-                    // cosmic_edit.editor.buffer_mut().set_redraw(true);
                 }
             }
         }

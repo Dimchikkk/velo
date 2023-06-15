@@ -256,7 +256,7 @@ impl Plugin for UiPlugin {
             save_to_store.after(save_tab),
             canvas_click,
             active_editor_changed,
-            interactive_sprite,
+            interactive_sprite.before(canvas_click),
         ));
         app.add_systems((set_focused_entity, clickable_links).chain());
 
