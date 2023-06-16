@@ -13,7 +13,7 @@ exclude = ["assets/*"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.10.1", default-features = false, features = [
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "8ec8149", default-features = false, features = [
   "bevy_asset",
   "bevy_core_pipeline",
   "bevy_render",

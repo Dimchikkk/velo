@@ -4,7 +4,7 @@ use crate::{components::MainCamera, utils::get_timestamp};
 
 use std::time::Duration;
 
-use super::{ui_helpers::InteractiveNode, NodeInteractionEvent, NodeInteractionType};
+use super::{ui_helpers::InteractiveNode, NodeInteraction, NodeInteractionType};
 
 #[derive(Default)]
 pub struct HoldingState {
@@ -23,7 +23,7 @@ pub fn interactive_sprite(
         With<InteractiveNode>,
     >,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    mut node_interaction_events: EventWriter<NodeInteractionEvent>,
+    mut node_interaction_events: EventWriter<NodeInteraction>,
     mut double_click: Local<(Duration, Option<Entity>)>,
     mut holding_state: Local<HoldingState>,
 ) {
@@ -79,12 +79,12 @@ pub fn interactive_sprite(
                 && Duration::from_millis(now_ms as u64) - double_click.0
                     < Duration::from_millis(500)
             {
-                node_interaction_events.send(NodeInteractionEvent {
+                node_interaction_events.send(NodeInteraction {
                     entity: active,
                     node_interaction_type: NodeInteractionType::LeftDoubleClick,
                 });
             } else {
-                node_interaction_events.send(NodeInteractionEvent {
+                node_interaction_events.send(NodeInteraction {
                     entity: active,
                     node_interaction_type: NodeInteractionType::LeftClick,
                 });
@@ -98,7 +98,7 @@ pub fn interactive_sprite(
         }
         if buttons.just_pressed(MouseButton::Right) {
             is_hover = false;
-            node_interaction_events.send(NodeInteractionEvent {
+            node_interaction_events.send(NodeInteraction {
                 entity: active,
                 node_interaction_type: NodeInteractionType::RightClick,
             });
@@ -112,7 +112,7 @@ pub fn interactive_sprite(
         {
             is_hover = false;
             holding_state.is_holding = true;
-            node_interaction_events.send(NodeInteractionEvent {
+            node_interaction_events.send(NodeInteraction {
                 entity: active,
                 node_interaction_type: NodeInteractionType::LeftMouseHoldAndDrag,
             });
@@ -124,14 +124,14 @@ pub fn interactive_sprite(
                 duration: Duration::ZERO,
                 entity: None,
             };
-            node_interaction_events.send(NodeInteractionEvent {
+            node_interaction_events.send(NodeInteraction {
                 entity: active,
                 node_interaction_type: NodeInteractionType::LeftMouseRelease,
             });
         }
 
         if is_hover {
-            node_interaction_events.send(NodeInteractionEvent {
+            node_interaction_events.send(NodeInteraction {
                 entity: active,
                 node_interaction_type: NodeInteractionType::Hover,
             });
@@ -142,7 +142,7 @@ pub fn interactive_sprite(
             duration: Duration::ZERO,
             entity: None,
         };
-        node_interaction_events.send(NodeInteractionEvent {
+        node_interaction_events.send(NodeInteraction {
             entity: Entity::PLACEHOLDER,
             node_interaction_type: NodeInteractionType::LeftMouseRelease,
         });

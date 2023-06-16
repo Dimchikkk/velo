@@ -1,5 +1,4 @@
 use bevy::{prelude::*, text::BreakLineOn};
-use bevy_ui_borders::BorderColor;
 
 use crate::{
     themes::Theme,
@@ -40,7 +39,8 @@ pub fn add_menu_button(
                             top: Val::Px(3.),
                             ..default()
                         },
-                        size: Size::new(Val::Percent(2.3), Val::Percent(85.)),
+                        width: Val::Percent(2.3),
+                        height: Val::Percent(85.),
                         ..default()
                     },
                     ..default()
@@ -51,7 +51,8 @@ pub fn add_menu_button(
                     ButtonBundle {
                         background_color: theme.new_tab_btn_bg.into(),
                         style: Style {
-                            size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                            width: Val::Percent(100.),
+                            height: Val::Percent(100.),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
                             ..default()
@@ -73,7 +74,7 @@ pub fn add_menu_button(
                             style: text_style,
                         }],
                         alignment: TextAlignment::Left,
-                        linebreak_behaviour: BreakLineOn::WordBoundary,
+                        linebreak_behavior: BreakLineOn::WordBoundary,
                     };
 
                     builder.spawn(TextBundle { text, ..default() });
@@ -84,42 +85,40 @@ pub fn add_menu_button(
         }
         _ => {
             let top = commands
-                .spawn((
-                    NodeBundle {
-                        background_color: theme.shadow.into(),
-                        style: Style {
-                            flex_direction: FlexDirection::Column,
-                            align_self: AlignSelf::Stretch,
-                            border: UiRect::all(Val::Px(1.)),
-                            margin: UiRect {
-                                left: Val::Px(10.),
-                                right: Val::Px(10.),
-                                top: Val::Px(3.),
-                                bottom: Val::Px(3.),
-                            },
-                            size: Size::new(Val::Percent(2.3), Val::Percent(85.)),
-                            ..default()
+                .spawn((NodeBundle {
+                    background_color: theme.shadow.into(),
+                    border_color: BorderColor(theme.btn_border),
+                    style: Style {
+                        flex_direction: FlexDirection::Column,
+                        align_self: AlignSelf::Stretch,
+                        border: UiRect::all(Val::Px(1.)),
+                        margin: UiRect {
+                            left: Val::Px(10.),
+                            right: Val::Px(10.),
+                            top: Val::Px(3.),
+                            bottom: Val::Px(3.),
                         },
+                        width: Val::Percent(2.3),
+                        height: Val::Percent(85.),
                         ..default()
                     },
-                    BorderColor(theme.btn_border),
-                ))
+                    ..default()
+                },))
                 .id();
             let button = commands
                 .spawn((
                     ButtonBundle {
                         background_color: theme.menu_btn_bg.into(),
                         style: Style {
-                            size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                            width: Val::Percent(100.),
+                            height: Val::Percent(100.),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
                             position_type: PositionType::Absolute,
-                            position: UiRect {
-                                left: Val::Px(1.),
-                                right: Val::Px(0.),
-                                top: Val::Px(-3.),
-                                bottom: Val::Px(0.),
-                            },
+                            left: Val::Px(1.),
+                            right: Val::Px(0.),
+                            top: Val::Px(-3.),
+                            bottom: Val::Px(0.),
                             ..default()
                         },
                         ..default()
@@ -144,7 +143,7 @@ pub fn add_menu_button(
                             style: text_style,
                         }],
                         alignment: TextAlignment::Left,
-                        linebreak_behaviour: BreakLineOn::WordBoundary,
+                        linebreak_behavior: BreakLineOn::WordBoundary,
                     };
                     let text_bundle_style = Style {
                         position_type: PositionType::Absolute,

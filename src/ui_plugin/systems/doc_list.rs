@@ -16,7 +16,7 @@ use crate::{ui_plugin::ui_helpers::add_list_item, utils::ReflectableUuid};
 
 use super::{
     ui_helpers::{DeleteDoc, DocList, DocListItemContainer},
-    UpdateDeleteDocBtnEvent,
+    UpdateDeleteDocBtn,
 };
 
 pub fn list_item_click(
@@ -66,7 +66,7 @@ pub fn mouse_scroll_list(
 
             scrolling_list.position += dy;
             scrolling_list.position = scrolling_list.position.clamp(-max_scroll, 0.);
-            style.position.top = Val::Px(scrolling_list.position);
+            style.top = Val::Px(scrolling_list.position);
         }
     }
 }
@@ -74,7 +74,7 @@ pub fn mouse_scroll_list(
 pub fn doc_list_del_button_update(
     app_state: Res<AppState>,
     mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
-    mut event_reader: EventReader<UpdateDeleteDocBtnEvent>,
+    mut event_reader: EventReader<UpdateDeleteDocBtn>,
 ) {
     for _ in event_reader.iter() {
         for (mut visibility, doc) in delete_doc.iter_mut() {
@@ -95,7 +95,7 @@ pub fn doc_list_ui_changed(
     asset_server: Res<AssetServer>,
     pkv: Res<PkvStore>,
     mut query_container: Query<Entity, With<DocListItemContainer>>,
-    mut event_writer: EventWriter<UpdateDeleteDocBtnEvent>,
+    mut event_writer: EventWriter<UpdateDeleteDocBtn>,
     theme: Res<Theme>,
 ) {
     if app_state.is_changed() && app_state.doc_list_ui != *last_doc_list {
@@ -119,7 +119,7 @@ pub fn doc_list_ui_changed(
                 add_list_item(&mut commands, &theme, &asset_server, doc_id, doc_name);
             commands.entity(doc_list).add_child(doc_list_item);
         }
-        event_writer.send(UpdateDeleteDocBtnEvent);
+        event_writer.send(UpdateDeleteDocBtn);
         *last_doc_list = app_state.doc_list_ui.clone();
     }
 }

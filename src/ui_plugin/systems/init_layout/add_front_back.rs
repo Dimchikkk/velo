@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_ui_borders::BorderColor;
 
 use crate::{
     themes::Theme,
@@ -25,7 +24,8 @@ pub fn add_front_back(
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
                 margin: UiRect::all(Val::Px(5.)),
-                size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                width: Val::Percent(15.),
+                height: Val::Percent(100.),
                 ..default()
             },
             background_color: theme.shadow.into(),
@@ -36,24 +36,23 @@ pub fn add_front_back(
         .spawn((
             ButtonBundle {
                 background_color: theme.front_back_btn_bg.into(),
+                border_color: theme.btn_border.into(),
                 image: image.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     border: UiRect::all(Val::Px(1.)),
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Px(1.),
-                        right: Val::Px(0.),
-                        top: Val::Px(-1.),
-                        bottom: Val::Px(0.),
-                    },
+                    left: Val::Px(1.),
+                    right: Val::Px(0.),
+                    top: Val::Px(-1.),
+                    bottom: Val::Px(0.),
                     justify_content: JustifyContent::Center,
                     ..default()
                 },
                 ..default()
             },
-            BorderColor(theme.btn_border),
             button_action,
             GenericButton,
         ))

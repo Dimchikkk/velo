@@ -18,7 +18,8 @@ pub fn node_manipulation(
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(12.)),
+                width: Val::Percent(90.),
+                height: Val::Percent(12.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -33,7 +34,8 @@ pub fn node_manipulation(
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
                 margin: UiRect::all(Val::Px(5.)),
-                size: Size::new(Val::Percent(23.), Val::Percent(100.)),
+                width: Val::Percent(23.),
+                height: Val::Percent(100.),
                 ..default()
             },
             ..default()
@@ -44,16 +46,15 @@ pub fn node_manipulation(
             ButtonBundle {
                 background_color: theme.node_manipulation_bg.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Px(1.),
-                        right: Val::Px(0.),
-                        top: Val::Px(-1.),
-                        bottom: Val::Px(0.),
-                    },
+                    left: Val::Px(1.),
+                    right: Val::Px(0.),
+                    top: Val::Px(-1.),
+                    bottom: Val::Px(0.),
                     ..default()
                 },
                 ..default()
@@ -83,7 +84,7 @@ pub fn node_manipulation(
                     style: text_style,
                 }],
                 alignment: TextAlignment::Left,
-                linebreak_behaviour: BreakLineOn::WordBoundary,
+                linebreak_behavior: BreakLineOn::WordBoundary,
             };
             let text_bundle_style = Style {
                 position_type: PositionType::Absolute,
@@ -106,7 +107,8 @@ pub fn node_manipulation(
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
                 margin: UiRect::all(Val::Px(5.)),
-                size: Size::new(Val::Percent(23.), Val::Percent(100.)),
+                width: Val::Percent(23.),
+                height: Val::Percent(100.),
                 ..default()
             },
             ..default()
@@ -117,16 +119,15 @@ pub fn node_manipulation(
             ButtonBundle {
                 background_color: theme.node_manipulation_bg.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Px(1.),
-                        right: Val::Px(0.),
-                        top: Val::Px(-1.),
-                        bottom: Val::Px(0.),
-                    },
+                    left: Val::Px(1.),
+                    right: Val::Px(0.),
+                    top: Val::Px(-1.),
+                    bottom: Val::Px(0.),
                     ..default()
                 },
                 ..default()
@@ -156,7 +157,7 @@ pub fn node_manipulation(
                     style: text_style,
                 }],
                 alignment: TextAlignment::Left,
-                linebreak_behaviour: BreakLineOn::WordBoundary,
+                linebreak_behavior: BreakLineOn::WordBoundary,
             };
             let text_bundle_style = Style {
                 position_type: PositionType::Absolute,
@@ -179,7 +180,8 @@ pub fn node_manipulation(
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
                 margin: UiRect::all(Val::Px(5.)),
-                size: Size::new(Val::Percent(23.), Val::Percent(100.)),
+                width: Val::Percent(23.),
+                height: Val::Percent(100.),
                 ..default()
             },
             ..default()
@@ -190,16 +192,15 @@ pub fn node_manipulation(
             ButtonBundle {
                 background_color: theme.node_manipulation_bg.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Px(1.),
-                        right: Val::Px(0.),
-                        top: Val::Px(-1.),
-                        bottom: Val::Px(0.),
-                    },
+                    left: Val::Px(1.),
+                    right: Val::Px(0.),
+                    top: Val::Px(-1.),
+                    bottom: Val::Px(0.),
                     ..default()
                 },
                 ..default()
@@ -229,7 +230,7 @@ pub fn node_manipulation(
                     style: text_style,
                 }],
                 alignment: TextAlignment::Left,
-                linebreak_behaviour: BreakLineOn::WordBoundary,
+                linebreak_behavior: BreakLineOn::WordBoundary,
             };
             let text_bundle_style = Style {
                 position_type: PositionType::Absolute,
@@ -252,7 +253,8 @@ pub fn node_manipulation(
                 flex_direction: FlexDirection::Column,
                 margin: UiRect::all(Val::Px(5.)),
                 align_self: AlignSelf::Stretch,
-                size: Size::new(Val::Percent(23.), Val::Percent(100.)),
+                width: Val::Percent(23.),
+                height: Val::Percent(100.),
                 ..default()
             },
             ..default()
@@ -263,16 +265,15 @@ pub fn node_manipulation(
             ButtonBundle {
                 background_color: theme.node_manipulation_bg.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Px(1.),
-                        right: Val::Px(0.),
-                        top: Val::Px(-1.),
-                        bottom: Val::Px(0.),
-                    },
+                    left: Val::Px(1.),
+                    right: Val::Px(0.),
+                    top: Val::Px(-1.),
+                    bottom: Val::Px(0.),
                     ..default()
                 },
                 ..default()
@@ -302,7 +303,7 @@ pub fn node_manipulation(
                     style: text_style,
                 }],
                 alignment: TextAlignment::Left,
-                linebreak_behaviour: BreakLineOn::WordBoundary,
+                linebreak_behavior: BreakLineOn::WordBoundary,
             };
             let text_bundle_style = Style {
                 position_type: PositionType::Absolute,

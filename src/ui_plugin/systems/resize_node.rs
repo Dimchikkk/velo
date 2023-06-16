@@ -1,6 +1,6 @@
 use super::{
     ui_helpers::{spawn_shadow, ResizeMarker, VeloBorder, VeloShadow},
-    NodeInteractionEvent, NodeType, RawText, RedrawArrowEvent, VeloNode,
+    NodeInteraction, NodeType, RawText, RedrawArrow, VeloNode,
 };
 use crate::{
     canvas::arrow::components::ArrowConnect, components::MainCamera, themes::Theme, UiState,
@@ -12,7 +12,7 @@ use cosmic_text::Edit;
 
 pub fn resize_entity_start(
     mut ui_state: ResMut<UiState>,
-    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    mut node_interaction_events: EventReader<NodeInteraction>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     resize_marker_query: Query<(&ResizeMarker, &Parent, &mut Transform), With<ResizeMarker>>,
     velo_node_query: Query<&VeloNode, With<VeloNode>>,
@@ -54,7 +54,7 @@ pub fn resize_entity_end(
     mut shaders: ResMut<Assets<Shader>>,
     theme: ResMut<Theme>,
     mut ui_state: ResMut<UiState>,
-    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    mut node_interaction_events: EventReader<NodeInteraction>,
     raw_text_query: Query<(&Parent, &RawText, &CosmicEdit), With<RawText>>,
     border_query: Query<(&Parent, &VeloBorder), With<VeloBorder>>,
     velo_node_query: Query<Entity, With<VeloNode>>,
@@ -91,7 +91,7 @@ pub fn resize_entity_run(
     mut commands: Commands,
     ui_state: ResMut<UiState>,
     mut cursor_moved_events: EventReader<CursorMoved>,
-    mut events: EventWriter<RedrawArrowEvent>,
+    mut events: EventWriter<RedrawArrow>,
     mut resize_marker_query: Query<
         (&ResizeMarker, &Parent, &mut Transform),
         (With<ResizeMarker>, Without<VeloNode>, Without<ArrowConnect>),
@@ -222,7 +222,7 @@ pub fn resize_entity_run(
                         }
                     };
                     *path = new_path;
-                    events.send(RedrawArrowEvent { id: raw_text.id });
+                    events.send(RedrawArrow { id: raw_text.id });
                 }
             }
         }

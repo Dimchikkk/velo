@@ -1,5 +1,3 @@
-use bevy_ui_borders::BorderColor;
-
 use bevy::{
     a11y::{
         accesskit::{NodeBuilder, Role},
@@ -23,9 +21,11 @@ pub fn add_list_item(
     let root = commands
         .spawn((
             ButtonBundle {
+                border_color: theme.btn_border.into(),
                 background_color: theme.doc_list_bg.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Px(100.),
                     justify_content: JustifyContent::Center,
                     border: UiRect::all(Val::Px(1.)),
                     ..default()
@@ -34,7 +34,6 @@ pub fn add_list_item(
             },
             GenericButton,
             DocListItemContainer { id },
-            BorderColor(theme.btn_border),
             AccessibilityNode(NodeBuilder::new(Role::ListItem)),
         ))
         .id();
@@ -43,7 +42,8 @@ pub fn add_list_item(
             ButtonBundle {
                 background_color: theme.doc_list_bg.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(90.), Val::Percent(100.)),
+                    width: Val::Percent(90.),
+                    height: Val::Percent(100.),
                     justify_content: JustifyContent::Center,
                     padding: UiRect::all(Val::Px(3.)),
                     ..default()
@@ -99,7 +99,8 @@ pub fn add_list_item(
                         top: Val::Px(0.),
                         bottom: Val::Px(0.),
                     },
-                    size: Size::new(Val::Percent(10.), Val::Percent(100.)),
+                    width: Val::Percent(10.),
+                    height: Val::Percent(100.),
                     justify_content: JustifyContent::Center,
                     padding: UiRect::all(Val::Px(5.)),
                     ..default()

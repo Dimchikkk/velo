@@ -117,12 +117,19 @@ fn change_active_editor(
     if buttons.just_pressed(MouseButton::Left) {
         for (cosmic_edit, node_transform, entity) in &mut cosmic_edit_query.iter_mut() {
             let size = cosmic_edit.size.unwrap();
-            let x_min = node_transform.affine().translation.x + size.0 / 2.;
-            let y_min = node_transform.affine().translation.y;
-            let x_max = x_min + size.0;
-            let y_max = y_min + size.1;
+            let x_min = node_transform.affine().translation.x - size.0 / 2.;
+            let y_min = -node_transform.affine().translation.y - size.1 / 2.;
+            let x_max = node_transform.affine().translation.x + size.0 / 2.;
+            let y_max = -node_transform.affine().translation.y + size.1 / 2.;
+
+            eprintln!(
+                "x_min: {}, x_max: {}, y_min: {}, y_max: {}",
+                x_min, x_max, y_min, y_max
+            );
             window.cursor_position().and_then(|pos| {
                 Some({
+                    let pos = Vec2::new(pos.x - window.width() / 2., pos.y - window.height() / 2.);
+                    eprintln!("pos: {}, entity: {:?}", pos, entity);
                     if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
                         commands.insert_resource(ActiveEditor {
                             entity: Some(entity),
@@ -138,7 +145,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(CosmicEditPlugin)
-        .add_startup_system(setup)
-        .add_system(change_active_editor)
+        .add_systems(Startup, setup)
+        .add_systems(Update, change_active_editor)
         .run();
 }

@@ -1,10 +1,10 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use super::{ui_helpers::RawText, NodeInteractionEvent, UiState};
+use super::{ui_helpers::RawText, NodeInteraction, UiState};
 
 pub fn set_focused_entity(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    mut node_interaction_events: EventReader<NodeInteraction>,
     mut ui_state: ResMut<UiState>,
     velo: Query<&RawText, With<RawText>>,
 ) {

@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use bevy_cosmic_edit::{
     spawn_cosmic_edit, CosmicEditMeta, CosmicFont, CosmicMetrics, CosmicNode, CosmicText,
 };
-use bevy_ui_borders::BorderColor;
 use cosmic_text::AttrsOwned;
 
 use crate::{
@@ -28,7 +27,8 @@ pub fn add_search_box(
         .spawn((NodeBundle {
             background_color: theme.search_box_bg.into(),
             style: Style {
-                size: Size::new(Val::Percent(80.), Val::Percent(8.)),
+                width: Val::Percent(80.),
+                height: Val::Px(8.),
                 flex_direction: FlexDirection::Column,
                 margin: UiRect::all(Val::Px(5.)),
                 ..default()
@@ -58,7 +58,6 @@ pub fn add_search_box(
     let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
     commands
         .entity(cosmic_edit)
-        .insert(BorderColor(theme.search_box_border))
         .insert(SearchButton { id })
         .insert(GenericButton);
     commands.entity(cosmic_edit).insert(SearchText { id });
