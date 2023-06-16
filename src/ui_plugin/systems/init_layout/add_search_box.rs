@@ -25,10 +25,12 @@ pub fn add_search_box(
     let id = ReflectableUuid::generate();
     let root = commands
         .spawn((NodeBundle {
+            border_color: theme.btn_border.into(),
             background_color: theme.search_box_bg.into(),
             style: Style {
                 width: Val::Percent(80.),
-                height: Val::Px(8.),
+                height: Val::Percent(8.),
+                border: UiRect::all(Val::Px(1.)),
                 flex_direction: FlexDirection::Column,
                 margin: UiRect::all(Val::Px(5.)),
                 ..default()
@@ -66,7 +68,7 @@ pub fn add_search_box(
             get_tooltip(
                 theme,
                 "Filter documents by text in nodes".to_string(),
-                14.,
+                crate::ui_plugin::ui_helpers::TooltipSize::Large,
                 TooltipPosition::Top,
             ),
             Tooltip,

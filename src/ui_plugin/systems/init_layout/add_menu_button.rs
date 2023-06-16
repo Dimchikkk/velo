@@ -2,7 +2,7 @@ use bevy::{prelude::*, text::BreakLineOn};
 
 use crate::{
     themes::Theme,
-    ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip, TooltipPosition},
+    ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip, TooltipPosition, TooltipSize},
 };
 
 pub fn add_menu_button(
@@ -128,7 +128,7 @@ pub fn add_menu_button(
                 ))
                 .with_children(|builder| {
                     builder.spawn((
-                        get_tooltip(theme, label, 14., TooltipPosition::Bottom),
+                        get_tooltip(theme, label, TooltipSize::Large, TooltipPosition::Bottom),
                         Tooltip,
                     ));
 

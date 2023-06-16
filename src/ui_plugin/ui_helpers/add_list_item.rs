@@ -25,7 +25,7 @@ pub fn add_list_item(
                 background_color: theme.doc_list_bg.into(),
                 style: Style {
                     width: Val::Percent(100.),
-                    height: Val::Px(100.),
+                    height: Val::Percent(100.),
                     justify_content: JustifyContent::Center,
                     border: UiRect::all(Val::Px(1.)),
                     ..default()

@@ -111,7 +111,8 @@ pub fn resize_entity_run(
 ) {
     let (camera, camera_transform) = camera_q.single();
 
-    for event in cursor_moved_events.iter() {
+    if !cursor_moved_events.is_empty() {
+        let event = cursor_moved_events.iter().last().unwrap();
         if let Some(id) = ui_state.entity_to_resize {
             for (raw_text_parent, raw_text, mut cosmic_edit) in &mut raw_text_query.iter_mut() {
                 if id != raw_text.id {

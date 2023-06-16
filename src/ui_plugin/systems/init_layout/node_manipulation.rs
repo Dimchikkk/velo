@@ -67,7 +67,7 @@ pub fn node_manipulation(
                 get_tooltip(
                     theme,
                     "New Papernote".to_string(),
-                    14.,
+                    crate::ui_plugin::ui_helpers::TooltipSize::Small,
                     TooltipPosition::Bottom,
                 ),
                 Tooltip,
@@ -140,7 +140,7 @@ pub fn node_manipulation(
                 get_tooltip(
                     theme,
                     "New Rectangle".to_string(),
-                    14.,
+                    crate::ui_plugin::ui_helpers::TooltipSize::Small,
                     TooltipPosition::Bottom,
                 ),
                 Tooltip,
@@ -213,7 +213,7 @@ pub fn node_manipulation(
                 get_tooltip(
                     theme,
                     "New Circle".to_string(),
-                    14.,
+                    crate::ui_plugin::ui_helpers::TooltipSize::Small,
                     TooltipPosition::Bottom,
                 ),
                 Tooltip,
@@ -286,7 +286,7 @@ pub fn node_manipulation(
                 get_tooltip(
                     theme,
                     "Delete Rectangle".to_string(),
-                    14.,
+                    crate::ui_plugin::ui_helpers::TooltipSize::Small,
                     TooltipPosition::Bottom,
                 ),
                 Tooltip,
