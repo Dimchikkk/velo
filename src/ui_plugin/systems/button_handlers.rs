@@ -113,14 +113,7 @@ pub fn rec_button_handlers(
                         #[allow(unused)]
                         for (entity, arrow, mut visibility) in &mut arrows.iter_mut() {
                             if arrow.start.id == id || arrow.end.id == id {
-                                #[cfg(not(target_arch = "wasm32"))]
-                                {
-                                    commands.entity(entity).despawn_recursive();
-                                }
-                                #[cfg(target_arch = "wasm32")]
-                                {
-                                    *visibility = Visibility::Hidden;
-                                }
+                                commands.entity(entity).despawn_recursive();
                             }
                         }
                     }

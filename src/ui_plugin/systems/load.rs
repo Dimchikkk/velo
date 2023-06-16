@@ -109,14 +109,7 @@ pub fn load_tab(
 
     #[allow(unused)]
     for (entity, mut visibility) in &mut old_arrows.iter_mut() {
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            commands.entity(entity).despawn_recursive();
-        }
-        #[cfg(target_arch = "wasm32")]
-        {
-            *visibility = Visibility::Hidden;
-        }
+        commands.entity(entity).despawn_recursive();
     }
     for entity in old_nodes.iter() {
         commands.entity(entity).despawn_recursive();

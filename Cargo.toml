@@ -55,6 +55,7 @@ bevy_markdown = { path = "crates/bevy_markdown" }
 bevy_cosmic_edit = { path = "crates/bevy_cosmic_edit" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "8ec8149", default-features = false, features = [ "webgl2" ] }
 console_error_panic_hook = "0.1.7"
 web-sys = { version = "0.3.61", default-features = false, features = ["Window", "Location"] }
 wasm-bindgen = "0.2.86"
