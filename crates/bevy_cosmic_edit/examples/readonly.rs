@@ -18,7 +18,8 @@ fn setup(
         .spawn(NodeBundle {
             style: Style {
                 display: Display::Flex,
-                size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
                 ..default()
             },
             ..default()
@@ -63,6 +64,6 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(CosmicEditPlugin)
-        .add_startup_system(setup)
+        .add_systems(Startup, setup)
         .run();
 }

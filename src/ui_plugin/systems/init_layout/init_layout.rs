@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
 use bevy_cosmic_edit::{create_cosmic_font_system, CosmicFont, CosmicFontConfig};
-use bevy_ui_borders::BorderColor;
 use std::time::Duration;
 
 use bevy_pkv::PkvStore;
@@ -108,26 +107,25 @@ pub fn init_layout(
     let bottom_panel = commands
         .spawn((
             NodeBundle {
+                border_color: theme.btn_border.into(),
                 background_color: theme.bottom_panel_bg.into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Percent(0.),
-                        right: Val::Percent(0.),
-                        bottom: Val::Percent(0.),
-                        top: Val::Percent(96.),
-                    },
-                    size: Size::new(Val::Percent(100.), Val::Percent(4.)),
+                    left: Val::Percent(0.),
+                    right: Val::Percent(0.),
+                    bottom: Val::Percent(0.),
+                    top: Val::Percent(96.),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(4.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Start,
-                    overflow: Overflow::Hidden,
+                    overflow: Overflow::clip(),
                     ..default()
                 },
                 ..default()
             },
             BottomPanel,
-            BorderColor(theme.btn_border),
         ))
         .id();
     let add_tab = add_menu_button(
@@ -145,12 +143,10 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 style: Style {
-                    position: UiRect {
-                        left: Val::Px(0.0),
-                        bottom: Val::Px(0.0),
-                        ..Default::default()
-                    },
-                    size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                    left: Val::Px(0.0),
+                    bottom: Val::Px(0.0),
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
                     align_items: AlignItems::Start,
                     justify_content: JustifyContent::Center,
                     flex_direction: FlexDirection::Column,
@@ -166,9 +162,11 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 background_color: theme.menu_bg.into(),
+                border_color: theme.btn_border.into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
-                    size: Size::new(Val::Percent(100.0), Val::Percent(5.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(5.),
                     padding: UiRect {
                         left: Val::Px(10.),
                         ..default()
@@ -179,7 +177,6 @@ pub fn init_layout(
                 },
                 ..default()
             },
-            BorderColor(theme.btn_border),
             Menu,
         ))
         .id();
@@ -253,7 +250,8 @@ pub fn init_layout(
     let main_bottom = commands
         .spawn(NodeBundle {
             style: Style {
-                size: Size::new(Val::Percent(100.0), Val::Percent(95.)),
+                width: Val::Percent(100.),
+                height: Val::Percent(95.),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 ..default()
@@ -265,9 +263,11 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 background_color: theme.left_panel_bg.into(),
+                border_color: theme.btn_border.into(),
                 style: Style {
                     border: UiRect::all(Val::Px(1.0)),
-                    size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                    width: Val::Percent(15.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Start,
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
@@ -275,14 +275,14 @@ pub fn init_layout(
                 },
                 ..default()
             },
-            BorderColor(theme.btn_border),
             LeftPanel,
         ))
         .id();
     let right_panel = commands
         .spawn((NodeBundle {
             style: Style {
-                size: Size::new(Val::Percent(85.), Val::Percent(100.)),
+                width: Val::Percent(85.),
+                height: Val::Percent(100.),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
@@ -296,10 +296,11 @@ pub fn init_layout(
             ButtonBundle {
                 background_color: Color::NONE.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
-                    overflow: Overflow::Hidden,
+                    overflow: Overflow::clip(),
                     ..default()
                 },
                 ..default()
@@ -316,7 +317,8 @@ pub fn init_layout(
             NodeBundle {
                 style: Style {
                     padding: UiRect::all(Val::Px(10.)),
-                    size: Size::new(Val::Percent(100.), Val::Percent(40.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(40.),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
@@ -339,7 +341,8 @@ pub fn init_layout(
         .spawn((
             NodeBundle {
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(60.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(60.),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
@@ -378,7 +381,8 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(9.)),
+                width: Val::Percent(90.),
+                height: Val::Percent(9.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -409,7 +413,8 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(9.)),
+                width: Val::Percent(90.),
+                height: Val::Percent(9.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -453,7 +458,8 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(9.)),
+                width: Val::Percent(90.),
+                height: Val::Percent(9.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -520,7 +526,8 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(9.)),
+                width: Val::Percent(90.),
+                height: Val::Percent(9.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()
@@ -552,7 +559,8 @@ pub fn init_layout(
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size::new(Val::Percent(90.), Val::Percent(10.)),
+                width: Val::Percent(90.),
+                height: Val::Percent(10.),
                 margin: UiRect::all(Val::Px(5.)),
                 justify_content: JustifyContent::Start,
                 ..default()

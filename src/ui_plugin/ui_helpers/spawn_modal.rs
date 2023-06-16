@@ -2,7 +2,6 @@ use bevy_cosmic_edit::{
     spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicFont, CosmicMetrics, CosmicNode,
     CosmicText,
 };
-use bevy_ui_borders::BorderColor;
 
 use bevy::prelude::*;
 use cosmic_text::AttrsOwned;
@@ -42,12 +41,10 @@ pub fn spawn_modal(
                     flex_direction: FlexDirection::Column,
                     align_self: AlignSelf::Stretch,
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Px(window.width() / 2. - 250.),
-                        bottom: Val::Px(window.height() / 2. - 50.),
-                        ..default()
-                    },
-                    size: Size::new(Val::Px(width), Val::Px(height)),
+                    left: Val::Px(window.width() / 2. - 250.),
+                    bottom: Val::Px(window.height() / 2. - 50.),
+                    width: Val::Px(width),
+                    height: Val::Px(height),
                     ..default()
                 },
                 background_color: theme.shadow.into(),
@@ -63,10 +60,8 @@ pub fn spawn_modal(
         .spawn(NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
-                size: Size {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(30.),
-                },
+                width: Val::Percent(100.),
+                height: Val::Percent(30.),
                 justify_content: JustifyContent::SpaceAround,
                 ..default()
             },
@@ -77,6 +72,7 @@ pub fn spawn_modal(
     let ok_button = commands
         .spawn((
             ButtonBundle {
+                border_color: theme.btn_border.into(),
                 background_color: theme.ok_cancel_bg.into(),
                 style: Style {
                     justify_content: JustifyContent::Center,
@@ -87,7 +83,6 @@ pub fn spawn_modal(
                 },
                 ..default()
             },
-            BorderColor(theme.btn_border),
             GenericButton,
             ModalConfirm {
                 id,
@@ -112,6 +107,7 @@ pub fn spawn_modal(
     let cancel_button = commands
         .spawn((
             ButtonBundle {
+                border_color: theme.btn_border.into(),
                 background_color: theme.ok_cancel_bg.into(),
                 style: Style {
                     justify_content: JustifyContent::Center,
@@ -123,7 +119,6 @@ pub fn spawn_modal(
                 ..default()
             },
             GenericButton,
-            BorderColor(theme.btn_border),
             ModalCancel { id },
         ))
         .with_children(|builder| {
@@ -152,10 +147,8 @@ pub fn spawn_modal(
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::SpaceAround,
                         padding: UiRect::all(Val::Px(20.)),
-                        size: Size {
-                            width: Val::Percent(100.),
-                            height: Val::Percent(70.),
-                        },
+                        width: Val::Percent(100.),
+                        height: Val::Percent(70.),
                         ..default()
                     },
                     ..default()
@@ -166,10 +159,8 @@ pub fn spawn_modal(
                     style: Style {
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
-                        size: Size {
-                            width: Val::Px(50.),
-                            height: Val::Percent(30.),
-                        },
+                        width: Val::Px(50.),
+                        height: Val::Percent(30.),
                         ..default()
                     },
                     ..default()
@@ -181,27 +172,23 @@ pub fn spawn_modal(
             let width = 180.;
             let height = 35.;
             let button = commands
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            justify_content: JustifyContent::Start,
-                            align_items: AlignItems::Center,
-                            border: UiRect::all(Val::Px(1.)),
-                            size: Size {
-                                width: Val::Px(width),
-                                height: Val::Px(height),
-                            },
-                            padding: UiRect {
-                                top: Val::Px(7.),
-                                left: Val::Px(7.),
-                                ..default()
-                            },
+                .spawn((ButtonBundle {
+                    border_color: theme.btn_border.into(),
+                    style: Style {
+                        justify_content: JustifyContent::Start,
+                        align_items: AlignItems::Center,
+                        border: UiRect::all(Val::Px(1.)),
+                        width: Val::Px(width),
+                        height: Val::Px(height),
+                        padding: UiRect {
+                            top: Val::Px(7.),
+                            left: Val::Px(7.),
                             ..default()
                         },
                         ..default()
                     },
-                    BorderColor(theme.btn_border),
-                ))
+                    ..default()
+                },))
                 .id();
             let mut attrs = cosmic_text::Attrs::new();
             attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
@@ -238,10 +225,8 @@ pub fn spawn_modal(
                     style: Style {
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
-                        size: Size {
-                            width: Val::Percent(100.),
-                            height: Val::Percent(50.),
-                        },
+                        width: Val::Percent(100.),
+                        height: Val::Percent(50.),
                         ..default()
                     },
                     ..default()
@@ -269,28 +254,25 @@ pub fn spawn_modal(
         }
     };
     let modal = commands
-        .spawn((
-            NodeBundle {
-                background_color: theme.modal_bg.into(),
-                style: Style {
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    border: UiRect::all(Val::Px(1.)),
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
-                    position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Px(-3.),
-                        right: Val::Px(0.),
-                        top: Val::Px(-3.),
-                        bottom: Val::Px(0.),
-                    },
-                    flex_direction: FlexDirection::Column,
-                    ..default()
-                },
+        .spawn((NodeBundle {
+            border_color: theme.btn_border.into(),
+            background_color: theme.modal_bg.into(),
+            style: Style {
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                border: UiRect::all(Val::Px(1.)),
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
+                position_type: PositionType::Absolute,
+                left: Val::Px(-3.),
+                right: Val::Px(0.),
+                top: Val::Px(-3.),
+                bottom: Val::Px(0.),
+                flex_direction: FlexDirection::Column,
                 ..default()
             },
-            BorderColor(theme.btn_border),
-        ))
+            ..default()
+        },))
         .id();
     commands.entity(modal).add_child(modal_dynamic);
     commands.entity(modal).add_child(modal_static);

@@ -13,7 +13,7 @@ use uuid::Uuid;
 use crate::{
     resources::{LoadTabRequest, SaveTabRequest},
     themes::Theme,
-    AddRectEvent, BlinkTimer, UiState,
+    AddRect, BlinkTimer, UiState,
 };
 
 use super::ui_helpers::{get_sections, EditableText};
@@ -25,7 +25,7 @@ pub fn keyboard_input_system(
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     mut char_evr: EventReader<ReceivedCharacter>,
-    mut events: EventWriter<AddRectEvent>,
+    mut events: EventWriter<AddRect>,
     input: Res<Input<KeyCode>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut deleting: Local<bool>,
@@ -36,8 +36,8 @@ pub fn keyboard_input_system(
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
-    let command = input.any_pressed([KeyCode::RWin, KeyCode::LWin]);
-    let shift = input.any_pressed([KeyCode::RShift, KeyCode::LShift]);
+    let command = input.any_pressed([KeyCode::SuperLeft, KeyCode::SuperRight]);
+    let shift = input.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
     blink_timer.timer.tick(time.delta());
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
@@ -154,7 +154,7 @@ fn get_text_val(
 #[cfg(not(target_arch = "wasm32"))]
 pub fn insert_from_clipboard(
     images: &mut ResMut<Assets<Image>>,
-    events: &mut EventWriter<AddRectEvent>,
+    events: &mut EventWriter<AddRect>,
     scale_factor: f64,
     theme: &Res<Theme>,
 ) {
@@ -182,7 +182,7 @@ pub fn insert_from_clipboard(
                 TextureFormat::Rgba8UnormSrgb,
             );
             let image = images.add(image);
-            events.send(AddRectEvent {
+            events.send(AddRect {
                 node: JsonNode {
                     id: Uuid::new_v4(),
                     node_type: crate::NodeType::Rect,
