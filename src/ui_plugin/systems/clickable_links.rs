@@ -2,7 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{get_node_cursor_pos, get_x_offset, get_y_offset, CosmicEdit};
 use cosmic_text::Edit;
 
-use super::{ui_helpers::BevyMarkdownView, NodeInteractionEvent, NodeInteractionType, UiState};
+use super::{ui_helpers::BevyMarkdownView, NodeInteraction, NodeInteractionType, UiState};
 
 pub fn clickable_links(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
@@ -10,7 +10,7 @@ pub fn clickable_links(
         (&GlobalTransform, &mut CosmicEdit, &BevyMarkdownView),
         With<BevyMarkdownView>,
     >,
-    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    mut node_interaction_events: EventReader<NodeInteraction>,
     ui_state: Res<UiState>,
 ) {
     if ui_state.hold_entity.is_some() {

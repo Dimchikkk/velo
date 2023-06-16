@@ -10,7 +10,7 @@ use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
 use super::ui_helpers::{VeloBorder, VeloNode};
-use super::{RawText, SaveStoreEvent};
+use super::{RawText, SaveStore};
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::components::Doc;
 use crate::resources::SaveDocRequest;
@@ -39,7 +39,7 @@ pub fn save_doc(
     mut app_state: ResMut<AppState>,
     mut pkv: ResMut<PkvStore>,
     mut commands: Commands,
-    mut events: EventWriter<SaveStoreEvent>,
+    mut events: EventWriter<SaveStore>,
 ) {
     let doc_id = request.doc_id;
 
@@ -54,7 +54,7 @@ pub fn save_doc(
         }
     }
     // event is used for running save_tab logic before saving to store
-    events.send(SaveStoreEvent {
+    events.send(SaveStore {
         doc_id,
         path: request.path.clone(),
     });
@@ -63,7 +63,7 @@ pub fn save_doc(
 pub fn save_to_store(
     mut pkv: ResMut<PkvStore>,
     mut app_state: ResMut<AppState>,
-    mut events: EventReader<SaveStoreEvent>,
+    mut events: EventReader<SaveStore>,
 ) {
     for event in events.iter() {
         let doc_id = event.doc_id;
@@ -228,7 +228,7 @@ mod tests {
     fn test_save_doc1() {
         // Setup
         let mut app = App::new();
-        app.add_systems((save_doc, save_to_store.after(save_doc)));
+        app.add_systems(Update, (save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -254,7 +254,7 @@ mod tests {
             path: Some(temp_file_path.clone()),
         };
         app.insert_resource(request);
-        app.add_event::<SaveStoreEvent>();
+        app.add_event::<SaveStore>();
         PkvStore::new("test", "test").clear().unwrap();
         app.insert_resource(PkvStore::new("test", "test"));
         app.insert_resource(app_state);
@@ -286,7 +286,7 @@ mod tests {
     fn test_save_doc2() {
         // Setup
         let mut app = App::new();
-        app.add_systems((save_doc, save_to_store.after(save_doc)));
+        app.add_systems(Update, (save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -317,7 +317,7 @@ mod tests {
         let mut tags = HashMap::new();
         tags.insert(ReflectableUuid::generate(), vec!["test_tag_2".to_string()]);
         pkv.set("tags", &tags).unwrap();
-        app.add_event::<SaveStoreEvent>();
+        app.add_event::<SaveStore>();
         app.insert_resource(pkv);
         app.insert_resource(app_state);
 
@@ -348,7 +348,7 @@ mod tests {
     fn test_save_doc3() {
         // Setup
         let mut app = App::new();
-        app.add_systems((save_doc, save_to_store.after(save_doc)));
+        app.add_systems(Update, (save_doc, save_to_store.after(save_doc)));
         let temp_dir = tempdir().unwrap();
         let temp_file_path = temp_dir.path().join("test_doc.json");
         let doc_id = ReflectableUuid::generate();
@@ -380,7 +380,7 @@ mod tests {
         let mut tags = HashMap::new();
         tags.insert(doc_id, vec!["test_tag_2".to_string()]);
         pkv.set("tags", &tags).unwrap();
-        app.add_event::<SaveStoreEvent>();
+        app.add_event::<SaveStore>();
         app.insert_resource(pkv);
         app.insert_resource(app_state);
 

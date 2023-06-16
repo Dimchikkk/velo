@@ -33,8 +33,9 @@ pub fn add_list(
         .spawn(NodeBundle {
             style: Style {
                 flex_direction: FlexDirection::Column,
-                size: Size::new(Val::Percent(80.), Val::Percent(80.)),
-                overflow: Overflow::Hidden,
+                width: Val::Percent(80.),
+                height: Val::Percent(80.),
+                overflow: Overflow::clip(),
                 ..default()
             },
             background_color: theme.doc_list_bg.into(),
@@ -46,7 +47,6 @@ pub fn add_list(
             NodeBundle {
                 style: Style {
                     flex_direction: FlexDirection::Column,
-                    max_size: Size::UNDEFINED,
                     align_items: AlignItems::Center,
                     ..default()
                 },

@@ -120,7 +120,7 @@ pub fn get_tooltip(
             },
         }],
         alignment: TextAlignment::Left,
-        linebreak_behaviour: BreakLineOn::WordBoundary,
+        linebreak_behavior: BreakLineOn::WordBoundary,
     };
     let position = match tooltip_position {
         TooltipPosition::Bottom => UiRect {
@@ -139,8 +139,12 @@ pub fn get_tooltip(
     let text_bundle_style = Style {
         padding: UiRect::all(Val::Px(0.)),
         position_type: PositionType::Relative,
-        position,
-        size: Size::new(Val::Auto, Val::Px(size)),
+        left: position.left,
+        right: position.right,
+        top: position.top,
+        bottom: position.bottom,
+        width: Val::Auto,
+        height: Val::Px(size),
         display: Display::None,
         ..default()
     };

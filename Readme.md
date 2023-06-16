@@ -92,7 +92,7 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 - start typing to add text to selected note
 - resize note by dragging its corners
 - click on canvas to deselect node
-- move note by dragging it (only unselected node can be dragged to allow mouse text selection for selected notes)
+- move note by dragging it (only unselected note can be dragged to allow mouse text selection for selected note)
 - click on little arrow connector icon to connect notes, arrow connector icons are placed on each side of note
 - for native target there is search box that allows to filter documents by text in notes (fuzzy search)
 - for wasm target there is url query parameter `?document=<url>` to load document from url

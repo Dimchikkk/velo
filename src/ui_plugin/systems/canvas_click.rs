@@ -2,14 +2,14 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use super::{
     ui_helpers::{MainPanel, RawText},
-    NodeInteractionEvent, UiState,
+    NodeInteraction, UiState,
 };
 
 pub fn canvas_click(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<MainPanel>)>,
     mut ui_state: ResMut<UiState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    mut node_interaction_events: EventReader<NodeInteraction>,
     raw_text: Query<With<RawText>>,
 ) {
     let mut primary_window = windows.single_mut();

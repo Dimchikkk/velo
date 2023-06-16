@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{canvas::arrow::events::RedrawArrowEvent, components::MainCamera};
+use crate::{canvas::arrow::events::RedrawArrow, components::MainCamera};
 
 use super::{
     ui_helpers::{RawText, VeloBorder, VeloNode},
@@ -12,7 +12,7 @@ pub fn update_rectangle_position(
     raw_text_query: Query<(&RawText, &Parent), With<RawText>>,
     border_query: Query<&Parent, With<VeloBorder>>,
     mut velo_node_query: Query<&mut Transform, With<VeloNode>>,
-    mut events: EventWriter<RedrawArrowEvent>,
+    mut events: EventWriter<RedrawArrow>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     state: Res<UiState>,
 ) {
@@ -25,7 +25,7 @@ pub fn update_rectangle_position(
                     let mut top = velo_node_query.get_mut(border.get()).unwrap();
                     top.translation.x = pos.x;
                     top.translation.y = pos.y;
-                    events.send(RedrawArrowEvent { id: raw_text.id });
+                    events.send(RedrawArrow { id: raw_text.id });
                 }
             }
         }

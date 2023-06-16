@@ -14,7 +14,7 @@ use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::themes::Theme;
-use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
+use crate::{AddRect, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     spawn_modal, ButtonAction, ChangeColor, DeleteDoc, DocListItemButton, GenericButton, NewDoc,
@@ -28,7 +28,7 @@ use crate::utils::{get_timestamp, load_doc_to_memory, ReflectableUuid};
 
 pub fn rec_button_handlers(
     mut commands: Commands,
-    mut events: EventWriter<AddRectEvent>,
+    mut events: EventWriter<AddRect>,
     mut interaction_query: Query<
         (&Interaction, &ButtonAction),
         (Changed<Interaction>, With<ButtonAction>),
@@ -45,7 +45,7 @@ pub fn rec_button_handlers(
         match *interaction {
             Interaction::Clicked => match button_action.button_type {
                 super::ui_helpers::ButtonTypes::AddRec => {
-                    events.send(AddRectEvent {
+                    events.send(AddRect {
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Rect,
@@ -64,7 +64,7 @@ pub fn rec_button_handlers(
                     });
                 }
                 super::ui_helpers::ButtonTypes::AddCircle => {
-                    events.send(AddRectEvent {
+                    events.send(AddRect {
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Circle,
@@ -83,7 +83,7 @@ pub fn rec_button_handlers(
                     });
                 }
                 super::ui_helpers::ButtonTypes::AddPaper => {
-                    events.send(AddRectEvent {
+                    events.send(AddRect {
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Paper,

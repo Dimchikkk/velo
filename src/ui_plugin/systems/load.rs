@@ -15,7 +15,7 @@ use crate::{
     resources::{FontSystemState, LoadTabRequest},
     themes::Theme,
 };
-use crate::{canvas::arrow::events::CreateArrowEvent, utils::load_doc_to_memory};
+use crate::{canvas::arrow::events::CreateArrow, utils::load_doc_to_memory};
 
 use crate::resources::{AppState, LoadDocRequest};
 use crate::utils::ReflectableUuid;
@@ -95,7 +95,7 @@ pub fn load_tab(
     mut ui_state: ResMut<UiState>,
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
-    mut create_arrow: EventWriter<CreateArrowEvent>,
+    mut create_arrow: EventWriter<CreateArrow>,
     mut delete_tab: Query<(&mut Visibility, &DeleteTab), (With<DeleteTab>, Without<ArrowMeta>)>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
@@ -193,7 +193,7 @@ pub fn load_tab(
             let arrows = json["arrows"].as_array_mut().unwrap();
             for arrow in arrows.iter() {
                 let arrow_meta: ArrowMeta = serde_json::from_value(arrow.clone()).unwrap();
-                create_arrow.send(CreateArrowEvent {
+                create_arrow.send(CreateArrow {
                     start: arrow_meta.start,
                     end: arrow_meta.end,
                     arrow_type: arrow_meta.arrow_type,

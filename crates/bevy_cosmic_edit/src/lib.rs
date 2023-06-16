@@ -4,7 +4,7 @@ use bevy::{
     asset::HandleId,
     input::mouse::{MouseScrollUnit, MouseWheel},
     prelude::*,
-    reflect::TypeUuid,
+    reflect::{TypePath, TypeUuid},
     render::render_resource::Extent3d,
     window::{PrimaryWindow, WindowScaleFactorChanged},
 };
@@ -76,7 +76,7 @@ pub struct CosmicEdit {
     pub is_ui_node: bool,
 }
 
-#[derive(TypeUuid)]
+#[derive(TypeUuid, TypePath)]
 #[uuid = "DC6A0357-7941-4ADE-9332-24EA87E38961"]
 pub struct CosmicFont(pub FontSystem);
 
@@ -85,15 +85,18 @@ pub struct CosmicEditPlugin;
 
 impl Plugin for CosmicEditPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems((
-            cosmic_edit_bevy_events,
-            cosmic_edit_set_redraw,
-            scale_factor_changed,
-            cosmic_edit_redraw_buffer_ui
-                .before(cosmic_edit_set_redraw)
-                .before(scale_factor_changed),
-            cosmic_edit_redraw_buffer.before(scale_factor_changed),
-        ))
+        app.add_systems(
+            Update,
+            (
+                cosmic_edit_bevy_events,
+                cosmic_edit_set_redraw,
+                scale_factor_changed,
+                cosmic_edit_redraw_buffer_ui
+                    .before(cosmic_edit_set_redraw)
+                    .before(scale_factor_changed),
+                cosmic_edit_redraw_buffer.before(scale_factor_changed),
+            ),
+        )
         .init_resource::<ActiveEditor>()
         .add_asset::<CosmicFont>()
         .insert_resource(SwashCacheState {
@@ -186,9 +189,9 @@ pub fn get_node_cursor_pos(
         ),
         false => (
             node_transform.affine().translation.x - size.0 / 2.,
-            node_transform.affine().translation.y - size.1 / 2.,
+            -node_transform.affine().translation.y - size.1 / 2.,
             node_transform.affine().translation.x + size.0 / 2.,
-            node_transform.affine().translation.y + size.1 / 2.,
+            -node_transform.affine().translation.y + size.1 / 2.,
         ),
     };
 
@@ -197,7 +200,7 @@ pub fn get_node_cursor_pos(
             pos = Vec2::new(pos.x - window.width() / 2., pos.y - window.height() / 2.);
         }
         if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
-            Some((pos.x - x_min, y_max - pos.y))
+            Some((pos.x - x_min, pos.y - y_min))
         } else {
             None
         }
@@ -288,8 +291,8 @@ pub fn cosmic_edit_bevy_events(
     for (mut cosmic_edit, node_transform, entity) in &mut cosmic_edit_query.iter_mut() {
         if active_editor.entity == Some(entity) {
             if let Some(font_system) = font_system_assets.get_mut(&cosmic_edit.font_system) {
-                let command = keys.any_pressed([KeyCode::RWin, KeyCode::LWin]);
-                let option = keys.any_pressed([KeyCode::LAlt, KeyCode::RAlt]);
+                let command = keys.any_pressed([KeyCode::SuperLeft, KeyCode::SuperRight]);
+                let option = keys.any_pressed([KeyCode::AltLeft, KeyCode::AltRight]);
                 if keys.just_pressed(KeyCode::Left) {
                     cosmic_edit.editor.action(&mut font_system.0, Action::Left);
                 }
@@ -384,10 +387,10 @@ pub fn cosmic_edit_bevy_events(
                         }
                     }
                 }
-                let (offset_y, offset_x) = match cosmic_edit.text_pos {
+                let (offset_x, offset_y) = match cosmic_edit.text_pos {
                     CosmicTextPos::Center => (
-                        get_y_offset(&cosmic_edit.editor),
                         get_x_offset(&cosmic_edit.editor),
+                        get_y_offset(&cosmic_edit.editor),
                     ),
                     CosmicTextPos::TopLeft => (0, 0),
                 };
@@ -715,10 +718,8 @@ pub fn spawn_cosmic_edit(
         CosmicNode::Ui => {
             cosmic_edit_component.is_ui_node = true;
             let style = Style {
-                size: Size {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(100.),
-                },
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
                 ..default()
             };
             let button_bundle = ButtonBundle {
@@ -829,7 +830,7 @@ mod tests {
         let mut app = App::new();
         app.add_plugin(TaskPoolPlugin::default());
         app.add_plugin(AssetPlugin::default());
-        app.add_system(test_spawn_cosmic_edit_system);
+        app.add_systems(Update, test_spawn_cosmic_edit_system);
 
         let input = Input::<KeyCode>::default();
         app.insert_resource(input);
