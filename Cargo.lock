@@ -571,6 +571,7 @@ dependencies = [
  "bevy_input",
  "bevy_log",
  "bevy_math",
+ "bevy_pbr",
  "bevy_ptr",
  "bevy_reflect",
  "bevy_render",
@@ -637,6 +638,27 @@ version = "0.11.0-dev"
 source = "git+https://github.com/bevyengine/bevy?rev=8ec8149#8ec81496ff6f879dabe42f7d445a7d0e3d308a1f"
 dependencies = [
  "glam",
+]
+
+[[package]]
+name = "bevy_pbr"
+version = "0.11.0-dev"
+source = "git+https://github.com/bevyengine/bevy?rev=8ec8149#8ec81496ff6f879dabe42f7d445a7d0e3d308a1f"
+dependencies = [
+ "bevy_app",
+ "bevy_asset",
+ "bevy_core_pipeline",
+ "bevy_derive",
+ "bevy_ecs",
+ "bevy_math",
+ "bevy_reflect",
+ "bevy_render",
+ "bevy_transform",
+ "bevy_utils",
+ "bevy_window",
+ "bitflags 2.3.2",
+ "bytemuck",
+ "radsort",
 ]
 
 [[package]]
