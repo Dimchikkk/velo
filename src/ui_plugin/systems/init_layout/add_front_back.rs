@@ -58,7 +58,12 @@ pub fn add_front_back(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip(theme, text.to_string(), 14., TooltipPosition::Bottom),
+                get_tooltip(
+                    theme,
+                    text.to_string(),
+                    crate::ui_plugin::ui_helpers::TooltipSize::Small,
+                    TooltipPosition::Bottom,
+                ),
                 Tooltip,
             ));
         })
