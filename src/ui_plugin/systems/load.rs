@@ -89,7 +89,7 @@ pub fn load_doc(
 
 pub fn load_tab(
     old_nodes: Query<Entity, With<VeloNode>>,
-    mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
+    mut old_arrows: Query<Entity, With<ArrowMeta>>,
     request: Res<LoadTabRequest>,
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
@@ -107,8 +107,7 @@ pub fn load_tab(
     commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
     let window = windows.single_mut();
 
-    #[allow(unused)]
-    for (entity, mut visibility) in &mut old_arrows.iter_mut() {
+    for entity in &mut old_arrows.iter_mut() {
         commands.entity(entity).despawn_recursive();
     }
     for entity in old_nodes.iter() {

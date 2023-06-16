@@ -44,8 +44,8 @@ impl Plugin for VeloPlugin {
             )
             .add_plugin(SmudPlugin)
             .add_plugin(CosmicEditPlugin)
-            .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)
+            .add_plugin(CanvasPlugin)
             .insert_resource(PkvStore::new(ORG_NAME, APP_NAME))
             .init_resource::<FontSystemState>();
 
