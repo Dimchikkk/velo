@@ -159,7 +159,7 @@ pub fn spawn_modal(
                     style: Style {
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
-                        width: Val::Px(50.),
+                        width: Val::Percent(50.),
                         height: Val::Percent(30.),
                         ..default()
                     },

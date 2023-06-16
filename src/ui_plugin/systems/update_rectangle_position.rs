@@ -17,7 +17,8 @@ pub fn update_rectangle_position(
     state: Res<UiState>,
 ) {
     let (camera, camera_transform) = camera_q.single();
-    for event in cursor_moved_events.iter() {
+    if !cursor_moved_events.is_empty() {
+        let event = cursor_moved_events.iter().last().unwrap();
         for (raw_text, parent) in &mut raw_text_query.iter() {
             if Some(raw_text.id) == state.hold_entity && state.entity_to_edit.is_none() {
                 if let Some(pos) = camera.viewport_to_world_2d(camera_transform, event.position) {
