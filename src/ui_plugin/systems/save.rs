@@ -127,7 +127,7 @@ pub fn save_to_store(
 
 pub fn save_tab(
     images: Res<Assets<Image>>,
-    arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
+    arrows: Query<&ArrowMeta, With<ArrowMeta>>,
     request: Res<SaveTabRequest>,
     mut app_state: ResMut<AppState>,
     raw_text_query: Query<(&RawText, &CosmicEdit, &Parent), With<RawText>>,
@@ -194,10 +194,8 @@ pub fn save_tab(
     }
 
     let json_arrows = json["arrows"].as_array_mut().unwrap();
-    for (arrow_meta, visibility) in arrows.iter() {
-        if visibility != Visibility::Hidden {
-            json_arrows.push(json!(arrow_meta));
-        }
+    for arrow_meta in arrows.iter() {
+        json_arrows.push(json!(arrow_meta));
     }
 
     let doc_id = request.doc_id;
