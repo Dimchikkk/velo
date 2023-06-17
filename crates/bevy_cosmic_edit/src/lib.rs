@@ -609,8 +609,8 @@ fn cosmic_edit_redraw_buffer(
 ) {
     let primary_window = windows.single();
     for (mut cosmic_edit, mut handle) in &mut cosmic_edit_query.iter_mut() {
-        let width = cosmic_edit.width as f32;
-        let height = cosmic_edit.height as f32;
+        let width = cosmic_edit.width;
+        let height = cosmic_edit.height;
         redraw_buffer_common(
             &mut images,
             &mut swash_cache_state,

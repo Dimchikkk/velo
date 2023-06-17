@@ -129,9 +129,9 @@ pub fn resize_entity_run(
                         velo_node_query.get_mut(border_parent.get()).unwrap();
                     let pos = velo_transform.translation.truncate();
                     let mut width =
-                        f32::max(((cursor_pos.x - pos.x).abs() * 2.).round() as f32, 1.);
+                        f32::max(((cursor_pos.x - pos.x).abs() * 2.).round(), 1.);
                     let mut height =
-                        f32::max(((cursor_pos.y - pos.y).abs() * 2.).round() as f32, 1.);
+                        f32::max(((cursor_pos.y - pos.y).abs() * 2.).round(), 1.);
                     if velo_border.node_type == NodeType::Circle {
                         width = f32::max(width, height);
                         height = f32::max(width, height);
