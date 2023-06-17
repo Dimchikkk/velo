@@ -40,7 +40,6 @@ pub fn spawn_sprite_node(
     scale_factor: f32,
     item_meta: NodeMeta,
 ) -> Entity {
-    let scale = Vec3::new(1. / scale_factor, 1. / scale_factor, 1.);
     let pos: Vec3 = Vec3::new(
         item_meta.position.0,
         item_meta.position.1,
@@ -150,7 +149,6 @@ pub fn spawn_sprite_node(
         node: CosmicNode::Sprite(CosmicEditSprite {
             transform: Transform {
                 translation: Vec3::new(0.0, 0.0, 0.2),
-                scale,
                 ..default()
             },
         }),
