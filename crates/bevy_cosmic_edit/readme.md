@@ -13,7 +13,7 @@ Emoji, ligatures, and other fancy stuff is supported!
 Explore examples folder for basic usage.
 
 ```rust
-cargo r --example basic
+cargo r --example basic_sprite
 ```
 
 ## Compatibility

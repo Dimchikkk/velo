@@ -135,10 +135,7 @@ pub fn rec_button_handlers(
                             if raw_text.id == id {
                                 let border = border_query.get(parent.get()).unwrap();
                                 let top = velo_node_query.get_mut(border.get()).unwrap();
-                                let size = Vec2::new(
-                                    cosmic_edit.size.unwrap().0,
-                                    cosmic_edit.size.unwrap().1,
-                                );
+                                let size = Vec2::new(cosmic_edit.width, cosmic_edit.height);
                                 let translation = top.2.translation;
                                 data = Some((size, translation));
                                 break;
@@ -149,10 +146,7 @@ pub fn rec_button_handlers(
                             if raw_text.id != id {
                                 let border = border_query.get(parent.get()).unwrap();
                                 let top = velo_node_query.get_mut(border.get()).unwrap();
-                                let size = Vec2::new(
-                                    cosmic_edit.size.unwrap().0,
-                                    cosmic_edit.size.unwrap().1,
-                                );
+                                let size = Vec2::new(cosmic_edit.width, cosmic_edit.height);
                                 let translation = top.2.translation;
                                 if let Some((active_size, active_translation)) = data {
                                     if collide(translation, size, active_translation, active_size)
@@ -190,10 +184,7 @@ pub fn rec_button_handlers(
                             if raw_text.id == id {
                                 let border = border_query.get(parent.get()).unwrap();
                                 let top = velo_node_query.get_mut(border.get()).unwrap();
-                                let size = Vec2::new(
-                                    cosmic_edit.size.unwrap().0,
-                                    cosmic_edit.size.unwrap().1,
-                                );
+                                let size = Vec2::new(cosmic_edit.width, cosmic_edit.height);
                                 let translation = top.2.translation;
                                 data = Some((size, translation));
                                 break;
@@ -204,10 +195,7 @@ pub fn rec_button_handlers(
                             if raw_text.id != id {
                                 let border = border_query.get(parent.get()).unwrap();
                                 let top = velo_node_query.get_mut(border.get()).unwrap();
-                                let size = Vec2::new(
-                                    cosmic_edit.size.unwrap().0,
-                                    cosmic_edit.size.unwrap().1,
-                                );
+                                let size = Vec2::new(cosmic_edit.width, cosmic_edit.height);
                                 let translation = top.2.translation;
                                 if let Some((active_size, active_translation)) = data {
                                     if collide(translation, size, active_translation, active_size)

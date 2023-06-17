@@ -165,7 +165,7 @@ pub fn save_tab(
         let x = top.translation.x;
         let y = top.translation.y;
         let z = top.translation.z;
-        let (width, height) = cosmic_edit.size.unwrap();
+        let (width, height) = (cosmic_edit.width, cosmic_edit.height);
         json_nodes.push(json!(JsonNode {
             node_type: border.node_type.clone(),
             id: raw_text.id.0,

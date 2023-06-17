@@ -36,13 +36,16 @@ arboard = "3.2.0"
 insta = "1.29.0"
 
 [[example]]
-name = "basic"
+name = "basic_button"
+
+[[example]]
+name = "basic_sprite"
 
 [[example]]
 name = "font_per_widget"
 
 [[example]]
-name = "text_sprites"
+name = "multiple_sprites"
 
 [[example]]
 name = "readonly"

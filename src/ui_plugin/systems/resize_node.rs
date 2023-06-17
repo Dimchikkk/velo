@@ -64,7 +64,7 @@ pub fn resize_entity_end(
             if let Some(entity_to_resize) = ui_state.entity_to_resize {
                 for (raw_text_parent, raw_text, cosmic_edit) in raw_text_query.iter() {
                     if raw_text.id == entity_to_resize {
-                        let (width, height) = cosmic_edit.size.unwrap();
+                        let (width, height) = (cosmic_edit.width, cosmic_edit.height);
                         let (border_parent, border) =
                             border_query.get(raw_text_parent.get()).unwrap();
                         if border.node_type == NodeType::Paper {
@@ -100,7 +100,7 @@ pub fn resize_entity_run(
         (&ArrowConnect, &mut Transform),
         (With<ArrowConnect>, Without<VeloNode>, Without<ResizeMarker>),
     >,
-    mut raw_text_query: Query<(&Parent, &RawText, &mut CosmicEdit), With<RawText>>,
+    mut raw_text_query: Query<(&Parent, &RawText, &mut CosmicEdit, &mut Sprite), With<RawText>>,
     mut border_query: Query<(&Parent, &VeloBorder, &mut Path), With<VeloBorder>>,
     mut velo_node_query: Query<
         (&mut Transform, &Children),
@@ -114,7 +114,9 @@ pub fn resize_entity_run(
     if !cursor_moved_events.is_empty() {
         let event = cursor_moved_events.iter().last().unwrap();
         if let Some(id) = ui_state.entity_to_resize {
-            for (raw_text_parent, raw_text, mut cosmic_edit) in &mut raw_text_query.iter_mut() {
+            for (raw_text_parent, raw_text, mut cosmic_edit, mut sprite) in
+                &mut raw_text_query.iter_mut()
+            {
                 if id != raw_text.id {
                     continue;
                 }
@@ -126,14 +128,18 @@ pub fn resize_entity_run(
                     let (velo_transform, children) =
                         velo_node_query.get_mut(border_parent.get()).unwrap();
                     let pos = velo_transform.translation.truncate();
-                    let mut width = (cursor_pos.x - pos.x).abs() * 2.;
-                    let mut height = (cursor_pos.y - pos.y).abs() * 2.;
+                    let mut width =
+                        f32::max(((cursor_pos.x - pos.x).abs() * 2.).round() as f32, 1.);
+                    let mut height =
+                        f32::max(((cursor_pos.y - pos.y).abs() * 2.).round() as f32, 1.);
                     if velo_border.node_type == NodeType::Circle {
                         width = f32::max(width, height);
                         height = f32::max(width, height);
                     }
 
-                    cosmic_edit.size = Some((width, height));
+                    cosmic_edit.width = width;
+                    cosmic_edit.height = height;
+                    sprite.custom_size = Some(Vec2::new(width, height));
                     cosmic_edit.editor.buffer_mut().set_redraw(true);
 
                     for child in children.iter() {
