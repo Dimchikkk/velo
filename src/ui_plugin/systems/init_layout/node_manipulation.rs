@@ -64,12 +64,7 @@ pub fn node_manipulation(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip(
-                    theme,
-                    "New Papernote".to_string(),
-                    crate::ui_plugin::ui_helpers::TooltipSize::Small,
-                    TooltipPosition::Bottom,
-                ),
+                get_tooltip(theme, "New Papernote".to_string(), TooltipPosition::Bottom),
                 Tooltip,
             ));
 
@@ -137,12 +132,7 @@ pub fn node_manipulation(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip(
-                    theme,
-                    "New Rectangle".to_string(),
-                    crate::ui_plugin::ui_helpers::TooltipSize::Small,
-                    TooltipPosition::Bottom,
-                ),
+                get_tooltip(theme, "New Rectangle".to_string(), TooltipPosition::Bottom),
                 Tooltip,
             ));
 
@@ -210,12 +200,7 @@ pub fn node_manipulation(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip(
-                    theme,
-                    "New Circle".to_string(),
-                    crate::ui_plugin::ui_helpers::TooltipSize::Small,
-                    TooltipPosition::Bottom,
-                ),
+                get_tooltip(theme, "New Circle".to_string(), TooltipPosition::Bottom),
                 Tooltip,
             ));
 
@@ -286,7 +271,6 @@ pub fn node_manipulation(
                 get_tooltip(
                     theme,
                     "Delete Rectangle".to_string(),
-                    crate::ui_plugin::ui_helpers::TooltipSize::Small,
                     TooltipPosition::Bottom,
                 ),
                 Tooltip,
