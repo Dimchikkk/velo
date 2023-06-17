@@ -68,7 +68,6 @@ pub fn add_search_box(
             get_tooltip(
                 theme,
                 "Filter documents by text in nodes".to_string(),
-                crate::ui_plugin::ui_helpers::TooltipSize::Large,
                 TooltipPosition::Top,
             ),
             Tooltip,

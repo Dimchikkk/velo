@@ -2,7 +2,7 @@ use bevy::{prelude::*, text::BreakLineOn};
 
 use crate::{
     themes::Theme,
-    ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip, TooltipPosition, TooltipSize},
+    ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip, TooltipPosition},
 };
 
 pub fn add_menu_button(
@@ -116,9 +116,9 @@ pub fn add_menu_button(
                             align_items: AlignItems::Center,
                             position_type: PositionType::Absolute,
                             left: Val::Px(1.),
-                            right: Val::Px(0.),
+                            right: Val::Auto,
                             top: Val::Px(-3.),
-                            bottom: Val::Px(0.),
+                            bottom: Val::Auto,
                             ..default()
                         },
                         ..default()
@@ -127,10 +127,7 @@ pub fn add_menu_button(
                     GenericButton,
                 ))
                 .with_children(|builder| {
-                    builder.spawn((
-                        get_tooltip(theme, label, TooltipSize::Large, TooltipPosition::Bottom),
-                        Tooltip,
-                    ));
+                    builder.spawn((get_tooltip(theme, label, TooltipPosition::Bottom), Tooltip));
 
                     let text_style = TextStyle {
                         font_size: 30.0,
