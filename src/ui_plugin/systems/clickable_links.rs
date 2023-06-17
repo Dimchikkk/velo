@@ -26,14 +26,14 @@ pub fn clickable_links(
                 if !cosmic_edit.readonly {
                     return;
                 }
-                let size = cosmic_edit.size.unwrap();
+                let size = (cosmic_edit.width, cosmic_edit.height);
                 if let Some(pos) =
                     get_node_cursor_pos(&primary_window, transform, size, cosmic_edit.is_ui_node)
                 {
                     let font_size = cosmic_edit.editor.buffer().metrics().font_size;
                     let line_height = cosmic_edit.editor.buffer().metrics().line_height;
-                    let y_start = get_y_offset(&cosmic_edit.editor) as f32;
-                    let x_start = get_x_offset(&cosmic_edit.editor) as f32;
+                    let y_start = get_y_offset(&cosmic_edit.editor.buffer()) as f32;
+                    let x_start = get_x_offset(&cosmic_edit.editor.buffer()) as f32;
                     for layout_runs in cosmic_edit.editor.buffer().layout_runs() {
                         let line_offset =
                             (y_start + (layout_runs.line_y - font_size)) / scale_factor;
