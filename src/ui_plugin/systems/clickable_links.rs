@@ -32,8 +32,8 @@ pub fn clickable_links(
                 {
                     let font_size = cosmic_edit.editor.buffer().metrics().font_size;
                     let line_height = cosmic_edit.editor.buffer().metrics().line_height;
-                    let y_start = get_y_offset(&cosmic_edit.editor.buffer()) as f32;
-                    let x_start = get_x_offset(&cosmic_edit.editor.buffer()) as f32;
+                    let y_start = get_y_offset(cosmic_edit.editor.buffer()) as f32;
+                    let x_start = get_x_offset(cosmic_edit.editor.buffer()) as f32;
                     for layout_runs in cosmic_edit.editor.buffer().layout_runs() {
                         let line_offset =
                             (y_start + (layout_runs.line_y - font_size)) / scale_factor;
