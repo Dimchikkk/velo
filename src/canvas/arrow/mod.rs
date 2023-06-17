@@ -4,7 +4,7 @@ mod systems;
 mod utils;
 use bevy::{
     app::{App, Plugin},
-    prelude::Update,
+    prelude::PreUpdate,
 };
 use bevy_prototype_lyon::prelude::ShapePlugin;
 use systems::*;
@@ -13,7 +13,7 @@ pub struct ArrowPlugin;
 impl Plugin for ArrowPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(ShapePlugin).add_systems(
-            Update,
+            PreUpdate, // due to CreateArrow event
             (create_arrow_start, create_arrow_end, redraw_arrows),
         );
     }
