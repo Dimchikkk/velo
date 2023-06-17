@@ -36,7 +36,7 @@ fn setup(
         text: CosmicText::OneStyle("😀😀😀 x => y".to_string()),
         attrs: AttrsOwned::new(attrs),
         text_pos: CosmicTextPos::Center,
-        bg: Color::GRAY.with_a(0.5),
+        bg: Color::WHITE,
         metrics: CosmicMetrics {
             font_size: 14.,
             line_height: 18.,

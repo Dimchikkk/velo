@@ -24,8 +24,8 @@ pub fn update_rectangle_position(
                 if let Some(pos) = camera.viewport_to_world_2d(camera_transform, event.position) {
                     let border = border_query.get(parent.get()).unwrap();
                     let mut top = velo_node_query.get_mut(border.get()).unwrap();
-                    top.translation.x = pos.x;
-                    top.translation.y = pos.y;
+                    top.translation.x = pos.x.round();
+                    top.translation.y = pos.y.round();
                     events.send(RedrawArrow { id: raw_text.id });
                 }
             }
