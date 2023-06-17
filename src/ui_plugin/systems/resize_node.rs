@@ -128,13 +128,17 @@ pub fn resize_entity_run(
                     let (velo_transform, children) =
                         velo_node_query.get_mut(border_parent.get()).unwrap();
                     let pos = velo_transform.translation.truncate();
-                    let mut width =
-                        f32::max(((cursor_pos.x - pos.x).abs() * 2.).round(), 1.);
-                    let mut height =
-                        f32::max(((cursor_pos.y - pos.y).abs() * 2.).round(), 1.);
+                    let mut width = f32::max(((cursor_pos.x - pos.x).abs() * 2.).round(), 1.);
+                    let mut height = f32::max(((cursor_pos.y - pos.y).abs() * 2.).round(), 1.);
                     if velo_border.node_type == NodeType::Circle {
                         width = f32::max(width, height);
                         height = f32::max(width, height);
+                    }
+                    if width % 2.0 != 0.0 {
+                        width += 1.0;
+                    }
+                    if height % 2.0 != 0.0 {
+                        height += 1.0;
                     }
 
                     cosmic_edit.width = width;
