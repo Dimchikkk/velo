@@ -73,12 +73,7 @@ pub fn add_arrow(
         ))
         .with_children(|builder| {
             builder.spawn((
-                get_tooltip(
-                    theme,
-                    text.to_string(),
-                    crate::ui_plugin::ui_helpers::TooltipSize::Large,
-                    TooltipPosition::Bottom,
-                ),
+                get_tooltip(theme, text.to_string(), TooltipPosition::Bottom),
                 Tooltip,
             ));
         })
