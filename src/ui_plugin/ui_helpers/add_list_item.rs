@@ -91,6 +91,7 @@ pub fn add_list_item(
     let del_button = commands
         .spawn((
             ButtonBundle {
+                background_color: theme.doc_list_bg.into(),
                 visibility: Visibility::Hidden,
                 style: Style {
                     margin: UiRect {

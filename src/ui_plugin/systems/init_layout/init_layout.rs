@@ -538,18 +538,20 @@ pub fn init_layout(
     let text_pos1 = add_text_pos(
         &mut commands,
         &theme,
-        &asset_server,
         TextPosMode {
             text_pos: TextPos::Center,
         },
+        "Center Text".to_string(),
+        &icon_font,
     );
     let text_pos2 = add_text_pos(
         &mut commands,
         &theme,
-        &asset_server,
         TextPosMode {
             text_pos: TextPos::TopLeft,
         },
+        "Top Left Text".to_string(),
+        &icon_font,
     );
     commands.entity(text_modes).add_child(text_pos1);
     commands.entity(text_modes).add_child(text_pos2);
