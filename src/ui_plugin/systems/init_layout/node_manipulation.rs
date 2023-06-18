@@ -27,289 +27,128 @@ pub fn node_manipulation(
             ..default()
         })
         .id();
-    let top_new_paper = commands
-        .spawn(NodeBundle {
-            background_color: theme.shadow.into(),
-            style: Style {
-                flex_direction: FlexDirection::Column,
-                align_self: AlignSelf::Stretch,
-                margin: UiRect::all(Val::Px(5.)),
-                width: Val::Percent(23.),
-                height: Val::Percent(100.),
-                ..default()
-            },
-            ..default()
-        })
-        .id();
-    let new_paper = commands
-        .spawn((
-            ButtonBundle {
-                background_color: theme.node_manipulation_bg.into(),
-                style: Style {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(100.),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(1.),
-                    right: Val::Px(0.),
-                    top: Val::Px(-1.),
-                    bottom: Val::Px(0.),
-                    ..default()
-                },
-                ..default()
-            },
-            papernote_component,
-            GenericButton,
-        ))
-        .with_children(|builder| {
-            builder.spawn((
-                get_tooltip(theme, "New Papernote".to_string(), TooltipPosition::Bottom),
-                Tooltip,
-            ));
 
-            let text_style = TextStyle {
-                font_size: 25.0,
-                color: theme.paper_node_bg,
-                font: icon_font.clone(),
-            };
-            let text = Text {
-                sections: vec![TextSection {
-                    value: "\u{eb54}".to_string(),
-                    style: text_style,
-                }],
-                alignment: TextAlignment::Left,
-                linebreak_behavior: BreakLineOn::WordBoundary,
-            };
-            let text_bundle_style = Style {
-                position_type: PositionType::Absolute,
-                padding: UiRect::all(Val::Px(5.)),
-                margin: UiRect::all(Val::Px(3.)),
-                ..default()
-            };
+    let top_new_paper = add_button_action(
+        commands,
+        theme,
+        "New Papernote".to_string(),
+        icon_font,
+        "\u{eb54}".to_string(),
+        theme.paper_node_bg,
+        papernote_component,
+    );
 
-            builder.spawn(TextBundle {
-                text,
-                style: text_bundle_style,
-                ..default()
-            });
-        })
-        .id();
-    let top_new_rec = commands
-        .spawn(NodeBundle {
-            background_color: theme.shadow.into(),
-            style: Style {
-                flex_direction: FlexDirection::Column,
-                align_self: AlignSelf::Stretch,
-                margin: UiRect::all(Val::Px(5.)),
-                width: Val::Percent(23.),
-                height: Val::Percent(100.),
-                ..default()
-            },
-            ..default()
-        })
-        .id();
-    let new_rec = commands
-        .spawn((
-            ButtonBundle {
-                background_color: theme.node_manipulation_bg.into(),
-                style: Style {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(100.),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(1.),
-                    right: Val::Px(0.),
-                    top: Val::Px(-1.),
-                    bottom: Val::Px(0.),
-                    ..default()
-                },
-                ..default()
-            },
-            create_rec_component,
-            GenericButton,
-        ))
-        .with_children(|builder| {
-            builder.spawn((
-                get_tooltip(theme, "New Rectangle".to_string(), TooltipPosition::Bottom),
-                Tooltip,
-            ));
+    let top_new_rec = add_button_action(
+        commands,
+        theme,
+        "New Rectangle".to_string(),
+        icon_font,
+        "\u{eb54}".to_string(),
+        theme.node_manipulation,
+        create_rec_component,
+    );
 
-            let text_style = TextStyle {
-                font_size: 25.0,
-                color: theme.node_manipulation,
-                font: icon_font.clone(),
-            };
-            let text = Text {
-                sections: vec![TextSection {
-                    value: "\u{eb54}".to_string(),
-                    style: text_style,
-                }],
-                alignment: TextAlignment::Left,
-                linebreak_behavior: BreakLineOn::WordBoundary,
-            };
-            let text_bundle_style = Style {
-                position_type: PositionType::Absolute,
-                padding: UiRect::all(Val::Px(5.)),
-                margin: UiRect::all(Val::Px(3.)),
-                ..default()
-            };
+    let top_new_circle = add_button_action(
+        commands,
+        theme,
+        "New Circle".to_string(),
+        icon_font,
+        "\u{ef4a}".to_string(),
+        theme.node_manipulation,
+        create_circle_component,
+    );
 
-            builder.spawn(TextBundle {
-                text,
-                style: text_bundle_style,
-                ..default()
-            });
-        })
-        .id();
-    let top_new_circle = commands
-        .spawn(NodeBundle {
-            background_color: theme.shadow.into(),
-            style: Style {
-                flex_direction: FlexDirection::Column,
-                align_self: AlignSelf::Stretch,
-                margin: UiRect::all(Val::Px(5.)),
-                width: Val::Percent(23.),
-                height: Val::Percent(100.),
-                ..default()
-            },
-            ..default()
-        })
-        .id();
-    let new_circle = commands
-        .spawn((
-            ButtonBundle {
-                background_color: theme.node_manipulation_bg.into(),
-                style: Style {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(100.),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(1.),
-                    right: Val::Px(0.),
-                    top: Val::Px(-1.),
-                    bottom: Val::Px(0.),
-                    ..default()
-                },
-                ..default()
-            },
-            create_circle_component,
-            GenericButton,
-        ))
-        .with_children(|builder| {
-            builder.spawn((
-                get_tooltip(theme, "New Circle".to_string(), TooltipPosition::Bottom),
-                Tooltip,
-            ));
+    let top_del = add_button_action(
+        commands,
+        theme,
+        "Delete Rectangle".to_string(),
+        icon_font,
+        "\u{e872}".to_string(),
+        theme.node_manipulation,
+        delete_component,
+    );
 
-            let text_style = TextStyle {
-                font_size: 25.0,
-                color: theme.node_manipulation,
-                font: icon_font.clone(),
-            };
-            let text = Text {
-                sections: vec![TextSection {
-                    value: "\u{ef4a}".to_string(),
-                    style: text_style,
-                }],
-                alignment: TextAlignment::Left,
-                linebreak_behavior: BreakLineOn::WordBoundary,
-            };
-            let text_bundle_style = Style {
-                position_type: PositionType::Absolute,
-                padding: UiRect::all(Val::Px(5.)),
-                margin: UiRect::all(Val::Px(3.)),
-                ..default()
-            };
-
-            builder.spawn(TextBundle {
-                text,
-                style: text_bundle_style,
-                ..default()
-            });
-        })
-        .id();
-    let top_del = commands
-        .spawn(NodeBundle {
-            background_color: theme.shadow.into(),
-            style: Style {
-                flex_direction: FlexDirection::Column,
-                margin: UiRect::all(Val::Px(5.)),
-                align_self: AlignSelf::Stretch,
-                width: Val::Percent(23.),
-                height: Val::Percent(100.),
-                ..default()
-            },
-            ..default()
-        })
-        .id();
-    let del_rec = commands
-        .spawn((
-            ButtonBundle {
-                background_color: theme.node_manipulation_bg.into(),
-                style: Style {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(100.),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(1.),
-                    right: Val::Px(0.),
-                    top: Val::Px(-1.),
-                    bottom: Val::Px(0.),
-                    ..default()
-                },
-                ..default()
-            },
-            delete_component,
-            GenericButton,
-        ))
-        .with_children(|builder| {
-            builder.spawn((
-                get_tooltip(
-                    theme,
-                    "Delete Rectangle".to_string(),
-                    TooltipPosition::Bottom,
-                ),
-                Tooltip,
-            ));
-
-            let text_style = TextStyle {
-                font_size: 25.0,
-                color: theme.node_manipulation,
-                font: icon_font.clone(),
-            };
-            let text = Text {
-                sections: vec![TextSection {
-                    value: "\u{e872}".to_string(),
-                    style: text_style,
-                }],
-                alignment: TextAlignment::Left,
-                linebreak_behavior: BreakLineOn::WordBoundary,
-            };
-            let text_bundle_style = Style {
-                position_type: PositionType::Absolute,
-                padding: UiRect::all(Val::Px(5.)),
-                margin: UiRect::all(Val::Px(3.)),
-                ..default()
-            };
-
-            builder.spawn(TextBundle {
-                text,
-                style: text_bundle_style,
-                ..default()
-            });
-        })
-        .id();
-    commands.entity(top_new_circle).add_child(new_circle);
-    commands.entity(top_new_rec).add_child(new_rec);
-    commands.entity(top_new_paper).add_child(new_paper);
-    commands.entity(top_del).add_child(del_rec);
     commands.entity(node).add_child(top_del);
     commands.entity(node).add_child(top_new_circle);
     commands.entity(node).add_child(top_new_rec);
     commands.entity(node).add_child(top_new_paper);
     node
+}
+
+fn add_button_action(
+    commands: &mut Commands,
+    theme: &Res<Theme>,
+    label: String,
+    icon_font: &Handle<Font>,
+    icon_code: String,
+    icon_color: Color,
+    button_action: ButtonAction,
+) -> Entity {
+    let top = commands
+        .spawn(NodeBundle {
+            background_color: theme.shadow.into(),
+            style: Style {
+                flex_direction: FlexDirection::Column,
+                align_self: AlignSelf::Stretch,
+                margin: UiRect::all(Val::Px(5.)),
+                width: Val::Percent(23.),
+                height: Val::Percent(100.),
+                ..default()
+            },
+            ..default()
+        })
+        .id();
+    let new_button_action = commands
+        .spawn((
+            ButtonBundle {
+                background_color: theme.node_manipulation_bg.into(),
+                style: Style {
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(1.),
+                    right: Val::Auto,
+                    top: Val::Px(-1.),
+                    bottom: Val::Auto,
+                    ..default()
+                },
+                ..default()
+            },
+            button_action,
+            GenericButton,
+        ))
+        .with_children(|builder| {
+            builder.spawn((get_tooltip(theme, label, TooltipPosition::Bottom), Tooltip));
+
+            let text_style = TextStyle {
+                font_size: 25.0,
+                color: icon_color,
+                font: icon_font.clone(),
+            };
+            let text = Text {
+                sections: vec![TextSection {
+                    value: icon_code,
+                    style: text_style,
+                }],
+                alignment: TextAlignment::Left,
+                linebreak_behavior: BreakLineOn::WordBoundary,
+            };
+            let text_bundle_style = Style {
+                position_type: PositionType::Absolute,
+                padding: UiRect::all(Val::Px(5.)),
+                margin: UiRect::all(Val::Px(3.)),
+                ..default()
+            };
+
+            builder.spawn(TextBundle {
+                text,
+                style: text_bundle_style,
+                ..default()
+            });
+        })
+        .id();
+    commands.entity(top).add_child(new_button_action);
+    top
 }
