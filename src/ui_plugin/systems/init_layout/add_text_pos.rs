@@ -1,19 +1,24 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::{themes::Theme, ui_plugin::ui_helpers::GenericButton};
+use crate::{
+    themes::Theme,
+    ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip, TooltipPosition},
+};
 
 use super::ui_helpers::TextPosMode;
 
 pub fn add_text_pos(
     commands: &mut Commands,
     theme: &Res<Theme>,
-    arrow_server: &Res<AssetServer>,
     text_pos_mode: TextPosMode,
+    tooltip_label: String,
+    icon_font: &Handle<Font>,
 ) -> Entity {
-    let image = match text_pos_mode.text_pos {
-        crate::TextPos::Center => arrow_server.load("text-center.png"),
-        crate::TextPos::TopLeft => arrow_server.load("text-left-top.png"),
+    let icon_code = match text_pos_mode.text_pos {
+        crate::TextPos::Center => "\u{e234}".to_string(),
+        crate::TextPos::TopLeft => "\u{e236}".to_string(),
     };
+
     let top = commands
         .spawn(NodeBundle {
             style: Style {
@@ -28,12 +33,11 @@ pub fn add_text_pos(
             ..default()
         })
         .id();
-    let button = commands
+    let new_button_action = commands
         .spawn((
             ButtonBundle {
-                background_color: theme.text_pos_btn_bg.into(),
+                background_color: Color::BLACK.into(),
                 border_color: theme.btn_border.into(),
-                image: image.into(),
                 style: Style {
                     width: Val::Percent(100.),
                     height: Val::Percent(100.),
@@ -52,7 +56,39 @@ pub fn add_text_pos(
             text_pos_mode,
             GenericButton,
         ))
+        .with_children(|builder| {
+            builder.spawn((
+                get_tooltip(theme, tooltip_label, TooltipPosition::Bottom),
+                Tooltip,
+            ));
+
+            let text_style = TextStyle {
+                font_size: 25.0,
+                color: theme.text_pos_btn_bg,
+                font: icon_font.clone(),
+            };
+            let text = Text {
+                sections: vec![TextSection {
+                    value: icon_code,
+                    style: text_style,
+                }],
+                alignment: TextAlignment::Left,
+                linebreak_behavior: BreakLineOn::WordBoundary,
+            };
+            let text_bundle_style = Style {
+                position_type: PositionType::Absolute,
+                padding: UiRect::all(Val::Px(5.)),
+                margin: UiRect::all(Val::Px(3.)),
+                ..default()
+            };
+
+            builder.spawn(TextBundle {
+                text,
+                style: text_bundle_style,
+                ..default()
+            });
+        })
         .id();
-    commands.entity(top).add_child(button);
+    commands.entity(top).add_child(new_button_action);
     top
 }
