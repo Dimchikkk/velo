@@ -10,6 +10,10 @@ pub fn set_focused_entity(
 ) {
     let mut primary_window = windows.single_mut();
 
+    if ui_state.modal_id.is_some() {
+        return;
+    }
+
     for event in node_interaction_events.iter() {
         if let Ok(velo_node) = velo.get(event.entity) {
             match event.node_interaction_type {
