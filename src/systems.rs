@@ -2,7 +2,7 @@ use crate::{
     components::{EffectsCamera, MainCamera},
     themes::{get_theme_by_name, Theme},
     ui_plugin::ui_helpers::{Background, InteractiveNode},
-    utils::UserPreferences,
+    utils::get_theme_key,
 };
 use bevy::{
     core_pipeline::clear_color::ClearColorConfig,
@@ -12,16 +12,8 @@ use bevy::{
 use bevy_pkv::PkvStore;
 
 pub fn setup_velo_theme(mut commands: Commands, pkv: Res<PkvStore>) {
-    let theme_name = if let Ok(user_preferences) = pkv.get::<UserPreferences>("user_preferences") {
-        if let Some(theme_name) = user_preferences.theme_name {
-            theme_name
-        } else {
-            "light".to_string()
-        }
-    } else {
-        "light".to_string()
-    };
-    let theme = get_theme_by_name(&theme_name);
+    let theme_key = get_theme_key(&pkv);
+    let theme = get_theme_by_name(&theme_key);
     commands.insert_resource(theme);
 }
 
