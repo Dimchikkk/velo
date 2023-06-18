@@ -14,7 +14,7 @@ use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::themes::Theme;
-use crate::{AddRectEvent, JsonNode, JsonNodeText, NodeType, UiState};
+use crate::{AddRect, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
     spawn_modal, ButtonAction, ChangeColor, DeleteDoc, DocListItemButton, GenericButton, NewDoc,
@@ -28,7 +28,7 @@ use crate::utils::{get_timestamp, load_doc_to_memory, ReflectableUuid};
 
 pub fn rec_button_handlers(
     mut commands: Commands,
-    mut events: EventWriter<AddRectEvent>,
+    mut events: EventWriter<AddRect>,
     mut interaction_query: Query<
         (&Interaction, &ButtonAction),
         (Changed<Interaction>, With<ButtonAction>),
@@ -45,7 +45,7 @@ pub fn rec_button_handlers(
         match *interaction {
             Interaction::Clicked => match button_action.button_type {
                 super::ui_helpers::ButtonTypes::AddRec => {
-                    events.send(AddRectEvent {
+                    events.send(AddRect {
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Rect,
@@ -64,7 +64,7 @@ pub fn rec_button_handlers(
                     });
                 }
                 super::ui_helpers::ButtonTypes::AddCircle => {
-                    events.send(AddRectEvent {
+                    events.send(AddRect {
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Circle,
@@ -83,7 +83,7 @@ pub fn rec_button_handlers(
                     });
                 }
                 super::ui_helpers::ButtonTypes::AddPaper => {
-                    events.send(AddRectEvent {
+                    events.send(AddRect {
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Paper,
@@ -113,14 +113,7 @@ pub fn rec_button_handlers(
                         #[allow(unused)]
                         for (entity, arrow, mut visibility) in &mut arrows.iter_mut() {
                             if arrow.start.id == id || arrow.end.id == id {
-                                #[cfg(not(target_arch = "wasm32"))]
-                                {
-                                    commands.entity(entity).despawn_recursive();
-                                }
-                                #[cfg(target_arch = "wasm32")]
-                                {
-                                    *visibility = Visibility::Hidden;
-                                }
+                                commands.entity(entity).despawn_recursive();
                             }
                         }
                     }
@@ -142,10 +135,7 @@ pub fn rec_button_handlers(
                             if raw_text.id == id {
                                 let border = border_query.get(parent.get()).unwrap();
                                 let top = velo_node_query.get_mut(border.get()).unwrap();
-                                let size = Vec2::new(
-                                    cosmic_edit.size.unwrap().0,
-                                    cosmic_edit.size.unwrap().1,
-                                );
+                                let size = Vec2::new(cosmic_edit.width, cosmic_edit.height);
                                 let translation = top.2.translation;
                                 data = Some((size, translation));
                                 break;
@@ -156,10 +146,7 @@ pub fn rec_button_handlers(
                             if raw_text.id != id {
                                 let border = border_query.get(parent.get()).unwrap();
                                 let top = velo_node_query.get_mut(border.get()).unwrap();
-                                let size = Vec2::new(
-                                    cosmic_edit.size.unwrap().0,
-                                    cosmic_edit.size.unwrap().1,
-                                );
+                                let size = Vec2::new(cosmic_edit.width, cosmic_edit.height);
                                 let translation = top.2.translation;
                                 if let Some((active_size, active_translation)) = data {
                                     if collide(translation, size, active_translation, active_size)
@@ -197,10 +184,7 @@ pub fn rec_button_handlers(
                             if raw_text.id == id {
                                 let border = border_query.get(parent.get()).unwrap();
                                 let top = velo_node_query.get_mut(border.get()).unwrap();
-                                let size = Vec2::new(
-                                    cosmic_edit.size.unwrap().0,
-                                    cosmic_edit.size.unwrap().1,
-                                );
+                                let size = Vec2::new(cosmic_edit.width, cosmic_edit.height);
                                 let translation = top.2.translation;
                                 data = Some((size, translation));
                                 break;
@@ -211,10 +195,7 @@ pub fn rec_button_handlers(
                             if raw_text.id != id {
                                 let border = border_query.get(parent.get()).unwrap();
                                 let top = velo_node_query.get_mut(border.get()).unwrap();
-                                let size = Vec2::new(
-                                    cosmic_edit.size.unwrap().0,
-                                    cosmic_edit.size.unwrap().1,
-                                );
+                                let size = Vec2::new(cosmic_edit.width, cosmic_edit.height);
                                 let translation = top.2.translation;
                                 if let Some((active_size, active_translation)) = data {
                                     if collide(translation, size, active_translation, active_size)
@@ -263,6 +244,7 @@ pub fn change_color_pallete(
                 for (mut stroke, velo_border) in velo_border.iter_mut() {
                     if Some(velo_border.id) == ui_state.entity_to_edit {
                         stroke.color = color;
+                        break;
                     }
                 }
             }

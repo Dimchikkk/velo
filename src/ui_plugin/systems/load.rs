@@ -15,7 +15,7 @@ use crate::{
     resources::{FontSystemState, LoadTabRequest},
     themes::Theme,
 };
-use crate::{canvas::arrow::events::CreateArrowEvent, utils::load_doc_to_memory};
+use crate::{canvas::arrow::events::CreateArrow, utils::load_doc_to_memory};
 
 use crate::resources::{AppState, LoadDocRequest};
 use crate::utils::ReflectableUuid;
@@ -89,13 +89,13 @@ pub fn load_doc(
 
 pub fn load_tab(
     old_nodes: Query<Entity, With<VeloNode>>,
-    mut old_arrows: Query<(Entity, &mut Visibility), With<ArrowMeta>>,
+    mut old_arrows: Query<Entity, With<ArrowMeta>>,
     request: Res<LoadTabRequest>,
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     mut commands: Commands,
     mut res_images: ResMut<Assets<Image>>,
-    mut create_arrow: EventWriter<CreateArrowEvent>,
+    mut create_arrow: EventWriter<CreateArrow>,
     mut delete_tab: Query<(&mut Visibility, &DeleteTab), (With<DeleteTab>, Without<ArrowMeta>)>,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
@@ -107,16 +107,8 @@ pub fn load_tab(
     commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
     let window = windows.single_mut();
 
-    #[allow(unused)]
-    for (entity, mut visibility) in &mut old_arrows.iter_mut() {
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            commands.entity(entity).despawn_recursive();
-        }
-        #[cfg(target_arch = "wasm32")]
-        {
-            *visibility = Visibility::Hidden;
-        }
+    for entity in &mut old_arrows.iter_mut() {
+        commands.entity(entity).despawn_recursive();
     }
     for entity in old_nodes.iter() {
         commands.entity(entity).despawn_recursive();
@@ -193,7 +185,7 @@ pub fn load_tab(
             let arrows = json["arrows"].as_array_mut().unwrap();
             for arrow in arrows.iter() {
                 let arrow_meta: ArrowMeta = serde_json::from_value(arrow.clone()).unwrap();
-                create_arrow.send(CreateArrowEvent {
+                create_arrow.send(CreateArrow {
                     start: arrow_meta.start,
                     end: arrow_meta.end,
                     arrow_type: arrow_meta.arrow_type,

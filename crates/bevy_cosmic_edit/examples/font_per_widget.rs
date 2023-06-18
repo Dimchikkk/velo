@@ -18,7 +18,8 @@ fn setup(
         .spawn(NodeBundle {
             style: bevy::prelude::Style {
                 position_type: PositionType::Absolute,
-                size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
                 ..default()
             },
             ..default()
@@ -297,7 +298,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(CosmicEditPlugin)
-        .add_startup_system(setup)
-        .add_system(change_active_editor)
+        .add_systems(Startup, setup)
+        .add_systems(Update, change_active_editor)
         .run();
 }
