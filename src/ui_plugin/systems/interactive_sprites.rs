@@ -107,7 +107,7 @@ pub fn interactive_sprite(
         if buttons.pressed(MouseButton::Left)
             && !holding_state.is_holding
             && Duration::from_millis(now_ms as u64) - holding_state.duration
-                > Duration::from_millis(50)
+                > Duration::from_millis(100)
             && holding_state.entity.is_some()
         {
             is_hover = false;
