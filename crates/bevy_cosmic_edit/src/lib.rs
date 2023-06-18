@@ -175,9 +175,9 @@ pub fn get_node_cursor_pos(
     let (x_min, y_min, x_max, y_max) = match is_ui_node {
         true => (
             node_transform.affine().translation.x - size.0 / 2.,
-            window.height() - node_transform.affine().translation.y - size.1 / 2.,
-            node_transform.affine().translation.x + size.0,
-            window.height() - node_transform.affine().translation.y - size.1 / 2. + size.1,
+            node_transform.affine().translation.y - size.1 / 2.,
+            node_transform.affine().translation.x + size.0 / 2.,
+            node_transform.affine().translation.y + size.1 / 2.,
         ),
         false => (
             node_transform.affine().translation.x - size.0 / 2.,
