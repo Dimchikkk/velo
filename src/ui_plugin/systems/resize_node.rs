@@ -74,7 +74,7 @@ pub fn resize_entity_end(
                                 &mut shaders,
                                 width,
                                 height,
-                                theme.shadow,
+                                theme.node_shadow,
                                 entity_to_resize,
                             );
                             commands.entity(top).add_child(shadow);
