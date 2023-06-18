@@ -62,13 +62,13 @@ enjoyable project to work on.
 Native:
 
 ```sh
-cargo r 
+cargo r --release
 ```
 
 Wasm:
 
 ```sh
-cargo r --target wasm32-unknown-unknown
+cargo r --release --target wasm32-unknown-unknown
 ```
 
 To create app bundle with icon (tested only on MacOS):
