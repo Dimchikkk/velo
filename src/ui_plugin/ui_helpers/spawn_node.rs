@@ -188,7 +188,14 @@ pub fn spawn_sprite_node(
     let has_shadow = item_meta.node_type == NodeType::Paper;
 
     if has_shadow {
-        let shadow = spawn_shadow(commands, shaders, width, height, theme.shadow, item_meta.id);
+        let shadow = spawn_shadow(
+            commands,
+            shaders,
+            width,
+            height,
+            theme.node_shadow,
+            item_meta.id,
+        );
         commands.entity(top).add_child(shadow);
     }
 
