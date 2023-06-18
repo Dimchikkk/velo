@@ -6,6 +6,7 @@ use bevy::prelude::*;
 use bevy::tasks::IoTaskPool;
 use bevy_cosmic_edit::{get_cosmic_text, ActiveEditor, CosmicEdit};
 use bevy_pkv::PkvStore;
+use cosmic_text::Edit;
 use linkify::{LinkFinder, LinkKind};
 
 use super::ui_helpers::{ModalCancel, ModalConfirm, ModalTop};
@@ -169,7 +170,7 @@ pub fn confirm_modal(
             for (entity, path_modal_top) in query_top.iter() {
                 if path_modal_confirm.id == path_modal_top.id {
                     for (editor, editable_text) in query_path.iter_mut() {
-                        let text = get_cosmic_text(&editor.editor);
+                        let text = get_cosmic_text(editor.editor.buffer());
                         if editable_text.id == path_modal_top.id {
                             match path_modal_confirm.action {
                                 ModalAction::SaveToFile => {
@@ -233,7 +234,7 @@ pub fn confirm_modal(
         for (entity, path_modal_top) in query_top.iter() {
             if Some(path_modal_top.id) == ui_state.modal_id {
                 for (editor, editable_text) in query_path.iter_mut() {
-                    let text = get_cosmic_text(&editor.editor);
+                    let text = get_cosmic_text(editor.editor.buffer());
                     if editable_text.id == path_modal_top.id {
                         match path_modal_top.action {
                             ModalAction::SaveToFile => {

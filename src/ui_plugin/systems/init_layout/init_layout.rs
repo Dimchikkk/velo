@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
 use bevy_cosmic_edit::{create_cosmic_font_system, CosmicFont, CosmicFontConfig};
-use std::time::Duration;
 
 use bevy_pkv::PkvStore;
 
@@ -14,7 +13,7 @@ use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc}
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
 use crate::resources::{AppState, FontSystemState};
 use crate::themes::Theme;
-use crate::{BlinkTimer, TextPos};
+use crate::TextPos;
 
 #[path = "add_arrow.rs"]
 mod add_arrow;
@@ -101,9 +100,6 @@ pub fn init_layout(
         commands.insert_resource(CommChannels { tx, rx });
     }
     let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
-    commands.insert_resource(BlinkTimer {
-        timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
-    });
     let bottom_panel = commands
         .spawn((
             NodeBundle {
