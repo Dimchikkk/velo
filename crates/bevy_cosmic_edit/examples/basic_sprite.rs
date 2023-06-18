@@ -1,9 +1,10 @@
 use std::path::Path;
 
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::{core_pipeline::clear_color::ClearColorConfig, prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{
     create_cosmic_font_system, spawn_cosmic_edit, ActiveEditor, CosmicEditMeta, CosmicEditPlugin,
-    CosmicFont, CosmicFontConfig, CosmicMetrics, CosmicNode, CosmicText, CosmicTextPos,
+    CosmicEditSprite, CosmicFont, CosmicFontConfig, CosmicMetrics, CosmicNode, CosmicText,
+    CosmicTextPos,
 };
 use cosmic_text::AttrsOwned;
 
@@ -13,18 +14,13 @@ fn setup(
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
 ) {
     let primary_window = windows.single();
-    commands.spawn(Camera2dBundle::default());
-    let root = commands
-        .spawn(NodeBundle {
-            style: Style {
-                display: Display::Flex,
-                size: Size::new(Val::Percent(100.), Val::Percent(100.)),
-                ..default()
-            },
-            ..default()
-        })
-        .id();
-
+    let camera_bundle = Camera2dBundle {
+        camera_2d: Camera2d {
+            clear_color: ClearColorConfig::Custom(Color::WHITE),
+        },
+        ..default()
+    };
+    commands.spawn(camera_bundle);
     let cosmic_font_config = CosmicFontConfig {
         fonts_dir_path: Some(Path::new("assets/fonts").into()),
         font_bytes: None,
@@ -35,6 +31,7 @@ fn setup(
     let mut attrs = cosmic_text::Attrs::new();
     attrs = attrs.family(cosmic_text::Family::Name("Victor Mono"));
     attrs = attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3));
+    let scale_factor = primary_window.scale_factor() as f32;
     let cosmic_edit_meta = CosmicEditMeta {
         text: CosmicText::OneStyle("😀😀😀 x => y".to_string()),
         attrs: AttrsOwned::new(attrs),
@@ -43,16 +40,20 @@ fn setup(
         metrics: CosmicMetrics {
             font_size: 14.,
             line_height: 18.,
-            scale_factor: primary_window.scale_factor() as f32,
+            scale_factor,
         },
         font_system_handle,
-        node: CosmicNode::Ui,
-        size: None,
+        node: CosmicNode::Sprite(CosmicEditSprite {
+            transform: Transform {
+                translation: Vec3::new(0., 0., 1.),
+                ..default()
+            },
+        }),
+        size: Some((primary_window.width(), primary_window.height())),
         readonly: false,
         bg_image: None,
     };
     let cosmic_edit = spawn_cosmic_edit(&mut commands, &mut cosmic_fonts, cosmic_edit_meta);
-    commands.entity(root).add_child(cosmic_edit);
     commands.insert_resource(ActiveEditor {
         entity: Some(cosmic_edit),
     });
@@ -62,6 +63,6 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(CosmicEditPlugin)
-        .add_startup_system(setup)
+        .add_systems(Startup, setup)
         .run();
 }

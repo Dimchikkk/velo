@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_ui_borders::BorderColor;
 
 use crate::{themes::Theme, ui_plugin::ui_helpers::GenericButton};
 
@@ -21,7 +20,8 @@ pub fn add_text_pos(
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
                 margin: UiRect::all(Val::Px(5.)),
-                size: Size::new(Val::Percent(15.), Val::Percent(100.)),
+                width: Val::Percent(15.),
+                height: Val::Percent(100.),
                 ..default()
             },
             background_color: theme.shadow.into(),
@@ -32,24 +32,23 @@ pub fn add_text_pos(
         .spawn((
             ButtonBundle {
                 background_color: theme.text_pos_btn_bg.into(),
+                border_color: theme.btn_border.into(),
                 image: image.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Val::Px(1.),
-                        right: Val::Px(0.),
-                        top: Val::Px(-1.),
-                        bottom: Val::Px(0.),
-                    },
+                    left: Val::Px(1.),
+                    right: Val::Px(0.),
+                    top: Val::Px(-1.),
+                    bottom: Val::Px(0.),
                     border: UiRect::all(Val::Px(1.)),
                     justify_content: JustifyContent::Center,
                     ..default()
                 },
                 ..default()
             },
-            BorderColor(theme.btn_border),
             text_pos_mode,
             GenericButton,
         ))

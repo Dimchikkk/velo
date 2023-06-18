@@ -107,41 +107,43 @@ pub enum TooltipPosition {
 pub fn get_tooltip(
     theme: &Res<Theme>,
     text: String,
-    size: f32,
     tooltip_position: TooltipPosition,
 ) -> TextBundle {
     let text = Text {
         sections: vec![TextSection {
             value: text,
             style: TextStyle {
-                font_size: size,
+                font_size: theme.font_size,
                 color: theme.font,
                 ..default()
             },
         }],
-        alignment: TextAlignment::Left,
-        linebreak_behaviour: BreakLineOn::WordBoundary,
+        alignment: TextAlignment::Center,
+        linebreak_behavior: BreakLineOn::WordBoundary,
     };
     let position = match tooltip_position {
         TooltipPosition::Bottom => UiRect {
             left: Val::Px(30.),
-            right: Val::Px(0.),
+            right: Val::Auto,
             top: Val::Px(40.),
-            bottom: Val::Px(0.),
+            bottom: Val::Auto,
         },
         TooltipPosition::Top => UiRect {
             left: Val::Px(30.),
-            right: Val::Px(0.),
+            right: Val::Auto,
             top: Val::Px(-40.),
-            bottom: Val::Px(0.),
+            bottom: Val::Auto,
         },
     };
     let text_bundle_style = Style {
-        padding: UiRect::all(Val::Px(0.)),
-        position_type: PositionType::Relative,
-        position,
-        size: Size::new(Val::Auto, Val::Px(size)),
+        position_type: PositionType::Absolute,
+        left: position.left,
+        right: position.right,
+        top: position.top,
+        bottom: position.bottom,
         display: Display::None,
+        width: Val::Auto,
+        height: Val::Auto,
         ..default()
     };
     TextBundle {

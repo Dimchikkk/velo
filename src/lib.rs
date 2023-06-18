@@ -12,7 +12,6 @@ use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_hanabi::HanabiPlugin;
 use bevy_pkv::PkvStore;
 use bevy_smud::SmudPlugin;
-use bevy_ui_borders::BordersPlugin;
 use canvas::CanvasPlugin;
 use resources::FontSystemState;
 use systems::*;
@@ -24,8 +23,8 @@ pub static APP_NAME: &str = "velo";
 pub struct VeloPlugin;
 impl Plugin for VeloPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_systems((setup_camera, setup_background))
-            .add_startup_system(setup_velo_theme.in_base_set(StartupSet::PreStartup))
+        app.add_systems(PreStartup, setup_velo_theme)
+            .add_systems(Startup, (setup_camera, setup_background))
             .add_plugins(
                 DefaultPlugins
                     .set(WindowPlugin {
@@ -47,7 +46,6 @@ impl Plugin for VeloPlugin {
             .add_plugin(CosmicEditPlugin)
             .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)
-            .add_plugin(BordersPlugin)
             .insert_resource(PkvStore::new(ORG_NAME, APP_NAME))
             .init_resource::<FontSystemState>();
 

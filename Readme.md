@@ -5,10 +5,10 @@
 
 ## Demo
 
-This app is primarily designed for native desktop platforms, ~~and its
+This app is primarily designed for native desktop platforms, and its
 WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
-mode is supported (tested on Chrome):~~ wasm target is currently broken until bevy 0.11 release with https://github.com/bevyengine/bevy/issues/5732 fix.
+mode is supported (tested on Chrome):  
 
   [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/680470528823044ccda3045113c9fa6c/raw/482ef70ac0905e0ee9bb921ac9440d01416c7043/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/680470528823044ccda3045113c9fa6c/raw/482ef70ac0905e0ee9bb921ac9440d01416c7043/velo.json)
 
@@ -92,7 +92,7 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 - start typing to add text to selected note
 - resize note by dragging its corners
 - click on canvas to deselect node
-- move note by dragging it (only unselected node can be dragged to allow mouse text selection for selected notes)
+- move note by dragging it (only unselected note can be dragged to allow mouse text selection for selected note)
 - click on little arrow connector icon to connect notes, arrow connector icons are placed on each side of note
 - for native target there is search box that allows to filter documents by text in notes (fuzzy search)
 - for wasm target there is url query parameter `?document=<url>` to load document from url

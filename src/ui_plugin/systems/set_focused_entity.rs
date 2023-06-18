@@ -1,14 +1,18 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use super::{ui_helpers::RawText, NodeInteractionEvent, UiState};
+use super::{ui_helpers::RawText, NodeInteraction, UiState};
 
 pub fn set_focused_entity(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    mut node_interaction_events: EventReader<NodeInteraction>,
     mut ui_state: ResMut<UiState>,
     velo: Query<&RawText, With<RawText>>,
 ) {
     let mut primary_window = windows.single_mut();
+
+    if ui_state.modal_id.is_some() {
+        return;
+    }
 
     for event in node_interaction_events.iter() {
         if let Ok(velo_node) = velo.get(event.entity) {
