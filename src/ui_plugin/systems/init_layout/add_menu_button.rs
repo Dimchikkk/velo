@@ -3,6 +3,7 @@ use bevy::{prelude::*, text::BreakLineOn};
 use crate::{
     themes::Theme,
     ui_plugin::ui_helpers::{get_tooltip, GenericButton, Tooltip, TooltipPosition},
+    utils::{DARK_THEME_ICON_CODE, LIGHT_THEME_ICON_CODE},
 };
 
 pub fn add_menu_button(
@@ -10,7 +11,7 @@ pub fn add_menu_button(
     theme: &Res<Theme>,
     label: String,
     icon_font: &Handle<Font>,
-    component: impl Component,
+    component: impl Component + Clone,
 ) -> Entity {
     let icon_code = match label.as_str() {
         "New Tab" => "\u{e3ba}",
@@ -21,6 +22,8 @@ pub fn add_menu_button(
         "Import From URL" => "\u{e902}",
         "Save Document to window.velo object" => "\u{e866}",
         "Share Document (copy URL to clipboard)" => "\u{e80d}",
+        "Enable dark theme (restart is required for now)" => DARK_THEME_ICON_CODE,
+        "Enable light theme (restart is required for now)" => LIGHT_THEME_ICON_CODE,
         _ => panic!("Unknown menu button tooltip label: {}", label),
     };
     match label.as_str() {
@@ -123,7 +126,7 @@ pub fn add_menu_button(
                         },
                         ..default()
                     },
-                    component,
+                    component.clone(),
                     GenericButton,
                 ))
                 .with_children(|builder| {
@@ -149,11 +152,14 @@ pub fn add_menu_button(
                         ..default()
                     };
 
-                    builder.spawn(TextBundle {
-                        text,
-                        style: text_bundle_style,
-                        ..default()
-                    });
+                    builder.spawn((
+                        TextBundle {
+                            text,
+                            style: text_bundle_style,
+                            ..default()
+                        },
+                        component,
+                    ));
                 })
                 .id();
             commands.entity(top).add_child(button);

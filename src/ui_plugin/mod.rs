@@ -271,6 +271,7 @@ impl Plugin for UiPlugin {
                 canvas_click,
                 active_editor_changed,
                 interactive_sprite.before(canvas_click),
+                change_theme,
             ),
         );
         app.add_systems(Update, (set_focused_entity, clickable_links).chain());
