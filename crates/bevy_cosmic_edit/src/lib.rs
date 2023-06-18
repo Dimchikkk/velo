@@ -216,11 +216,11 @@ pub fn get_node_cursor_pos(
 /// let cosmic_text = get_cosmic_text(&editor);
 /// println!("Cosmic text: {}", cosmic_text);
 /// ```
-pub fn get_cosmic_text(editor: &Editor) -> String {
+pub fn get_cosmic_text(buffer: &Buffer) -> String {
     let mut text = String::new();
-    let line_count = editor.buffer().lines.len();
+    let line_count = buffer.lines.len();
 
-    for (i, line) in editor.buffer().lines.iter().enumerate() {
+    for (i, line) in buffer.lines.iter().enumerate() {
         text.push_str(line.text());
 
         if i < line_count - 1 {
@@ -578,10 +578,7 @@ fn cosmic_edit_redraw_buffer_ui(
 ) {
     let primary_window = windows.single();
     for (mut cosmic_edit, mut img, node) in &mut cosmic_edit_query.iter_mut() {
-        if node.size().x != 0.
-            && node.size().y != 0.
-            && (cosmic_edit.width == 1. || cosmic_edit.height == 1.)
-        {
+        if node.size().x != 0. && node.size().y != 0. {
             cosmic_edit.width = node.size().x;
             cosmic_edit.height = node.size().y;
         }

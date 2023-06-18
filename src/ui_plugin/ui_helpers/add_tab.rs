@@ -1,16 +1,27 @@
 use bevy::prelude::*;
+use bevy_cosmic_edit::{
+    spawn_cosmic_edit, CosmicEditMeta, CosmicFont, CosmicMetrics, CosmicNode, CosmicText,
+};
+use cosmic_text::AttrsOwned;
 
-use crate::{themes::Theme, utils::ReflectableUuid};
+use crate::{
+    themes::Theme,
+    ui_plugin::TextPos,
+    utils::{bevy_color_to_cosmic, ReflectableUuid},
+};
 
 use super::{DeleteTab, EditableText, GenericButton, TabButton, TabContainer};
 
 pub fn add_tab(
     commands: &mut Commands,
+    cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
+    cosmic_font_handle: Handle<CosmicFont>,
     theme: &Res<Theme>,
     asset_server: &Res<AssetServer>,
     name: String,
     id: ReflectableUuid,
     is_active: bool,
+    scale_factor: f32,
 ) -> Entity {
     let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
     let root = commands
@@ -35,57 +46,31 @@ pub fn add_tab(
             TabContainer { id },
         ))
         .id();
-    let tab_button = commands
-        .spawn((
-            ButtonBundle {
-                background_color: theme.add_tab_bg.into(),
-                style: Style {
-                    width: Val::Percent(90.),
-                    height: Val::Percent(100.),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    overflow: Overflow::clip(),
-                    ..default()
-                },
-                ..default()
-            },
-            GenericButton,
-            TabButton { id },
-        ))
-        .id();
-    let tab_label = commands
-        .spawn((
-            TextBundle {
-                text: Text {
-                    sections: vec![
-                        TextSection {
-                            value: name,
-                            style: TextStyle {
-                                font_size: 18.,
-                                color: theme.font,
-                                ..default()
-                            },
-                        },
-                        TextSection {
-                            value: " ".to_string(),
-                            style: TextStyle {
-                                font_size: 18.,
-                                color: theme.font,
-                                ..default()
-                            },
-                        },
-                    ],
-                    ..default()
-                },
-                style: Style {
-                    margin: UiRect::all(Val::Px(5.)),
-                    ..default()
-                },
-                ..default()
-            },
-            EditableText { id },
-        ))
-        .id();
+    let mut attrs = cosmic_text::Attrs::new();
+    attrs = attrs.family(cosmic_text::Family::Name(theme.font_name.as_str()));
+    attrs = attrs.color(bevy_color_to_cosmic(theme.font));
+    let cosmic_edit_meta = CosmicEditMeta {
+        text: CosmicText::OneStyle(name),
+        attrs: AttrsOwned::new(attrs),
+        font_system_handle: cosmic_font_handle,
+        text_pos: TextPos::Center.into(),
+        size: None,
+        metrics: CosmicMetrics {
+            font_size: theme.font_size,
+            line_height: theme.line_height,
+            scale_factor,
+        },
+        bg: theme.add_tab_bg,
+        node: CosmicNode::Ui,
+        readonly: true,
+        bg_image: None,
+    };
+    let cosmic_edit = spawn_cosmic_edit(commands, cosmic_fonts, cosmic_edit_meta);
+    commands
+        .entity(cosmic_edit)
+        .insert(EditableText { id })
+        .insert(GenericButton)
+        .insert(TabButton { id });
     let del_button = commands
         .spawn((
             ButtonBundle {
@@ -134,9 +119,8 @@ pub fn add_tab(
             Label,
         ))
         .id();
-    commands.entity(tab_button).add_child(tab_label);
     commands.entity(del_button).add_child(del_label);
-    commands.entity(root).add_child(tab_button);
+    commands.entity(root).add_child(cosmic_edit);
     commands.entity(root).add_child(del_button);
     root
 }

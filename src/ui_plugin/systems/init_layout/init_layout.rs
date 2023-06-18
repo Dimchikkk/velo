@@ -2,19 +2,19 @@ use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
 use bevy_cosmic_edit::{create_cosmic_font_system, CosmicFont, CosmicFontConfig};
-use std::time::Duration;
 
 use bevy_pkv::PkvStore;
 
 use super::ui_helpers::{
-    self, AddTab, BottomPanel, ButtonAction, LeftPanel, LeftPanelControls, LeftPanelExplorer,
-    MainPanel, Menu, NewDoc, ParticlesEffect, Root, SaveDoc, TextPosMode,
+    self, AddTab, BottomPanel, ButtonAction, ChangeTheme, LeftPanel, LeftPanelControls,
+    LeftPanelExplorer, MainPanel, Menu, NewDoc, ParticlesEffect, Root, SaveDoc, TextPosMode,
 };
 use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
 use crate::resources::{AppState, FontSystemState};
 use crate::themes::Theme;
-use crate::{BlinkTimer, TextPos};
+use crate::utils::get_theme_key;
+use crate::TextPos;
 
 #[path = "add_arrow.rs"]
 mod add_arrow;
@@ -101,9 +101,6 @@ pub fn init_layout(
         commands.insert_resource(CommChannels { tx, rx });
     }
     let icon_font = asset_server.load("fonts/MaterialIcons-Regular.ttf");
-    commands.insert_resource(BlinkTimer {
-        timer: Timer::new(Duration::from_millis(500), TimerMode::Repeating),
-    });
     let bottom_panel = commands
         .spawn((
             NodeBundle {
@@ -246,6 +243,15 @@ pub fn init_layout(
     }
     #[cfg(target_arch = "wasm32")]
     commands.entity(menu).add_child(set_window_prop);
+    let theme_key = get_theme_key(&pkv);
+    let theme_msg = if theme_key == "light" {
+        "Enable dark theme (restart is required for now)".to_string()
+    } else {
+        "Enable light theme (restart is required for now)".to_string()
+    };
+
+    let change_theme = add_menu_button(&mut commands, &theme, theme_msg, &icon_font, ChangeTheme);
+    commands.entity(menu).add_child(change_theme);
 
     let main_bottom = commands
         .spawn(NodeBundle {

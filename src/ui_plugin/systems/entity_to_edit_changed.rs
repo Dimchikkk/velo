@@ -71,7 +71,7 @@ pub fn entity_to_edit_changed(
                             0,
                             bevy_color_to_cosmic(theme.node_bg),
                         ));
-                        let text = get_cosmic_text(&cosmic_edit.editor);
+                        let text = get_cosmic_text(cosmic_edit.editor.buffer());
                         raw_text.last_text = text.clone();
                         let markdown_theme = BevyMarkdownTheme {
                             code_theme: theme.code_theme.clone(),
@@ -121,7 +121,7 @@ pub fn entity_to_edit_changed(
                             0,
                             bevy_color_to_cosmic(theme.node_bg),
                         ));
-                        let text = get_cosmic_text(&cosmic_edit.editor);
+                        let text = get_cosmic_text(cosmic_edit.editor.buffer());
                         raw_text.last_text = text.clone();
                         let markdown_theme = BevyMarkdownTheme {
                             code_theme: theme.code_theme.clone(),
