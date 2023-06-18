@@ -39,7 +39,7 @@ pub struct SaveDoc;
 #[derive(Component, Clone)]
 pub struct ExportToFile;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct SetWindowProperty;
 
 #[derive(Component, Clone)]
