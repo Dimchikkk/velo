@@ -18,7 +18,8 @@ pub fn add_tab(
             NodeBundle {
                 background_color: theme.add_tab_bg.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(8.), Val::Percent(90.)),
+                    width: Val::Percent(8.),
+                    height: Val::Percent(90.),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     margin: UiRect {
@@ -39,10 +40,11 @@ pub fn add_tab(
             ButtonBundle {
                 background_color: theme.add_tab_bg.into(),
                 style: Style {
-                    size: Size::new(Val::Percent(90.), Val::Percent(100.)),
+                    width: Val::Percent(90.),
+                    height: Val::Percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
-                    overflow: Overflow::Hidden,
+                    overflow: Overflow::clip(),
                     ..default()
                 },
                 ..default()
@@ -100,7 +102,8 @@ pub fn add_tab(
                         top: Val::Px(0.),
                         bottom: Val::Px(0.),
                     },
-                    size: Size::new(Val::Percent(10.), Val::Percent(100.)),
+                    width: Val::Percent(10.),
+                    height: Val::Percent(100.),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()

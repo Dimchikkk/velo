@@ -31,7 +31,6 @@ fn setup(
     let mut attrs = cosmic_text::Attrs::new();
     attrs = attrs.family(cosmic_text::Family::Name("Victor Mono"));
     attrs = attrs.color(cosmic_text::Color::rgb(0x94, 0x00, 0xD3));
-    let scale_factor = primary_window.scale_factor() as f32;
     let metrics = CosmicMetrics {
         font_size: 14.,
         line_height: 18.,
@@ -46,7 +45,6 @@ fn setup(
         node: CosmicNode::Sprite(CosmicEditSprite {
             transform: Transform {
                 translation: Vec3::new(-primary_window.width() / 4., 0., 1.),
-                scale: Vec3::new(1. / scale_factor, 1. / scale_factor, 1.),
                 ..default()
             },
         }),
@@ -69,7 +67,6 @@ fn setup(
                     -primary_window.height() / 4.,
                     1.,
                 ),
-                scale: Vec3::new(1. / scale_factor, 1. / scale_factor, 1.),
                 ..default()
             },
         }),
@@ -92,7 +89,6 @@ fn setup(
                     primary_window.height() / 4.,
                     1.,
                 ),
-                scale: Vec3::new(1. / scale_factor, 1. / scale_factor, 1.),
                 ..default()
             },
         }),
@@ -116,13 +112,14 @@ fn change_active_editor(
     let window = windows.single();
     if buttons.just_pressed(MouseButton::Left) {
         for (cosmic_edit, node_transform, entity) in &mut cosmic_edit_query.iter_mut() {
-            let size = cosmic_edit.size.unwrap();
-            let x_min = node_transform.affine().translation.x + size.0 / 2.;
-            let y_min = node_transform.affine().translation.y;
-            let x_max = x_min + size.0;
-            let y_max = y_min + size.1;
+            let size = (cosmic_edit.width, cosmic_edit.height);
+            let x_min = node_transform.affine().translation.x - size.0 / 2.;
+            let y_min = -node_transform.affine().translation.y - size.1 / 2.;
+            let x_max = node_transform.affine().translation.x + size.0 / 2.;
+            let y_max = -node_transform.affine().translation.y + size.1 / 2.;
             window.cursor_position().and_then(|pos| {
                 Some({
+                    let pos = Vec2::new(pos.x - window.width() / 2., pos.y - window.height() / 2.);
                     if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
                         commands.insert_resource(ActiveEditor {
                             entity: Some(entity),
@@ -138,7 +135,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(CosmicEditPlugin)
-        .add_startup_system(setup)
-        .add_system(change_active_editor)
+        .add_systems(Startup, setup)
+        .add_systems(Update, change_active_editor)
         .run();
 }

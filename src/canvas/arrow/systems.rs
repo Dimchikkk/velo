@@ -1,17 +1,17 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use super::components::{ArrowConnect, ArrowMeta};
-use super::events::{CreateArrowEvent, RedrawArrowEvent};
+use super::events::{CreateArrow, RedrawArrow};
 use super::utils::{build_arrow, create_arrow};
 use crate::themes::Theme;
-use crate::ui_plugin::{NodeInteractionEvent, UiState};
+use crate::ui_plugin::{NodeInteraction, UiState};
 use bevy_prototype_lyon::prelude::Path;
 
 pub fn create_arrow_start(
-    mut node_interaction_events: EventReader<NodeInteractionEvent>,
+    mut node_interaction_events: EventReader<NodeInteraction>,
     arrow_connect_query: Query<&ArrowConnect, With<ArrowConnect>>,
     mut state: ResMut<UiState>,
-    mut create_arrow: EventWriter<CreateArrowEvent>,
+    mut create_arrow: EventWriter<CreateArrow>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let mut primary_window = windows.single_mut();
@@ -28,7 +28,7 @@ pub fn create_arrow_start(
                                 continue;
                             }
                             state.arrow_to_draw_start = None;
-                            create_arrow.send(CreateArrowEvent {
+                            create_arrow.send(CreateArrow {
                                 start: start_arrow,
                                 end: *arrow_connect,
                                 arrow_type: state.arrow_type,
@@ -50,7 +50,7 @@ pub fn create_arrow_start(
 
 pub fn create_arrow_end(
     mut commands: Commands,
-    mut events: EventReader<CreateArrowEvent>,
+    mut events: EventReader<CreateArrow>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
     theme: Res<Theme>,
 ) {
@@ -82,7 +82,7 @@ pub fn create_arrow_end(
     }
 }
 pub fn redraw_arrows(
-    mut redraw_arrow: EventReader<RedrawArrowEvent>,
+    mut redraw_arrow: EventReader<RedrawArrow>,
     mut arrow_query: Query<(&mut Path, &mut ArrowMeta), With<ArrowMeta>>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
 ) {

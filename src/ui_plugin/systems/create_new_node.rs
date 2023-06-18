@@ -7,11 +7,11 @@ use crate::{
     utils::ReflectableUuid,
 };
 
-use super::{ui_helpers::spawn_sprite_node, AddRectEvent, NodeMeta, UiState};
+use super::{ui_helpers::spawn_sprite_node, AddRect, NodeMeta, UiState};
 
 pub fn create_new_node(
     mut commands: Commands,
-    mut events: EventReader<AddRectEvent>,
+    mut events: EventReader<AddRect>,
     mut ui_state: ResMut<UiState>,
     app_state: Res<AppState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,

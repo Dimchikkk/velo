@@ -14,7 +14,8 @@ pub fn add_effect(
                 margin: UiRect::all(Val::Px(5.)),
                 flex_direction: FlexDirection::Column,
                 align_self: AlignSelf::Stretch,
-                size: Size::new(Val::Percent(2.3), Val::Percent(85.)),
+                width: Val::Percent(2.3),
+                height: Val::Percent(85.),
                 ..default()
             },
             ..default()
@@ -31,7 +32,8 @@ pub fn add_effect(
                         top: Val::Px(0.),
                         bottom: Val::Px(0.),
                     },
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
@@ -53,7 +55,7 @@ pub fn add_effect(
                     style: text_style,
                 }],
                 alignment: TextAlignment::Left,
-                linebreak_behaviour: BreakLineOn::WordBoundary,
+                linebreak_behavior: BreakLineOn::WordBoundary,
             };
 
             builder.spawn(TextBundle { text, ..default() });
