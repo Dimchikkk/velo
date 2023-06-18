@@ -1,6 +1,7 @@
 # Velo 🚵‍♀️🚵
 ![Rust](https://img.shields.io/badge/Rust-lang-000000.svg?style=flat&logo=rust)[![codecov](https://codecov.io/gh/StaffEngineer/velo/branch/main/graph/badge.svg?token=QGEKLM6ZDF)](https://codecov.io/gh/StaffEngineer/velo)
 
+![velo](./velo.gif)
 ![alt text](velo.png "Velo")
 
 ## Demo
@@ -56,6 +57,7 @@ enjoyable project to work on.
 - filter documents by text in nodes (fuzzy search) [native target only 🖥️]
 - highlight nodes containing searched text [native target only 🖥️]
 - ligature/emoji rendering support [emoji native target only 🖥️]
+- dark/light theme support (app restart is required for now)
 
 ## Run
 
@@ -97,8 +99,6 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 - for native target there is search box that allows to filter documents by text in notes (fuzzy search)
 - for wasm target there is url query parameter `?document=<url>` to load document from url
 - click save icon to save document to database on native platform or to localStorage on wasm target
-
-![velo](./velo.gif)
 
 ## License
 All code in this repository dual-licensed under either:
