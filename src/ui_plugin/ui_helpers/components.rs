@@ -13,7 +13,7 @@ pub struct Root;
 #[derive(Component)]
 pub struct Menu;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct AddTab;
 
 #[derive(Component)]
@@ -24,7 +24,7 @@ pub struct DeleteTab {
 #[derive(Component)]
 pub struct Tooltip;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct NewDoc;
 
 #[derive(Component)]
@@ -33,23 +33,26 @@ pub struct ParticlesEffect;
 #[derive(Component)]
 pub struct DocList;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct SaveDoc;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct ExportToFile;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct SetWindowProperty;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct ImportFromFile;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct ImportFromUrl;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct ShareDoc;
+
+#[derive(Component, Clone)]
+pub struct ChangeTheme;
 
 #[derive(Component)]
 pub struct DeleteDoc {

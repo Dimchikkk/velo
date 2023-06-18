@@ -164,11 +164,6 @@ pub struct UiState {
     pub arrow_to_draw_start: Option<ArrowConnect>,
 }
 
-#[derive(Resource)]
-pub struct BlinkTimer {
-    timer: Timer,
-}
-
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiState>();
@@ -201,7 +196,6 @@ impl Plugin for UiPlugin {
                 resize_entity_end,
                 cancel_modal,
                 confirm_modal,
-                resize_notificator,
             ),
         );
 
@@ -248,7 +242,7 @@ impl Plugin for UiPlugin {
                 rename_doc_handler,
                 delete_doc_handler,
                 save_doc_handler,
-                keyboard_input_system.after(bevy_cosmic_edit::cosmic_edit_bevy_events),
+                keyboard_input_system.before(bevy_cosmic_edit::cosmic_edit_bevy_events),
             ),
         );
         app.add_systems(
@@ -277,6 +271,7 @@ impl Plugin for UiPlugin {
                 canvas_click,
                 active_editor_changed,
                 interactive_sprite.before(canvas_click),
+                change_theme,
             ),
         );
         app.add_systems(Update, (set_focused_entity, clickable_links).chain());
@@ -291,6 +286,8 @@ impl Plugin for UiPlugin {
                 .before(rec_button_handlers)
                 .before(create_new_node),
         );
+
+        app.add_systems(PostUpdate, resize_notificator);
     }
 }
 
