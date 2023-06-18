@@ -1,5 +1,3 @@
-use linkify::{LinkFinder, LinkKind};
-
 use bevy::{prelude::*, text::BreakLineOn};
 
 use crate::themes::Theme;
@@ -34,71 +32,6 @@ pub fn add_rectangle_txt(theme: &Res<Theme>, text: String) -> TextBundle {
         ..default()
     })
 }
-
-pub fn get_sections(theme: &Res<Theme>, text: String) -> (Vec<TextSection>, Vec<bool>) {
-    let text_style = TextStyle {
-        font_size: 18.0,
-        color: theme.font,
-        ..default()
-    };
-    let link_style = TextStyle {
-        font_size: 18.0,
-        color: theme.font,
-        ..default()
-    };
-    let mut finder = LinkFinder::new();
-    finder.kinds(&[LinkKind::Url]);
-    let links: Vec<_> = finder.links(&text).collect();
-    if links.is_empty() {
-        return (
-            vec![
-                TextSection {
-                    value: text,
-                    style: text_style.clone(),
-                },
-                TextSection {
-                    value: " ".to_string(),
-                    style: text_style,
-                },
-            ],
-            vec![false, false],
-        );
-    }
-    let mut sections = vec![];
-    let mut is_link = vec![];
-    let mut idx = 0;
-    for link in links {
-        let start = link.start();
-        let end = link.end();
-        if start > idx {
-            sections.push(TextSection {
-                value: text[idx..start].to_string(),
-                style: text_style.clone(),
-            });
-            is_link.push(false);
-        }
-        sections.push(TextSection {
-            value: text[start..end].to_string(),
-            style: link_style.clone(),
-        });
-        is_link.push(true);
-        idx = end;
-    }
-    if idx < text.len() {
-        sections.push(TextSection {
-            value: text[idx..text.len()].to_string(),
-            style: text_style.clone(),
-        });
-        is_link.push(false);
-    }
-    sections.push(TextSection {
-        value: " ".to_string(),
-        style: text_style,
-    });
-    is_link.push(false);
-    (sections, is_link)
-}
-
 pub enum TooltipPosition {
     Top,
     Bottom,

@@ -6,6 +6,7 @@ use bevy_cosmic_edit::ActiveEditor;
 use bevy_cosmic_edit::CosmicEdit;
 use bevy_pkv::PkvStore;
 use bevy_prototype_lyon::prelude::Stroke;
+use cosmic_text::Edit;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::Path;
@@ -89,7 +90,7 @@ pub fn search_box_text_changed(
     pkv: Res<PkvStore>,
     theme: Res<Theme>,
 ) {
-    let str = get_cosmic_text(&text_query.single().editor);
+    let str = get_cosmic_text(text_query.single().editor.buffer());
     if str != *previous_search_text {
         if !str.is_empty() {
             if let Some(index) = &app_state.search_index {

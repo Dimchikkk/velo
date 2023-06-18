@@ -4,6 +4,8 @@ use bevy::{
     window::PrimaryWindow,
 };
 
+use bevy_cosmic_edit::{get_cosmic_text, CosmicEdit};
+use cosmic_text::{Cursor, Edit};
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 
@@ -13,10 +15,11 @@ use uuid::Uuid;
 use crate::{
     resources::{LoadTabRequest, SaveTabRequest},
     themes::Theme,
-    AddRect, BlinkTimer, UiState,
+    utils::bevy_color_to_cosmic,
+    AddRect, UiState,
 };
 
-use super::ui_helpers::{get_sections, EditableText};
+use super::ui_helpers::EditableText;
 use crate::resources::{AppState, SaveDocRequest};
 
 pub fn keyboard_input_system(
@@ -24,21 +27,16 @@ pub fn keyboard_input_system(
     mut images: ResMut<Assets<Image>>,
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
-    mut char_evr: EventReader<ReceivedCharacter>,
     mut events: EventWriter<AddRect>,
     input: Res<Input<KeyCode>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut deleting: Local<bool>,
-    mut editable_text_query: Query<(&mut Text, &EditableText), With<EditableText>>,
-    mut blink_timer: ResMut<BlinkTimer>,
-    time: Res<Time>,
+    mut editable_text_query: Query<(&EditableText, &mut CosmicEdit), With<EditableText>>,
     theme: Res<Theme>,
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
     let command = input.any_pressed([KeyCode::SuperLeft, KeyCode::SuperRight]);
     let shift = input.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
-    blink_timer.timer.tick(time.delta());
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(&mut images, &mut events, scale_factor, &theme);
@@ -67,88 +65,43 @@ pub fn keyboard_input_system(
             }
         }
     } else {
-        if ui_state.doc_to_edit.is_some() || ui_state.tab_to_edit.is_some() {
-            blink_timer.timer.unpause();
-        } else {
-            blink_timer.timer.pause();
-        }
-        for (mut text, editable_text) in &mut editable_text_query.iter_mut() {
-            if vec![ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id))
-                && input.any_just_pressed([KeyCode::Escape, KeyCode::Return])
-            {
-                *ui_state = UiState::default();
-                commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
-            }
-            if Some(editable_text.id) == ui_state.doc_to_edit
-                && text.sections[0].value == *"Untitled"
-            {
-                text.sections[0].value = "".to_string();
-            }
+        for (editable_text, mut cosmic_edit) in &mut editable_text_query.iter_mut() {
             if vec![ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id)) {
-                let mut str = "".to_string();
-                let mut text_copy = text.clone();
-                text_copy.sections.pop();
-                for section in text_copy.sections.iter() {
-                    str = format!("{}{}", str, section.value.clone());
-                }
-                let current_str = str.clone();
-                let (str, is_del_mode) = if input.just_pressed(KeyCode::Return) {
-                    (format!("{}{}", str, "\n"), false)
-                } else {
-                    get_text_val(str, *deleting, &input, &mut char_evr)
-                };
-                *deleting = is_del_mode;
-                if str != current_str {
-                    text.sections = get_sections(&theme, str.clone()).0;
-                }
-                if blink_timer.timer.finished() {
-                    text.sections.last_mut().unwrap().value =
-                        if text.sections.last().unwrap().value == "|" {
-                            " ".to_string()
-                        } else {
-                            "|".to_string()
-                        };
+                if input.any_just_pressed([KeyCode::Escape, KeyCode::Return]) {
+                    commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
+                    cosmic_edit.readonly = true;
+                    if ui_state.doc_to_edit.is_some() {
+                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                            0,
+                            0,
+                            bevy_color_to_cosmic(theme.doc_list_bg),
+                        ));
+                    }
+                    if ui_state.tab_to_edit.is_some() {
+                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                            0,
+                            0,
+                            bevy_color_to_cosmic(theme.add_tab_bg),
+                        ));
+                    }
+                    cosmic_edit.editor.buffer_mut().set_redraw(true);
+                    *ui_state = UiState::default();
                 }
                 if let Some(doc_id) = ui_state.doc_to_edit {
                     let doc = app_state.docs.get_mut(&doc_id).unwrap();
-                    doc.name = str.clone();
+                    doc.name = get_cosmic_text(cosmic_edit.editor.buffer())
                 }
                 if let Some(tab_id) = ui_state.tab_to_edit {
                     if let Some(doc_id) = app_state.current_document {
                         let doc = app_state.docs.get_mut(&doc_id).unwrap();
                         if let Some(tab) = doc.tabs.iter_mut().find(|x| x.id == tab_id) {
-                            tab.name = str.clone();
+                            tab.name = get_cosmic_text(cosmic_edit.editor.buffer())
                         }
                     }
                 }
-            } else {
-                text.sections.last_mut().unwrap().value = " ".to_string();
             }
         }
     }
-}
-
-fn get_text_val(
-    mut str: String,
-    mut deleting: bool,
-    input: &Res<Input<KeyCode>>,
-    char_evr: &mut EventReader<ReceivedCharacter>,
-) -> (String, bool) {
-    if input.just_pressed(KeyCode::Back) {
-        deleting = true;
-        str.pop();
-    } else if input.just_released(KeyCode::Back) {
-        deleting = false;
-    } else {
-        for ev in char_evr.iter() {
-            if deleting {
-                str.pop();
-            } else {
-                str = format!("{}{}", str, ev.char);
-            }
-        }
-    }
-    (str, deleting)
 }
 
 #[cfg(not(target_arch = "wasm32"))]

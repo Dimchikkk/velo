@@ -8,7 +8,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{CosmicEdit, CosmicFont};
 use bevy_pkv::PkvStore;
 use bevy_prototype_lyon::prelude::Fill;
-use cosmic_text::Edit;
+use cosmic_text::{Cursor, Edit};
 use serde::Serialize;
 use serde_json::{json, Value};
 use uuid::Uuid;
@@ -24,7 +24,7 @@ use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, EffectsCamera, Tab};
 use crate::resources::{AppState, FontSystemState, LoadDocRequest, SaveDocRequest};
-use crate::utils::{get_timestamp, load_doc_to_memory, ReflectableUuid};
+use crate::utils::{bevy_color_to_cosmic, get_timestamp, load_doc_to_memory, ReflectableUuid};
 
 pub fn rec_button_handlers(
     mut commands: Commands,
@@ -351,13 +351,14 @@ pub fn new_doc_handler(
 pub fn rename_doc_handler(
     mut commands: Commands,
     mut rename_doc_query: Query<
-        (&Interaction, &DocListItemButton),
+        (&Interaction, &DocListItemButton, Entity, &mut CosmicEdit),
         (Changed<Interaction>, With<DocListItemButton>),
     >,
     mut ui_state: ResMut<UiState>,
     mut double_click: Local<(Duration, Option<ReflectableUuid>)>,
+    theme: Res<Theme>,
 ) {
-    for (interaction, item) in &mut rename_doc_query.iter_mut() {
+    for (interaction, item, entity, mut cosmic_edit) in &mut rename_doc_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
                 let now_ms = get_timestamp();
@@ -366,7 +367,15 @@ pub fn rename_doc_handler(
                         < Duration::from_millis(500)
                 {
                     *ui_state = UiState::default();
-                    commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
+                    commands.insert_resource(bevy_cosmic_edit::ActiveEditor {
+                        entity: Some(entity),
+                    });
+                    cosmic_edit.readonly = false;
+                    cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                        0,
+                        0,
+                        bevy_color_to_cosmic(theme.font),
+                    ));
                     ui_state.doc_to_edit = Some(item.id);
                     *double_click = (Duration::from_secs(0), None);
                 } else {
