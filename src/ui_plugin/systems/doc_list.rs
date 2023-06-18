@@ -1,10 +1,12 @@
 use bevy::{
     input::mouse::{MouseScrollUnit, MouseWheel},
     prelude::*,
+    window::PrimaryWindow,
 };
+use bevy_cosmic_edit::CosmicFont;
 
 use super::ui_helpers::ScrollingList;
-use crate::{themes::Theme, ui_plugin::ui_helpers::DocListItemButton};
+use crate::{resources::FontSystemState, themes::Theme, ui_plugin::ui_helpers::DocListItemButton};
 
 use crate::resources::{AppState, LoadDocRequest, SaveDocRequest};
 
@@ -97,7 +99,12 @@ pub fn doc_list_ui_changed(
     mut query_container: Query<Entity, With<DocListItemContainer>>,
     mut event_writer: EventWriter<UpdateDeleteDocBtn>,
     theme: Res<Theme>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
+    font_system_state: ResMut<FontSystemState>,
+    windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
+    let primary_window = windows.single();
+    let scale_factor = primary_window.scale_factor() as f32;
     if app_state.is_changed() && app_state.doc_list_ui != *last_doc_list {
         // Think about re-using UI elements instead of destroying and re-creating them
         for entity in query_container.iter_mut() {
@@ -115,8 +122,16 @@ pub fn doc_list_ui_changed(
         // Sort the tuples alphabetically based on doc_name
         doc_tuples.sort_by(|(name1, _), (name2, _)| name1.cmp(name2));
         for (doc_name, doc_id) in doc_tuples {
-            let doc_list_item =
-                add_list_item(&mut commands, &theme, &asset_server, doc_id, doc_name);
+            let doc_list_item = add_list_item(
+                &mut commands,
+                &mut cosmic_fonts,
+                font_system_state.0.clone().unwrap(),
+                &theme,
+                &asset_server,
+                doc_id,
+                doc_name,
+                scale_factor,
+            );
             commands.entity(doc_list).add_child(doc_list_item);
         }
         event_writer.send(UpdateDeleteDocBtn);
