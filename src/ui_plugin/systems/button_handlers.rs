@@ -244,6 +244,7 @@ pub fn change_color_pallete(
                 for (mut stroke, velo_border) in velo_border.iter_mut() {
                     if Some(velo_border.id) == ui_state.entity_to_edit {
                         stroke.color = color;
+                        break;
                     }
                 }
             }

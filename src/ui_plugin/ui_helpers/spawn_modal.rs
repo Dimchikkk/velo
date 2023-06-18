@@ -170,9 +170,9 @@ pub fn spawn_modal(
                 })
                 .id();
             let width = 180.;
-            let height = 35.;
+            let height = 30.;
             let button = commands
-                .spawn((ButtonBundle {
+                .spawn((NodeBundle {
                     border_color: theme.btn_border.into(),
                     style: Style {
                         justify_content: JustifyContent::Start,
@@ -180,11 +180,6 @@ pub fn spawn_modal(
                         border: UiRect::all(Val::Px(1.)),
                         width: Val::Px(width),
                         height: Val::Px(height),
-                        padding: UiRect {
-                            top: Val::Px(7.),
-                            left: Val::Px(7.),
-                            ..default()
-                        },
                         ..default()
                     },
                     ..default()
@@ -197,7 +192,7 @@ pub fn spawn_modal(
                 text: CosmicText::OneStyle(default_value),
                 attrs: AttrsOwned::new(attrs),
                 font_system_handle: cosmic_font_handle,
-                text_pos: TextPos::TopLeft.into(),
+                text_pos: TextPos::Center.into(),
                 size: Some((width, height)),
                 metrics: CosmicMetrics {
                     font_size: theme.font_size,
