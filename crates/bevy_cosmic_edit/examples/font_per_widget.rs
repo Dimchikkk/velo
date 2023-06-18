@@ -289,7 +289,10 @@ fn change_active_editor(
             commands.insert_resource(ActiveEditor {
                 entity: Some(entity),
             });
-            info!("Widget text: {}", get_cosmic_text(&cosmic_edit.editor));
+            info!(
+                "Widget text: {}",
+                get_cosmic_text(&cosmic_edit.editor.buffer())
+            );
         }
     }
 }

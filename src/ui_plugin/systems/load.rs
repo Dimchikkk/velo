@@ -50,7 +50,12 @@ pub fn load_doc(
     mut tabs_query: Query<Entity, With<TabContainer>>,
     mut delete_doc: Query<(&mut Visibility, &DeleteDoc), With<DeleteDoc>>,
     theme: Res<Theme>,
+    mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
+    font_system_state: ResMut<FontSystemState>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
+    let primary_window = windows.single();
+    let scale_factor = primary_window.scale_factor() as f32;
     let bottom_panel = bottom_panel.single_mut();
     let doc_id = request.doc_id;
     for (mut visibility, doc) in delete_doc.iter_mut() {
@@ -69,11 +74,14 @@ pub fn load_doc(
     for tab in app_state.docs.get_mut(&doc_id).unwrap().tabs.iter() {
         let tab_view: Entity = add_tab(
             &mut commands,
+            &mut cosmic_fonts,
+            font_system_state.0.clone().unwrap(),
             &theme,
             &asset_server,
             tab.name.clone(),
             tab.id,
             tab.is_active,
+            scale_factor,
         );
         tabs.push(tab_view);
         if tab.is_active {
@@ -105,7 +113,8 @@ pub fn load_tab(
 ) {
     *ui_state = UiState::default();
     commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
-    let window = windows.single_mut();
+    let primary_window = windows.single_mut();
+    let scale_factor = primary_window.scale_factor() as f32;
 
     for entity in &mut old_arrows.iter_mut() {
         commands.entity(entity).despawn_recursive();
@@ -167,7 +176,7 @@ pub fn load_tab(
                     &theme,
                     &mut cosmic_fonts,
                     font_system_state.0.clone().unwrap(),
-                    window.scale_factor() as f32,
+                    scale_factor,
                     NodeMeta {
                         size: (json_node.width, json_node.height),
                         node_type: json_node.node_type,
