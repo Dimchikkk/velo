@@ -117,7 +117,7 @@ pub fn add_menu_button(
                             position_type: PositionType::Absolute,
                             left: Val::Px(1.),
                             right: Val::Auto,
-                            top: Val::Px(-3.),
+                            top: Val::Px(-2.),
                             bottom: Val::Auto,
                             ..default()
                         },
