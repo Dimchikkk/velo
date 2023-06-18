@@ -17,14 +17,18 @@ use crate::themes::Theme;
 use crate::{AddRect, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
-    spawn_modal, ButtonAction, ChangeColor, DeleteDoc, DocListItemButton, GenericButton, NewDoc,
-    ParticlesEffect, RawText, SaveDoc, TextPosMode, Tooltip, VeloBorder, VeloNode, VeloShadow,
+    spawn_modal, ButtonAction, ChangeColor, ChangeTheme, DeleteDoc, DocListItemButton,
+    GenericButton, NewDoc, ParticlesEffect, RawText, SaveDoc, TextPosMode, Tooltip, VeloBorder,
+    VeloNode, VeloShadow,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
 use crate::components::{Doc, EffectsCamera, Tab};
 use crate::resources::{AppState, FontSystemState, LoadDocRequest, SaveDocRequest};
-use crate::utils::{bevy_color_to_cosmic, get_timestamp, load_doc_to_memory, ReflectableUuid};
+use crate::utils::{
+    bevy_color_to_cosmic, get_timestamp, load_doc_to_memory, ReflectableUuid, UserPreferences,
+    DARK_THEME_ICON_CODE, LIGHT_THEME_ICON_CODE,
+};
 
 pub fn rec_button_handlers(
     mut commands: Commands,
@@ -785,6 +789,61 @@ pub fn particles_effect(
                         })
                         .insert(Name::new("effect:2d"))
                         .insert(RenderLayers::layer(2));
+                }
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+pub fn change_theme(
+    mut pkv: ResMut<PkvStore>,
+    mut change_theme_button: Query<&Interaction, (Changed<Interaction>, With<ChangeTheme>)>,
+    mut change_theme_label: Query<&mut Text, (With<ChangeTheme>, Without<Tooltip>)>,
+    mut tooltip_label: Query<&mut Text, (With<Tooltip>, Without<ChangeTheme>)>,
+) {
+    for interaction in &mut change_theme_button.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                for mut text in &mut change_theme_label.iter_mut() {
+                    let icon_code = text.sections[0].value.clone();
+                    if icon_code == DARK_THEME_ICON_CODE {
+                        for mut tooltip in &mut tooltip_label.iter_mut() {
+                            if tooltip.sections[0].value
+                                == "Enable dark theme (restart is required for now)"
+                            {
+                                tooltip.sections[0].value =
+                                    "Enable light theme (restart is required for now)".to_string();
+                                break;
+                            }
+                        }
+                        text.sections[0].value = LIGHT_THEME_ICON_CODE.to_string();
+                        let _ = pkv.set(
+                            "user_preferences",
+                            &UserPreferences {
+                                theme_name: Some("dark".to_string()),
+                            },
+                        );
+                    }
+                    if icon_code == LIGHT_THEME_ICON_CODE {
+                        for mut tooltip in &mut tooltip_label.iter_mut() {
+                            if tooltip.sections[0].value
+                                == "Enable light theme (restart is required for now)"
+                            {
+                                tooltip.sections[0].value =
+                                    "Enable dark theme (restart is required for now)".to_string();
+                                break;
+                            }
+                        }
+                        text.sections[0].value = DARK_THEME_ICON_CODE.to_string();
+                        let _ = pkv.set(
+                            "user_preferences",
+                            &UserPreferences {
+                                theme_name: Some("light".to_string()),
+                            },
+                        );
+                    }
                 }
             }
             Interaction::Hovered => {}

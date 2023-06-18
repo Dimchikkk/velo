@@ -112,3 +112,18 @@ pub fn bevy_color_to_cosmic(color: bevy::prelude::Color) -> cosmic_text::Color {
         (color.a() * 255.) as u8,
     )
 }
+
+pub fn get_theme_key(pkv: &PkvStore) -> String {
+    if let Ok(user_preferences) = pkv.get::<UserPreferences>("user_preferences") {
+        if let Some(theme_name) = user_preferences.theme_name {
+            theme_name
+        } else {
+            "light".to_string()
+        }
+    } else {
+        "light".to_string()
+    }
+}
+
+pub static DARK_THEME_ICON_CODE: &str = "\u{e51c}";
+pub static LIGHT_THEME_ICON_CODE: &str = "\u{e518}";
