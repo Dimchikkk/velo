@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Velo</title>
+
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        canvas {
+            display: block;
+        }
+        #forkongithub a{
+            background:#DEA584;
+            color:#fff;
+            text-decoration:none;
+            font-family:arial,sans-serif;
+            text-align:center;
+            font-weight:bold;
+            padding:5px 40px;
+            font-size:1rem;
+            line-height:2rem;
+            position:relative;
+            transition:0.5s;
+        }
+        #forkongithub a:hover{
+            background:#c11;
+            color:#fff;
+        }
+        #forkongithub a::before,#forkongithub a::after{
+            content:"";
+            width:100%;
+            display:block;
+            position:absolute;
+            top:1px;
+            left:0;
+            height:1px;
+            background:#fff;
+        }
+        #forkongithub a::after{
+            bottom:1px;
+            top:auto;
+        }
+        @media screen and (min-width:100px){
+            #forkongithub{
+                position:fixed;
+                display:block;
+                top:0;
+                right:0;
+                width:200px;
+                overflow:hidden;
+                height:200px;
+                z-index:9999;
+            }
+            #forkongithub a{
+                width:200px;
+                position:absolute;
+                top:60px;
+                right:-60px;
+                transform:rotate(45deg);
+                -webkit-transform:rotate(45deg);
+                -ms-transform:rotate(45deg);
+                -moz-transform:rotate(45deg);
+                -o-transform:rotate(45deg);
+                box-shadow:4px 4px 10px rgba(0,0,0,0.8);
+            }
+        }
+
+        #forkongithub {
+            display: none;
+        }
+        #spinner-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            animation: spinner-rotate 1s linear infinite;
+        }
+
+        @keyframes spinner-rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="spinner-container"><div class="spinner"></div></div>
+    <span id="forkongithub"><a href="https://github.com/StaffEngineer/velo">⭐ me on GitHub</a></span>
+    <script type="module">
+        import init from "./velo.js";
+        (async () => {
+            try {
+                await init()
+            } finally {
+                const spinnerContainer = document.getElementById("spinner-container");
+                spinnerContainer.remove();
+                const forkOnGithub = document.getElementById("forkongithub");
+                forkOnGithub.style.display = "inline-block";
+            }
+        })();
+    </script>
+</body>
+
+</html>
