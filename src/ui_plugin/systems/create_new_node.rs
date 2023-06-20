@@ -11,7 +11,7 @@ use super::{ui_helpers::spawn_sprite_node, AddRect, NodeMeta, UiState};
 
 pub fn create_new_node(
     mut commands: Commands,
-    mut events: EventReader<AddRect>,
+    mut events: EventReader<AddRect<(String, Color)>>,
     mut ui_state: ResMut<UiState>,
     app_state: Res<AppState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
@@ -48,7 +48,7 @@ pub fn create_new_node(
                 node_type: event.node.node_type.clone(),
                 image: event.image.clone(),
                 text: event.node.text.text.clone(),
-                bg_color: event.node.bg_color,
+                pair_bg_color: event.node.bg_color.clone(),
                 position: (event.node.x, event.node.y, *z_index_local),
                 text_pos: event.node.text.pos.clone(),
                 is_active: true,
