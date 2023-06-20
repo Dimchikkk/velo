@@ -47,7 +47,12 @@ pub fn entity_to_edit_changed(
                     // cosmic-edit editing mode
                     if raw_text.id == entity_to_edit {
                         cosmic_edit.readonly = false;
-                        cosmic_edit.editor.set_cursor(Cursor::default());
+                        let current_cursor = cosmic_edit.editor.cursor();
+                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                            current_cursor.line,
+                            current_cursor.index,
+                            bevy_color_to_cosmic(theme.font),
+                        ));
                         let text = raw_text.last_text.clone();
                         let font = cosmic_fonts
                             .get_mut(&cosmic_edit.font_system.clone())
@@ -66,10 +71,12 @@ pub fn entity_to_edit_changed(
                     // cosmic-edit readonly mode
                     if Some(raw_text.id) == *last_entity_to_edit {
                         cosmic_edit.readonly = true;
+                        let cursor_color = cosmic_edit.bg;
+                        let current_cursor = cosmic_edit.editor.cursor();
                         cosmic_edit.editor.set_cursor(Cursor::new_with_color(
-                            0,
-                            0,
-                            bevy_color_to_cosmic(theme.node_bg),
+                            current_cursor.line,
+                            current_cursor.index,
+                            bevy_color_to_cosmic(cursor_color),
                         ));
                         let text = get_cosmic_text(cosmic_edit.editor.buffer());
                         raw_text.last_text = text.clone();
@@ -116,10 +123,12 @@ pub fn entity_to_edit_changed(
                     // cosmic-edit readonly mode
                     if Some(raw_text.id) == *last_entity_to_edit {
                         cosmic_edit.readonly = true;
+                        let cursor_color = cosmic_edit.bg;
+                        let current_cursor = cosmic_edit.editor.cursor();
                         cosmic_edit.editor.set_cursor(Cursor::new_with_color(
-                            0,
-                            0,
-                            bevy_color_to_cosmic(theme.node_bg),
+                            current_cursor.line,
+                            current_cursor.index,
+                            bevy_color_to_cosmic(cursor_color),
                         ));
                         let text = get_cosmic_text(cosmic_edit.editor.buffer());
                         raw_text.last_text = text.clone();

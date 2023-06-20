@@ -70,17 +70,18 @@ pub fn keyboard_input_system(
                 if input.any_just_pressed([KeyCode::Escape, KeyCode::Return]) {
                     commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                     cosmic_edit.readonly = true;
+                    let current_cursor = cosmic_edit.editor.cursor();
                     if ui_state.doc_to_edit.is_some() {
                         cosmic_edit.editor.set_cursor(Cursor::new_with_color(
-                            0,
-                            0,
+                            current_cursor.line,
+                            current_cursor.index,
                             bevy_color_to_cosmic(theme.doc_list_bg),
                         ));
                     }
                     if ui_state.tab_to_edit.is_some() {
                         cosmic_edit.editor.set_cursor(Cursor::new_with_color(
-                            0,
-                            0,
+                            current_cursor.line,
+                            current_cursor.index,
                             bevy_color_to_cosmic(theme.add_tab_bg),
                         ));
                     }
