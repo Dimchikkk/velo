@@ -59,6 +59,10 @@ enjoyable project to work on.
 - ligature/emoji rendering support [emoji native target only 🖥️]
 - dark/light theme support (app restart is required for now)
 
+## Installation
+
+[Archives of precompiled binaries for *velo* are available for Windows, macOS
+and Linux.](https://github.com/StaffEngineer/velo/releases/latest)
 ## Run
 
 Native:
