@@ -89,7 +89,7 @@ pub struct CosmicEditPlugin;
 impl Plugin for CosmicEditPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            PreUpdate,
+            Update,
             (
                 cosmic_edit_bevy_events,
                 cosmic_edit_set_redraw,
