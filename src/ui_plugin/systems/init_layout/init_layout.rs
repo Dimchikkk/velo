@@ -1,3 +1,4 @@
+#![allow(clippy::duplicate_mod)]
 use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
@@ -15,6 +16,10 @@ use crate::resources::{AppState, FontSystemState};
 use crate::themes::Theme;
 use crate::utils::get_theme_key;
 use crate::TextPos;
+
+#[path = "../../../macros.rs"]
+#[macro_use]
+mod macros;
 
 #[path = "add_arrow.rs"]
 mod add_arrow;
@@ -428,31 +433,11 @@ pub fn init_layout(
             ..default()
         },))
         .id();
-    let color1 = add_color(
-        &mut commands,
-        &theme,
-        Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0),
-    );
-    let color2 = add_color(
-        &mut commands,
-        &theme,
-        Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
-    );
-    let color3 = add_color(
-        &mut commands,
-        &theme,
-        Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
-    );
-    let color4 = add_color(
-        &mut commands,
-        &theme,
-        Color::rgb(239., 68.0 / 255.0, 68.0 / 255.0),
-    );
-    let color5 = add_color(
-        &mut commands,
-        &theme,
-        Color::rgb(34.0 / 255.0, 197.0 / 255.0, 94.0 / 255.0),
-    );
+    let color1 = add_color(&mut commands, &theme, pair_struct!(theme.color_change_1));
+    let color2 = add_color(&mut commands, &theme, pair_struct!(theme.color_change_2));
+    let color3 = add_color(&mut commands, &theme, pair_struct!(theme.color_change_3));
+    let color4 = add_color(&mut commands, &theme, pair_struct!(theme.color_change_4));
+    let color5 = add_color(&mut commands, &theme, pair_struct!(theme.color_change_5));
 
     commands.entity(color_picker).add_child(color1);
     commands.entity(color_picker).add_child(color2);
