@@ -706,15 +706,11 @@ pub fn spawn_cosmic_edit(
         );
     }
     let cursor_position = get_last_position(&editor);
-    editor.set_cursor(Cursor::new(cursor_position.0, cursor_position.1));
+    let mut cursor = Cursor::new(cursor_position.0, cursor_position.1);
     if cosmic_edit_meta.readonly {
-        let cursor_position = get_last_position(&editor);
-        editor.set_cursor(Cursor::new_with_color(
-            cursor_position.0,
-            cursor_position.1,
-            bevy_color_to_cosmic(cosmic_edit_meta.bg),
-        ))
+        cursor.color = Some(bevy_color_to_cosmic(cosmic_edit_meta.bg));
     }
+    editor.set_cursor(cursor);
     let mut cosmic_edit_component = CosmicEdit {
         editor,
         font_system: cosmic_edit_meta.font_system_handle,
