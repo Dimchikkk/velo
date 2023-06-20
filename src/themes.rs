@@ -1,7 +1,8 @@
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Resource, Debug)]
+#[derive(Resource, Debug, Serialize, Deserialize)]
 pub struct Theme {
     pub add_tab_bg: Color,
     pub arrow_btn_bg: Color,
