@@ -78,8 +78,8 @@ use active_editor_changed::*;
 pub struct UiPlugin;
 
 #[derive(Event, Default)]
-pub struct AddRect {
-    pub node: JsonNode,
+pub struct AddRect<T> {
+    pub node: JsonNode<T>,
     pub image: Option<Handle<Image>>,
 }
 
@@ -136,7 +136,7 @@ pub struct JsonNodeText {
 }
 
 #[derive(Serialize, Deserialize, Default)]
-pub struct JsonNode {
+pub struct JsonNode<T> {
     pub id: Uuid,
     pub node_type: NodeType,
     pub x: f32,
@@ -145,7 +145,7 @@ pub struct JsonNode {
     pub width: f32,
     pub height: f32,
     pub text: JsonNodeText,
-    pub bg_color: Color,
+    pub bg_color: T,
 }
 
 pub const MAX_CHECKPOINTS: i32 = 7;
@@ -169,7 +169,7 @@ impl Plugin for UiPlugin {
         app.init_resource::<UiState>();
         app.init_resource::<AppState>();
 
-        app.add_event::<AddRect>();
+        app.add_event::<AddRect<(String, Color)>>();
         app.add_event::<CreateArrow>();
         app.add_event::<RedrawArrow>();
         app.add_event::<SaveStore>();

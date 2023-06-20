@@ -22,7 +22,7 @@ use crate::utils::ReflectableUuid;
 use crate::{JsonNode, UiState};
 use bevy_pkv::PkvStore;
 use image::{load_from_memory_with_format, ImageFormat};
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 pub fn should_load_doc(request: Option<Res<LoadDocRequest>>) -> bool {
     request.is_some()
@@ -110,8 +110,14 @@ pub fn load_tab(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut shaders: ResMut<Assets<Shader>>,
     theme: Res<Theme>,
+    mut local_theme: Local<Option<Map<String, Value>>>,
 ) {
     *ui_state = UiState::default();
+    let value = serde_json::to_value(&*theme).unwrap();
+    if local_theme.is_none() || theme.is_changed() {
+        *local_theme = Some(value.as_object().unwrap().clone());
+    }
+
     commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
     let primary_window = windows.single_mut();
     let scale_factor = primary_window.scale_factor() as f32;
@@ -146,7 +152,7 @@ pub fn load_tab(
             let images = json["images"].as_object().unwrap();
             let nodes = json["nodes"].as_array().unwrap();
             for node in nodes.iter() {
-                let json_node: JsonNode = serde_json::from_value(node.clone()).unwrap();
+                let json_node: JsonNode<String> = serde_json::from_value(node.clone()).unwrap();
                 let image: Option<Handle<Image>> = match images.get(&json_node.id.to_string()) {
                     Some(image) => {
                         let image_bytes = general_purpose::STANDARD
@@ -170,6 +176,15 @@ pub fn load_tab(
                     }
                     None => None,
                 };
+                let theme_color = local_theme
+                    .as_ref()
+                    .unwrap()
+                    .get(json_node.bg_color.as_str())
+                    .unwrap();
+                let pair_bg_color = (
+                    json_node.bg_color,
+                    serde_json::from_value(theme_color.clone()).unwrap(),
+                );
                 let _ = spawn_sprite_node(
                     &mut shaders,
                     &mut commands,
@@ -183,7 +198,7 @@ pub fn load_tab(
                         id: ReflectableUuid(json_node.id),
                         image,
                         text: json_node.text.text.clone(),
-                        bg_color: json_node.bg_color,
+                        pair_bg_color,
                         position: (json_node.x, json_node.y, json_node.z),
                         text_pos: json_node.text.pos,
                         is_active: false,
