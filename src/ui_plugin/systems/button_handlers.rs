@@ -1,3 +1,4 @@
+#![allow(clippy::duplicate_mod)]
 use std::collections::HashMap;
 use std::{collections::VecDeque, time::Duration};
 
@@ -30,9 +31,13 @@ use crate::utils::{
     DARK_THEME_ICON_CODE, LIGHT_THEME_ICON_CODE,
 };
 
+#[path = "../../macros.rs"]
+#[macro_use]
+mod macros;
+
 pub fn rec_button_handlers(
     mut commands: Commands,
-    mut events: EventWriter<AddRect>,
+    mut events: EventWriter<AddRect<(String, Color)>>,
     mut interaction_query: Query<
         (&Interaction, &ButtonAction),
         (Changed<Interaction>, With<ButtonAction>),
@@ -40,7 +45,7 @@ pub fn rec_button_handlers(
     mut raw_text_query: Query<(&mut CosmicEdit, &RawText, &Parent), With<RawText>>,
     border_query: Query<&Parent, With<VeloBorder>>,
     mut velo_node_query: Query<(Entity, &VeloNode, &mut Transform), With<VeloNode>>,
-    mut arrows: Query<(Entity, &ArrowMeta, &mut Visibility), (With<ArrowMeta>, Without<Tooltip>)>,
+    mut arrows: Query<(Entity, &ArrowMeta), (With<ArrowMeta>, Without<Tooltip>)>,
     mut state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
     theme: Res<Theme>,
@@ -61,7 +66,7 @@ pub fn rec_button_handlers(
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
                             },
-                            bg_color: theme.node_bg,
+                            bg_color: pair_struct!(theme.node_bg),
                             ..default()
                         },
                         image: None,
@@ -80,7 +85,7 @@ pub fn rec_button_handlers(
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
                             },
-                            bg_color: theme.node_bg,
+                            bg_color: pair_struct!(theme.node_bg),
                             ..default()
                         },
                         image: None,
@@ -99,7 +104,7 @@ pub fn rec_button_handlers(
                                 text: "".to_string(),
                                 pos: crate::TextPos::Center,
                             },
-                            bg_color: theme.paper_node_bg,
+                            bg_color: pair_struct!(theme.paper_node_bg),
                             ..default()
                         },
                         image: None,
@@ -114,8 +119,7 @@ pub fn rec_button_handlers(
                                 commands.entity(entity).despawn_recursive();
                             }
                         }
-                        #[allow(unused)]
-                        for (entity, arrow, mut visibility) in &mut arrows.iter_mut() {
+                        for (entity, arrow) in &mut arrows.iter_mut() {
                             if arrow.start.id == id || arrow.end.id == id {
                                 commands.entity(entity).despawn_recursive();
                             }
@@ -124,7 +128,7 @@ pub fn rec_button_handlers(
                 }
                 super::ui_helpers::ButtonTypes::Front => {
                     let current_document = app_state.current_document.unwrap();
-                    let mut tab = app_state
+                    let tab = app_state
                         .docs
                         .get_mut(&current_document)
                         .unwrap()
@@ -238,16 +242,17 @@ pub fn change_color_pallete(
         (&Interaction, &ChangeColor),
         (Changed<Interaction>, With<ChangeColor>),
     >,
-    mut velo_border: Query<(&mut Fill, &VeloBorder), With<VeloBorder>>,
+    mut velo_border: Query<(&mut Fill, &mut VeloBorder), With<VeloBorder>>,
     ui_state: Res<UiState>,
 ) {
     for (interaction, change_color) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                let color = change_color.color;
-                for (mut stroke, velo_border) in velo_border.iter_mut() {
+                let pair_color = change_color.pair_color.clone();
+                for (mut stroke, mut velo_border) in velo_border.iter_mut() {
                     if Some(velo_border.id) == ui_state.entity_to_edit {
-                        stroke.color = color;
+                        stroke.color = pair_color.1;
+                        velo_border.pair_color = pair_color;
                         break;
                     }
                 }

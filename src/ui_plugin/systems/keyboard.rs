@@ -1,3 +1,4 @@
+#![allow(clippy::duplicate_mod)]
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
@@ -22,12 +23,16 @@ use crate::{
 use super::ui_helpers::EditableText;
 use crate::resources::{AppState, SaveDocRequest};
 
+#[path = "../../macros.rs"]
+#[macro_use]
+mod macros;
+
 pub fn keyboard_input_system(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
-    mut events: EventWriter<AddRect>,
+    mut events: EventWriter<AddRect<(String, Color)>>,
     input: Res<Input<KeyCode>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut editable_text_query: Query<(&EditableText, &mut CosmicEdit), With<EditableText>>,
@@ -108,7 +113,7 @@ pub fn keyboard_input_system(
 #[cfg(not(target_arch = "wasm32"))]
 pub fn insert_from_clipboard(
     images: &mut ResMut<Assets<Image>>,
-    events: &mut EventWriter<AddRect>,
+    events: &mut EventWriter<AddRect<(String, Color)>>,
     scale_factor: f64,
     theme: &Res<Theme>,
 ) {
@@ -148,7 +153,7 @@ pub fn insert_from_clipboard(
                         text: "".to_string(),
                         pos: crate::TextPos::Center,
                     },
-                    bg_color: theme.clipboard_image_bg,
+                    bg_color: pair_struct!(theme.clipboard_image_bg),
                     z: 0.,
                 },
                 image: Some(image),

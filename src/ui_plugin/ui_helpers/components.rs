@@ -95,7 +95,7 @@ pub struct DocListItemButton {
 
 #[derive(Component)]
 pub struct ChangeColor {
-    pub color: Color,
+    pub pair_color: (String, Color),
 }
 
 #[derive(Component)]
@@ -122,6 +122,7 @@ pub struct LeftPanelExplorer;
 pub struct VeloBorder {
     pub id: ReflectableUuid,
     pub node_type: NodeType,
+    pub pair_color: (String, Color),
 }
 
 #[derive(Component, Default, Debug)]

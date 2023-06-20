@@ -1,7 +1,6 @@
-#[macro_export]
-macro_rules! struct_pair {
-    ($obj:expr . $field:ident) => {{
+macro_rules! pair_struct {
+    ($obj:ident . $field:ident) => {{
         let field_val = $obj.$field;
-        (stringify!($field), field_val)
+        (stringify!($field).to_string(), field_val)
     }};
 }

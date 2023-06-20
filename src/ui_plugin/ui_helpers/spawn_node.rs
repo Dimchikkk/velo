@@ -25,7 +25,7 @@ pub struct NodeMeta {
     pub size: (f32, f32),
     pub position: (f32, f32, f32),
     pub text: String,
-    pub bg_color: Color,
+    pub pair_bg_color: (String, Color),
     pub image: Option<Handle<Image>>,
     pub text_pos: TextPos,
     pub is_active: bool,
@@ -108,10 +108,11 @@ pub fn spawn_sprite_node(
                 },
                 1.,
             ),
-            Fill::color(item_meta.bg_color),
+            Fill::color(item_meta.pair_bg_color.1),
             VeloBorder {
                 id: item_meta.id,
                 node_type: item_meta.node_type.clone(),
+                pair_color: item_meta.pair_bg_color,
             },
         ))
         .id();

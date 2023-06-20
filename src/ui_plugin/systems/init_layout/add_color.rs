@@ -4,7 +4,7 @@ use crate::{themes::Theme, ui_plugin::ui_helpers::GenericButton};
 
 use super::ui_helpers::ChangeColor;
 
-pub fn add_color(commands: &mut Commands, theme: &Res<Theme>, color: Color) -> Entity {
+pub fn add_color(commands: &mut Commands, theme: &Res<Theme>, color: (String, Color)) -> Entity {
     let top = commands
         .spawn(NodeBundle {
             style: Style {
@@ -22,7 +22,7 @@ pub fn add_color(commands: &mut Commands, theme: &Res<Theme>, color: Color) -> E
     let button = commands
         .spawn((
             ButtonBundle {
-                background_color: color.into(),
+                background_color: color.1.into(),
                 border_color: BorderColor(theme.btn_border),
                 style: Style {
                     width: Val::Percent(100.),
@@ -39,7 +39,7 @@ pub fn add_color(commands: &mut Commands, theme: &Res<Theme>, color: Color) -> E
                 },
                 ..default()
             },
-            ChangeColor { color },
+            ChangeColor { pair_color: color },
             GenericButton,
         ))
         .id();

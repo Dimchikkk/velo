@@ -3,7 +3,6 @@ use bevy::prelude::*;
 
 use bevy_cosmic_edit::CosmicEdit;
 use bevy_pkv::PkvStore;
-use bevy_prototype_lyon::prelude::Fill;
 use image::*;
 
 use serde_json::json;
@@ -131,7 +130,7 @@ pub fn save_tab(
     request: Res<SaveTabRequest>,
     mut app_state: ResMut<AppState>,
     raw_text_query: Query<(&RawText, &CosmicEdit, &Parent), With<RawText>>,
-    border_query: Query<(&Parent, &VeloBorder, &Fill), With<VeloBorder>>,
+    border_query: Query<(&Parent, &VeloBorder), With<VeloBorder>>,
     velo_node_query: Query<&Transform, With<VeloNode>>,
 ) {
     #[cfg(not(target_arch = "wasm32"))]
@@ -159,9 +158,8 @@ pub fn save_tab(
 
     let json_nodes = json["nodes"].as_array_mut().unwrap();
     for (raw_text, cosmic_edit, parent) in raw_text_query.iter() {
-        let (border_parent, border, fill) = border_query.get(parent.get()).unwrap();
+        let (border_parent, border) = border_query.get(parent.get()).unwrap();
         let top = velo_node_query.get(border_parent.get()).unwrap();
-        let bg_color = fill.color;
         let x = top.translation.x;
         let y = top.translation.y;
         let z = top.translation.z;
@@ -174,7 +172,7 @@ pub fn save_tab(
             z,
             width,
             height,
-            bg_color,
+            bg_color: border.pair_color.0.clone(),
             text: JsonNodeText {
                 text: raw_text.last_text.clone(),
                 pos: cosmic_edit.text_pos.clone().into()
