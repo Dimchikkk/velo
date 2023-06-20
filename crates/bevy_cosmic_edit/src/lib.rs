@@ -322,7 +322,13 @@ pub fn cosmic_edit_bevy_events(
                     cosmic_edit
                         .editor
                         .action(&mut font_system.0, Action::BufferEnd);
-                    cosmic_edit.editor.set_select_opt(Some(Cursor::default()));
+                    let current_cursor = cosmic_edit.editor.cursor();
+                    cosmic_edit.editor.set_select_opt(Some(Cursor {
+                        line: 0,
+                        index: 0,
+                        affinity: current_cursor.affinity,
+                        color: current_cursor.color,
+                    }));
                     // RETURN
                     return;
                 }
@@ -657,6 +663,16 @@ pub fn cosmic_edit_set_text(
     }
 }
 
+fn get_last_position(editor: &Editor) -> (usize, usize) {
+    let layout_runs = editor.buffer().layout_runs();
+    let len = layout_runs.len();
+    if len > 0 {
+        (len - 1, usize::max_value())
+    } else {
+        (0, 0)
+    }
+}
+
 /// Spawns a cosmic edit entity with the provided configuration.
 ///
 /// # Returns
@@ -676,13 +692,12 @@ pub fn spawn_cosmic_edit(
     let metrics = Metrics::new(font_size, line_height).scale(scale_factor);
     let buffer = Buffer::new(&mut font_system.0, metrics);
     let mut editor = Editor::new(buffer);
-    if cosmic_edit_meta.readonly {
-        editor.set_cursor(Cursor::new_with_color(
-            0,
-            0,
-            bevy_color_to_cosmic(cosmic_edit_meta.bg),
-        ))
-    }
+    cosmic_edit_set_text(
+        cosmic_edit_meta.text,
+        cosmic_edit_meta.attrs.clone(),
+        &mut editor,
+        &mut font_system.0,
+    );
     if let Some((width, height)) = cosmic_edit_meta.size {
         editor.buffer_mut().set_size(
             &mut font_system.0,
@@ -690,12 +705,12 @@ pub fn spawn_cosmic_edit(
             height * scale_factor,
         );
     }
-    cosmic_edit_set_text(
-        cosmic_edit_meta.text,
-        cosmic_edit_meta.attrs.clone(),
-        &mut editor,
-        &mut font_system.0,
-    );
+    let cursor_position = get_last_position(&editor);
+    let mut cursor = Cursor::new(cursor_position.0, cursor_position.1);
+    if cosmic_edit_meta.readonly {
+        cursor.color = Some(bevy_color_to_cosmic(cosmic_edit_meta.bg));
+    }
+    editor.set_cursor(cursor);
     let mut cosmic_edit_component = CosmicEdit {
         editor,
         font_system: cosmic_edit_meta.font_system_handle,

@@ -375,9 +375,10 @@ pub fn rename_doc_handler(
                         entity: Some(entity),
                     });
                     cosmic_edit.readonly = false;
+                    let current_cursor = cosmic_edit.editor.cursor();
                     cosmic_edit.editor.set_cursor(Cursor::new_with_color(
-                        0,
-                        0,
+                        current_cursor.line,
+                        current_cursor.index,
                         bevy_color_to_cosmic(theme.font),
                     ));
                     ui_state.doc_to_edit = Some(item.id);
