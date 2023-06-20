@@ -11,7 +11,7 @@ WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
 mode is supported (tested on Chrome):  
 
-  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/4e93d6bf9972224235e47fe0e2e1d32c/raw/25764128f51e66dfbd05a573dc1a2235bb9cd290/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/4e93d6bf9972224235e47fe0e2e1d32c/raw/25764128f51e66dfbd05a573dc1a2235bb9cd290/velo.json)
+  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/315ef72beec8af883464f59ab11b061f/raw/9eb4dbb88d47bd514336963560a6c31d77c7dd66/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/315ef72beec8af883464f59ab11b061f/raw/9eb4dbb88d47bd514336963560a6c31d77c7dd66/velo.json)
 
 ## Inspiration
 
