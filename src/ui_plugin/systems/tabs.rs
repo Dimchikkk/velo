@@ -127,9 +127,10 @@ pub fn rename_tab_handler(
                         entity: Some(entity),
                     });
                     cosmic_edit.readonly = false;
+                    let current_cursor = cosmic_edit.editor.cursor();
                     cosmic_edit.editor.set_cursor(Cursor::new_with_color(
-                        0,
-                        0,
+                        current_cursor.line,
+                        current_cursor.index,
                         bevy_color_to_cosmic(theme.font),
                     ));
                     let current_document = app_state.current_document.unwrap();
