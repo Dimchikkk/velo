@@ -579,17 +579,21 @@ fn cosmic_edit_redraw_buffer_ui(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut images: ResMut<Assets<Image>>,
     mut swash_cache_state: ResMut<SwashCacheState>,
-    mut cosmic_edit_query: Query<(&mut CosmicEdit, &mut UiImage, &Node), With<CosmicEdit>>,
+    mut cosmic_edit_query: Query<
+        (&mut CosmicEdit, &mut UiImage, &Node, &mut Visibility),
+        With<CosmicEdit>,
+    >,
     mut font_system_assets: ResMut<Assets<CosmicFont>>,
 ) {
     let primary_window = windows.single();
-    for (mut cosmic_edit, mut img, node) in &mut cosmic_edit_query.iter_mut() {
+    for (mut cosmic_edit, mut img, node, mut visibility) in &mut cosmic_edit_query.iter_mut() {
         if node.size().x != 0. && node.size().y != 0. {
             cosmic_edit.width = node.size().x;
             cosmic_edit.height = node.size().y;
         }
         let width = cosmic_edit.width;
         let height = cosmic_edit.height;
+
         redraw_buffer_common(
             &mut images,
             &mut swash_cache_state,
@@ -600,6 +604,12 @@ fn cosmic_edit_redraw_buffer_ui(
             width,
             height,
         );
+
+        if *visibility == Visibility::Hidden
+            && img.texture.clone() != bevy::render::texture::DEFAULT_IMAGE_HANDLE.typed()
+        {
+            *visibility = Visibility::Visible;
+        }
     }
 }
 
@@ -607,11 +617,14 @@ fn cosmic_edit_redraw_buffer(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut images: ResMut<Assets<Image>>,
     mut swash_cache_state: ResMut<SwashCacheState>,
-    mut cosmic_edit_query: Query<(&mut CosmicEdit, &mut Handle<Image>), With<CosmicEdit>>,
+    mut cosmic_edit_query: Query<
+        (&mut CosmicEdit, &mut Handle<Image>, &mut Visibility),
+        With<CosmicEdit>,
+    >,
     mut font_system_assets: ResMut<Assets<CosmicFont>>,
 ) {
     let primary_window = windows.single();
-    for (mut cosmic_edit, mut handle) in &mut cosmic_edit_query.iter_mut() {
+    for (mut cosmic_edit, mut handle, mut visibility) in &mut cosmic_edit_query.iter_mut() {
         let width = cosmic_edit.width;
         let height = cosmic_edit.height;
         redraw_buffer_common(
@@ -624,6 +637,12 @@ fn cosmic_edit_redraw_buffer(
             width,
             height,
         );
+
+        if *visibility == Visibility::Hidden
+            && handle.clone() != bevy::render::texture::DEFAULT_IMAGE_HANDLE.typed()
+        {
+            *visibility = Visibility::Visible;
+        }
     }
 }
 
@@ -734,6 +753,7 @@ pub fn spawn_cosmic_edit(
                 ..default()
             };
             let button_bundle = ButtonBundle {
+                visibility: Visibility::Hidden,
                 focus_policy: bevy::ui::FocusPolicy::Pass,
                 style,
                 ..default()
@@ -742,6 +762,7 @@ pub fn spawn_cosmic_edit(
         }
         CosmicNode::Sprite(sprite_node) => {
             let sprite = SpriteBundle {
+                visibility: Visibility::Hidden,
                 sprite: Sprite {
                     custom_size: Some(Vec2::new(
                         cosmic_edit_component.width,
