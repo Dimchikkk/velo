@@ -150,7 +150,7 @@ jobs:
 
         mkdir -p "$staging"
 
-        cp {README.md,LICENSE-APACHE,LICENSE-MIT} "$staging/"
+        cp {Readme.md,LICENSE-APACHE,LICENSE-MIT} "$staging/"
 
         if [ "${{ matrix.os }}" = "windows-2019" ]; then
           cp "target/${{ matrix.target }}/release/velo.exe" "$staging/"
