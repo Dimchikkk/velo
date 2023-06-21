@@ -214,7 +214,7 @@ impl Plugin for UiPlugin {
         );
 
         app.add_systems(
-            PreUpdate,
+            Update,
             (load_doc, remove_load_doc_request)
                 .chain()
                 .distributive_run_if(should_load_doc),
