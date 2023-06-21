@@ -664,7 +664,7 @@ dependencies = [
 [[package]]
 name = "bevy_pkv"
 version = "0.7.0"
-source = "git+https://github.com/StaffEngineer/bevy_pkv?rev=4cf14a5#4cf14a57327bf198746eebe08d70ed9029383d7e"
+source = "git+https://github.com/StaffEngineer/bevy_pkv?rev=bf79a1a#bf79a1aece2f260b01b2cffb93cfcc4169b03614"
 dependencies = [
  "bevy_ecs",
  "cfg_aliases",
