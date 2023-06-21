@@ -89,17 +89,16 @@ pub struct CosmicEditPlugin;
 impl Plugin for CosmicEditPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            PostUpdate,
+            Update,
             (
                 cosmic_edit_bevy_events,
                 cosmic_edit_set_redraw,
                 on_scale_factor_change,
                 cosmic_edit_redraw_buffer_ui
-                    .after(cosmic_edit_set_redraw)
+                    .before(cosmic_edit_set_redraw)
                     .before(on_scale_factor_change),
                 cosmic_edit_redraw_buffer.before(on_scale_factor_change),
-            )
-                .after(bevy::ui::UiSystem::Layout),
+            ),
         )
         .init_resource::<ActiveEditor>()
         .add_asset::<CosmicFont>()
