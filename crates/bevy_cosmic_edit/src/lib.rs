@@ -1,9 +1,4 @@
-use std::{
-    cmp::{max, min},
-    collections::VecDeque,
-    path::PathBuf,
-    time::Duration,
-};
+use std::{collections::VecDeque, path::PathBuf, time::Duration};
 #[path = "utils.rs"]
 pub mod utils;
 pub use utils::*;
@@ -71,9 +66,15 @@ pub enum CosmicTextPos {
     TopLeft,
 }
 
+#[derive(Clone)]
+pub struct EditHistoryItem {
+    cursor: Cursor,
+    lines: Vec<Vec<(String, AttrsOwned)>>,
+}
+
 #[derive(Component)]
 pub struct CosmicEditHistory {
-    edits: VecDeque<Vec<Vec<(String, AttrsOwned)>>>,
+    edits: VecDeque<EditHistoryItem>,
     current_edit: usize,
 }
 
@@ -245,25 +246,60 @@ pub fn get_cosmic_text(buffer: &Buffer) -> String {
     text
 }
 
-fn get_text_spans(buffer: &Buffer) -> Vec<Vec<(String, AttrsOwned)>> {
+fn get_text_spans(buffer: &Buffer, default_attrs: AttrsOwned) -> Vec<Vec<(String, AttrsOwned)>> {
     let mut spans = Vec::new();
     for line in buffer.lines.iter() {
         let mut line_spans = Vec::new();
         let line_text = line.text();
-        eprintln!("line_text: {:?}", line_text);
         let line_attrs = line.attrs_list();
-        for span in line_attrs.spans() {
-            let span_range = span.0;
-            eprintln!("span_range: {:?}", span_range);
-            let span_attrs = span.1.clone();
-            eprintln!("span_attrs: {:?}", span_attrs);
-            let span_text = line_text[span_range.clone()].to_string();
-            eprintln!("span_text: {:?}", span_text);
-            line_spans.push((span_text, span_attrs));
+        if line_attrs.spans().is_empty() {
+            line_spans.push((line_text.to_string(), default_attrs.clone()));
+        } else {
+            let mut current_pos = 0;
+            for span in line_attrs.spans() {
+                let span_range = span.0;
+                let span_attrs = span.1.clone();
+                let start_index = span_range.start;
+                let end_index = span_range.end;
+                if start_index > current_pos {
+                    // Add the text between the current position and the start of the span
+                    let non_span_text = line_text[current_pos..start_index].to_string();
+                    line_spans.push((non_span_text, default_attrs.clone()));
+                }
+                let span_text = line_text[start_index..end_index].to_string();
+                line_spans.push((span_text.clone(), span_attrs));
+                current_pos = end_index;
+            }
+            if current_pos < line_text.len() {
+                // Add the remaining text after the last span
+                let remaining_text = line_text[current_pos..].to_string();
+                line_spans.push((remaining_text, default_attrs.clone()));
+            }
         }
         spans.push(line_spans);
     }
     spans
+}
+
+fn save_edit_history(cosmic_edit: &mut CosmicEdit, edit_history: &mut CosmicEditHistory) {
+    let edits = &edit_history.edits;
+    let current_lines = get_text_spans(&cosmic_edit.editor.buffer(), cosmic_edit.attrs.clone());
+    let current_edit = edit_history.current_edit;
+    let mut new_edits = VecDeque::new();
+    new_edits.extend(edits.iter().take((current_edit + 1) as usize).cloned());
+    // remove old edits
+    if new_edits.len() > 1000 {
+        new_edits.drain(0..100);
+    }
+    new_edits.push_back(EditHistoryItem {
+        cursor: cosmic_edit.editor.cursor(),
+        lines: current_lines,
+    });
+    let len = new_edits.len() as i16;
+    *edit_history = CosmicEditHistory {
+        edits: new_edits,
+        current_edit: len as usize - 1,
+    };
 }
 
 fn bevy_color_to_cosmic(color: bevy::prelude::Color) -> cosmic_text::Color {
@@ -383,14 +419,14 @@ pub fn cosmic_edit_bevy_events(
                 // redo
                 if command && shift && keys.just_pressed(KeyCode::Z) {
                     let edits = &edit_history.edits;
-                    if edits.is_empty() {
+                    if edit_history.current_edit == edits.len() - 1 {
                         // RETURN
                         return;
                     }
-                    let idx = min(edit_history.current_edit + 1, edits.len() - 1);
+                    let idx = edit_history.current_edit as usize + 1;
                     if let Some(current_edit) = edits.get(idx) {
                         cosmic_edit.editor.buffer_mut().lines.clear();
-                        for line in current_edit {
+                        for line in current_edit.lines.iter() {
                             let mut line_text = String::new();
                             let mut attrs_list = AttrsList::new(cosmic_edit.attrs.as_attrs());
                             for (text, attrs) in line.iter() {
@@ -405,6 +441,8 @@ pub fn cosmic_edit_bevy_events(
                                 Shaping::Advanced,
                             ));
                         }
+                        cosmic_edit.editor.set_cursor(current_edit.cursor);
+                        cosmic_edit.editor.buffer_mut().set_redraw(true);
                         edit_history.current_edit += 1;
                     }
                     return;
@@ -412,18 +450,14 @@ pub fn cosmic_edit_bevy_events(
                 // undo
                 if command && keys.just_pressed(KeyCode::Z) {
                     let edits = &edit_history.edits;
-                    if edits.is_empty() {
+                    if edit_history.current_edit == 1 {
                         // RETURN
                         return;
                     }
-                    if edit_history.current_edit == 0 {
-                        // RETURN
-                        return;
-                    }
-                    let idx = edit_history.current_edit - 1;
+                    let idx = edit_history.current_edit as usize - 1;
                     if let Some(current_edit) = edits.get(idx) {
                         cosmic_edit.editor.buffer_mut().lines.clear();
-                        for line in current_edit {
+                        for line in current_edit.lines.iter() {
                             let mut line_text = String::new();
                             let mut attrs_list = AttrsList::new(cosmic_edit.attrs.as_attrs());
                             for (text, attrs) in line.iter() {
@@ -438,12 +472,15 @@ pub fn cosmic_edit_bevy_events(
                                 Shaping::Advanced,
                             ));
                         }
+                        cosmic_edit.editor.set_cursor(current_edit.cursor);
+                        cosmic_edit.editor.buffer_mut().set_redraw(true);
                         edit_history.current_edit -= 1;
                     }
 
                     // RETURN
                     return;
                 }
+                let mut is_clipboard = false;
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     if let Ok(mut clipboard) = arboard::Clipboard::new() {
@@ -451,16 +488,14 @@ pub fn cosmic_edit_bevy_events(
                             if let Some(text) = cosmic_edit.editor.copy_selection() {
                                 clipboard.set_text(text).unwrap();
                             }
-                            // RETURN
-                            return;
+                            is_clipboard = true;
                         }
                         if !cosmic_edit.readonly && command && keys.just_pressed(KeyCode::X) {
                             if let Some(text) = cosmic_edit.editor.copy_selection() {
                                 clipboard.set_text(text).unwrap();
                                 cosmic_edit.editor.delete_selection();
                             }
-                            // RETURN
-                            return;
+                            is_clipboard = true;
                         }
                         if !cosmic_edit.readonly && command && keys.just_pressed(KeyCode::V) {
                             if let Ok(text) = clipboard.get_text() {
@@ -470,8 +505,7 @@ pub fn cosmic_edit_bevy_events(
                                         .action(&mut font_system.0, Action::Insert(c));
                                 }
                             }
-                            // RETURN
-                            return;
+                            is_clipboard = true;
                         }
                     }
                 }
@@ -545,17 +579,19 @@ pub fn cosmic_edit_bevy_events(
                     return;
                 }
 
-                let mut is_edit = false;
-                for char_ev in char_evr.iter() {
-                    is_edit = true;
-                    if *is_deleting {
-                        cosmic_edit
-                            .editor
-                            .action(&mut font_system.0, Action::Backspace);
-                    } else {
-                        cosmic_edit
-                            .editor
-                            .action(&mut font_system.0, Action::Insert(char_ev.char));
+                let mut is_edit = is_clipboard;
+                if !is_clipboard {
+                    for char_ev in char_evr.iter() {
+                        is_edit = true;
+                        if *is_deleting {
+                            cosmic_edit
+                                .editor
+                                .action(&mut font_system.0, Action::Backspace);
+                        } else {
+                            cosmic_edit
+                                .editor
+                                .action(&mut font_system.0, Action::Insert(char_ev.char));
+                        }
                     }
                 }
 
@@ -575,34 +611,13 @@ pub fn cosmic_edit_bevy_events(
                 let now_ms = get_timestamp();
                 if let Some(last_edit_duration) = *edits_duration {
                     if Duration::from_millis(now_ms as u64) - last_edit_duration
-                        > Duration::from_secs(1)
+                        > Duration::from_millis(300)
                     {
+                        save_edit_history(&mut cosmic_edit, &mut edit_history);
                         *edits_duration = Some(Duration::from_millis(now_ms as u64));
-
-                        let edits = &edit_history.edits;
-                        let current_spans = get_text_spans(&cosmic_edit.editor.buffer());
-
-                        // if current_text the same as last edit - do not push
-                        if let Some(last_edit) = edits.back() {
-                            if last_edit == &current_spans {
-                                // RETURN
-                                return;
-                            }
-                        }
-                        let current_edit = edit_history.current_edit;
-                        let mut new_edits = VecDeque::new();
-                        new_edits.extend(edits.iter().take(current_edit).cloned());
-                        // remove old edits
-                        if new_edits.len() > 1000 {
-                            new_edits.drain(0..100);
-                        }
-                        new_edits.push_back(current_spans);
-                        *edit_history = CosmicEditHistory {
-                            edits: new_edits,
-                            current_edit: current_edit + 1,
-                        };
                     }
                 } else {
+                    save_edit_history(&mut cosmic_edit, &mut edit_history);
                     *edits_duration = Some(Duration::from_millis(now_ms as u64));
                 }
             }
@@ -831,16 +846,6 @@ pub fn cosmic_edit_set_text(
     }
 }
 
-fn get_last_position(editor: &Editor) -> (usize, usize) {
-    let layout_runs = editor.buffer().layout_runs();
-    let len = layout_runs.len();
-    if len > 0 {
-        (len - 1, usize::max_value())
-    } else {
-        (0, 0)
-    }
-}
-
 /// Spawns a cosmic edit entity with the provided configuration.
 ///
 /// # Returns
@@ -873,12 +878,21 @@ pub fn spawn_cosmic_edit(
             height * scale_factor,
         );
     }
-    let cursor_position = get_last_position(&editor);
-    let mut cursor = Cursor::new(cursor_position.0, cursor_position.1);
+    let mut cursor = editor.cursor();
     if cosmic_edit_meta.readonly {
         cursor.color = Some(bevy_color_to_cosmic(cosmic_edit_meta.bg));
     }
     editor.set_cursor(cursor);
+
+    let mut edits = VecDeque::new();
+    edits.push_back(EditHistoryItem {
+        cursor,
+        lines: get_text_spans(&editor.buffer(), cosmic_edit_meta.attrs.clone()),
+    });
+    let edit_history = CosmicEditHistory {
+        edits,
+        current_edit: 0,
+    };
     let mut cosmic_edit_component = CosmicEdit {
         editor,
         font_system: cosmic_edit_meta.font_system_handle,
@@ -892,10 +906,6 @@ pub fn spawn_cosmic_edit(
         readonly: cosmic_edit_meta.readonly,
         attrs: cosmic_edit_meta.attrs.clone(),
         bg_image: cosmic_edit_meta.bg_image,
-    };
-    let edits_component = CosmicEditHistory {
-        edits: VecDeque::new(),
-        current_edit: 0,
     };
     match cosmic_edit_meta.node {
         CosmicNode::Ui => {
@@ -912,7 +922,7 @@ pub fn spawn_cosmic_edit(
                 ..default()
             };
             commands
-                .spawn((button_bundle, cosmic_edit_component, edits_component))
+                .spawn((button_bundle, cosmic_edit_component, edit_history))
                 .id()
         }
         CosmicNode::Sprite(sprite_node) => {
@@ -929,7 +939,7 @@ pub fn spawn_cosmic_edit(
                 ..default()
             };
             commands
-                .spawn((sprite, cosmic_edit_component, edits_component))
+                .spawn((sprite, cosmic_edit_component, edit_history))
                 .id()
         }
     }
