@@ -1,4 +1,7 @@
-use std::path::PathBuf;
+use std::{collections::VecDeque, path::PathBuf, time::Duration};
+#[path = "utils.rs"]
+pub mod utils;
+pub use utils::*;
 
 use bevy::{
     asset::HandleId,
@@ -61,6 +64,12 @@ pub struct CosmicEditMeta {
 pub enum CosmicTextPos {
     Center,
     TopLeft,
+}
+
+#[derive(Component)]
+pub struct CosmicEditHistory {
+    edits: VecDeque<Vec<BufferLine>>,
+    current_edit: usize,
 }
 
 #[derive(Component)]
@@ -265,17 +274,29 @@ pub fn cosmic_edit_bevy_events(
     keys: Res<Input<KeyCode>>,
     mut char_evr: EventReader<ReceivedCharacter>,
     buttons: Res<Input<MouseButton>>,
-    mut cosmic_edit_query: Query<(&mut CosmicEdit, &GlobalTransform, Entity), With<CosmicEdit>>,
+    mut cosmic_edit_query: Query<
+        (
+            &mut CosmicEdit,
+            &mut CosmicEditHistory,
+            &GlobalTransform,
+            Entity,
+        ),
+        With<CosmicEdit>,
+    >,
     mut is_deleting: Local<bool>,
     mut font_system_assets: ResMut<Assets<CosmicFont>>,
     mut scroll_evr: EventReader<MouseWheel>,
+    mut edits_duration: Local<Option<Duration>>,
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor() as f32;
-    for (mut cosmic_edit, node_transform, entity) in &mut cosmic_edit_query.iter_mut() {
+    for (mut cosmic_edit, mut edit_history, node_transform, entity) in
+        &mut cosmic_edit_query.iter_mut()
+    {
         if active_editor.entity == Some(entity) {
             if let Some(font_system) = font_system_assets.get_mut(&cosmic_edit.font_system) {
                 let command = keys.any_pressed([KeyCode::SuperLeft, KeyCode::SuperRight]);
+                let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
                 let option = keys.any_pressed([KeyCode::AltLeft, KeyCode::AltRight]);
                 if keys.just_pressed(KeyCode::Left) {
                     cosmic_edit.editor.action(&mut font_system.0, Action::Left);
@@ -290,11 +311,6 @@ pub fn cosmic_edit_bevy_events(
                     cosmic_edit.editor.action(&mut font_system.0, Action::Down);
                 }
                 if !cosmic_edit.readonly && keys.just_pressed(KeyCode::Back) {
-                    // there is ReceivedCharacter event for backspace on wasm
-                    #[cfg(target_arch = "wasm32")]
-                    cosmic_edit
-                        .editor
-                        .action(&mut font_system.0, Action::Backspace);
                     *is_deleting = true;
                 }
                 if !cosmic_edit.readonly && keys.just_released(KeyCode::Back) {
@@ -304,14 +320,6 @@ pub fn cosmic_edit_bevy_events(
                     cosmic_edit
                         .editor
                         .action(&mut font_system.0, Action::Delete);
-                }
-                if !cosmic_edit.readonly && keys.just_pressed(KeyCode::Return) {
-                    // to have new line on wasm rather than E
-                    cosmic_edit
-                        .editor
-                        .action(&mut font_system.0, Action::Insert('\n'));
-                    // RETURN
-                    return;
                 }
                 if keys.just_pressed(KeyCode::Escape) {
                     cosmic_edit
@@ -343,6 +351,16 @@ pub fn cosmic_edit_bevy_events(
                     cosmic_edit
                         .editor
                         .action(&mut font_system.0, Action::NextWord);
+                    // RETURN
+                    return;
+                }
+                // redo
+                if command && shift && keys.just_pressed(KeyCode::Z) {
+                    // RETURN
+                    return;
+                }
+                // undo
+                if command && keys.just_pressed(KeyCode::Z) {
                     // RETURN
                     return;
                 }
@@ -441,11 +459,15 @@ pub fn cosmic_edit_bevy_events(
                         }
                     }
                 }
+
                 if cosmic_edit.readonly {
                     // RETURN
                     return;
                 }
+
+                let mut is_edit = false;
                 for char_ev in char_evr.iter() {
+                    is_edit = true;
                     if *is_deleting {
                         cosmic_edit
                             .editor
@@ -455,6 +477,53 @@ pub fn cosmic_edit_bevy_events(
                             .editor
                             .action(&mut font_system.0, Action::Insert(char_ev.char));
                     }
+                }
+
+                if keys.just_pressed(KeyCode::Return) {
+                    is_edit = true;
+                    // to have new line on wasm rather than E
+                    cosmic_edit
+                        .editor
+                        .action(&mut font_system.0, Action::Insert('\n'));
+                }
+
+                if !is_edit {
+                    // RETURN
+                    return;
+                }
+
+                let now_ms = get_timestamp();
+                if let Some(last_edit_duration) = *edits_duration {
+                    if Duration::from_millis(now_ms as u64) - last_edit_duration
+                        > Duration::from_secs(1)
+                    {
+                        *edits_duration = Some(Duration::from_millis(now_ms as u64));
+
+                        let edits = &edit_history.edits;
+                        let current_text = get_cosmic_text(&cosmic_edit.editor.buffer());
+
+                        // if current_text the same as last edit - do not push
+                        if let Some(last_edit) = edits.back() {
+                            if last_edit == &current_text {
+                                // RETURN
+                                return;
+                            }
+                        }
+                        let current_edit = edit_history.current_edit;
+                        let mut new_edits = VecDeque::new();
+                        new_edits.extend(edits.iter().take(current_edit).cloned());
+                        // remove old edits
+                        if new_edits.len() > 1000 {
+                            new_edits.drain(0..100);
+                        }
+                        new_edits.push_back(current_text);
+                        *edit_history = CosmicEditHistory {
+                            edits: new_edits,
+                            current_edit: current_edit + 1,
+                        };
+                    }
+                } else {
+                    *edits_duration = Some(Duration::from_millis(now_ms as u64));
                 }
             }
         }
@@ -744,6 +813,10 @@ pub fn spawn_cosmic_edit(
         attrs: cosmic_edit_meta.attrs.clone(),
         bg_image: cosmic_edit_meta.bg_image,
     };
+    let edits_component = CosmicEditHistory {
+        edits: VecDeque::new(),
+        current_edit: 0,
+    };
     match cosmic_edit_meta.node {
         CosmicNode::Ui => {
             cosmic_edit_component.is_ui_node = true;
@@ -758,7 +831,9 @@ pub fn spawn_cosmic_edit(
                 style,
                 ..default()
             };
-            commands.spawn((button_bundle, cosmic_edit_component)).id()
+            commands
+                .spawn((button_bundle, cosmic_edit_component, edits_component))
+                .id()
         }
         CosmicNode::Sprite(sprite_node) => {
             let sprite = SpriteBundle {
@@ -773,7 +848,9 @@ pub fn spawn_cosmic_edit(
                 transform: sprite_node.transform,
                 ..default()
             };
-            commands.spawn((sprite, cosmic_edit_component)).id()
+            commands
+                .spawn((sprite, cosmic_edit_component, edits_component))
+                .id()
         }
     }
 }
