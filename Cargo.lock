@@ -415,6 +415,7 @@ dependencies = [
  "cosmic-text",
  "image",
  "insta",
+ "js-sys",
  "sys-locale",
 ]
 

@@ -1,4 +1,9 @@
-use std::{collections::VecDeque, path::PathBuf, time::Duration};
+use std::{
+    cmp::{max, min},
+    collections::VecDeque,
+    path::PathBuf,
+    time::Duration,
+};
 #[path = "utils.rs"]
 pub mod utils;
 pub use utils::*;
@@ -68,7 +73,7 @@ pub enum CosmicTextPos {
 
 #[derive(Component)]
 pub struct CosmicEditHistory {
-    edits: VecDeque<Vec<BufferLine>>,
+    edits: VecDeque<Vec<Vec<(String, AttrsOwned)>>>,
     current_edit: usize,
 }
 
@@ -240,6 +245,27 @@ pub fn get_cosmic_text(buffer: &Buffer) -> String {
     text
 }
 
+fn get_text_spans(buffer: &Buffer) -> Vec<Vec<(String, AttrsOwned)>> {
+    let mut spans = Vec::new();
+    for line in buffer.lines.iter() {
+        let mut line_spans = Vec::new();
+        let line_text = line.text();
+        eprintln!("line_text: {:?}", line_text);
+        let line_attrs = line.attrs_list();
+        for span in line_attrs.spans() {
+            let span_range = span.0;
+            eprintln!("span_range: {:?}", span_range);
+            let span_attrs = span.1.clone();
+            eprintln!("span_attrs: {:?}", span_attrs);
+            let span_text = line_text[span_range.clone()].to_string();
+            eprintln!("span_text: {:?}", span_text);
+            line_spans.push((span_text, span_attrs));
+        }
+        spans.push(line_spans);
+    }
+    spans
+}
+
 fn bevy_color_to_cosmic(color: bevy::prelude::Color) -> cosmic_text::Color {
     cosmic_text::Color::rgba(
         (color.r() * 255.) as u8,
@@ -356,11 +382,65 @@ pub fn cosmic_edit_bevy_events(
                 }
                 // redo
                 if command && shift && keys.just_pressed(KeyCode::Z) {
-                    // RETURN
+                    let edits = &edit_history.edits;
+                    if edits.is_empty() {
+                        // RETURN
+                        return;
+                    }
+                    let idx = min(edit_history.current_edit + 1, edits.len() - 1);
+                    if let Some(current_edit) = edits.get(idx) {
+                        cosmic_edit.editor.buffer_mut().lines.clear();
+                        for line in current_edit {
+                            let mut line_text = String::new();
+                            let mut attrs_list = AttrsList::new(cosmic_edit.attrs.as_attrs());
+                            for (text, attrs) in line.iter() {
+                                let start = line_text.len();
+                                line_text.push_str(text);
+                                let end = line_text.len();
+                                attrs_list.add_span(start..end, attrs.as_attrs());
+                            }
+                            cosmic_edit.editor.buffer_mut().lines.push(BufferLine::new(
+                                line_text,
+                                attrs_list,
+                                Shaping::Advanced,
+                            ));
+                        }
+                        edit_history.current_edit += 1;
+                    }
                     return;
                 }
                 // undo
                 if command && keys.just_pressed(KeyCode::Z) {
+                    let edits = &edit_history.edits;
+                    if edits.is_empty() {
+                        // RETURN
+                        return;
+                    }
+                    if edit_history.current_edit == 0 {
+                        // RETURN
+                        return;
+                    }
+                    let idx = edit_history.current_edit - 1;
+                    if let Some(current_edit) = edits.get(idx) {
+                        cosmic_edit.editor.buffer_mut().lines.clear();
+                        for line in current_edit {
+                            let mut line_text = String::new();
+                            let mut attrs_list = AttrsList::new(cosmic_edit.attrs.as_attrs());
+                            for (text, attrs) in line.iter() {
+                                let start = line_text.len();
+                                line_text.push_str(text);
+                                let end = line_text.len();
+                                attrs_list.add_span(start..end, attrs.as_attrs());
+                            }
+                            cosmic_edit.editor.buffer_mut().lines.push(BufferLine::new(
+                                line_text,
+                                attrs_list,
+                                Shaping::Advanced,
+                            ));
+                        }
+                        edit_history.current_edit -= 1;
+                    }
+
                     // RETURN
                     return;
                 }
@@ -500,11 +580,11 @@ pub fn cosmic_edit_bevy_events(
                         *edits_duration = Some(Duration::from_millis(now_ms as u64));
 
                         let edits = &edit_history.edits;
-                        let current_text = get_cosmic_text(&cosmic_edit.editor.buffer());
+                        let current_spans = get_text_spans(&cosmic_edit.editor.buffer());
 
                         // if current_text the same as last edit - do not push
                         if let Some(last_edit) = edits.back() {
-                            if last_edit == &current_text {
+                            if last_edit == &current_spans {
                                 // RETURN
                                 return;
                             }
@@ -516,7 +596,7 @@ pub fn cosmic_edit_bevy_events(
                         if new_edits.len() > 1000 {
                             new_edits.drain(0..100);
                         }
-                        new_edits.push_back(current_text);
+                        new_edits.push_back(current_spans);
                         *edit_history = CosmicEditHistory {
                             edits: new_edits,
                             current_edit: current_edit + 1,
