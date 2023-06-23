@@ -74,6 +74,7 @@ cargo r --release
 Wasm:
 
 ```sh
+cargo install wasm-server-runner
 cargo r --release --target wasm32-unknown-unknown
 ```
 
