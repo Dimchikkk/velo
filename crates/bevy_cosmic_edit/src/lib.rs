@@ -283,7 +283,7 @@ fn get_text_spans(buffer: &Buffer, default_attrs: AttrsOwned) -> Vec<Vec<(String
 
 fn save_edit_history(cosmic_edit: &mut CosmicEdit, edit_history: &mut CosmicEditHistory) {
     let edits = &edit_history.edits;
-    let current_lines = get_text_spans(&cosmic_edit.editor.buffer(), cosmic_edit.attrs.clone());
+    let current_lines = get_text_spans(cosmic_edit.editor.buffer(), cosmic_edit.attrs.clone());
     let current_edit = edit_history.current_edit;
     let mut new_edits = VecDeque::new();
     new_edits.extend(edits.iter().take(current_edit + 1).cloned());
@@ -901,7 +901,7 @@ pub fn spawn_cosmic_edit(
     if !cosmic_edit_meta.readonly {
         edits.push_back(EditHistoryItem {
             cursor,
-            lines: get_text_spans(&editor.buffer(), cosmic_edit_meta.attrs.clone()),
+            lines: get_text_spans(editor.buffer(), cosmic_edit_meta.attrs.clone()),
         });
     }
     let edit_history = CosmicEditHistory {
