@@ -286,7 +286,7 @@ fn save_edit_history(cosmic_edit: &mut CosmicEdit, edit_history: &mut CosmicEdit
     let current_lines = get_text_spans(&cosmic_edit.editor.buffer(), cosmic_edit.attrs.clone());
     let current_edit = edit_history.current_edit;
     let mut new_edits = VecDeque::new();
-    new_edits.extend(edits.iter().take((current_edit + 1) as usize).cloned());
+    new_edits.extend(edits.iter().take(current_edit + 1).cloned());
     // remove old edits
     if new_edits.len() > 1000 {
         new_edits.drain(0..100);
@@ -295,10 +295,10 @@ fn save_edit_history(cosmic_edit: &mut CosmicEdit, edit_history: &mut CosmicEdit
         cursor: cosmic_edit.editor.cursor(),
         lines: current_lines,
     });
-    let len = new_edits.len() as i16;
+    let len = new_edits.len();
     *edit_history = CosmicEditHistory {
         edits: new_edits,
-        current_edit: len as usize - 1,
+        current_edit: len - 1,
     };
 }
 
@@ -373,6 +373,10 @@ pub fn cosmic_edit_bevy_events(
                     cosmic_edit.editor.action(&mut font_system.0, Action::Down);
                 }
                 if !cosmic_edit.readonly && keys.just_pressed(KeyCode::Back) {
+                    #[cfg(target_arch = "wasm32")]
+                    cosmic_edit
+                        .editor
+                        .action(&mut font_system.0, Action::Backspace);
                     *is_deleting = true;
                 }
                 if !cosmic_edit.readonly && keys.just_released(KeyCode::Back) {
@@ -427,7 +431,7 @@ pub fn cosmic_edit_bevy_events(
                         // RETURN
                         return;
                     }
-                    let idx = edit_history.current_edit as usize + 1;
+                    let idx = edit_history.current_edit + 1;
                     if let Some(current_edit) = edits.get(idx) {
                         cosmic_edit.editor.buffer_mut().lines.clear();
                         for line in current_edit.lines.iter() {
@@ -462,7 +466,7 @@ pub fn cosmic_edit_bevy_events(
                         // RETURN
                         return;
                     }
-                    let idx = edit_history.current_edit as usize - 1;
+                    let idx = edit_history.current_edit - 1;
                     if let Some(current_edit) = edits.get(idx) {
                         cosmic_edit.editor.buffer_mut().lines.clear();
                         for line in current_edit.lines.iter() {
@@ -496,7 +500,6 @@ pub fn cosmic_edit_bevy_events(
                             if let Some(text) = cosmic_edit.editor.copy_selection() {
                                 clipboard.set_text(text).unwrap();
                             }
-                            is_clipboard = true;
                         }
                         if !cosmic_edit.readonly && command && keys.just_pressed(KeyCode::X) {
                             if let Some(text) = cosmic_edit.editor.copy_selection() {
@@ -588,7 +591,17 @@ pub fn cosmic_edit_bevy_events(
                 }
 
                 let mut is_edit = is_clipboard;
-                if !is_clipboard {
+                let mut is_return = false;
+                if keys.just_pressed(KeyCode::Return) {
+                    is_return = true;
+                    is_edit = true;
+                    // to have new line on wasm rather than E
+                    cosmic_edit
+                        .editor
+                        .action(&mut font_system.0, Action::Insert('\n'));
+                }
+
+                if !(is_clipboard || is_return) {
                     for char_ev in char_evr.iter() {
                         is_edit = true;
                         if *is_deleting {
@@ -601,14 +614,6 @@ pub fn cosmic_edit_bevy_events(
                                 .action(&mut font_system.0, Action::Insert(char_ev.char));
                         }
                     }
-                }
-
-                if keys.just_pressed(KeyCode::Return) {
-                    is_edit = true;
-                    // to have new line on wasm rather than E
-                    cosmic_edit
-                        .editor
-                        .action(&mut font_system.0, Action::Insert('\n'));
                 }
 
                 if !is_edit {
