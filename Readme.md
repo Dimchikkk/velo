@@ -63,6 +63,20 @@ enjoyable project to work on.
 
 [Archives of precompiled binaries for *velo* are available for Windows, macOS
 and Linux.](https://github.com/StaffEngineer/velo/releases/latest)
+
+### Compiling from Source
+
+If you want to compile from source you can use 
+```sh
+cargo install --path .
+```
+
+**ATTENTION**
+If you have set your cargo target directory in `.cargo/config.toml` you must provide the fullpath to the assets directory like this
+```sh
+BEVY_ASSET_PATH=$(realpath assets) cargo install --path .
+```
+
 ## Run
 
 Native:
