@@ -417,8 +417,12 @@ pub fn cosmic_edit_bevy_events(
                     return;
                 }
                 // redo
-                if command && shift && keys.just_pressed(KeyCode::Z) {
+                if !cosmic_edit.readonly && command && shift && keys.just_pressed(KeyCode::Z) {
                     let edits = &edit_history.edits;
+                    if edits.is_empty() {
+                        // RETURN
+                        return;
+                    }
                     if edit_history.current_edit == edits.len() - 1 {
                         // RETURN
                         return;
@@ -448,9 +452,13 @@ pub fn cosmic_edit_bevy_events(
                     return;
                 }
                 // undo
-                if command && keys.just_pressed(KeyCode::Z) {
+                if !cosmic_edit.readonly && command && keys.just_pressed(KeyCode::Z) {
                     let edits = &edit_history.edits;
-                    if edit_history.current_edit == 1 {
+                    if edits.is_empty() {
+                        // RETURN
+                        return;
+                    }
+                    if edit_history.current_edit == 0 {
                         // RETURN
                         return;
                     }
@@ -885,10 +893,12 @@ pub fn spawn_cosmic_edit(
     editor.set_cursor(cursor);
 
     let mut edits = VecDeque::new();
-    edits.push_back(EditHistoryItem {
-        cursor,
-        lines: get_text_spans(&editor.buffer(), cosmic_edit_meta.attrs.clone()),
-    });
+    if !cosmic_edit_meta.readonly {
+        edits.push_back(EditHistoryItem {
+            cursor,
+            lines: get_text_spans(&editor.buffer(), cosmic_edit_meta.attrs.clone()),
+        });
+    }
     let edit_history = CosmicEditHistory {
         edits,
         current_edit: 0,
