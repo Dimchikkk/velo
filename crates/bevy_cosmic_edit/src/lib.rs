@@ -435,14 +435,6 @@ pub fn cosmic_edit_bevy_events(
                             // RETURN
                             return;
                         }
-                        if Duration::from_millis(now_ms as u64)
-                            - undoredo_duration
-                                .unwrap_or(Duration::from_millis(now_ms as u64 - 400))
-                            < Duration::from_millis(400)
-                        {
-                            // RETURN
-                            return;
-                        }
                         let idx = edit_history.current_edit + 1;
                         if let Some(current_edit) = edits.get(idx) {
                             cosmic_edit.editor.buffer_mut().lines.clear();
@@ -477,14 +469,6 @@ pub fn cosmic_edit_bevy_events(
                             return;
                         }
                         if edit_history.current_edit == 0 {
-                            // RETURN
-                            return;
-                        }
-                        if Duration::from_millis(now_ms as u64)
-                            - undoredo_duration
-                                .unwrap_or(Duration::from_millis(now_ms as u64 - 400))
-                            < Duration::from_millis(400)
-                        {
                             // RETURN
                             return;
                         }
