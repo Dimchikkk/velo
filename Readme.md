@@ -58,6 +58,7 @@ enjoyable project to work on.
 - highlight nodes containing searched text [native target only 🖥️]
 - ligature/emoji rendering support [emoji native target only 🖥️]
 - dark/light theme support (app restart is required for now)
+- infinite grid with zooming (right click to move camera, mouse wheel to zoom)
 
 ## Installation
 

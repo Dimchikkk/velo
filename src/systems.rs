@@ -9,6 +9,7 @@ use bevy::{
     prelude::*,
     render::{camera::ScalingMode, view::RenderLayers},
 };
+use bevy_pancam::PanCam;
 use bevy_pkv::PkvStore;
 
 pub fn setup_velo_theme(mut commands: Commands, pkv: Res<PkvStore>) {
@@ -22,15 +23,24 @@ pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>, 
     if let Some(bg_img) = theme.canvas_bg_img.clone() {
         sprite_bundle.texture = asset_server.load(bg_img);
     }
-    if let Some(bg_color) = theme.canvas_bg_color {
-        sprite_bundle.sprite.color = bg_color;
-    }
     commands.spawn((sprite_bundle, Background, InteractiveNode));
 }
 
-pub fn setup_camera(mut commands: Commands) {
-    let main_camera = Camera2dBundle::default();
-    commands.spawn((main_camera, MainCamera));
+pub fn setup_camera(mut commands: Commands, theme: Res<Theme>) {
+    let mut main_camera = Camera2dBundle::default();
+    if let Some(bg_color) = theme.canvas_bg_color {
+        main_camera.camera_2d.clear_color = ClearColorConfig::Custom(bg_color);
+    } else {
+        main_camera.camera_2d.clear_color = ClearColorConfig::Custom(Color::WHITE.with_a(0.1));
+    }
+    commands.spawn((main_camera, MainCamera)).insert(PanCam {
+        grab_buttons: vec![MouseButton::Right],
+        enabled: true,
+        zoom_to_cursor: false,
+        min_scale: 1.,
+        max_scale: Some(3.),
+        ..default()
+    });
     let mut effects_camera = Camera2dBundle {
         camera: Camera {
             order: 2,
