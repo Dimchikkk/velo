@@ -85,9 +85,11 @@ pub fn keyboard_input_system(
                     let mut current_cursor = cosmic_edit.editor.cursor();
                     if ui_state.doc_to_edit.is_some() {
                         current_cursor.color = Some(bevy_color_to_cosmic(theme.doc_list_bg));
+                        cosmic_edit.editor.set_cursor(current_cursor);
                     }
                     if ui_state.tab_to_edit.is_some() {
                         current_cursor.color = Some(bevy_color_to_cosmic(theme.add_tab_bg));
+                        cosmic_edit.editor.set_cursor(current_cursor);
                     }
                     let mut edits = VecDeque::new();
                     edits.push_back(EditHistoryItem {
