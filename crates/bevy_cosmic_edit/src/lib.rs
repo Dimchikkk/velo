@@ -437,8 +437,8 @@ pub fn cosmic_edit_bevy_events(
                         }
                         if Duration::from_millis(now_ms as u64)
                             - undoredo_duration
-                                .unwrap_or(Duration::from_millis(now_ms as u64 - 200))
-                            < Duration::from_millis(200)
+                                .unwrap_or(Duration::from_millis(now_ms as u64 - 400))
+                            < Duration::from_millis(400)
                         {
                             // RETURN
                             return;
@@ -482,8 +482,8 @@ pub fn cosmic_edit_bevy_events(
                         }
                         if Duration::from_millis(now_ms as u64)
                             - undoredo_duration
-                                .unwrap_or(Duration::from_millis(now_ms as u64 - 200))
-                            < Duration::from_millis(200)
+                                .unwrap_or(Duration::from_millis(now_ms as u64 - 400))
+                            < Duration::from_millis(400)
                         {
                             // RETURN
                             return;
