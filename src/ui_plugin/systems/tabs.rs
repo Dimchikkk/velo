@@ -3,9 +3,7 @@ use std::{collections::VecDeque, time::Duration};
 use bevy::prelude::*;
 
 use bevy::window::PrimaryWindow;
-use bevy_cosmic_edit::{
-    get_text_spans, CosmicEdit, CosmicEditHistory, CosmicFont, EditHistoryItem,
-};
+use bevy_cosmic_edit::{CosmicEdit, CosmicFont};
 use cosmic_text::{Cursor, Edit};
 
 use super::ui_helpers::{spawn_modal, AddTab, DeleteTab, TabButton};
@@ -108,13 +106,7 @@ pub fn add_tab_handler(
 pub fn rename_tab_handler(
     mut commands: Commands,
     mut interaction_query: Query<
-        (
-            &Interaction,
-            &TabButton,
-            Entity,
-            &mut CosmicEdit,
-            &mut CosmicEditHistory,
-        ),
+        (&Interaction, &TabButton, Entity, &mut CosmicEdit),
         (Changed<Interaction>, With<TabButton>),
     >,
     mut ui_state: ResMut<UiState>,
@@ -122,9 +114,7 @@ pub fn rename_tab_handler(
     mut double_click: Local<(Duration, Option<ReflectableUuid>)>,
     theme: Res<Theme>,
 ) {
-    for (interaction, item, entity, mut cosmic_edit, mut cosmic_edit_history) in
-        &mut interaction_query
-    {
+    for (interaction, item, entity, mut cosmic_edit) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
                 let now_ms = get_timestamp();
@@ -144,18 +134,6 @@ pub fn rename_tab_handler(
                         bevy_color_to_cosmic(theme.font),
                     );
                     cosmic_edit.editor.set_cursor(new_cursor);
-                    let mut edits = VecDeque::new();
-                    edits.push_back(EditHistoryItem {
-                        cursor: new_cursor,
-                        lines: get_text_spans(
-                            cosmic_edit.editor.buffer(),
-                            cosmic_edit.attrs.clone(),
-                        ),
-                    });
-                    *cosmic_edit_history = CosmicEditHistory {
-                        edits,
-                        current_edit: 0,
-                    };
                     let current_document = app_state.current_document.unwrap();
                     let tab = app_state
                         .docs
