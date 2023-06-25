@@ -5,12 +5,14 @@ use bevy::{
     window::PrimaryWindow,
 };
 
-use bevy_cosmic_edit::{get_cosmic_text, CosmicEdit};
-use cosmic_text::{Cursor, Edit};
+use bevy_cosmic_edit::{
+    get_cosmic_text, get_text_spans, CosmicEdit, CosmicEditHistory, EditHistoryItem,
+};
+use cosmic_text::Edit;
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
 
-use std::convert::TryInto;
+use std::{collections::VecDeque, convert::TryInto};
 use uuid::Uuid;
 
 use crate::{
@@ -35,7 +37,10 @@ pub fn keyboard_input_system(
     mut events: EventWriter<AddRect<(String, Color)>>,
     input: Res<Input<KeyCode>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut editable_text_query: Query<(&EditableText, &mut CosmicEdit), With<EditableText>>,
+    mut editable_text_query: Query<
+        (&EditableText, &mut CosmicEdit, &mut CosmicEditHistory),
+        With<EditableText>,
+    >,
     theme: Res<Theme>,
 ) {
     let primary_window = windows.single();
@@ -70,26 +75,32 @@ pub fn keyboard_input_system(
             }
         }
     } else {
-        for (editable_text, mut cosmic_edit) in &mut editable_text_query.iter_mut() {
+        for (editable_text, mut cosmic_edit, mut cosmit_edit_history) in
+            &mut editable_text_query.iter_mut()
+        {
             if vec![ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id)) {
                 if input.any_just_pressed([KeyCode::Escape, KeyCode::Return]) {
                     commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                     cosmic_edit.readonly = true;
-                    let current_cursor = cosmic_edit.editor.cursor();
+                    let mut current_cursor = cosmic_edit.editor.cursor();
                     if ui_state.doc_to_edit.is_some() {
-                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
-                            current_cursor.line,
-                            current_cursor.index,
-                            bevy_color_to_cosmic(theme.doc_list_bg),
-                        ));
+                        current_cursor.color = Some(bevy_color_to_cosmic(theme.doc_list_bg));
                     }
                     if ui_state.tab_to_edit.is_some() {
-                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
-                            current_cursor.line,
-                            current_cursor.index,
-                            bevy_color_to_cosmic(theme.add_tab_bg),
-                        ));
+                        current_cursor.color = Some(bevy_color_to_cosmic(theme.add_tab_bg));
                     }
+                    let mut edits = VecDeque::new();
+                    edits.push_back(EditHistoryItem {
+                        cursor: current_cursor,
+                        lines: get_text_spans(
+                            cosmic_edit.editor.buffer(),
+                            cosmic_edit.attrs.clone(),
+                        ),
+                    });
+                    *cosmit_edit_history = CosmicEditHistory {
+                        edits,
+                        current_edit: 0,
+                    };
                     cosmic_edit.editor.buffer_mut().set_redraw(true);
                     *ui_state = UiState::default();
                 }

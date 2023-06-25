@@ -67,18 +67,6 @@ pub fn entity_to_edit_changed(
                             bevy_color_to_cosmic(theme.font),
                         );
                         cosmic_edit.editor.set_cursor(new_cursor);
-                        let mut edits = VecDeque::new();
-                        edits.push_back(EditHistoryItem {
-                            cursor: new_cursor,
-                            lines: get_text_spans(
-                                cosmic_edit.editor.buffer(),
-                                cosmic_edit.attrs.clone(),
-                            ),
-                        });
-                        *cosmic_edit_history = CosmicEditHistory {
-                            edits,
-                            current_edit: 0,
-                        };
                         let text = raw_text.last_text.clone();
                         let font = cosmic_fonts
                             .get_mut(&cosmic_edit.font_system.clone())
@@ -99,11 +87,24 @@ pub fn entity_to_edit_changed(
                         cosmic_edit.readonly = true;
                         let cursor_color = cosmic_edit.bg;
                         let current_cursor = cosmic_edit.editor.cursor();
-                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                        let new_cursor = Cursor::new_with_color(
                             current_cursor.line,
                             current_cursor.index,
                             bevy_color_to_cosmic(cursor_color),
-                        ));
+                        );
+                        cosmic_edit.editor.set_cursor(new_cursor);
+                        let mut edits = VecDeque::new();
+                        edits.push_back(EditHistoryItem {
+                            cursor: new_cursor,
+                            lines: get_text_spans(
+                                cosmic_edit.editor.buffer(),
+                                cosmic_edit.attrs.clone(),
+                            ),
+                        });
+                        *cosmic_edit_history = CosmicEditHistory {
+                            edits,
+                            current_edit: 0,
+                        };
                         let text = get_cosmic_text(cosmic_edit.editor.buffer());
                         raw_text.last_text = text.clone();
                         let markdown_theme = BevyMarkdownTheme {
@@ -145,7 +146,7 @@ pub fn entity_to_edit_changed(
                     };
                     stroke.options.line_width = 1.;
                 }
-                for (entity, mut raw_text, mut cosmic_edit, mut _cosmic_edit_history) in
+                for (entity, mut raw_text, mut cosmic_edit, mut cosmic_edit_history) in
                     raw_text_node_query.iter_mut()
                 {
                     // cosmic-edit readonly mode
@@ -153,11 +154,24 @@ pub fn entity_to_edit_changed(
                         cosmic_edit.readonly = true;
                         let cursor_color = cosmic_edit.bg;
                         let current_cursor = cosmic_edit.editor.cursor();
-                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                        let new_cursor = Cursor::new_with_color(
                             current_cursor.line,
                             current_cursor.index,
                             bevy_color_to_cosmic(cursor_color),
-                        ));
+                        );
+                        cosmic_edit.editor.set_cursor(new_cursor);
+                        let mut edits = VecDeque::new();
+                        edits.push_back(EditHistoryItem {
+                            cursor: new_cursor,
+                            lines: get_text_spans(
+                                cosmic_edit.editor.buffer(),
+                                cosmic_edit.attrs.clone(),
+                            ),
+                        });
+                        *cosmic_edit_history = CosmicEditHistory {
+                            edits,
+                            current_edit: 0,
+                        };
                         let text = get_cosmic_text(cosmic_edit.editor.buffer());
                         raw_text.last_text = text.clone();
                         let markdown_theme = BevyMarkdownTheme {
