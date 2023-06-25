@@ -1,6 +1,9 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 use bevy_cosmic_edit::{
-    cosmic_edit_set_text, get_cosmic_text, ActiveEditor, CosmicEdit, CosmicFont, CosmicText,
+    cosmic_edit_set_text, get_cosmic_text, get_text_spans, ActiveEditor, CosmicEdit,
+    CosmicEditHistory, CosmicFont, CosmicText, EditHistoryItem,
 };
 use bevy_markdown::{generate_markdown_lines, BevyMarkdown, BevyMarkdownTheme};
 use bevy_prototype_lyon::prelude::Stroke;
@@ -20,7 +23,15 @@ pub fn entity_to_edit_changed(
     theme: Res<Theme>,
     mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
     mut velo_border: Query<(&mut Stroke, &VeloBorder), With<VeloBorder>>,
-    mut raw_text_node_query: Query<(Entity, &mut RawText, &mut CosmicEdit), With<RawText>>,
+    mut raw_text_node_query: Query<
+        (
+            Entity,
+            &mut RawText,
+            &mut CosmicEdit,
+            &mut CosmicEditHistory,
+        ),
+        With<RawText>,
+    >,
     mut commands: Commands,
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
 ) {
@@ -43,16 +54,31 @@ pub fn entity_to_edit_changed(
                     }
                 }
 
-                for (entity, mut raw_text, mut cosmic_edit) in raw_text_node_query.iter_mut() {
+                for (entity, mut raw_text, mut cosmic_edit, mut cosmic_edit_history) in
+                    raw_text_node_query.iter_mut()
+                {
                     // cosmic-edit editing mode
                     if raw_text.id == entity_to_edit {
                         cosmic_edit.readonly = false;
                         let current_cursor = cosmic_edit.editor.cursor();
-                        cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                        let new_cursor = Cursor::new_with_color(
                             current_cursor.line,
                             current_cursor.index,
                             bevy_color_to_cosmic(theme.font),
-                        ));
+                        );
+                        cosmic_edit.editor.set_cursor(new_cursor);
+                        let mut edits = VecDeque::new();
+                        edits.push_back(EditHistoryItem {
+                            cursor: new_cursor,
+                            lines: get_text_spans(
+                                cosmic_edit.editor.buffer(),
+                                cosmic_edit.attrs.clone(),
+                            ),
+                        });
+                        *cosmic_edit_history = CosmicEditHistory {
+                            edits,
+                            current_edit: 0,
+                        };
                         let text = raw_text.last_text.clone();
                         let font = cosmic_fonts
                             .get_mut(&cosmic_edit.font_system.clone())
@@ -119,7 +145,9 @@ pub fn entity_to_edit_changed(
                     };
                     stroke.options.line_width = 1.;
                 }
-                for (entity, mut raw_text, mut cosmic_edit) in raw_text_node_query.iter_mut() {
+                for (entity, mut raw_text, mut cosmic_edit, mut _cosmic_edit_history) in
+                    raw_text_node_query.iter_mut()
+                {
                     // cosmic-edit readonly mode
                     if Some(raw_text.id) == *last_entity_to_edit {
                         cosmic_edit.readonly = true;
