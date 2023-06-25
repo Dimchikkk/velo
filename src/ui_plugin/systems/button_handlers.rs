@@ -6,9 +6,7 @@ use bevy::render::view::RenderLayers;
 use bevy::sprite::collide_aabb::collide;
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use bevy_cosmic_edit::{
-    get_text_spans, CosmicEdit, CosmicEditHistory, CosmicFont, EditHistoryItem,
-};
+use bevy_cosmic_edit::{CosmicEdit, CosmicEditHistory, CosmicFont};
 use bevy_pkv::PkvStore;
 use bevy_prototype_lyon::prelude::Fill;
 use cosmic_text::{Cursor, Edit};
@@ -375,7 +373,7 @@ pub fn rename_doc_handler(
     mut double_click: Local<(Duration, Option<ReflectableUuid>)>,
     theme: Res<Theme>,
 ) {
-    for (interaction, item, entity, mut cosmic_edit, mut cosmic_edit_history) in
+    for (interaction, item, entity, mut cosmic_edit, mut _cosmic_edit_history) in
         &mut rename_doc_query.iter_mut()
     {
         match *interaction {
@@ -397,18 +395,6 @@ pub fn rename_doc_handler(
                         bevy_color_to_cosmic(theme.font),
                     );
                     cosmic_edit.editor.set_cursor(new_cursor);
-                    let mut edits = VecDeque::new();
-                    edits.push_back(EditHistoryItem {
-                        cursor: new_cursor,
-                        lines: get_text_spans(
-                            cosmic_edit.editor.buffer(),
-                            cosmic_edit.attrs.clone(),
-                        ),
-                    });
-                    *cosmic_edit_history = CosmicEditHistory {
-                        edits,
-                        current_edit: 0,
-                    };
                     ui_state.doc_to_edit = Some(item.id);
                     *double_click = (Duration::from_secs(0), None);
                 } else {
