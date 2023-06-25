@@ -455,9 +455,7 @@ pub fn cosmic_edit_bevy_events(
                                 Shaping::Advanced,
                             ));
                         }
-                        if idx != 0 {
-                            cosmic_edit.editor.set_cursor(current_edit.cursor);
-                        }
+                        cosmic_edit.editor.set_cursor(current_edit.cursor);
                         cosmic_edit.editor.buffer_mut().set_redraw(true);
                         edit_history.current_edit += 1;
                     }
@@ -472,7 +470,7 @@ pub fn cosmic_edit_bevy_events(
                         // RETURN
                         return;
                     }
-                    if edit_history.current_edit == 0 {
+                    if edit_history.current_edit <= 1 {
                         // RETURN
                         return;
                     }
@@ -494,9 +492,7 @@ pub fn cosmic_edit_bevy_events(
                                 Shaping::Advanced,
                             ));
                         }
-                        if idx != 0 {
-                            cosmic_edit.editor.set_cursor(current_edit.cursor);
-                        }
+                        cosmic_edit.editor.set_cursor(current_edit.cursor);
                         cosmic_edit.editor.buffer_mut().set_redraw(true);
                         edit_history.current_edit -= 1;
                     }
