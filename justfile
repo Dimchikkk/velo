@@ -4,6 +4,7 @@ native:
 
 # Run wasm
 wasm:
+    cargo install wasm-server-runner
     cargo run --release --target wasm32-unknown-unknown
 
 # Create app bundle with icon (tested only on MacOS)

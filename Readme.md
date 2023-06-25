@@ -58,11 +58,26 @@ enjoyable project to work on.
 - highlight nodes containing searched text [native target only 🖥️]
 - ligature/emoji rendering support [emoji native target only 🖥️]
 - dark/light theme support (app restart is required for now)
+- infinite grid with zooming (right click to move camera, mouse wheel to zoom)
 
 ## Installation
 
 [Archives of precompiled binaries for *velo* are available for Windows, macOS
 and Linux.](https://github.com/StaffEngineer/velo/releases/latest)
+
+### Compiling from Source
+
+If you want to compile from source you can use 
+```sh
+cargo install --path .
+```
+
+**ATTENTION**
+If you have set your cargo target directory in `.cargo/config.toml` you must provide the fullpath to the assets directory like this
+```sh
+BEVY_ASSET_PATH=$(realpath assets) cargo install --path .
+```
+
 ## Run
 
 Native:
@@ -74,6 +89,7 @@ cargo r --release
 Wasm:
 
 ```sh
+cargo install wasm-server-runner
 cargo r --release --target wasm32-unknown-unknown
 ```
 
