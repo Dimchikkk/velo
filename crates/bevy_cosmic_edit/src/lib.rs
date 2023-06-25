@@ -68,14 +68,14 @@ pub enum CosmicTextPos {
 
 #[derive(Clone)]
 pub struct EditHistoryItem {
-    cursor: Cursor,
-    lines: Vec<Vec<(String, AttrsOwned)>>,
+    pub cursor: Cursor,
+    pub lines: Vec<Vec<(String, AttrsOwned)>>,
 }
 
 #[derive(Component)]
 pub struct CosmicEditHistory {
-    edits: VecDeque<EditHistoryItem>,
-    current_edit: usize,
+    pub edits: VecDeque<EditHistoryItem>,
+    pub current_edit: usize,
 }
 
 #[derive(Component)]
@@ -246,7 +246,10 @@ pub fn get_cosmic_text(buffer: &Buffer) -> String {
     text
 }
 
-fn get_text_spans(buffer: &Buffer, default_attrs: AttrsOwned) -> Vec<Vec<(String, AttrsOwned)>> {
+pub fn get_text_spans(
+    buffer: &Buffer,
+    default_attrs: AttrsOwned,
+) -> Vec<Vec<(String, AttrsOwned)>> {
     let mut spans = Vec::new();
     for line in buffer.lines.iter() {
         let mut line_spans = Vec::new();
