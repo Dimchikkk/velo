@@ -423,81 +423,79 @@ pub fn cosmic_edit_bevy_events(
                     return;
                 }
 
-                if !cosmic_edit.readonly {
-                    // redo
-                    if command && shift && keys.just_pressed(KeyCode::Z) {
-                        let edits = &edit_history.edits;
-                        if edits.is_empty() {
-                            // RETURN
-                            return;
-                        }
-                        if edit_history.current_edit == edits.len() - 1 {
-                            // RETURN
-                            return;
-                        }
-                        let idx = edit_history.current_edit + 1;
-                        if let Some(current_edit) = edits.get(idx) {
-                            cosmic_edit.editor.buffer_mut().lines.clear();
-                            for line in current_edit.lines.iter() {
-                                let mut line_text = String::new();
-                                let mut attrs_list = AttrsList::new(cosmic_edit.attrs.as_attrs());
-                                for (text, attrs) in line.iter() {
-                                    let start = line_text.len();
-                                    line_text.push_str(text);
-                                    let end = line_text.len();
-                                    attrs_list.add_span(start..end, attrs.as_attrs());
-                                }
-                                cosmic_edit.editor.buffer_mut().lines.push(BufferLine::new(
-                                    line_text,
-                                    attrs_list,
-                                    Shaping::Advanced,
-                                ));
-                            }
-                            cosmic_edit.editor.set_cursor(current_edit.cursor);
-                            cosmic_edit.editor.buffer_mut().set_redraw(true);
-                            edit_history.current_edit += 1;
-                        }
-                        *undoredo_duration = Some(Duration::from_millis(now_ms as u64));
+                // redo
+                if !cosmic_edit.readonly && command && shift && keys.just_pressed(KeyCode::Z) {
+                    let edits = &edit_history.edits;
+                    if edits.is_empty() {
                         // RETURN
                         return;
                     }
-                    // undo
-                    if command && keys.just_pressed(KeyCode::Z) {
-                        let edits = &edit_history.edits;
-                        if edits.is_empty() {
-                            // RETURN
-                            return;
-                        }
-                        if edit_history.current_edit == 0 {
-                            // RETURN
-                            return;
-                        }
-                        let idx = edit_history.current_edit - 1;
-                        if let Some(current_edit) = edits.get(idx) {
-                            cosmic_edit.editor.buffer_mut().lines.clear();
-                            for line in current_edit.lines.iter() {
-                                let mut line_text = String::new();
-                                let mut attrs_list = AttrsList::new(cosmic_edit.attrs.as_attrs());
-                                for (text, attrs) in line.iter() {
-                                    let start = line_text.len();
-                                    line_text.push_str(text);
-                                    let end = line_text.len();
-                                    attrs_list.add_span(start..end, attrs.as_attrs());
-                                }
-                                cosmic_edit.editor.buffer_mut().lines.push(BufferLine::new(
-                                    line_text,
-                                    attrs_list,
-                                    Shaping::Advanced,
-                                ));
-                            }
-                            cosmic_edit.editor.set_cursor(current_edit.cursor);
-                            cosmic_edit.editor.buffer_mut().set_redraw(true);
-                            edit_history.current_edit -= 1;
-                        }
-                        *undoredo_duration = Some(Duration::from_millis(now_ms as u64));
+                    if edit_history.current_edit == edits.len() - 1 {
                         // RETURN
                         return;
                     }
+                    let idx = edit_history.current_edit + 1;
+                    if let Some(current_edit) = edits.get(idx) {
+                        cosmic_edit.editor.buffer_mut().lines.clear();
+                        for line in current_edit.lines.iter() {
+                            let mut line_text = String::new();
+                            let mut attrs_list = AttrsList::new(cosmic_edit.attrs.as_attrs());
+                            for (text, attrs) in line.iter() {
+                                let start = line_text.len();
+                                line_text.push_str(text);
+                                let end = line_text.len();
+                                attrs_list.add_span(start..end, attrs.as_attrs());
+                            }
+                            cosmic_edit.editor.buffer_mut().lines.push(BufferLine::new(
+                                line_text,
+                                attrs_list,
+                                Shaping::Advanced,
+                            ));
+                        }
+                        cosmic_edit.editor.set_cursor(current_edit.cursor);
+                        cosmic_edit.editor.buffer_mut().set_redraw(true);
+                        edit_history.current_edit += 1;
+                    }
+                    *undoredo_duration = Some(Duration::from_millis(now_ms as u64));
+                    // RETURN
+                    return;
+                }
+                // undo
+                if !cosmic_edit.readonly && command && keys.just_pressed(KeyCode::Z) {
+                    let edits = &edit_history.edits;
+                    if edits.is_empty() {
+                        // RETURN
+                        return;
+                    }
+                    if edit_history.current_edit == 0 {
+                        // RETURN
+                        return;
+                    }
+                    let idx = edit_history.current_edit - 1;
+                    if let Some(current_edit) = edits.get(idx) {
+                        cosmic_edit.editor.buffer_mut().lines.clear();
+                        for line in current_edit.lines.iter() {
+                            let mut line_text = String::new();
+                            let mut attrs_list = AttrsList::new(cosmic_edit.attrs.as_attrs());
+                            for (text, attrs) in line.iter() {
+                                let start = line_text.len();
+                                line_text.push_str(text);
+                                let end = line_text.len();
+                                attrs_list.add_span(start..end, attrs.as_attrs());
+                            }
+                            cosmic_edit.editor.buffer_mut().lines.push(BufferLine::new(
+                                line_text,
+                                attrs_list,
+                                Shaping::Advanced,
+                            ));
+                        }
+                        cosmic_edit.editor.set_cursor(current_edit.cursor);
+                        cosmic_edit.editor.buffer_mut().set_redraw(true);
+                        edit_history.current_edit -= 1;
+                    }
+                    *undoredo_duration = Some(Duration::from_millis(now_ms as u64));
+                    // RETURN
+                    return;
                 }
 
                 let mut is_clipboard = false;
