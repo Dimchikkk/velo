@@ -642,6 +642,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_pancam"
+version = "0.8.0"
+source = "git+https://github.com/StaffEngineer/bevy_pancam?rev=3773b9c#3773b9c24b862e45f301f663fde5269f1d146bd4"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "bevy_pbr"
 version = "0.11.0-dev"
 source = "git+https://github.com/bevyengine/bevy?rev=8ec8149#8ec81496ff6f879dabe42f7d445a7d0e3d308a1f"
@@ -4006,6 +4014,7 @@ dependencies = [
  "bevy_embedded_assets",
  "bevy_hanabi",
  "bevy_markdown",
+ "bevy_pancam",
  "bevy_pkv",
  "bevy_prototype_lyon",
  "bevy_smud",
