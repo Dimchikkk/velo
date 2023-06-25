@@ -455,7 +455,9 @@ pub fn cosmic_edit_bevy_events(
                                 Shaping::Advanced,
                             ));
                         }
-                        cosmic_edit.editor.set_cursor(current_edit.cursor);
+                        if idx != 0 {
+                            cosmic_edit.editor.set_cursor(current_edit.cursor);
+                        }
                         cosmic_edit.editor.buffer_mut().set_redraw(true);
                         edit_history.current_edit += 1;
                     }
@@ -492,7 +494,9 @@ pub fn cosmic_edit_bevy_events(
                                 Shaping::Advanced,
                             ));
                         }
-                        cosmic_edit.editor.set_cursor(current_edit.cursor);
+                        if idx != 0 {
+                            cosmic_edit.editor.set_cursor(current_edit.cursor);
+                        }
                         cosmic_edit.editor.buffer_mut().set_redraw(true);
                         edit_history.current_edit -= 1;
                     }
@@ -634,7 +638,7 @@ pub fn cosmic_edit_bevy_events(
 
                 if let Some(last_edit_duration) = *edits_duration {
                     if Duration::from_millis(now_ms as u64) - last_edit_duration
-                        > Duration::from_millis(300)
+                        > Duration::from_millis(150)
                     {
                         save_edit_history(&mut cosmic_edit, &mut edit_history);
                         *edits_duration = Some(Duration::from_millis(now_ms as u64));
