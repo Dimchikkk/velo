@@ -10,6 +10,7 @@ use bevy_cosmic_edit::CosmicEditPlugin;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 #[cfg(not(target_arch = "wasm32"))]
 use bevy_hanabi::HanabiPlugin;
+use bevy_pancam::PanCamPlugin;
 use bevy_pkv::PkvStore;
 use bevy_smud::SmudPlugin;
 use canvas::CanvasPlugin;
@@ -46,6 +47,7 @@ impl Plugin for VeloPlugin {
             .add_plugin(CosmicEditPlugin)
             .add_plugin(CanvasPlugin)
             .add_plugin(UiPlugin)
+            .add_plugin(PanCamPlugin::default())
             .insert_resource(PkvStore::new(ORG_NAME, APP_NAME))
             .init_resource::<FontSystemState>();
 
