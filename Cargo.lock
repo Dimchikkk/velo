@@ -415,6 +415,7 @@ dependencies = [
  "cosmic-text",
  "image",
  "insta",
+ "js-sys",
  "sys-locale",
 ]
 
@@ -672,7 +673,7 @@ dependencies = [
 [[package]]
 name = "bevy_pkv"
 version = "0.7.0"
-source = "git+https://github.com/StaffEngineer/bevy_pkv?rev=bf79a1a#bf79a1aece2f260b01b2cffb93cfcc4169b03614"
+source = "git+https://github.com/StaffEngineer/bevy_pkv?rev=612f991#612f991ef072adc155b488f34c957aa71f3b6c29"
 dependencies = [
  "bevy_ecs",
  "cfg_aliases",
@@ -3034,8 +3035,7 @@ checksum = "a0d463f2884048e7153449a55166f91028d5b0ea53c79377099ce4e8cf0cf9bb"
 [[package]]
 name = "redb"
 version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89ccfb694235b9b5214d32756192abe324083e49363f29bc7c91a69854effe4c"
+source = "git+https://github.com/cberner/redb#3e4b81bbbae4b8c48fd24ec07c4e7a7e012a6895"
 dependencies = [
  "libc",
  "pyo3-build-config",
