@@ -37,7 +37,7 @@ bevy = { git = "https://github.com/bevyengine/bevy", rev = "8ec8149", default-fe
 ] }
 bevy_prototype_lyon = { git = "https://github.com/StaffEngineer/bevy_prototype_lyon", rev = "69b4643" }
 bevy_embedded_assets = { git = "https://github.com/StaffEngineer/bevy_embedded_assets", rev = "d9dac8d" }
-bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "8a94974", default-features = true }
+bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "612f991", default-features = true }
 bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "3a7e902" }
 base64 = "0.21.0"
 serde_json = "1.0.94"
