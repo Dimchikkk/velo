@@ -43,15 +43,15 @@ impl Plugin for VeloPlugin {
                     .build()
                     .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
             )
-            .add_plugin(SmudPlugin)
-            .add_plugin(CosmicEditPlugin)
-            .add_plugin(CanvasPlugin)
-            .add_plugin(UiPlugin)
-            .add_plugin(PanCamPlugin::default())
+            .add_plugins(SmudPlugin)
+            .add_plugins(CosmicEditPlugin)
+            .add_plugins(CanvasPlugin)
+            .add_plugins(UiPlugin)
+            .add_plugins(PanCamPlugin::default())
             .insert_resource(PkvStore::new(ORG_NAME, APP_NAME))
             .init_resource::<FontSystemState>();
 
         #[cfg(not(target_arch = "wasm32"))]
-        app.add_plugin(HanabiPlugin);
+        app.add_plugins(HanabiPlugin);
     }
 }

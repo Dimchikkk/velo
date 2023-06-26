@@ -52,7 +52,7 @@ pub fn get_tooltip(
             },
         }],
         alignment: TextAlignment::Center,
-        linebreak_behavior: BreakLineOn::WordBoundary,
+        linebreak_behavior: BreakLineOn::NoWrap,
     };
     let position = match tooltip_position {
         TooltipPosition::Bottom => UiRect {
