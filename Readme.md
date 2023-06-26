@@ -28,7 +28,7 @@ enjoyable project to work on.
 -   add/remove note
 -   note resizing
 -   note repositioning
--   wrapped text inside nodes
+-   wrapped text inside notes
 -   paste screenshot from clipboard [native target only 🖥️] 
 -   connect notes with arrows
 -   make app snapshot in memory and load from it (MacOs: Command + s\[l\])
@@ -54,8 +54,8 @@ enjoyable project to work on.
   - inline code
   - ordered/unordered lists
 - particles effect [native target only 🖥️]
-- filter documents by text in nodes (fuzzy search) [native target only 🖥️]
-- highlight nodes containing searched text [native target only 🖥️]
+- filter documents by text in notes (fuzzy search) [native target only 🖥️]
+- highlight notes containing searched text [native target only 🖥️]
 - ligature/emoji rendering support [emoji native target only 🖥️]
 - dark/light theme support (app restart is required for now)
 - infinite canvas with zooming (right click to move camera, mouse wheel to zoom)
@@ -114,7 +114,7 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 - double-click to select note
 - start typing to add text to selected note
 - resize note by dragging its corners
-- click on canvas to deselect node
+- click on canvas to deselect note
 - move note by dragging it (only unselected note can be dragged to allow mouse text selection for selected note)
 - click on little arrow connector icon to connect notes, arrow connector icons are placed on each side of note
 - for native target there is search box that allows to filter documents by text in notes (fuzzy search)
