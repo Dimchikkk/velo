@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
-version = "0.6.0"
+version = "0.7.1"
 edition = "2021"
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
@@ -23,7 +23,7 @@ members = [
 ]
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "8ec8149", default-features = false, features = [
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "1e73312", default-features = false, features = [
   "bevy_asset",
   "bevy_core_pipeline",
   "bevy_render",
@@ -35,10 +35,10 @@ bevy = { git = "https://github.com/bevyengine/bevy", rev = "8ec8149", default-fe
   "png",
   "x11",
 ] }
-bevy_prototype_lyon = { git = "https://github.com/StaffEngineer/bevy_prototype_lyon", rev = "69b4643" }
-bevy_embedded_assets = { git = "https://github.com/StaffEngineer/bevy_embedded_assets", rev = "d9dac8d" }
-bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "612f991", default-features = true }
-bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "3a7e902" }
+bevy_prototype_lyon = { git = "https://github.com/StaffEngineer/bevy_prototype_lyon", rev = "7d1c30a" }
+bevy_embedded_assets = { git = "https://github.com/StaffEngineer/bevy_embedded_assets", rev = "9428982" }
+bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "21cca01", default-features = true }
+bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "983472f" }
 base64 = "0.21.0"
 serde_json = "1.0.94"
 uuid = { version = "1.3.0", default-features = false, features = ["v4", "js"] }
@@ -50,10 +50,10 @@ image = { version = "0.24.5", default-features = false, features = ["ico"] }
 cosmic-text = { git = "https://github.com/pop-os/cosmic-text", rev = "79275d1" }
 bevy_markdown = { path = "crates/bevy_markdown" }
 bevy_cosmic_edit = { path = "crates/bevy_cosmic_edit" }
-bevy_pancam = { git = "https://github.com/StaffEngineer/bevy_pancam", rev = "3773b9c" }
+bevy_pancam = { git = "https://github.com/StaffEngineer/bevy_pancam", rev = "7154e90" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "8ec8149", default-features = false, features = [ "webgl2" ] }
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "1e73312", default-features = false, features = [ "webgl2" ] }
 console_error_panic_hook = "0.1.7"
 web-sys = { version = "0.3.61", default-features = false, features = ["Window", "Location"] }
 wasm-bindgen = "0.2.86"
@@ -61,7 +61,7 @@ js-sys = "0.3.61"
 url = "2.3.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-bevy_hanabi = { git = "https://github.com/StaffEngineer/bevy_hanabi", rev = "7d2f8c0", default-features = false, features = [ "2d" ] }
+bevy_hanabi = { git = "https://github.com/StaffEngineer/bevy_hanabi", rev = "c0928e6", default-features = false, features = [ "2d" ] }
 arboard = "3.2.0"
 open = "4.0.1"
 toml = "0.7.3"
