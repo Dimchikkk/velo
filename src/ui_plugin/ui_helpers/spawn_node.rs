@@ -306,13 +306,13 @@ fn spawn_arrow_marker(
         ArrowConnectPos::Top => (0., height / 2.),
         ArrowConnectPos::Right => (width / 2., 0.),
     };
-    let arrow_marker = commands
+    let arrow_marker_container = commands
         .spawn(SpriteBundle {
             sprite: Sprite {
-                color: theme.arrow_connector,
+                color: Color::NONE,
                 custom_size: Some(Vec2::new(
-                    theme.arrow_connector_size,
-                    theme.arrow_connector_size,
+                    6. * theme.arrow_connector_size,
+                    6. * theme.arrow_connector_size,
                 )),
                 ..default()
             },
@@ -323,9 +323,25 @@ fn spawn_arrow_marker(
             ..default()
         })
         .id();
+    let arrow_marker = commands
+        .spawn(SpriteBundle {
+            sprite: Sprite {
+                color: theme.arrow_connector,
+                custom_size: Some(Vec2::new(
+                    theme.arrow_connector_size,
+                    theme.arrow_connector_size,
+                )),
+                ..default()
+            },
+            ..default()
+        })
+        .id();
     commands
-        .entity(arrow_marker)
+        .entity(arrow_marker_container)
+        .add_child(arrow_marker);
+    commands
+        .entity(arrow_marker_container)
         .insert(ArrowConnect { pos, id })
         .insert(InteractiveNode);
-    arrow_marker
+    arrow_marker_container
 }

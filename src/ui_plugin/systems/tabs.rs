@@ -128,11 +128,12 @@ pub fn rename_tab_handler(
                     });
                     cosmic_edit.readonly = false;
                     let current_cursor = cosmic_edit.editor.cursor();
-                    cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                    let new_cursor = Cursor::new_with_color(
                         current_cursor.line,
                         current_cursor.index,
                         bevy_color_to_cosmic(theme.font),
-                    ));
+                    );
+                    cosmic_edit.editor.set_cursor(new_cursor);
                     let current_document = app_state.current_document.unwrap();
                     let tab = app_state
                         .docs

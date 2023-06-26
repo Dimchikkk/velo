@@ -6,7 +6,7 @@ use bevy::render::view::RenderLayers;
 use bevy::sprite::collide_aabb::collide;
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use bevy_cosmic_edit::{CosmicEdit, CosmicFont};
+use bevy_cosmic_edit::{CosmicEdit, CosmicEditHistory, CosmicFont};
 use bevy_pkv::PkvStore;
 use bevy_prototype_lyon::prelude::Fill;
 use cosmic_text::{Cursor, Edit};
@@ -360,14 +360,22 @@ pub fn new_doc_handler(
 pub fn rename_doc_handler(
     mut commands: Commands,
     mut rename_doc_query: Query<
-        (&Interaction, &DocListItemButton, Entity, &mut CosmicEdit),
+        (
+            &Interaction,
+            &DocListItemButton,
+            Entity,
+            &mut CosmicEdit,
+            &mut CosmicEditHistory,
+        ),
         (Changed<Interaction>, With<DocListItemButton>),
     >,
     mut ui_state: ResMut<UiState>,
     mut double_click: Local<(Duration, Option<ReflectableUuid>)>,
     theme: Res<Theme>,
 ) {
-    for (interaction, item, entity, mut cosmic_edit) in &mut rename_doc_query.iter_mut() {
+    for (interaction, item, entity, mut cosmic_edit, mut _cosmic_edit_history) in
+        &mut rename_doc_query.iter_mut()
+    {
         match *interaction {
             Interaction::Clicked => {
                 let now_ms = get_timestamp();
@@ -381,11 +389,12 @@ pub fn rename_doc_handler(
                     });
                     cosmic_edit.readonly = false;
                     let current_cursor = cosmic_edit.editor.cursor();
-                    cosmic_edit.editor.set_cursor(Cursor::new_with_color(
+                    let new_cursor = Cursor::new_with_color(
                         current_cursor.line,
                         current_cursor.index,
                         bevy_color_to_cosmic(theme.font),
-                    ));
+                    );
+                    cosmic_edit.editor.set_cursor(new_cursor);
                     ui_state.doc_to_edit = Some(item.id);
                     *double_click = (Duration::from_secs(0), None);
                 } else {
