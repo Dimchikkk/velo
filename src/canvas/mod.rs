@@ -7,6 +7,6 @@ pub struct CanvasPlugin;
 
 impl Plugin for CanvasPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(ArrowPlugin);
+        app.add_plugins(ArrowPlugin);
     }
 }
