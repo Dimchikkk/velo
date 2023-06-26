@@ -7,5 +7,5 @@ fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     std::env::set_var("RUST_LOG", "warn,velo=info,tantivy=warn,bevy_render=off");
     // bevy_render=off until https://github.com/johanhelsing/bevy_smud/issues/26 is fixed ^^
-    App::new().add_plugin(VeloPlugin).run();
+    App::new().add_plugins(VeloPlugin).run();
 }

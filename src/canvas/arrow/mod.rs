@@ -12,7 +12,7 @@ pub struct ArrowPlugin;
 
 impl Plugin for ArrowPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(ShapePlugin).add_systems(
+        app.add_plugins(ShapePlugin).add_systems(
             PreUpdate, // due to CreateArrow event
             (create_arrow_start, create_arrow_end, redraw_arrows),
         );
