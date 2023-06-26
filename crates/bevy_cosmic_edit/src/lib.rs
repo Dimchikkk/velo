@@ -1059,8 +1059,8 @@ mod tests {
     #[test]
     fn test_spawn_cosmic_edit() {
         let mut app = App::new();
-        app.add_plugin(TaskPoolPlugin::default());
-        app.add_plugin(AssetPlugin::default());
+        app.add_plugins(TaskPoolPlugin::default());
+        app.add_plugins(AssetPlugin::default());
         app.add_systems(Update, test_spawn_cosmic_edit_system);
 
         let input = Input::<KeyCode>::default();
