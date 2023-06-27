@@ -6,7 +6,11 @@ use bevy_cosmic_edit::{
     CosmicEditPlugin, CosmicEditSprite, CosmicFont, CosmicFontConfig, CosmicMetrics, CosmicNode,
     CosmicText, CosmicTextPos,
 };
+use bevy_pancam::{PanCam, PanCamPlugin};
 use cosmic_text::AttrsOwned;
+
+#[derive(Component)]
+pub struct MainCamera;
 
 fn setup(
     mut commands: Commands,
@@ -20,7 +24,14 @@ fn setup(
         },
         ..default()
     };
-    commands.spawn(camera_bundle);
+    commands.spawn((camera_bundle, MainCamera)).insert(PanCam {
+        grab_buttons: vec![MouseButton::Right],
+        enabled: true,
+        zoom_to_cursor: false,
+        min_scale: 1.,
+        max_scale: Some(3.),
+        ..default()
+    });
     let cosmic_font_config = CosmicFontConfig {
         fonts_dir_path: Some(Path::new("assets/fonts").into()),
         font_bytes: None,
@@ -108,24 +119,29 @@ fn change_active_editor(
     windows: Query<&Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
     mut cosmic_edit_query: Query<(&mut CosmicEdit, &GlobalTransform, Entity), With<CosmicEdit>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let window = windows.single();
+    let (camera, camera_transform) = camera_q.single();
     if buttons.just_pressed(MouseButton::Left) {
         for (cosmic_edit, node_transform, entity) in &mut cosmic_edit_query.iter_mut() {
             let size = (cosmic_edit.width, cosmic_edit.height);
             let x_min = node_transform.affine().translation.x - size.0 / 2.;
-            let y_min = -node_transform.affine().translation.y - size.1 / 2.;
+            let y_min = node_transform.affine().translation.y - size.1 / 2.;
             let x_max = node_transform.affine().translation.x + size.0 / 2.;
-            let y_max = -node_transform.affine().translation.y + size.1 / 2.;
+            let y_max = node_transform.affine().translation.y + size.1 / 2.;
             window.cursor_position().and_then(|pos| {
-                Some({
-                    let pos = Vec2::new(pos.x - window.width() / 2., pos.y - window.height() / 2.);
-                    if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
-                        commands.insert_resource(ActiveEditor {
-                            entity: Some(entity),
-                        });
-                    };
-                })
+                if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
+                    Some({
+                        if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
+                            commands.insert_resource(ActiveEditor {
+                                entity: Some(entity),
+                            });
+                        };
+                    })
+                } else {
+                    None
+                }
             });
         }
     }
@@ -134,7 +150,8 @@ fn change_active_editor(
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(CosmicEditPlugin)
+        .add_plugins(CosmicEditPlugin)
+        .add_plugins(PanCamPlugin::default())
         .add_systems(Startup, setup)
         .add_systems(Update, change_active_editor)
         .run();
