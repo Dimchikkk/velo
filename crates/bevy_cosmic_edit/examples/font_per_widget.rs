@@ -300,7 +300,7 @@ fn change_active_editor(
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(CosmicEditPlugin)
+        .add_plugins(CosmicEditPlugin)
         .add_systems(Startup, setup)
         .add_systems(Update, change_active_editor)
         .run();

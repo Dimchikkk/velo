@@ -6,6 +6,7 @@ use bevy_cosmic_edit::{
     CosmicEditSprite, CosmicFont, CosmicFontConfig, CosmicMetrics, CosmicNode, CosmicText,
     CosmicTextPos,
 };
+use bevy_pancam::{PanCam, PanCamPlugin};
 use cosmic_text::AttrsOwned;
 
 fn setup(
@@ -20,7 +21,14 @@ fn setup(
         },
         ..default()
     };
-    commands.spawn(camera_bundle);
+    commands.spawn(camera_bundle).insert(PanCam {
+        grab_buttons: vec![MouseButton::Right],
+        enabled: true,
+        zoom_to_cursor: false,
+        min_scale: 1.,
+        max_scale: Some(3.),
+        ..default()
+    });
     let cosmic_font_config = CosmicFontConfig {
         fonts_dir_path: Some(Path::new("assets/fonts").into()),
         font_bytes: None,
@@ -62,7 +70,8 @@ fn setup(
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(CosmicEditPlugin)
+        .add_plugins(CosmicEditPlugin)
+        .add_plugins(PanCamPlugin::default())
         .add_systems(Startup, setup)
         .run();
 }
