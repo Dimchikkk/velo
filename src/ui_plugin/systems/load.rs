@@ -5,10 +5,13 @@ use bevy::{
     window::PrimaryWindow,
 };
 use bevy_cosmic_edit::CosmicFont;
+use bevy_prototype_lyon::prelude::{PathBuilder, ShapeBundle, Stroke};
 
 use super::{
-    ui_helpers::{add_tab, spawn_sprite_node, BottomPanel, NodeMeta, TabContainer, VeloNode},
-    DeleteDoc, DeleteTab,
+    ui_helpers::{
+        add_tab, spawn_sprite_node, BottomPanel, Drawing, NodeMeta, TabContainer, VeloNode,
+    },
+    DeleteDoc, DeleteTab, DrawingJsonNode,
 };
 use crate::{
     canvas::arrow::components::ArrowMeta,
@@ -98,6 +101,7 @@ pub fn load_doc(
 pub fn load_tab(
     old_nodes: Query<Entity, With<VeloNode>>,
     mut old_arrows: Query<Entity, With<ArrowMeta>>,
+    mut old_drawings: Query<Entity, With<Drawing<(String, Color)>>>,
     request: Res<LoadTabRequest>,
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
@@ -123,6 +127,9 @@ pub fn load_tab(
     let scale_factor = primary_window.scale_factor() as f32;
 
     for entity in &mut old_arrows.iter_mut() {
+        commands.entity(entity).despawn_recursive();
+    }
+    for entity in &mut old_drawings.iter_mut() {
         commands.entity(entity).despawn_recursive();
     }
     for entity in old_nodes.iter() {
@@ -214,6 +221,46 @@ pub fn load_tab(
                     end: arrow_meta.end,
                     arrow_type: arrow_meta.arrow_type,
                 });
+            }
+            let drawings = json["drawings"].as_array_mut().unwrap();
+            for drawing in drawings.iter() {
+                let drawing_json_node: DrawingJsonNode<String> =
+                    serde_json::from_value(drawing.clone()).unwrap();
+                let mut path_builder = PathBuilder::new();
+                let mut points_iter = drawing_json_node.points.iter();
+                let start = points_iter.next().unwrap();
+                path_builder.move_to(*start);
+                path_builder.line_to(*start);
+                for point in points_iter {
+                    path_builder.line_to(*point);
+                }
+                let path = path_builder.build();
+                let theme_color = local_theme
+                    .as_ref()
+                    .unwrap()
+                    .get(drawing_json_node.drawing_color.as_str())
+                    .unwrap();
+                let pair_color = (
+                    drawing_json_node.drawing_color,
+                    serde_json::from_value(theme_color.clone()).unwrap(),
+                );
+                commands.spawn((
+                    ShapeBundle {
+                        path,
+                        transform: Transform::from_xyz(
+                            drawing_json_node.x,
+                            drawing_json_node.y,
+                            drawing_json_node.z,
+                        ),
+                        ..Default::default()
+                    },
+                    Stroke::new(pair_color.1, 2.),
+                    Drawing {
+                        id: drawing_json_node.id,
+                        points: drawing_json_node.points.clone(),
+                        drawing_color: pair_color,
+                    },
+                ));
             }
             break;
         }

@@ -18,9 +18,9 @@ use crate::themes::Theme;
 use crate::{AddRect, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
-    spawn_modal, ButtonAction, ChangeColor, ChangeTheme, DeleteDoc, DocListItemButton,
-    GenericButton, NewDoc, ParticlesEffect, RawText, SaveDoc, TextPosMode, Tooltip, VeloBorder,
-    VeloNode, VeloShadow,
+    spawn_modal, ButtonAction, ChangeColor, ChangeTheme, DeleteDoc, DocListItemButton, DrawPencil,
+    Drawing, GenericButton, NewDoc, ParticlesEffect, RawText, SaveDoc, TextPosMode, Tooltip,
+    VeloBorder, VeloNode, VeloShadow,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
@@ -46,7 +46,8 @@ pub fn rec_button_handlers(
     border_query: Query<&Parent, With<VeloBorder>>,
     mut velo_node_query: Query<(Entity, &VeloNode, &mut Transform), With<VeloNode>>,
     mut arrows: Query<(Entity, &ArrowMeta), (With<ArrowMeta>, Without<Tooltip>)>,
-    mut state: ResMut<UiState>,
+    mut drawings: Query<Entity, With<Drawing<(String, Color)>>>,
+    mut ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
     theme: Res<Theme>,
 ) {
@@ -111,9 +112,14 @@ pub fn rec_button_handlers(
                     });
                 }
                 super::ui_helpers::ButtonTypes::Del => {
-                    if let Some(id) = state.entity_to_edit {
+                    if ui_state.drawing_mode {
+                        for entity in &mut drawings.iter_mut() {
+                            commands.entity(entity).despawn_recursive();
+                        }
+                    }
+                    if let Some(id) = ui_state.entity_to_edit {
                         commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
-                        *state = UiState::default();
+                        *ui_state = UiState::default();
                         for (entity, node, _) in velo_node_query.iter() {
                             if node.id == id {
                                 commands.entity(entity).despawn_recursive();
@@ -136,7 +142,7 @@ pub fn rec_button_handlers(
                         .iter_mut()
                         .find(|x| x.is_active)
                         .unwrap();
-                    if let Some(id) = state.entity_to_edit {
+                    if let Some(id) = ui_state.entity_to_edit {
                         let mut data = None;
                         // fint current z_index
                         for (cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
@@ -185,7 +191,7 @@ pub fn rec_button_handlers(
                     }
                 }
                 super::ui_helpers::ButtonTypes::Back => {
-                    if let Some(id) = state.entity_to_edit {
+                    if let Some(id) = ui_state.entity_to_edit {
                         let mut data = None;
                         // fint current z_index
                         for (cosmic_edit, raw_text, parent) in &mut raw_text_query.iter_mut() {
@@ -243,7 +249,7 @@ pub fn change_color_pallete(
         (Changed<Interaction>, With<ChangeColor>),
     >,
     mut velo_border: Query<(&mut Fill, &mut VeloBorder), With<VeloBorder>>,
-    ui_state: Res<UiState>,
+    mut ui_state: ResMut<UiState>,
 ) {
     for (interaction, change_color) in &mut interaction_query {
         match *interaction {
@@ -253,9 +259,10 @@ pub fn change_color_pallete(
                     if Some(velo_border.id) == ui_state.entity_to_edit {
                         stroke.color = pair_color.1;
                         velo_border.pair_color = pair_color;
-                        break;
+                        return;
                     }
                 }
+                ui_state.draw_color_pair = Some(pair_color);
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -324,6 +331,7 @@ pub fn new_doc_handler(
                         "nodes": [],
                         "arrows": [],
                         "images": {},
+                        "drawings": []
                     })
                     .to_string(),
                 );
@@ -677,7 +685,6 @@ pub fn import_from_url(
 }
 
 pub fn button_generic_handler(
-    _commands: Commands,
     mut generic_button_query: Query<
         (&Interaction, &mut BackgroundColor, Entity),
         (Changed<Interaction>, With<GenericButton>),
@@ -707,6 +714,21 @@ pub fn button_generic_handler(
                     }
                 }
             }
+        }
+    }
+}
+
+pub fn enable_drawing_mode(
+    mut query: Query<&Interaction, (Changed<Interaction>, With<DrawPencil>)>,
+    mut ui_state: ResMut<UiState>,
+) {
+    for interaction in &mut query.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                ui_state.drawing_mode = !ui_state.drawing_mode;
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }

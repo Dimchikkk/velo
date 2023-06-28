@@ -3,13 +3,14 @@ use bevy::prelude::*;
 
 use bevy_cosmic_edit::CosmicEdit;
 use bevy_pkv::PkvStore;
+use bevy_prototype_lyon::prelude::Stroke;
 use image::*;
 
 use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
-use super::ui_helpers::{VeloBorder, VeloNode};
-use super::{RawText, SaveStore};
+use super::ui_helpers::{Drawing, VeloBorder, VeloNode};
+use super::{DrawingJsonNode, RawText, SaveStore};
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::components::Doc;
 use crate::resources::SaveDocRequest;
@@ -132,6 +133,10 @@ pub fn save_tab(
     raw_text_query: Query<(&RawText, &CosmicEdit, &Parent), With<RawText>>,
     border_query: Query<(&Parent, &VeloBorder), With<VeloBorder>>,
     velo_node_query: Query<&Transform, With<VeloNode>>,
+    drawing_query: Query<
+        (&Transform, &Drawing<(String, Color)>, &Stroke),
+        With<Drawing<(String, Color)>>,
+    >,
 ) {
     #[cfg(not(target_arch = "wasm32"))]
     if let Some(index) = &mut app_state.search_index {
@@ -141,6 +146,7 @@ pub fn save_tab(
         "images": {},
         "nodes": [],
         "arrows": [],
+        "drawings": []
     });
     let json_images = json["images"].as_object_mut().unwrap();
     for (raw_text, cosmic_edit, _) in raw_text_query.iter() {
@@ -194,6 +200,19 @@ pub fn save_tab(
     let json_arrows = json["arrows"].as_array_mut().unwrap();
     for arrow_meta in arrows.iter() {
         json_arrows.push(json!(arrow_meta));
+    }
+
+    let json_drawing = json["drawings"].as_array_mut().unwrap();
+    for (transform, drawing, stroke) in drawing_query.iter() {
+        json_drawing.push(json!(DrawingJsonNode {
+            x: transform.translation.x,
+            y: transform.translation.y,
+            z: transform.translation.z,
+            width: stroke.options.line_width,
+            id: drawing.id.clone(),
+            points: drawing.points.clone(),
+            drawing_color: drawing.drawing_color.0.clone()
+        }));
     }
 
     let doc_id = request.doc_id;
