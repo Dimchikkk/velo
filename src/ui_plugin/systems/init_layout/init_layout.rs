@@ -7,7 +7,7 @@ use bevy_cosmic_edit::{create_cosmic_font_system, CosmicFont, CosmicFontConfig};
 use bevy_pkv::PkvStore;
 
 use super::ui_helpers::{
-    self, AddTab, BottomPanel, ButtonAction, ChangeTheme, LeftPanel, LeftPanelControls,
+    self, AddTab, BottomPanel, ButtonAction, ChangeTheme, DrawPencil, LeftPanel, LeftPanelControls,
     LeftPanelExplorer, MainPanel, Menu, NewDoc, ParticlesEffect, Root, SaveDoc, TextPosMode,
 };
 use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
@@ -52,6 +52,10 @@ use add_list::*;
 #[path = "add_effect.rs"]
 mod add_effect;
 use add_effect::*;
+
+#[path = "add_pencil.rs"]
+mod add_pencil;
+use add_pencil::*;
 
 #[path = "add_search_box.rs"]
 mod add_search_box;
@@ -547,8 +551,7 @@ pub fn init_layout(
     commands.entity(text_modes).add_child(text_pos1);
     commands.entity(text_modes).add_child(text_pos2);
 
-    #[cfg(not(target_arch = "wasm32"))]
-    let effects = commands
+    let left_panel_bottom = commands
         .spawn((NodeBundle {
             style: Style {
                 align_items: AlignItems::Center,
@@ -561,11 +564,15 @@ pub fn init_layout(
             ..default()
         },))
         .id();
+
     #[cfg(not(target_arch = "wasm32"))]
     {
-        let effect1 = add_effect(&mut commands, &theme, &icon_font, ParticlesEffect);
-        commands.entity(effects).add_child(effect1);
+        let effect = add_effect(&mut commands, &theme, &icon_font, ParticlesEffect);
+        commands.entity(left_panel_bottom).add_child(effect);
     }
+
+    let pencil = add_pencil(&mut commands, &theme, &icon_font, DrawPencil);
+    commands.entity(left_panel_bottom).add_child(pencil);
 
     commands
         .entity(left_panel_controls)
@@ -574,8 +581,9 @@ pub fn init_layout(
     commands.entity(left_panel_controls).add_child(arrow_modes);
     commands.entity(left_panel_controls).add_child(text_modes);
     commands.entity(left_panel_controls).add_child(fron_back);
-    #[cfg(not(target_arch = "wasm32"))]
-    commands.entity(left_panel_controls).add_child(effects);
+    commands
+        .entity(left_panel_controls)
+        .add_child(left_panel_bottom);
 
     commands.entity(main_bottom).add_child(left_panel);
     commands.entity(main_bottom).add_child(right_panel);
