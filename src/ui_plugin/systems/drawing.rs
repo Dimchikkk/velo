@@ -47,10 +47,14 @@ pub fn drawing(
     }
 
     if ui_state.drawing_mode {
-        let current_document = app_state.current_document.unwrap();
+        let current_document_id = app_state.current_document.unwrap();
+        let current_document = app_state.docs.get(&current_document_id);
+        if current_document.is_none() {
+            return;
+        }
         let tab = app_state
             .docs
-            .get(&current_document)
+            .get(&current_document_id)
             .unwrap()
             .tabs
             .iter()
