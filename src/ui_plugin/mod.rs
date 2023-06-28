@@ -71,6 +71,10 @@ pub use search::*;
 mod canvas_click;
 use canvas_click::*;
 
+#[path = "systems/drawing.rs"]
+mod drawing;
+use drawing::*;
+
 #[path = "systems/active_editor_changed.rs"]
 mod active_editor_changed;
 use active_editor_changed::*;
@@ -148,6 +152,17 @@ pub struct JsonNode<T> {
     pub bg_color: T,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct DrawingJsonNode<T> {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub id: ReflectableUuid,
+    pub points: Vec<Vec2>,
+    pub drawing_color: T,
+    pub width: f32,
+}
+
 pub const MAX_CHECKPOINTS: i32 = 7;
 pub const MAX_SAVED_DOCS_IN_MEMORY: i32 = 7;
 
@@ -161,7 +176,10 @@ pub struct UiState {
     pub arrow_type: ArrowType,
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<ReflectableUuid>,
+    pub entity_to_draw: Option<ReflectableUuid>,
+    pub draw_color_pair: Option<(String, Color)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
+    pub drawing_mode: bool,
 }
 
 impl Plugin for UiPlugin {
@@ -272,6 +290,8 @@ impl Plugin for UiPlugin {
                 active_editor_changed,
                 interactive_sprite.before(canvas_click),
                 change_theme,
+                enable_drawing_mode,
+                drawing,
             ),
         );
         app.add_systems(Update, (set_focused_entity, clickable_links).chain());

@@ -2,7 +2,7 @@ use bevy::{prelude::*, text::BreakLineOn};
 
 use crate::{themes::Theme, ui_plugin::ui_helpers::GenericButton};
 
-pub fn add_effect(
+pub fn add_pencil(
     commands: &mut Commands,
     theme: &Res<Theme>,
     icon_font: &Handle<Font>,
@@ -32,7 +32,7 @@ pub fn add_effect(
     let button = commands
         .spawn((
             ButtonBundle {
-                background_color: theme.celebrate_btn_bg.into(),
+                background_color: theme.drawing_pencil_btn_bg.into(),
                 style: Style {
                     padding: UiRect::all(Val::Px(10.)),
                     width: Val::Percent(100.),
@@ -49,12 +49,12 @@ pub fn add_effect(
         .with_children(|builder| {
             let text_style = TextStyle {
                 font_size: 25.0,
-                color: theme.celebrate_btn,
+                color: theme.drawing_pencil_btn,
                 font: icon_font.clone(),
             };
             let text = Text {
                 sections: vec![TextSection {
-                    value: "\u{ea65}".to_string(),
+                    value: "\u{e746}".to_string(),
                     style: text_style,
                 }],
                 alignment: TextAlignment::Center,
