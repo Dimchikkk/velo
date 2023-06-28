@@ -134,7 +134,7 @@ pub fn velo_dark() -> Theme {
         canvas_bg_img: None,
         celebrate_btn_bg: Color::GRAY,
         celebrate_btn: Color::RED,
-        drawing_pencil_btn_bg: Color::rgb(0.9, 0.9, 0.9),
+        drawing_pencil_btn_bg: Color::GRAY,
         drawing_pencil_btn: Color::RED,
         clipboard_image_bg: Color::BLACK,
         code_default_lang: "rs".to_string(),
