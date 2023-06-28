@@ -719,13 +719,23 @@ pub fn button_generic_handler(
 }
 
 pub fn enable_drawing_mode(
-    mut query: Query<&Interaction, (Changed<Interaction>, With<DrawPencil>)>,
+    mut query: Query<(&Interaction, &Children), (Changed<Interaction>, With<DrawPencil>)>,
+    mut text_style_query: Query<&mut Text, With<DrawPencil>>,
     mut ui_state: ResMut<UiState>,
 ) {
-    for interaction in &mut query.iter_mut() {
+    for (interaction, children) in &mut query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
                 ui_state.drawing_mode = !ui_state.drawing_mode;
+                for child in children.iter() {
+                    if let Ok(mut text) = text_style_query.get_mut(*child) {
+                        if ui_state.drawing_mode {
+                            text.sections[0].style.color = text.sections[0].style.color.with_a(1.)
+                        } else {
+                            text.sections[0].style.color = text.sections[0].style.color.with_a(0.5)
+                        }
+                    }
+                }
             }
             Interaction::Hovered => {}
             Interaction::None => {}
@@ -735,7 +745,8 @@ pub fn enable_drawing_mode(
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn particles_effect(
-    mut query: Query<&Interaction, (Changed<Interaction>, With<ParticlesEffect>)>,
+    mut query: Query<(&Interaction, &Children), (Changed<Interaction>, With<ParticlesEffect>)>,
+    mut text_style_query: Query<&mut Text, With<ParticlesEffect>>,
     mut commands: Commands,
     mut effects: ResMut<Assets<bevy_hanabi::EffectAsset>>,
     mut effects_camera: Query<&mut Camera, With<EffectsCamera>>,
@@ -745,9 +756,18 @@ pub fn particles_effect(
     use bevy_hanabi::prelude::*;
     use rand::Rng;
 
-    for interaction in &mut query.iter_mut() {
+    for (interaction, children) in &mut query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
+                for child in children.iter() {
+                    if let Ok(mut text) = text_style_query.get_mut(*child) {
+                        if effects_camera.single_mut().is_active {
+                            text.sections[0].style.color = text.sections[0].style.color.with_a(0.5)
+                        } else {
+                            text.sections[0].style.color = text.sections[0].style.color.with_a(1.)
+                        }
+                    }
+                }
                 if effects_camera.single_mut().is_active {
                     effects_camera.single_mut().is_active = false;
                     for mut transform in shadow_query.iter_mut() {
