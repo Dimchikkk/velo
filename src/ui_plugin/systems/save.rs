@@ -209,7 +209,7 @@ pub fn save_tab(
             y: transform.translation.y,
             z: transform.translation.z,
             width: stroke.options.line_width,
-            id: drawing.id.clone(),
+            id: drawing.id,
             points: drawing.points.clone(),
             drawing_color: drawing.drawing_color.0.clone()
         }));
