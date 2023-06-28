@@ -9,6 +9,7 @@ wasm:
 
 # Create app bundle with icon (tested only on MacOS)
 bundle:
+    cargo build --release
     cargo install cargo-bundle
     cargo bundle
 
