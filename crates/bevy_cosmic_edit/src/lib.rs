@@ -186,30 +186,33 @@ pub fn get_node_cursor_pos(
     node_transform: &GlobalTransform,
     size: (f32, f32),
     is_ui_node: bool,
+    camera: &Camera,
+    camera_transform: &GlobalTransform,
 ) -> Option<(f32, f32)> {
-    let (x_min, y_min, x_max, y_max) = match is_ui_node {
-        true => (
-            node_transform.affine().translation.x - size.0 / 2.,
-            node_transform.affine().translation.y - size.1 / 2.,
-            node_transform.affine().translation.x + size.0 / 2.,
-            node_transform.affine().translation.y + size.1 / 2.,
-        ),
-        false => (
-            node_transform.affine().translation.x - size.0 / 2.,
-            -node_transform.affine().translation.y - size.1 / 2.,
-            node_transform.affine().translation.x + size.0 / 2.,
-            -node_transform.affine().translation.y + size.1 / 2.,
-        ),
-    };
+    let (x_min, y_min, x_max, y_max) = (
+        node_transform.affine().translation.x - size.0 / 2.,
+        node_transform.affine().translation.y - size.1 / 2.,
+        node_transform.affine().translation.x + size.0 / 2.,
+        node_transform.affine().translation.y + size.1 / 2.,
+    );
 
-    window.cursor_position().and_then(|mut pos| {
-        if !is_ui_node {
-            pos = Vec2::new(pos.x - window.width() / 2., pos.y - window.height() / 2.);
-        }
-        if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
-            Some((pos.x - x_min, pos.y - y_min))
+    window.cursor_position().and_then(|pos| {
+        if is_ui_node {
+            if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
+                Some((pos.x - x_min, pos.y - y_min))
+            } else {
+                None
+            }
         } else {
-            None
+            camera
+                .viewport_to_world_2d(camera_transform, pos)
+                .and_then(|pos| {
+                    if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
+                        Some((pos.x - x_min, y_max - pos.y))
+                    } else {
+                        None
+                    }
+                })
         }
     })
 }
@@ -353,9 +356,11 @@ pub fn cosmic_edit_bevy_events(
     mut scroll_evr: EventReader<MouseWheel>,
     mut edits_duration: Local<Option<Duration>>,
     mut undoredo_duration: Local<Option<Duration>>,
+    camera_q: Query<(&Camera, &GlobalTransform)>,
 ) {
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor() as f32;
+    let (camera, camera_transform) = camera_q.iter().find(|(c, _)| c.is_active).unwrap();
     for (mut cosmic_edit, mut edit_history, node_transform, entity) in
         &mut cosmic_edit_query.iter_mut()
     {
@@ -544,6 +549,8 @@ pub fn cosmic_edit_bevy_events(
                         node_transform,
                         (cosmic_edit.width, cosmic_edit.height),
                         cosmic_edit.is_ui_node,
+                        camera,
+                        camera_transform,
                     ) {
                         cosmic_edit.editor.action(
                             &mut font_system.0,
@@ -562,6 +569,8 @@ pub fn cosmic_edit_bevy_events(
                         node_transform,
                         (cosmic_edit.width, cosmic_edit.height),
                         cosmic_edit.is_ui_node,
+                        camera,
+                        camera_transform,
                     ) {
                         cosmic_edit.editor.action(
                             &mut font_system.0,

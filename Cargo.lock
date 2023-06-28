@@ -418,6 +418,7 @@ version = "0.8.0"
 dependencies = [
  "arboard",
  "bevy",
+ "bevy_pancam",
  "cosmic-text",
  "image",
  "insta",

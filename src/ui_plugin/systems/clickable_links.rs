@@ -2,6 +2,8 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::{get_node_cursor_pos, get_x_offset, get_y_offset, CosmicEdit};
 use cosmic_text::Edit;
 
+use crate::components::MainCamera;
+
 use super::{ui_helpers::BevyMarkdownView, NodeInteraction, NodeInteractionType, UiState};
 
 pub fn clickable_links(
@@ -12,12 +14,14 @@ pub fn clickable_links(
     >,
     mut node_interaction_events: EventReader<NodeInteraction>,
     ui_state: Res<UiState>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     if ui_state.hold_entity.is_some() {
         return;
     }
     let primary_window = windows.iter_mut().next().unwrap();
     let scale_factor = primary_window.scale_factor() as f32;
+    let (camera, camera_transform) = camera_q.single();
     for event in node_interaction_events.iter() {
         if let Ok((transform, cosmic_edit, bevy_markdown_view)) =
             markdown_text_query.get_mut(event.entity)
@@ -27,9 +31,14 @@ pub fn clickable_links(
                     return;
                 }
                 let size = (cosmic_edit.width, cosmic_edit.height);
-                if let Some(pos) =
-                    get_node_cursor_pos(&primary_window, transform, size, cosmic_edit.is_ui_node)
-                {
+                if let Some(pos) = get_node_cursor_pos(
+                    &primary_window,
+                    transform,
+                    size,
+                    cosmic_edit.is_ui_node,
+                    camera,
+                    camera_transform,
+                ) {
                     let font_size = cosmic_edit.editor.buffer().metrics().font_size;
                     let line_height = cosmic_edit.editor.buffer().metrics().line_height;
                     let y_start = get_y_offset(cosmic_edit.editor.buffer()) as f32;

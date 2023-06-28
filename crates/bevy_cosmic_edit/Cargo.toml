@@ -38,6 +38,7 @@ js-sys = "0.3.61"
 
 [dev-dependencies]
 insta = "1.29.0"
+bevy_pancam = { git = "https://github.com/StaffEngineer/bevy_pancam", rev = "7154e90" }
 
 [[example]]
 name = "basic_button"
