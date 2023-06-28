@@ -20,7 +20,8 @@ pub fn update_rectangle_position(
     if !cursor_moved_events.is_empty() {
         let event = cursor_moved_events.iter().last().unwrap();
         for (raw_text, parent) in &mut raw_text_query.iter() {
-            if ui_state.modal_id.is_none()
+            if !ui_state.drawing_mode
+                && ui_state.modal_id.is_none()
                 && Some(raw_text.id) == ui_state.hold_entity
                 && ui_state.entity_to_edit.is_none()
             {
