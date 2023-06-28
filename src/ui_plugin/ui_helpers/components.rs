@@ -27,10 +27,10 @@ pub struct Tooltip;
 #[derive(Component, Clone)]
 pub struct NewDoc;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct ParticlesEffect;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct DrawPencil;
 
 #[derive(Component)]

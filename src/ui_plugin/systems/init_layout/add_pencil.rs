@@ -6,7 +6,7 @@ pub fn add_pencil(
     commands: &mut Commands,
     theme: &Res<Theme>,
     icon_font: &Handle<Font>,
-    component: impl Component,
+    component: impl Component + Clone,
 ) -> Entity {
     let top = commands
         .spawn((NodeBundle {
@@ -43,13 +43,13 @@ pub fn add_pencil(
                 },
                 ..default()
             },
-            component,
+            component.clone(),
             GenericButton,
         ))
         .with_children(|builder| {
             let text_style = TextStyle {
                 font_size: 25.0,
-                color: theme.drawing_pencil_btn,
+                color: theme.drawing_pencil_btn.with_a(0.5),
                 font: icon_font.clone(),
             };
             let text = Text {
@@ -61,7 +61,7 @@ pub fn add_pencil(
                 linebreak_behavior: BreakLineOn::WordBoundary,
             };
 
-            builder.spawn(TextBundle { text, ..default() });
+            builder.spawn((TextBundle { text, ..default() }, component));
         })
         .id();
     commands.entity(top).add_child(button);
