@@ -11,7 +11,7 @@ WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing and editing, currently only landscape
 mode is supported (tested on Chrome):  
 
-  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a2dc4c07c3306005554c1c690a4922ec/raw/d791d27fed7afe0734e4350dfedfc11b65096ee1/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/a2dc4c07c3306005554c1c690a4922ec/raw/d791d27fed7afe0734e4350dfedfc11b65096ee1/velo.json)
+  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/b8ba7a054a3852d6f88044f604bc08b7/raw/6a1631fb6763c784f5da7db13fc2f3cbd0242c0c/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/b8ba7a054a3852d6f88044f604bc08b7/raw/6a1631fb6763c784f5da7db13fc2f3cbd0242c0c/velo.json)
 
 ## Inspiration
 
@@ -60,6 +60,7 @@ enjoyable project to work on.
 - dark/light theme support (app restart is required for now)
 - infinite canvas with zooming (right click to move camera, mouse wheel to zoom)
 - undo/redo for text editing [native target only 🖥️]
+- drawing mode (click on pencil icon to enable it)
 
 ## Installation
 
@@ -120,6 +121,7 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 - for native target there is search box that allows to filter documents by text in notes (fuzzy search)
 - for wasm target there is url query parameter `?document=<url>` to load document from url
 - click save icon to save document to database on native platform or to localStorage on wasm target
+- click on drawing pencil to enable drawing mode
 
 ## License
 All code in this repository dual-licensed under either:

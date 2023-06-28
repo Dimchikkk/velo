@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use super::{ui_helpers::InteractiveNode, NodeInteraction, NodeInteractionType};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct HoldingState {
     duration: Duration,
     entity: Option<Entity>,
@@ -28,8 +28,8 @@ pub fn interactive_sprite(
     mut holding_state: Local<HoldingState>,
 ) {
     let (camera, camera_transform) = camera_q.single();
-    let window = windows.single();
-    let scale_factor = window.scale_factor() as f32;
+    let primary_window = windows.single();
+    let scale_factor = primary_window.scale_factor() as f32;
     let mut active_entity = None;
     if !cursor_moved_events.is_empty() {
         for (sprite, handle, node_transform, entity) in &mut sprite_query.iter_mut() {
@@ -53,7 +53,7 @@ pub fn interactive_sprite(
             let y_max = node_transform.affine().translation.y + size.1 / 2.;
             let z_current = node_transform.affine().translation.z;
 
-            if let Some(pos) = window.cursor_position() {
+            if let Some(pos) = primary_window.cursor_position() {
                 if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
                     if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
                         if let Some((_, z)) = active_entity {
@@ -72,7 +72,6 @@ pub fn interactive_sprite(
     if let Some((active, _)) = active_entity {
         let now_ms = get_timestamp();
         let mut is_hover = true;
-
         if buttons.just_pressed(MouseButton::Left) {
             is_hover = false;
             if double_click.1 == Some(active)
@@ -107,7 +106,7 @@ pub fn interactive_sprite(
         if buttons.pressed(MouseButton::Left)
             && !holding_state.is_holding
             && Duration::from_millis(now_ms as u64) - holding_state.duration
-                > Duration::from_millis(75)
+                > Duration::from_millis(60)
             && holding_state.entity.is_some()
         {
             is_hover = false;
