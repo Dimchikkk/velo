@@ -31,6 +31,9 @@ pub struct NewDoc;
 pub struct ParticlesEffect;
 
 #[derive(Component)]
+pub struct DrawPencil;
+
+#[derive(Component)]
 pub struct DocList;
 
 #[derive(Component, Clone)]
@@ -218,4 +221,11 @@ pub struct Background;
 #[derive(Component)]
 pub struct VeloShadow {
     pub id: ReflectableUuid,
+}
+
+#[derive(Component, Clone)]
+pub struct Drawing<T> {
+    pub id: ReflectableUuid,
+    pub points: Vec<Vec2>,
+    pub drawing_color: T,
 }

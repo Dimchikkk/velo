@@ -61,7 +61,7 @@ pub fn node_manipulation(
     let top_del = add_button_action(
         commands,
         theme,
-        "Delete Rectangle".to_string(),
+        "Delete element".to_string(),
         icon_font,
         "\u{e872}".to_string(),
         theme.node_manipulation,
