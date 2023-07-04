@@ -123,6 +123,15 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 - click save icon to save document to database on native platform or to localStorage on wasm target
 - click on drawing pencil to enable drawing mode
 
+## Troubleshooting
+
+If the application fails to start, you can try resolving the issue by removing velo data folder. This problem may occur due to changes in the data schema between different versions of the application.
+
+- MacOS: `rm -rf /Users/<username>/Library/Application Support/velo`
+- Windows: `rm -rf C:\Users\<username>\AppData\Roaming\velo`
+- Linux: `/home/<username>/.config/velo`
+- wasm: `localStorage.clear()`
+
 ## License
 All code in this repository dual-licensed under either:
 
