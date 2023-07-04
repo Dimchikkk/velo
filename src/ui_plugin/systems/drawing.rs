@@ -75,6 +75,9 @@ pub fn drawing(
                         if let Some(entity_to_draw) = ui_state.entity_to_draw {
                             for (mut path, mut drawing_line) in &mut drawing_line_q.iter_mut() {
                                 if entity_to_draw == drawing_line.id {
+                                    if drawing_line.points.last() == Some(&pos) {
+                                        continue;
+                                    }
                                     drawing_line.points.push(pos);
                                     let mut path_builder = PathBuilder::new();
                                     let mut points_iter = drawing_line.points.iter();
