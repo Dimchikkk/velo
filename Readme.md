@@ -127,8 +127,8 @@ cargo clippy -- -A clippy::type_complexity -A clippy::too_many_arguments
 
 If the application fails to start, you can try resolving the issue by removing velo data folder. This problem may occur due to changes in the data schema between different versions of the application.
 
-- MacOS: `rm -rf /Users/<username>/Library/Application Support/velo`
-- Windows: `rm -rf C:\Users\<username>\AppData\Roaming\velo`
+- MacOS: `/Users/<username>/Library/Application Support/velo`
+- Windows: `C:\Users\<username>\AppData\Roaming\velo`
 - Linux: `/home/<username>/.config/velo`
 - wasm: `localStorage.clear()`
 
