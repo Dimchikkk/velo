@@ -31,7 +31,7 @@ pub fn list_item_click(
 ) {
     for (interaction, doc_list_item) in &mut interaction_query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 if Some(doc_list_item.id) != state.current_document {
                     commands.insert_resource(SaveDocRequest {
                         doc_id: state.current_document.unwrap(),

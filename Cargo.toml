@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
-version = "0.8.2"
+version = "0.8.3"
 edition = "2021"
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
@@ -19,11 +19,10 @@ opt-level = 'z'
 [workspace]
 members = [
     "crates/bevy_markdown",
-    "crates/bevy_cosmic_edit"
 ]
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "1e73312", default-features = false, features = [
+bevy = { version = "0.11", default-features = false, features = [
   "bevy_asset",
   "bevy_core_pipeline",
   "bevy_render",
@@ -35,10 +34,7 @@ bevy = { git = "https://github.com/bevyengine/bevy", rev = "1e73312", default-fe
   "png",
   "x11",
 ] }
-bevy_prototype_lyon = { git = "https://github.com/StaffEngineer/bevy_prototype_lyon", rev = "7d1c30a" }
-bevy_embedded_assets = { git = "https://github.com/StaffEngineer/bevy_embedded_assets", rev = "9428982" }
-bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "21cca01", default-features = true }
-bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "983472f" }
+bevy_embedded_assets = { version = "0.8" }
 base64 = "0.21.0"
 serde_json = "1.0.94"
 uuid = { version = "1.3.0", default-features = false, features = ["v4", "js"] }
@@ -47,13 +43,17 @@ linkify = "0.9.0"
 ehttp = "0.1.0"
 async-channel = "1.8"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
-cosmic-text = { git = "https://github.com/pop-os/cosmic-text", rev = "79275d1" }
+cosmic-text = { version = "0.9" }
 bevy_markdown = { path = "crates/bevy_markdown" }
-bevy_cosmic_edit = { path = "crates/bevy_cosmic_edit" }
-bevy_pancam = { git = "https://github.com/StaffEngineer/bevy_pancam", rev = "7154e90" }
+bevy_cosmic_edit = { version = "0.8" }
+# TODO: point to official releases that support bevy 0.11
+bevy_prototype_lyon = { git = "https://github.com/StaffEngineer/bevy_prototype_lyon", rev = "335c345" }
+bevy_pancam = { git = "https://github.com/StaffEngineer/bevy_pancam", rev = "2608088" }
+bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "d55de2e", default-features = true }
+bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "7db39d1" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "1e73312", default-features = false, features = [ "webgl2" ] }
+bevy = { version = "0.11", default-features = false, features = [ "webgl2" ] }
 console_error_panic_hook = "0.1.7"
 web-sys = { version = "0.3.61", default-features = false, features = ["Window", "Location"] }
 wasm-bindgen = "0.2.86"
@@ -61,7 +61,8 @@ js-sys = "0.3.61"
 url = "2.3.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-bevy_hanabi = { git = "https://github.com/StaffEngineer/bevy_hanabi", rev = "c0928e6", default-features = false, features = [ "2d" ] }
+# TODO: point to official releases that support bevy 0.11
+bevy_hanabi = { git = "https://github.com/StaffEngineer/bevy_hanabi", rev = "514c1eb", default-features = false, features = [ "2d" ] }
 arboard = "3.2.0"
 open = "4.0.1"
 toml = "0.7.3"

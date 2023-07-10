@@ -26,7 +26,7 @@ pub fn cancel_modal(
     query: Query<(Entity, &ModalTop), With<ModalTop>>,
 ) {
     for (interaction, path_modal_cancel) in interaction_query.iter_mut() {
-        if let Interaction::Clicked = interaction {
+        if let Interaction::Pressed = interaction {
             for (entity, path_modal_top) in query.iter() {
                 if path_modal_cancel.id == path_modal_top.id {
                     commands.entity(entity).despawn_recursive();
@@ -166,7 +166,7 @@ pub fn confirm_modal(
     comm_channels: Res<CommChannels>,
 ) {
     for (interaction, path_modal_confirm) in interaction_query.iter_mut() {
-        if let Interaction::Clicked = interaction {
+        if let Interaction::Pressed = interaction {
             for (entity, path_modal_top) in query_top.iter() {
                 if path_modal_confirm.id == path_modal_top.id {
                     for (editor, editable_text) in query_path.iter_mut() {
