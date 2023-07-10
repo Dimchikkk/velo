@@ -853,7 +853,7 @@ dependencies = [
 [[package]]
 name = "bevy_smud"
 version = "0.5.0"
-source = "git+https://github.com/StaffEngineer/bevy_smud?rev=ac3567b#ac3567bf9fe3d59df3ea5954435c66bea40098ca"
+source = "git+https://github.com/StaffEngineer/bevy_smud?rev=7db39d1#7db39d14ed8d060a143e307487e04e2ea2cd62b7"
 dependencies = [
  "bevy",
  "bitflags 1.3.2",
@@ -4082,7 +4082,7 @@ checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
 
 [[package]]
 name = "velo"
-version = "0.8.2"
+version = "0.8.3"
 dependencies = [
  "arboard",
  "async-channel",
