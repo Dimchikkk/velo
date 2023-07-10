@@ -24,7 +24,7 @@ pub fn select_tab_handler(
 ) {
     for (interaction, selected_tab) in &mut interaction_query {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 let current_document = state.current_document.unwrap();
                 for tab in state
                     .docs
@@ -72,7 +72,7 @@ pub fn add_tab_handler(
 ) {
     for interaction in &mut interaction_query {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 let tab_id = ReflectableUuid::generate();
                 let current_document = app_state.current_document.unwrap();
                 let tabs = &mut app_state.docs.get_mut(&current_document).unwrap().tabs;
@@ -116,7 +116,7 @@ pub fn rename_tab_handler(
 ) {
     for (interaction, item, entity, mut cosmic_edit) in &mut interaction_query {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 let now_ms = get_timestamp();
                 if double_click.1 == Some(item.id)
                     && Duration::from_millis(now_ms as u64) - double_click.0
@@ -169,8 +169,8 @@ pub fn delete_tab_handler(
     let window = windows.single();
     for interaction in &mut interaction_query {
         match *interaction {
-            Interaction::Clicked => {
-                let id = ReflectableUuid::generate();
+            Interaction::Pressed => {
+                let id: ReflectableUuid = ReflectableUuid::generate();
                 *ui_state = UiState::default();
                 commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                 let current_document = app_state.current_document.unwrap();

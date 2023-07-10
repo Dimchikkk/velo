@@ -59,7 +59,7 @@ pub fn search_box_click(
     let mut primary_window = windows.single_mut();
     for (interaction, node) in &mut interaction_query {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 primary_window.cursor.icon = CursorIcon::Text;
                 *state = UiState::default();
                 state.search_box_to_edit = Some(node.id);
