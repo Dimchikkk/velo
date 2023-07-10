@@ -1,8 +1,0 @@
----
-source: crates/bevy_cosmic_edit/src/lib.rs
-assertion_line: 368
-expression: "node.editor.buffer().lines.iter().map(|line| line.text()).collect::<Vec<_>>()"
----
-[
-    "Blah",
-]

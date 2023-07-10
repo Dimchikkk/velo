@@ -53,7 +53,7 @@ pub fn rec_button_handlers(
 ) {
     for (interaction, button_action) in &mut interaction_query {
         match *interaction {
-            Interaction::Clicked => match button_action.button_type {
+            Interaction::Pressed => match button_action.button_type {
                 super::ui_helpers::ButtonTypes::AddRec => {
                     events.send(AddRect {
                         node: JsonNode {
@@ -253,7 +253,7 @@ pub fn change_color_pallete(
 ) {
     for (interaction, change_color) in &mut interaction_query {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 let pair_color = change_color.pair_color.clone();
                 for (mut stroke, mut velo_border) in velo_border.iter_mut() {
                     if Some(velo_border.id) == ui_state.entity_to_edit {
@@ -280,7 +280,7 @@ pub fn change_text_pos(
 ) {
     for (interaction, text_pos_mode) in &mut interaction_query {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 if let Some(entity_to_edit) = state.entity_to_edit {
                     for (raw_text, mut cosmit_edit) in raw_text_node_query.iter_mut() {
                         if raw_text.id == entity_to_edit {
@@ -305,7 +305,7 @@ pub fn change_arrow_type(
 ) {
     for (interaction, arrow_mode) in &mut interaction_query {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 state.arrow_type = arrow_mode.arrow_type;
             }
             Interaction::Hovered => {}
@@ -321,7 +321,7 @@ pub fn new_doc_handler(
 ) {
     for interaction in &mut new_doc_query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 let doc_id = ReflectableUuid::generate();
                 let name = "Untitled".to_string();
                 let tab_id = ReflectableUuid::generate();
@@ -385,7 +385,7 @@ pub fn rename_doc_handler(
         &mut rename_doc_query.iter_mut()
     {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 let now_ms = get_timestamp();
                 if double_click.1 == Some(item.id)
                     && Duration::from_millis(now_ms as u64) - double_click.0
@@ -430,7 +430,7 @@ pub fn delete_doc_handler(
     let window = windows.single();
     for interaction in &mut delete_doc_query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 if app_state.docs.len() == 1 {
                     if let Ok(docs) = pkv.get::<HashMap<ReflectableUuid, Doc>>("docs") {
                         if docs.len() > 1 {
@@ -477,7 +477,7 @@ pub fn save_doc_handler(
 ) {
     for interaction in &mut save_doc_query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 commands.insert_resource(SaveDocRequest {
                     doc_id: state.current_document.unwrap(),
                     path: None,
@@ -502,7 +502,7 @@ pub fn export_to_file(
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
                 commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
@@ -556,7 +556,7 @@ pub fn shared_doc_handler(
 ) {
     for interaction in &mut query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 if let Some(doc_id) = app_state.current_document {
                     load_doc_to_memory(doc_id, &mut app_state, &mut pkv);
                     let current_doc = app_state.docs.get(&doc_id).unwrap().clone();
@@ -627,7 +627,7 @@ pub fn import_from_file(
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
                 commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
@@ -662,7 +662,7 @@ pub fn import_from_url(
     let window = windows.single();
     for interaction in &mut query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 let id = ReflectableUuid::generate();
                 *ui_state = UiState::default();
                 commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
@@ -695,7 +695,7 @@ pub fn button_generic_handler(
     let mut primary_window = windows.single_mut();
     for (interaction, mut bg_color, entity) in &mut generic_button_query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {}
+            Interaction::Pressed => {}
             Interaction::Hovered => {
                 primary_window.cursor.icon = CursorIcon::Hand;
                 bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
@@ -725,7 +725,7 @@ pub fn enable_drawing_mode(
 ) {
     for (interaction, children) in &mut query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 ui_state.drawing_mode = !ui_state.drawing_mode;
                 for child in children.iter() {
                     if let Ok(mut text) = text_style_query.get_mut(*child) {
@@ -758,7 +758,7 @@ pub fn particles_effect(
 
     for (interaction, children) in &mut query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 for child in children.iter() {
                     if let Ok(mut text) = text_style_query.get_mut(*child) {
                         if effects_camera.single_mut().is_active {
@@ -862,7 +862,7 @@ pub fn change_theme(
 ) {
     for interaction in &mut change_theme_button.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 for mut text in &mut change_theme_label.iter_mut() {
                     let icon_code = text.sections[0].value.clone();
                     if icon_code == DARK_THEME_ICON_CODE {

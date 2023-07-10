@@ -14,7 +14,7 @@ pub fn canvas_click(
 ) {
     let mut primary_window = windows.single_mut();
     for interaction in interaction_query.iter() {
-        if *interaction == Interaction::Clicked {
+        if *interaction == Interaction::Pressed {
             for event in node_interaction_events.iter() {
                 if raw_text.get(event.entity).is_ok() {
                     return;
