@@ -12,7 +12,7 @@ keywords = ["bevy"]
 [dependencies]
 markdown = "1.0.0-alpha.9"
 syntect = { version = "5.0.0", default-features = false, features = ["default-fancy"] }
-cosmic-text = { git = "https://github.com/pop-os/cosmic-text", rev = "79275d1" }
+cosmic-text = { version = "0.9" }
 
 [dev-dependencies]
 insta = "1.29.0"

@@ -41,7 +41,7 @@ pub fn drawing(
     let now = Duration::from_millis(now_ms as u64);
 
     for interaction in interaction_query.iter() {
-        if *interaction == Interaction::Clicked {
+        if *interaction == Interaction::Pressed {
             *holding_state = Some(now);
         }
     }
