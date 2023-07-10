@@ -50,7 +50,7 @@ bevy_cosmic_edit = { version = "0.8" }
 bevy_prototype_lyon = { git = "https://github.com/StaffEngineer/bevy_prototype_lyon", rev = "335c345" }
 bevy_pancam = { git = "https://github.com/StaffEngineer/bevy_pancam", rev = "2608088" }
 bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "d55de2e", default-features = true }
-bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "ac3567b" }
+bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "7db39d1" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 bevy = { version = "0.11", default-features = false, features = [ "webgl2" ] }
