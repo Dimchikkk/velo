@@ -810,33 +810,32 @@ pub fn particles_effect(
                     size_gradient1.add_key(0.0, Vec2::splat(0.008));
                     size_gradient1.add_key(0.3, Vec2::splat(0.012));
                     size_gradient1.add_key(1.0, Vec2::splat(0.0));
-
+                    let writer = ExprWriter::new();
+                    let lifetime = writer.lit(5.).uniform(writer.lit(10.)).expr();
                     let spawner = Spawner::rate(rng.gen_range(10.0..300.0).into());
                     let effect = effects.add(
-                        EffectAsset {
-                            name: "Effect".into(),
-                            capacity: 32768,
-                            spawner,
-                            ..Default::default()
-                        }
-                        .init(InitPositionCircleModifier {
-                            center: Vec3::ZERO,
-                            axis: Vec3::Z,
-                            radius: 0.0001,
-                            dimension: ShapeDimension::Surface,
-                        })
-                        .init(InitVelocityCircleModifier {
-                            center: Vec3::ZERO,
-                            axis: Vec3::Z,
-                            speed: Value::Uniform((0.05, 0.1)),
-                        })
-                        .init(InitLifetimeModifier {
-                            lifetime: Value::Uniform((5., 10.)),
-                        })
-                        .render(SizeOverLifetimeModifier {
-                            gradient: size_gradient1,
-                        })
-                        .render(ColorOverLifetimeModifier { gradient }),
+                        EffectAsset::new(32768, spawner, writer.finish())
+                            .with_name("Effect")
+                            .init(InitPositionCircleModifier {
+                                center: Vec3::ZERO,
+                                axis: Vec3::Z,
+                                radius: 0.0001,
+                                dimension: ShapeDimension::Surface,
+                            })
+                            .init(InitVelocityCircleModifier {
+                                center: Vec3::ZERO,
+                                axis: Vec3::Z,
+                                speed: CpuValue::Uniform((0.05, 0.1)),
+                            })
+                            .init(InitAttributeModifier {
+                                attribute: Attribute::LIFETIME,
+                                value: lifetime,
+                            })
+                            .render(SizeOverLifetimeModifier {
+                                gradient: size_gradient1,
+                                screen_space_size: false,
+                            })
+                            .render(ColorOverLifetimeModifier { gradient }),
                     );
 
                     commands

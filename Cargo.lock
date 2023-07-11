@@ -532,12 +532,12 @@ dependencies = [
 
 [[package]]
 name = "bevy_hanabi"
-version = "0.6.1"
-source = "git+https://github.com/StaffEngineer/bevy_hanabi?rev=514c1eb#514c1ebb1a6252ce44c406656b595a14313a8175"
+version = "0.7.0-dev"
+source = "git+https://github.com/djeedai/bevy_hanabi?rev=e013d27#e013d27c5f775b2aaf80b0dda156cc4a3f9e25c1"
 dependencies = [
  "anyhow",
  "bevy",
- "bitflags 1.3.2",
+ "bitflags 2.3.2",
  "bytemuck",
  "copyless",
  "rand",
