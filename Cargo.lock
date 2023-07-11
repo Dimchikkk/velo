@@ -718,8 +718,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_prototype_lyon"
-version = "0.8.0"
-source = "git+https://github.com/StaffEngineer/bevy_prototype_lyon?rev=335c345#335c345f6483cdc03c2efba95d3c467dc155ebc2"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e347c16caede05dc5f774ba388cefeef0ab558a5601fc6b5ffd6606bef77308"
 dependencies = [
  "bevy",
  "lyon_algorithms",
@@ -4082,7 +4083,7 @@ checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
 
 [[package]]
 name = "velo"
-version = "0.8.3"
+version = "0.8.4"
 dependencies = [
  "arboard",
  "async-channel",
