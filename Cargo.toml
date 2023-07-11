@@ -62,7 +62,7 @@ url = "2.3.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # TODO: point to official releases that support bevy 0.11
-bevy_hanabi = { git = "https://github.com/StaffEngineer/bevy_hanabi", rev = "514c1eb", default-features = false, features = [ "2d" ] }
+bevy_hanabi = { git = "https://github.com/djeedai/bevy_hanabi", rev = "e013d27", default-features = false, features = [ "2d" ] }
 arboard = "3.2.0"
 open = "4.0.1"
 toml = "0.7.3"
