@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
-version = "0.8.3"
+version = "0.8.4"
 edition = "2021"
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
@@ -46,8 +46,8 @@ image = { version = "0.24.5", default-features = false, features = ["ico"] }
 cosmic-text = { version = "0.9" }
 bevy_markdown = { path = "crates/bevy_markdown" }
 bevy_cosmic_edit = { version = "0.8" }
+bevy_prototype_lyon = { version = "0.9" }
 # TODO: point to official releases that support bevy 0.11
-bevy_prototype_lyon = { git = "https://github.com/StaffEngineer/bevy_prototype_lyon", rev = "335c345" }
 bevy_pancam = { git = "https://github.com/StaffEngineer/bevy_pancam", rev = "2608088" }
 bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "d55de2e", default-features = true }
 bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "7db39d1" }
@@ -61,8 +61,8 @@ js-sys = "0.3.61"
 url = "2.3.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-# TODO: point to official releases that support bevy 0.11
-bevy_hanabi = { git = "https://github.com/StaffEngineer/bevy_hanabi", rev = "514c1eb", default-features = false, features = [ "2d" ] }
+# TODO: point to crates.io when it's published
+bevy_hanabi = { git = "https://github.com/djeedai/bevy_hanabi", rev = "e013d27", default-features = false, features = [ "2d" ] }
 arboard = "3.2.0"
 open = "4.0.1"
 toml = "0.7.3"
