@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
-version = "0.8.4"
+version = "0.8.5"
 edition = "2021"
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
@@ -50,7 +50,7 @@ bevy_prototype_lyon = { version = "0.9" }
 # TODO: point to official releases that support bevy 0.11
 bevy_pancam = { git = "https://github.com/StaffEngineer/bevy_pancam", rev = "2608088" }
 bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "d55de2e", default-features = true }
-bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "7db39d1" }
+bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "e0358df" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 bevy = { version = "0.11", default-features = false, features = [ "webgl2" ] }
@@ -78,3 +78,10 @@ tempfile = "3.5.0"
 name = "velo"
 identifier = "com.rust.velo"
 icon = ["128x128.icns"]
+
+# [patch.crates-io]
+# bevy = { path = "../bevy" }
+# bevy_ecs = { path = "../bevy/crates/bevy_ecs" }
+
+# [patch."https://github.com/bevyengine/bevy"]
+# bevy = { path = "../bevy" }
