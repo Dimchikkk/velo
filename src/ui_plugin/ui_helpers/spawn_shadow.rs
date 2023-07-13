@@ -27,7 +27,7 @@ pub fn spawn_shadow(
         width
     ));
     let sdf_expr = format!(
-        "shapes::sd_box(p, vec2<f32>({:.2}, {:.2}))",
+        "sd_box(p, vec2<f32>({:.2}, {:.2}))",
         0.7 * (width / 2.),
         0.7 * (height / 2.),
     );
