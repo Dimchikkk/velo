@@ -13,12 +13,12 @@ use super::{
     },
     DeleteDoc, DeleteTab, DrawingJsonNode,
 };
+use crate::{canvas::arrow::events::CreateArrow, utils::load_doc_to_memory};
 use crate::{
-    canvas::arrow::components::ArrowMeta,
+    canvas::{arrow::components::ArrowMeta, shadows::CustomMaterial},
     resources::{FontSystemState, LoadTabRequest},
     themes::Theme,
 };
-use crate::{canvas::arrow::events::CreateArrow, utils::load_doc_to_memory};
 
 use crate::resources::{AppState, LoadDocRequest};
 use crate::utils::ReflectableUuid;
@@ -112,9 +112,9 @@ pub fn load_tab(
     mut cosmic_fonts: ResMut<Assets<CosmicFont>>,
     font_system_state: ResMut<FontSystemState>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut shaders: ResMut<Assets<Shader>>,
     theme: Res<Theme>,
     mut local_theme: Local<Option<Map<String, Value>>>,
+    mut materials_meshes: (ResMut<Assets<CustomMaterial>>, ResMut<Assets<Mesh>>),
 ) {
     *ui_state = UiState::default();
     let value = serde_json::to_value(&*theme).unwrap();
@@ -193,8 +193,9 @@ pub fn load_tab(
                     serde_json::from_value(theme_color.clone()).unwrap(),
                 );
                 let _ = spawn_sprite_node(
-                    &mut shaders,
                     &mut commands,
+                    &mut materials_meshes.0,
+                    &mut materials_meshes.1,
                     &theme,
                     &mut cosmic_fonts,
                     font_system_state.0.clone().unwrap(),

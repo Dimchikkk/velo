@@ -8,6 +8,7 @@ use bevy::{
 };
 use bevy_prototype_lyon::prelude::ShapePlugin;
 use systems::*;
+
 pub struct ArrowPlugin;
 
 impl Plugin for ArrowPlugin {

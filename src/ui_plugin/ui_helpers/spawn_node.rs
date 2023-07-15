@@ -8,13 +8,13 @@ use bevy_prototype_lyon::prelude::{Fill, Path, Stroke};
 use bevy::prelude::*;
 use cosmic_text::AttrsOwned;
 
+use crate::canvas::shadows::systems::spawn_shadow;
+use crate::canvas::shadows::CustomMaterial;
 use crate::themes::Theme;
 use crate::ui_plugin::NodeType;
 use crate::TextPos;
 
-use super::{
-    spawn_shadow, BevyMarkdownView, InteractiveNode, RawText, ResizeMarker, VeloBorder, VeloNode,
-};
+use super::{BevyMarkdownView, InteractiveNode, RawText, ResizeMarker, VeloNode, VeloShape};
 use crate::canvas::arrow::components::{ArrowConnect, ArrowConnectPos};
 use crate::utils::{bevy_color_to_cosmic, ReflectableUuid};
 
@@ -32,8 +32,9 @@ pub struct NodeMeta {
 }
 
 pub fn spawn_sprite_node(
-    shaders: &mut ResMut<Assets<Shader>>,
     commands: &mut Commands,
+    materials: &mut ResMut<Assets<CustomMaterial>>,
+    meshes: &mut ResMut<Assets<Mesh>>,
     theme: &Res<Theme>,
     cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,
     cosmic_font_handle: Handle<CosmicFont>,
@@ -90,7 +91,7 @@ pub fn spawn_sprite_node(
         ),
     };
     let has_border = item_meta.node_type != NodeType::Paper;
-    let border = commands
+    let shape = commands
         .spawn((
             bevy_prototype_lyon::prelude::ShapeBundle {
                 transform: Transform {
@@ -109,7 +110,7 @@ pub fn spawn_sprite_node(
                 1.,
             ),
             Fill::color(item_meta.pair_bg_color.1),
-            VeloBorder {
+            VeloShape {
                 id: item_meta.id,
                 node_type: item_meta.node_type.clone(),
                 pair_color: item_meta.pair_bg_color,
@@ -186,17 +187,8 @@ pub fn spawn_sprite_node(
         }
     }
 
-    let has_shadow = item_meta.node_type == NodeType::Paper;
-
-    if has_shadow {
-        let shadow = spawn_shadow(
-            commands,
-            shaders,
-            width,
-            height,
-            theme.node_shadow,
-            item_meta.id,
-        );
+    if item_meta.node_type == NodeType::Paper {
+        let shadow: Entity = spawn_shadow(commands, materials, meshes, theme);
         commands.entity(top).add_child(shadow);
     }
 
@@ -242,8 +234,8 @@ pub fn spawn_sprite_node(
     let resize_marker_4 =
         spawn_resize_marker(commands, theme, width, height, ResizeMarker::BottomRight);
 
-    commands.entity(top).add_child(border);
-    commands.entity(border).add_child(cosmic_edit);
+    commands.entity(top).add_child(shape);
+    commands.entity(shape).add_child(cosmic_edit);
     commands.entity(top).add_child(arrow_marker_1);
     commands.entity(top).add_child(arrow_marker_2);
     commands.entity(top).add_child(arrow_marker_3);
@@ -252,7 +244,7 @@ pub fn spawn_sprite_node(
     commands.entity(top).add_child(resize_marker_2);
     commands.entity(top).add_child(resize_marker_3);
     commands.entity(top).add_child(resize_marker_4);
-    border
+    top
 }
 
 fn spawn_resize_marker(
