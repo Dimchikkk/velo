@@ -20,65 +20,73 @@
         canvas {
             display: block;
         }
-        #forkongithub a{
-            background:#DEA584;
-            color:#fff;
-            text-decoration:none;
-            font-family:arial,sans-serif;
-            text-align:center;
-            font-weight:bold;
-            padding:5px 40px;
-            font-size:1rem;
-            line-height:2rem;
-            position:relative;
-            transition:0.5s;
+
+        #forkongithub a {
+            background: #DEA584;
+            color: #fff;
+            text-decoration: none;
+            font-family: arial, sans-serif;
+            text-align: center;
+            font-weight: bold;
+            padding: 5px 40px;
+            font-size: 1rem;
+            line-height: 2rem;
+            position: relative;
+            transition: 0.5s;
         }
-        #forkongithub a:hover{
-            background:#c11;
-            color:#fff;
+
+        #forkongithub a:hover {
+            background: #c11;
+            color: #fff;
         }
-        #forkongithub a::before,#forkongithub a::after{
-            content:"";
-            width:100%;
-            display:block;
-            position:absolute;
-            top:1px;
-            left:0;
-            height:1px;
-            background:#fff;
+
+        #forkongithub a::before,
+        #forkongithub a::after {
+            content: "";
+            width: 100%;
+            display: block;
+            position: absolute;
+            top: 1px;
+            left: 0;
+            height: 1px;
+            background: #fff;
         }
-        #forkongithub a::after{
-            bottom:1px;
-            top:auto;
+
+        #forkongithub a::after {
+            bottom: 1px;
+            top: auto;
         }
-        @media screen and (min-width:100px){
-            #forkongithub{
-                position:fixed;
-                display:block;
-                top:0;
-                right:0;
-                width:200px;
-                overflow:hidden;
-                height:200px;
-                z-index:9999;
+
+        @media screen and (min-width:100px) {
+            #forkongithub {
+                position: fixed;
+                display: block;
+                top: 0;
+                right: 0;
+                width: 200px;
+                overflow: hidden;
+                height: 200px;
+                z-index: 9999;
             }
-            #forkongithub a{
-                width:200px;
-                position:absolute;
-                top:60px;
-                right:-60px;
-                transform:rotate(45deg);
-                -webkit-transform:rotate(45deg);
-                -ms-transform:rotate(45deg);
-                -moz-transform:rotate(45deg);
-                -o-transform:rotate(45deg);
-                box-shadow:4px 4px 10px rgba(0,0,0,0.8);
+
+            #forkongithub a {
+                width: 200px;
+                position: absolute;
+                top: 60px;
+                right: -60px;
+                transform: rotate(45deg);
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                -moz-transform: rotate(45deg);
+                -o-transform: rotate(45deg);
+                box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.8);
             }
         }
 
         #forkongithub {
             display: none;
         }
+
         #spinner-container {
             position: fixed;
             top: 0;
@@ -109,90 +117,112 @@
 </head>
 
 <body>
-    <div id="spinner-container"><div class="spinner"></div></div>
+    <div id="spinner-container">
+        <div class="spinner"></div>
+    </div>
     <span id="forkongithub"><a href="https://github.com/StaffEngineer/velo">⭐ me on GitHub</a></span>
+    <div id="unsupported-message" style="display: none;">
+            <p>Sorry, your browser does not support WebGPU. Currently, only WebGPU is supported for the velo wasm target.</p>
+    </div>
     <script type="module">
         import init from "./velo.js";
         (async () => {
             try {
-                await init()
+                if (navigator.gpu) {
+                    await init();
+                } else {
+                    showUnsupportedMessage();
+                }
             } finally {
-                const spinnerContainer = document.getElementById("spinner-container");
-                spinnerContainer.remove();
-                const forkOnGithub = document.getElementById("forkongithub");
-                forkOnGithub.style.display = "inline-block";
+                removeSpinner();
+                showForkOnGithub();
             }
         })();
+
+        function showUnsupportedMessage() {
+            const unsupportedMessage = document.getElementById("unsupported-message");
+            unsupportedMessage.style.display = "block";
+        }
+
+        function removeSpinner() {
+            const spinnerContainer = document.getElementById("spinner-container");
+            spinnerContainer.remove();
+        }
+
+        function showForkOnGithub() {
+            const forkOnGithub = document.getElementById("forkongithub");
+            forkOnGithub.style.display = "inline-block";
+        }
     </script>
-        <script>
-            document.body.addEventListener("contextmenu", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+    <script>
+        document.body.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        // Insert hack to make sound autoplay on Chrome as soon as the user interacts with the tab:
+        // https://developers.google.com/web/updates/2018/11/web-audio-autoplay#moving-forward
+
+        // the following function keeps track of all AudioContexts and resumes them on the first user
+        // interaction with the page. If the function is called and all contexts are already running,
+        // it will remove itself from all event listeners.
+        (function () {
+            // An array of all contexts to resume on the page
+            const audioContextList = [];
+
+            // An array of various user interaction events we should listen for
+            const userInputEventNames = [
+                "click",
+                "contextmenu",
+                "auxclick",
+                "dblclick",
+                "mousedown",
+                "mouseup",
+                "pointerup",
+                "touchend",
+                "keydown",
+                "keyup",
+            ];
+
+            // A proxy object to intercept AudioContexts and
+            // add them to the array for tracking and resuming later
+            self.AudioContext = new Proxy(self.AudioContext, {
+                construct(target, args) {
+                    const result = new target(...args);
+                    audioContextList.push(result);
+                    return result;
+                },
             });
 
-            // Insert hack to make sound autoplay on Chrome as soon as the user interacts with the tab:
-            // https://developers.google.com/web/updates/2018/11/web-audio-autoplay#moving-forward
+            // To resume all AudioContexts being tracked
+            function resumeAllContexts(_event) {
+                let count = 0;
 
-            // the following function keeps track of all AudioContexts and resumes them on the first user
-            // interaction with the page. If the function is called and all contexts are already running,
-            // it will remove itself from all event listeners.
-            (function () {
-                // An array of all contexts to resume on the page
-                const audioContextList = [];
-
-                // An array of various user interaction events we should listen for
-                const userInputEventNames = [
-                    "click",
-                    "contextmenu",
-                    "auxclick",
-                    "dblclick",
-                    "mousedown",
-                    "mouseup",
-                    "pointerup",
-                    "touchend",
-                    "keydown",
-                    "keyup",
-                ];
-
-                // A proxy object to intercept AudioContexts and
-                // add them to the array for tracking and resuming later
-                self.AudioContext = new Proxy(self.AudioContext, {
-                    construct(target, args) {
-                        const result = new target(...args);
-                        audioContextList.push(result);
-                        return result;
-                    },
-                });
-
-                // To resume all AudioContexts being tracked
-                function resumeAllContexts(_event) {
-                    let count = 0;
-
-                    audioContextList.forEach((context) => {
-                        if (context.state !== "running") {
-                            context.resume();
-                        } else {
-                            count++;
-                        }
-                    });
-
-                    // If all the AudioContexts have now resumed then we unbind all
-                    // the event listeners from the page to prevent unnecessary resume attempts
-                    // Checking count > 0 ensures that the user interaction happens AFTER the game started up
-                    if (count > 0 && count === audioContextList.length) {
-                        userInputEventNames.forEach((eventName) => {
-                            document.removeEventListener(eventName, resumeAllContexts);
-                        });
+                audioContextList.forEach((context) => {
+                    if (context.state !== "running") {
+                        context.resume();
+                    } else {
+                        count++;
                     }
-                }
-
-                // We bind the resume function for each user interaction
-                // event on the page
-                userInputEventNames.forEach((eventName) => {
-                    document.addEventListener(eventName, resumeAllContexts);
                 });
-            })();
-        </script>
+
+                // If all the AudioContexts have now resumed then we unbind all
+                // the event listeners from the page to prevent unnecessary resume attempts
+                // Checking count > 0 ensures that the user interaction happens AFTER the game started up
+                if (count > 0 && count === audioContextList.length) {
+                    userInputEventNames.forEach((eventName) => {
+                        document.removeEventListener(eventName, resumeAllContexts);
+                    });
+                }
+            }
+
+            // We bind the resume function for each user interaction
+            // event on the page
+            userInputEventNames.forEach((eventName) => {
+                document.addEventListener(eventName, resumeAllContexts);
+            });
+        })();
+    </script>
 </body>
 
 </html>
