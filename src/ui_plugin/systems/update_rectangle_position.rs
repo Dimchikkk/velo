@@ -3,14 +3,14 @@ use bevy::prelude::*;
 use crate::{canvas::arrow::events::RedrawArrow, components::MainCamera};
 
 use super::{
-    ui_helpers::{RawText, VeloBorder, VeloNode},
+    ui_helpers::{RawText, VeloNode, VeloShape},
     UiState,
 };
 
 pub fn update_rectangle_position(
     mut cursor_moved_events: EventReader<CursorMoved>,
     raw_text_query: Query<(&RawText, &Parent), With<RawText>>,
-    border_query: Query<&Parent, With<VeloBorder>>,
+    border_query: Query<&Parent, With<VeloShape>>,
     mut velo_node_query: Query<&mut Transform, With<VeloNode>>,
     mut events: EventWriter<RedrawArrow>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,

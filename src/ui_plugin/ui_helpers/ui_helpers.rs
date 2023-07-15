@@ -17,10 +17,6 @@ pub use add_tab::*;
 mod add_list_item;
 pub use add_list_item::*;
 
-#[path = "spawn_shadow.rs"]
-mod spawn_shadow;
-pub use spawn_shadow::*;
-
 pub fn add_rectangle_txt(theme: &Res<Theme>, text: String) -> TextBundle {
     let text_style = TextStyle {
         font_size: 18.0,

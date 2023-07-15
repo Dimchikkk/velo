@@ -122,7 +122,7 @@ pub struct LeftPanelControls;
 pub struct LeftPanelExplorer;
 
 #[derive(Component)]
-pub struct VeloBorder {
+pub struct VeloShape {
     pub id: ReflectableUuid,
     pub node_type: NodeType,
     pub pair_color: (String, Color),
@@ -217,11 +217,6 @@ pub struct InteractiveNode;
 
 #[derive(Component)]
 pub struct Background;
-
-#[derive(Component)]
-pub struct VeloShadow {
-    pub id: ReflectableUuid,
-}
 
 #[derive(Component, Clone)]
 pub struct Drawing<T> {
