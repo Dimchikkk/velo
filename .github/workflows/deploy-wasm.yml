@@ -33,7 +33,7 @@ jobs:
           echo `pwd`/binaryen/bin >> $GITHUB_PATH
 
       - name : Build Wasm
-        run: cargo build --release --target wasm32-unknown-unknown
+        run: RUSTFLAGS=--cfg=web_sys_unstable_apis cargo build --release --target wasm32-unknown-unknown
         
       - name: Generate JavaScript bindings
         run: wasm-bindgen --target web  --no-typescript --out-dir out target/wasm32-unknown-unknown/release/velo.wasm
