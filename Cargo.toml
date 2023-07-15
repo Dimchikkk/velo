@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
-version = "0.8.5"
+version = "0.8.6"
 edition = "2021"
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
@@ -47,10 +47,9 @@ cosmic-text = { version = "0.9" }
 bevy_markdown = { path = "crates/bevy_markdown" }
 bevy_cosmic_edit = { version = "0.8" }
 bevy_prototype_lyon = { version = "0.9" }
-# TODO: point to official releases that support bevy 0.11
-bevy_pancam = { git = "https://github.com/StaffEngineer/bevy_pancam", rev = "2608088" }
+bevy_pancam = { version = "0.9" }
+# TODO: point to official release that support bevy 0.11
 bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "d55de2e", default-features = true }
-bevy_smud = { git = "https://github.com/StaffEngineer/bevy_smud", rev = "e0358df" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 bevy = { version = "0.11", default-features = false, features = [ "webgl2" ] }
