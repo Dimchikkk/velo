@@ -9,7 +9,7 @@ use image::*;
 use serde_json::json;
 use std::{collections::HashMap, io::Cursor};
 
-use super::ui_helpers::{Drawing, VeloBorder, VeloNode};
+use super::ui_helpers::{Drawing, VeloNode, VeloShape};
 use super::{DrawingJsonNode, RawText, SaveStore};
 use crate::canvas::arrow::components::ArrowMeta;
 use crate::components::Doc;
@@ -131,7 +131,7 @@ pub fn save_tab(
     request: Res<SaveTabRequest>,
     mut app_state: ResMut<AppState>,
     raw_text_query: Query<(&RawText, &CosmicEdit, &Parent), With<RawText>>,
-    border_query: Query<(&Parent, &VeloBorder), With<VeloBorder>>,
+    border_query: Query<(&Parent, &VeloShape), With<VeloShape>>,
     velo_node_query: Query<&Transform, With<VeloNode>>,
     drawing_query: Query<
         (&Transform, &Drawing<(String, Color)>, &Stroke),

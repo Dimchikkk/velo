@@ -5,6 +5,7 @@ mod systems;
 mod themes;
 mod ui_plugin;
 mod utils;
+
 use bevy::{prelude::*, window::PresentMode};
 use bevy_cosmic_edit::CosmicEditPlugin;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
@@ -12,7 +13,6 @@ use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_hanabi::HanabiPlugin;
 use bevy_pancam::PanCamPlugin;
 use bevy_pkv::PkvStore;
-use bevy_smud::SmudPlugin;
 use canvas::CanvasPlugin;
 use resources::FontSystemState;
 use systems::*;
@@ -43,11 +43,10 @@ impl Plugin for VeloPlugin {
                     .build()
                     .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
             )
-            .add_plugins(SmudPlugin)
             .add_plugins(CosmicEditPlugin)
             .add_plugins(CanvasPlugin)
             .add_plugins(UiPlugin)
-            .add_plugins(PanCamPlugin::default())
+            .add_plugins(PanCamPlugin)
             .insert_resource(PkvStore::new(ORG_NAME, APP_NAME))
             .init_resource::<FontSystemState>();
 

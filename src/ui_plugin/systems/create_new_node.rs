@@ -2,6 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::CosmicFont;
 
 use crate::{
+    canvas::shadows::CustomMaterial,
     resources::{AppState, FontSystemState},
     themes::Theme,
     utils::ReflectableUuid,
@@ -19,7 +20,8 @@ pub fn create_new_node(
     font_system_state: ResMut<FontSystemState>,
     theme: Res<Theme>,
     mut z_index_local: Local<f32>,
-    mut shaders: ResMut<Assets<Shader>>,
+    mut materials: ResMut<Assets<CustomMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
 ) {
     let window = windows.single_mut();
     for event in events.iter() {
@@ -36,8 +38,9 @@ pub fn create_new_node(
         *ui_state = UiState::default();
         ui_state.entity_to_edit = Some(ReflectableUuid(event.node.id));
         let _ = spawn_sprite_node(
-            &mut shaders,
             &mut commands,
+            &mut materials,
+            &mut meshes,
             &theme,
             &mut cosmic_fonts,
             font_system_state.0.clone().unwrap(),

@@ -1,10 +1,8 @@
 use super::{
-    ui_helpers::{spawn_shadow, ResizeMarker, VeloBorder, VeloShadow},
+    ui_helpers::{ResizeMarker, VeloShape},
     NodeInteraction, NodeType, RawText, RedrawArrow, VeloNode,
 };
-use crate::{
-    canvas::arrow::components::ArrowConnect, components::MainCamera, themes::Theme, UiState,
-};
+use crate::{canvas::arrow::components::ArrowConnect, components::MainCamera, UiState};
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::CosmicEdit;
 use bevy_prototype_lyon::prelude::Path;
@@ -50,45 +48,19 @@ pub fn resize_entity_start(
 }
 
 pub fn resize_entity_end(
-    mut commands: Commands,
-    mut shaders: ResMut<Assets<Shader>>,
-    theme: ResMut<Theme>,
     mut ui_state: ResMut<UiState>,
     mut node_interaction_events: EventReader<NodeInteraction>,
-    raw_text_query: Query<(&Parent, &RawText, &CosmicEdit), With<RawText>>,
-    border_query: Query<(&Parent, &VeloBorder), With<VeloBorder>>,
-    velo_node_query: Query<Entity, With<VeloNode>>,
 ) {
     for event in node_interaction_events.iter() {
-        if event.node_interaction_type == super::NodeInteractionType::LeftMouseRelease {
-            if let Some(entity_to_resize) = ui_state.entity_to_resize {
-                for (raw_text_parent, raw_text, cosmic_edit) in raw_text_query.iter() {
-                    if raw_text.id == entity_to_resize {
-                        let (width, height) = (cosmic_edit.width, cosmic_edit.height);
-                        let (border_parent, border) =
-                            border_query.get(raw_text_parent.get()).unwrap();
-                        if border.node_type == NodeType::Paper {
-                            let top = velo_node_query.get(border_parent.get()).unwrap();
-                            let shadow = spawn_shadow(
-                                &mut commands,
-                                &mut shaders,
-                                width,
-                                height,
-                                theme.node_shadow,
-                                entity_to_resize,
-                            );
-                            commands.entity(top).add_child(shadow);
-                        }
-                    }
-                }
-                ui_state.entity_to_resize = None;
-            }
+        if event.node_interaction_type == super::NodeInteractionType::LeftMouseRelease
+            && ui_state.entity_to_resize.is_some()
+        {
+            ui_state.entity_to_resize = None;
         }
     }
 }
 
 pub fn resize_entity_run(
-    mut commands: Commands,
     ui_state: ResMut<UiState>,
     mut cursor_moved_events: EventReader<CursorMoved>,
     mut events: EventWriter<RedrawArrow>,
@@ -101,12 +73,11 @@ pub fn resize_entity_run(
         (With<ArrowConnect>, Without<VeloNode>, Without<ResizeMarker>),
     >,
     mut raw_text_query: Query<(&Parent, &RawText, &mut CosmicEdit, &mut Sprite), With<RawText>>,
-    mut border_query: Query<(&Parent, &VeloBorder, &mut Path), With<VeloBorder>>,
+    mut border_query: Query<(&Parent, &VeloShape, &mut Path), With<VeloShape>>,
     mut velo_node_query: Query<
         (&mut Transform, &Children),
         (With<VeloNode>, Without<ResizeMarker>, Without<ArrowConnect>),
     >,
-    shadow_query: Query<Entity, With<VeloShadow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let (camera, camera_transform) = camera_q.single();
@@ -190,14 +161,6 @@ pub fn resize_entity_run(
                                     arrow_transform.translation.y = 0.;
                                 }
                             }
-                        }
-                    }
-
-                    // despawn shadow (to recreate it with new size on resize end)
-                    for child in children.iter() {
-                        if let Ok(shadow) = shadow_query.get(*child) {
-                            commands.entity(shadow).despawn_recursive();
-                            break;
                         }
                     }
 

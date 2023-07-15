@@ -15,14 +15,14 @@ use crate::{
     utils::{bevy_color_to_cosmic, ReflectableUuid},
 };
 
-use super::{ui_helpers::VeloBorder, BevyMarkdownView, NodeType, RawText, UiState};
+use super::{ui_helpers::VeloShape, BevyMarkdownView, NodeType, RawText, UiState};
 
 pub fn entity_to_edit_changed(
     ui_state: Res<UiState>,
     app_state: Res<AppState>,
     theme: Res<Theme>,
     mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
-    mut velo_border: Query<(&mut Stroke, &VeloBorder), With<VeloBorder>>,
+    mut velo_border: Query<(&mut Stroke, &VeloShape), With<VeloShape>>,
     mut raw_text_node_query: Query<
         (
             Entity,

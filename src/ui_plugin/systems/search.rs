@@ -29,7 +29,7 @@ use crate::ORG_NAME;
 
 use super::ui_helpers::SearchButton;
 use super::ui_helpers::SearchText;
-use super::ui_helpers::VeloBorder;
+use super::ui_helpers::VeloShape;
 use super::NodeType;
 use super::UiState;
 
@@ -84,7 +84,7 @@ pub fn search_box_click(
 
 pub fn search_box_text_changed(
     text_query: Query<&CosmicEdit, With<SearchText>>,
-    mut velo_border: Query<(&mut Stroke, &VeloBorder), With<VeloBorder>>,
+    mut velo_border: Query<(&mut Stroke, &VeloShape), With<VeloShape>>,
     mut previous_search_text: Local<String>,
     mut app_state: ResMut<AppState>,
     pkv: Res<PkvStore>,
@@ -271,7 +271,7 @@ pub fn fuzzy_search(index: &Index, query: &str) -> tantivy::Result<Vec<NodeSearc
 
 fn highlight_search_match_nodes(
     node_ids: &HashSet<ReflectableUuid>,
-    velo_border: &mut Query<(&mut Stroke, &VeloBorder), With<VeloBorder>>,
+    velo_border: &mut Query<(&mut Stroke, &VeloShape), With<VeloShape>>,
     theme: &Res<Theme>,
 ) {
     let highlight_color = theme.node_found_color;

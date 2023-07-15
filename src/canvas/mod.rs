@@ -1,12 +1,14 @@
 pub mod arrow;
+pub mod shadows;
 
 use arrow::*;
 use bevy::app::{App, Plugin};
+use shadows::*;
 
 pub struct CanvasPlugin;
 
 impl Plugin for CanvasPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(ArrowPlugin);
+        app.add_plugins((ArrowPlugin, ShadowsPlugin));
     }
 }
