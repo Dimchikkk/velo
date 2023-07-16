@@ -8,8 +8,7 @@
 
 This app is primarily designed for native desktop platforms, and its
 WebAssembly (wasm) target has a limited feature set. wasm target is best
-suited for quick document sharing and editing, currently only landscape
-mode is supported (tested on Chrome):  
+suited for quick document sharing, currently, only WebGPU backend enabled for the demo:
 
   [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/4298475a275a41c2156bd9e43f7b3191/raw/94d9cae2afad1936810ca15a9a81b7fd60295693/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/4298475a275a41c2156bd9e43f7b3191/raw/94d9cae2afad1936810ca15a9a81b7fd60295693/velo.json)
 
