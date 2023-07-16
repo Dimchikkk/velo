@@ -129,13 +129,13 @@
         (async () => {
             try {
                 if (navigator.gpu) {
+                    showForkOnGithub();
                     await init();
                 } else {
                     showUnsupportedMessage();
                 }
             } finally {
                 removeSpinner();
-                showForkOnGithub();
             }
         })();
 
