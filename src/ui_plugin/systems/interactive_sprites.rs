@@ -14,7 +14,6 @@ pub struct HoldingState {
 }
 
 pub fn interactive_sprite(
-    cursor_moved_events: EventReader<CursorMoved>,
     windows: Query<&Window, With<PrimaryWindow>>,
     buttons: Res<Input<MouseButton>>,
     res_images: Res<Assets<Image>>,
@@ -31,41 +30,39 @@ pub fn interactive_sprite(
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor() as f32;
     let mut active_entity = None;
-    if !cursor_moved_events.is_empty() {
-        for (sprite, handle, node_transform, entity) in &mut sprite_query.iter_mut() {
-            let size = match sprite.custom_size {
-                Some(size) => (size.x, size.y),
-                None => {
-                    if let Some(sprite_image) = res_images.get(handle) {
-                        (
-                            sprite_image.size().x / scale_factor,
-                            sprite_image.size().y / scale_factor,
-                        )
+    for (sprite, handle, node_transform, entity) in &mut sprite_query.iter_mut() {
+        let size = match sprite.custom_size {
+            Some(size) => (size.x, size.y),
+            None => {
+                if let Some(sprite_image) = res_images.get(handle) {
+                    (
+                        sprite_image.size().x / scale_factor,
+                        sprite_image.size().y / scale_factor,
+                    )
+                } else {
+                    (1., 1.)
+                }
+            }
+        };
+
+        let x_min = node_transform.affine().translation.x - size.0 / 2.;
+        let y_min = node_transform.affine().translation.y - size.1 / 2.;
+        let x_max = node_transform.affine().translation.x + size.0 / 2.;
+        let y_max = node_transform.affine().translation.y + size.1 / 2.;
+        let z_current = node_transform.affine().translation.z;
+
+        if let Some(pos) = primary_window.cursor_position() {
+            if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
+                if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
+                    if let Some((_, z)) = active_entity {
+                        if z < z_current {
+                            active_entity = Some((entity, z_current));
+                        }
                     } else {
-                        (1., 1.)
+                        active_entity = Some((entity, node_transform.affine().translation.z));
                     }
                 }
             };
-
-            let x_min = node_transform.affine().translation.x - size.0 / 2.;
-            let y_min = node_transform.affine().translation.y - size.1 / 2.;
-            let x_max = node_transform.affine().translation.x + size.0 / 2.;
-            let y_max = node_transform.affine().translation.y + size.1 / 2.;
-            let z_current = node_transform.affine().translation.z;
-
-            if let Some(pos) = primary_window.cursor_position() {
-                if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
-                    if x_min < pos.x && pos.x < x_max && y_min < pos.y && pos.y < y_max {
-                        if let Some((_, z)) = active_entity {
-                            if z < z_current {
-                                active_entity = Some((entity, z_current));
-                            }
-                        } else {
-                            active_entity = Some((entity, node_transform.affine().translation.z));
-                        }
-                    }
-                };
-            }
         }
     }
 
