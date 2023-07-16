@@ -299,7 +299,7 @@ impl Plugin for UiPlugin {
         app.add_systems(
             Update,
             entity_to_edit_changed
-                .before(save_doc)
+                .before(save_tab)
                 .before(save_doc)
                 .before(load_tab)
                 .before(load_doc)
