@@ -39,7 +39,7 @@ jobs:
       - name: Cache
         uses: Swatinem/rust-cache@v2
       - name: Check
-        run: cargo check --target wasm32-unknown-unknown --all-targets
+        run: RUSTFLAGS=--cfg=web_sys_unstable_apis cargo check --target wasm32-unknown-unknown --all-targets
   lints:
     name: Lints
     runs-on: ubuntu-latest
