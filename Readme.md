@@ -91,7 +91,7 @@ Wasm:
 
 ```sh
 cargo install wasm-server-runner
-cargo r --release --target wasm32-unknown-unknown
+RUSTFLAGS=--cfg=web_sys_unstable_apis cargo r --release --target wasm32-unknown-unknown
 ```
 
 To create app bundle with icon (tested only on MacOS):

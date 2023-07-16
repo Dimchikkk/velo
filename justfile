@@ -5,7 +5,7 @@ native:
 # Run wasm
 wasm:
     cargo install wasm-server-runner
-    cargo run --release --target wasm32-unknown-unknown
+    RUSTFLAGS=--cfg=web_sys_unstable_apis cargo run --release --target wasm32-unknown-unknown
 
 # Create app bundle with icon (tested only on MacOS)
 bundle:
