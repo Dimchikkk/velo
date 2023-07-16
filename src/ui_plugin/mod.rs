@@ -70,6 +70,11 @@ pub use search::*;
 #[path = "systems/canvas_click.rs"]
 mod canvas_click;
 use canvas_click::*;
+#[path = "systems/effects.rs"]
+#[cfg(not(target_arch = "wasm32"))]
+mod effects;
+#[cfg(not(target_arch = "wasm32"))]
+pub use effects::*;
 
 #[path = "systems/drawing.rs"]
 mod drawing;
@@ -284,7 +289,9 @@ impl Plugin for UiPlugin {
                 set_window_property,
                 shared_doc_handler,
                 #[cfg(not(target_arch = "wasm32"))]
-                particles_effect,
+                create_particles_effect,
+                #[cfg(not(target_arch = "wasm32"))]
+                update_particles_effect,
                 save_to_store.after(save_tab),
                 canvas_click,
                 active_editor_changed,
