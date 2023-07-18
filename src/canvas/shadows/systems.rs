@@ -10,7 +10,7 @@ use crate::{
     ui_plugin::ui_helpers::{RawText, VeloNode, VeloShape},
 };
 
-use super::CustomMaterial;
+use super::CustomShadowMaterial;
 
 fn unnormalize_uv(uv: f32, size: f32) -> f32 {
     size * (uv - 0.5)
@@ -22,7 +22,7 @@ pub struct Shadow;
 // Spawn an entity using `CustomMaterial`.
 pub fn spawn_shadow(
     commands: &mut Commands,
-    materials: &mut ResMut<Assets<CustomMaterial>>,
+    materials: &mut ResMut<Assets<CustomShadowMaterial>>,
     meshes: &mut ResMut<Assets<Mesh>>,
     theme: &Res<Theme>,
 ) -> Entity {
@@ -34,7 +34,7 @@ pub fn spawn_shadow(
     commands
         .spawn(MaterialMesh2dBundle {
             mesh: meshes.add(mesh).into(),
-            material: materials.add(CustomMaterial {
+            material: materials.add(CustomShadowMaterial {
                 color: theme.shadow,
             }),
             transform: Transform {

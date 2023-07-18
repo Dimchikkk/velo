@@ -2,7 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::CosmicFont;
 
 use crate::{
-    canvas::shadows::CustomMaterial,
+    canvas::shadows::CustomShadowMaterial,
     resources::{AppState, FontSystemState},
     themes::Theme,
     utils::ReflectableUuid,
@@ -20,7 +20,7 @@ pub fn create_new_node(
     font_system_state: ResMut<FontSystemState>,
     theme: Res<Theme>,
     mut z_index_local: Local<f32>,
-    mut materials: ResMut<Assets<CustomMaterial>>,
+    mut materials: ResMut<Assets<CustomShadowMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
     let window = windows.single_mut();
