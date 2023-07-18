@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 #[derive(Resource, Debug, Serialize, Deserialize)]
 pub struct Theme {
@@ -12,7 +11,7 @@ pub struct Theme {
     pub bottom_panel_bg: Color,
     pub btn_border: Color,
     pub canvas_bg_color: Option<Color>,
-    pub canvas_bg_img: Option<PathBuf>,
+    pub canvas_bg_line_color: Color,
     pub celebrate_btn_bg: Color,
     pub celebrate_btn: Color,
     pub drawing_pencil_btn_bg: Color,
@@ -71,7 +70,7 @@ pub fn velo_light() -> Theme {
         bottom_panel_bg: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0),
         btn_border: Color::rgb(0.5, 0.5, 0.5),
         canvas_bg_color: None,
-        canvas_bg_img: Some(PathBuf::from("bg.png")),
+        canvas_bg_line_color: Color::rgba(85. / 255., 150. / 255., 100. / 255., 0.2),
         celebrate_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         celebrate_btn: Color::RED,
         drawing_pencil_btn_bg: Color::rgb(0.9, 0.9, 0.9),
@@ -131,7 +130,7 @@ pub fn velo_dark() -> Theme {
         bottom_panel_bg: Color::rgb(0.1, 0.1, 0.1),
         btn_border: Color::rgb(0.8, 0.8, 0.8),
         canvas_bg_color: Some(Color::rgb(0.3, 0.3, 0.3)),
-        canvas_bg_img: None,
+        canvas_bg_line_color: Color::rgba(1., 0. / 255., 1., 0.2),
         celebrate_btn_bg: Color::GRAY,
         celebrate_btn: Color::RED,
         drawing_pencil_btn_bg: Color::GRAY,

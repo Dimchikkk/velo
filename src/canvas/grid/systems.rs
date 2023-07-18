@@ -1,3 +1,5 @@
+use crate::themes::Theme;
+
 use super::CustomGridMaterial;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 
@@ -5,6 +7,7 @@ pub fn grid(
     mut commands: Commands,
     mut materials: ResMut<Assets<CustomGridMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
+    theme: Res<Theme>,
 ) {
     let max_size = 1000000.;
     let size = Vec2::new(max_size, max_size);
@@ -17,10 +20,9 @@ pub fn grid(
             ..Default::default()
         },
         material: materials.add(CustomGridMaterial {
-            color: Color::rgba(245. / 255., 245. / 255., 245. / 255., 1.),
-            line_color: Color::rgba(97. / 255., 164. / 255., 255. / 255., 0.2),
+            line_color: theme.canvas_bg_line_color,
             grid_size: size,
-            cell_size: Vec2::new(10.0, 10.0),
+            cell_size: Vec2::new(12.0, 12.0),
         }),
         ..Default::default()
     });
