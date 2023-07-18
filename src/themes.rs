@@ -71,7 +71,7 @@ pub fn velo_light() -> Theme {
         bottom_panel_bg: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0),
         btn_border: Color::rgb(0.5, 0.5, 0.5),
         canvas_bg_color: None,
-        canvas_bg_line_color: Color::rgba(97. / 255., 164. / 255., 255. / 255., 0.2),
+        canvas_bg_line_color: Color::rgba(97. / 255., 164. / 255., 1., 0.2),
         celebrate_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         celebrate_btn: Color::RED,
         drawing_pencil_btn_bg: Color::rgb(0.9, 0.9, 0.9),
