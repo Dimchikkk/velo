@@ -1,11 +1,11 @@
 #import bevy_sprite::mesh2d_functions as MeshFunctions
 
-struct CustomMaterial {
+struct CustomShadowMaterial {
     color: vec4<f32>,
 };
 
 @group(1) @binding(0)
-var<uniform> material: CustomMaterial;
+var<uniform> material: CustomShadowMaterial;
 
 struct VertexOutput {
     @location(0) uv: vec2<f32>,

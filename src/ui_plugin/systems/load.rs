@@ -15,7 +15,7 @@ use super::{
 };
 use crate::{canvas::arrow::events::CreateArrow, utils::load_doc_to_memory};
 use crate::{
-    canvas::{arrow::components::ArrowMeta, shadows::CustomMaterial},
+    canvas::{arrow::components::ArrowMeta, shadows::CustomShadowMaterial},
     resources::{FontSystemState, LoadTabRequest},
     themes::Theme,
 };
@@ -114,7 +114,7 @@ pub fn load_tab(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     theme: Res<Theme>,
     mut local_theme: Local<Option<Map<String, Value>>>,
-    mut materials_meshes: (ResMut<Assets<CustomMaterial>>, ResMut<Assets<Mesh>>),
+    mut materials_meshes: (ResMut<Assets<CustomShadowMaterial>>, ResMut<Assets<Mesh>>),
 ) {
     *ui_state = UiState::default();
     let value = serde_json::to_value(&*theme).unwrap();
