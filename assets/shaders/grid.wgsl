@@ -27,10 +27,8 @@ fn fragment(
     let grid_size: vec2<f32> = material.grid_size;
     let cell_size: vec2<f32> = material.cell_size;
 
-    // Calculate the relative position of the current pixel to the origin of the grid
     let point = (mesh.uv - vec2(0.5)) * grid_size;
 
-    // Check if the relative position is on a grid line
     let t = grid(point, cell_size, 1.);
     let u = grid(point, cell_size, 2.);
     let g = min(t, u);
