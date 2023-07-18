@@ -24,8 +24,8 @@ pub fn setup_camera(mut commands: Commands, theme: Res<Theme>) {
     } else {
         main_camera.camera_2d.clear_color = ClearColorConfig::Custom(Color::WHITE.with_a(0.1));
     }
-    let max_size = 1000000.;
 
+    let max_size = theme.max_grid_size;
     commands.spawn((main_camera, MainCamera)).insert(PanCam {
         grab_buttons: vec![MouseButton::Right],
         enabled: true,

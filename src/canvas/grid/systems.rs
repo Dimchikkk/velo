@@ -9,7 +9,7 @@ pub fn grid(
     mut meshes: ResMut<Assets<Mesh>>,
     theme: Res<Theme>,
 ) {
-    let max_size = 1000000.;
+    let max_size = theme.max_grid_size;
     let size = Vec2::new(max_size, max_size);
     let mesh = Mesh::from(shape::Quad { size, flip: false });
 
