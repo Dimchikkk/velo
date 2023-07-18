@@ -10,28 +10,35 @@ struct CustomGridMaterial {
 @group(1) @binding(0)
 var<uniform> material: CustomGridMaterial;
 
+fn grid(point: vec2<f32>, cell_size: vec2<f32>, thickness: f32) -> f32 {
+  let x = abs(fract(point.x / cell_size.x)) * cell_size.x - thickness;
+  let y = abs(fract(point.y / cell_size.y)) * cell_size.y - thickness;
+  return min(x, y);
+}
+
 @fragment
 fn fragment(
     mesh: MeshVertexOutput,
 ) -> @location(0) vec4<f32> {
-    let color: vec4<f32> = material.color;
+    // let color: vec4<f32> = material.color;
     let line_color: vec4<f32> = material.line_color;
     let grid_size: vec2<f32> = material.grid_size;
     let cell_size: vec2<f32> = material.cell_size;
 
     // Calculate the relative position of the current pixel to the origin of the grid
-    let relative_pos = ceil((mesh.uv - vec2(0.5)) * grid_size);
+    let point = floor((mesh.uv - vec2(0.5)) * grid_size);
 
     // Check if the relative position is on a grid line
-    let epsilon: f32 = 0.01;
-    let on_line_x = fract(relative_pos.x / cell_size.x) < epsilon || fract(relative_pos.x / cell_size.x) > (1.0 - epsilon);
-    let on_line_y = fract(relative_pos.y / cell_size.y) < epsilon || fract(relative_pos.y / cell_size.y) > (1.0 - epsilon);
+    let t = grid(point, cell_size, 0.1);
+    let u = grid(point, cell_size * 10.,   1.0);
+    let g = min(t, u);
+    let alpha =  1.0 - smoothstep(0.0, fwidth(g), g);
+    
+    
+    var color = line_color;
+    if abs(point.x) < 0.1 || abs(point.y) < 0.1 {
+        color = vec4(1.0, 0.,0., 1.);
+    } 
 
-    // If the relative position is on a grid line, return the line color
-    if on_line_x || on_line_y {
-        return line_color;
-    }
-
-    // Otherwise, return the color
-    return color;
+    return vec4(color.rgb, alpha * color.a);
 }

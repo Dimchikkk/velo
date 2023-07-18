@@ -25,7 +25,7 @@ pub struct VeloPlugin;
 impl Plugin for VeloPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PreStartup, setup_velo_theme)
-            .add_systems(Startup, (setup_camera, setup_background))
+            .add_systems(Startup, setup_camera)
             .add_plugins(
                 DefaultPlugins
                     .set(WindowPlugin {

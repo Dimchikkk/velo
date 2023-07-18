@@ -3,6 +3,7 @@ use bevy::{
     reflect::{TypePath, TypeUuid},
     render::render_resource::{AsBindGroup, ShaderRef},
     sprite::{Material2d, Material2dPlugin},
+    transform::TransformSystem,
 };
 
 pub mod systems;
@@ -16,7 +17,11 @@ pub struct CanvasInserted(pub bool);
 impl Plugin for GridPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Material2dPlugin::<CustomGridMaterial>::default())
-            .add_systems(Startup, grid);
+            .add_systems(Startup, grid)
+            .add_systems(
+                PostUpdate,
+                update_camera_translation.after(TransformSystem::TransformPropagate),
+            );
     }
 }
 

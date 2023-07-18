@@ -1,7 +1,6 @@
 use crate::{
     components::{EffectsCamera, MainCamera},
     themes::{get_theme_by_name, Theme},
-    ui_plugin::ui_helpers::InteractiveNode,
     utils::get_theme_key,
 };
 use bevy::{
@@ -16,14 +15,6 @@ pub fn setup_velo_theme(mut commands: Commands, pkv: Res<PkvStore>) {
     let theme_key = get_theme_key(&pkv);
     let theme = get_theme_by_name(&theme_key);
     commands.insert_resource(theme);
-}
-
-pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>, theme: Res<Theme>) {
-    let mut sprite_bundle = SpriteBundle::default();
-    // if let Some(bg_img) = theme.canvas_bg_img.clone() {
-    //     sprite_bundle.texture = asset_server.load(bg_img);
-    // }
-    commands.spawn(sprite_bundle);
 }
 
 pub fn setup_camera(mut commands: Commands, theme: Res<Theme>) {
