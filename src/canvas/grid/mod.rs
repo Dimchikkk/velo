@@ -29,8 +29,6 @@ impl Plugin for GridPlugin {
 #[uuid = "CC3772B3-5282-4F1F-92B5-4F2D864B4441"]
 pub struct CustomGridMaterial {
     #[uniform(0)]
-    color: Color,
-    #[uniform(0)]
     line_color: Color,
     #[uniform(0)]
     grid_size: Vec2,

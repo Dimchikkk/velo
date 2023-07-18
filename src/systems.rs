@@ -24,13 +24,18 @@ pub fn setup_camera(mut commands: Commands, theme: Res<Theme>) {
     } else {
         main_camera.camera_2d.clear_color = ClearColorConfig::Custom(Color::WHITE.with_a(0.1));
     }
+    let max_size = 1000000.;
+
     commands.spawn((main_camera, MainCamera)).insert(PanCam {
         grab_buttons: vec![MouseButton::Right],
         enabled: true,
         zoom_to_cursor: false,
         min_scale: 1.,
         max_scale: None,
-        ..default()
+        min_x: Some(-max_size / 2.),
+        max_x: Some(max_size / 2.),
+        min_y: Some(-max_size / 2.),
+        max_y: Some(max_size / 2.),
     });
     let mut effects_camera = Camera2dBundle {
         camera: Camera {
