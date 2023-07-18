@@ -23,7 +23,7 @@ pub fn update_particles_effect(
 
     if let Ok(window) = window.get_single() {
         if let Some(mouse_pos) = window.cursor_position() {
-            if mouse_button_input.just_pressed(MouseButton::Left) {
+            if mouse_button_input.pressed(MouseButton::Left) {
                 let ray = camera
                     .viewport_to_world(camera_transform, mouse_pos)
                     .unwrap();
