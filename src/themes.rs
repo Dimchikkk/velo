@@ -34,6 +34,7 @@ pub struct Theme {
     pub left_panel_bg: Color,
     pub line_height: f32,
     pub link: Color,
+    pub max_grid_size: f32,
     pub menu_bg: Color,
     pub menu_btn_bg: Color,
     pub menu_btn: Color,
@@ -117,6 +118,7 @@ pub fn velo_light() -> Theme {
         tab_bg: Color::rgb(0.9, 0.9, 0.9),
         text_pos_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
         tooltip_bg: Color::rgb(1., 1., 1.),
+        max_grid_size: 1000000.,
     }
 }
 
@@ -177,6 +179,7 @@ pub fn velo_dark() -> Theme {
         tab_bg: Color::rgb(0.2, 0.2, 0.2),
         text_pos_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         tooltip_bg: Color::rgb(0.2, 0.2, 0.2),
+        max_grid_size: 1000000.,
     }
 }
 
