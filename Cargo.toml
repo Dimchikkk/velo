@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
-version = "0.8.7"
+version = "0.8.8"
 edition = "2021"
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
@@ -59,8 +59,7 @@ js-sys = "0.3.61"
 url = "2.3.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-# TODO: point to crates.io when it's published
-bevy_hanabi = { git = "https://github.com/djeedai/bevy_hanabi", rev = "e013d27", default-features = false, features = [ "2d" ] }
+bevy_hanabi = { version = "0.7" }
 arboard = "3.2.0"
 open = "4.0.1"
 toml = "0.7.3"

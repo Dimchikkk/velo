@@ -98,21 +98,23 @@ pub fn create_particles_effect(
                     let writer = ExprWriter::new();
                     let lifetime = writer.lit(5.).uniform(writer.lit(10.)).expr();
                     let spawner = Spawner::rate(rng.gen_range(10.0..300.0).into());
+                    let position_circle_modifier = SetPositionCircleModifier {
+                        center: writer.lit(Vec3::ZERO).expr(),
+                        axis: writer.lit(Vec3::Z).expr(),
+                        radius: writer.lit(0.0001).expr(),
+                        dimension: ShapeDimension::Surface,
+                    };
+                    let velocity_circle_modifier = SetVelocityCircleModifier {
+                        center: writer.lit(Vec3::ZERO).expr(),
+                        axis: writer.lit(Vec3::Z).expr(),
+                        speed: writer.lit(0.05).uniform(writer.lit(0.1)).expr(),
+                    };
                     let effect = effects.add(
                         EffectAsset::new(32768, spawner, writer.finish())
                             .with_name("Effect")
-                            .init(InitPositionCircleModifier {
-                                center: Vec3::ZERO,
-                                axis: Vec3::Z,
-                                radius: 0.0001,
-                                dimension: ShapeDimension::Surface,
-                            })
-                            .init(InitVelocityCircleModifier {
-                                center: Vec3::ZERO,
-                                axis: Vec3::Z,
-                                speed: CpuValue::Uniform((0.05, 0.1)),
-                            })
-                            .init(InitAttributeModifier {
+                            .init(position_circle_modifier)
+                            .init(velocity_circle_modifier)
+                            .init(SetAttributeModifier {
                                 attribute: Attribute::LIFETIME,
                                 value: lifetime,
                             })
