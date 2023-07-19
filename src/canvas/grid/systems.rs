@@ -25,7 +25,7 @@ pub fn grid(
             line_color: theme.canvas_bg_line_color,
             grid_size: size,
             cell_size: Vec2::splat(CELL_SIZE),
-            major: 8.0,
+            major: 4.0,
         }),
         ..Default::default()
     });
