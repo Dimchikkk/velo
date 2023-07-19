@@ -20,6 +20,8 @@ pub fn create_arrow(
     let arrow_path = build_arrow(start, end, arrow_meta);
     commands.spawn((
         ShapeBundle {
+            // TODO: https://github.com/StaffEngineer/velo/issues/195
+            transform: Transform::from_xyz(0.0, 0.0, 0.1),
             path: arrow_path,
             ..default()
         },

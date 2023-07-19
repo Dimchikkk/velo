@@ -215,9 +215,6 @@ pub struct ModalCancel {
 #[derive(Component)]
 pub struct InteractiveNode;
 
-#[derive(Component)]
-pub struct Background;
-
 #[derive(Component, Clone)]
 pub struct Drawing<T> {
     pub id: ReflectableUuid,

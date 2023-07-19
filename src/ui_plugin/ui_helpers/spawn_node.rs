@@ -9,7 +9,7 @@ use bevy::prelude::*;
 use cosmic_text::AttrsOwned;
 
 use crate::canvas::shadows::systems::spawn_shadow;
-use crate::canvas::shadows::CustomMaterial;
+use crate::canvas::shadows::CustomShadowMaterial;
 use crate::themes::Theme;
 use crate::ui_plugin::NodeType;
 use crate::TextPos;
@@ -33,7 +33,7 @@ pub struct NodeMeta {
 
 pub fn spawn_sprite_node(
     commands: &mut Commands,
-    materials: &mut ResMut<Assets<CustomMaterial>>,
+    materials: &mut ResMut<Assets<CustomShadowMaterial>>,
     meshes: &mut ResMut<Assets<Mesh>>,
     theme: &Res<Theme>,
     cosmic_fonts: &mut ResMut<Assets<CosmicFont>>,

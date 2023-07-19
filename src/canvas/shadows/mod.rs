@@ -17,7 +17,7 @@ pub struct ShadowsPlugin;
 
 impl Plugin for ShadowsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(Material2dPlugin::<CustomMaterial>::default())
+        app.add_plugins(Material2dPlugin::<CustomShadowMaterial>::default())
             .add_systems(
                 PostUpdate,
                 update_shadows.after(TransformSystem::TransformPropagate),
@@ -27,17 +27,17 @@ impl Plugin for ShadowsPlugin {
 
 #[derive(AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
 #[uuid = "f690fdae-d598-45ab-8225-97e2a3f056e0"]
-pub struct CustomMaterial {
+pub struct CustomShadowMaterial {
     #[uniform(0)]
     color: Color,
 }
 
-impl Material2d for CustomMaterial {
+impl Material2d for CustomShadowMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/custom_material.wgsl".into()
+        "shaders/shadows.wgsl".into()
     }
     fn vertex_shader() -> ShaderRef {
-        "shaders/custom_material.wgsl".into()
+        "shaders/shadows.wgsl".into()
     }
 
     fn specialize(

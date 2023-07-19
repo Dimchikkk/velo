@@ -1,7 +1,6 @@
 use crate::{
     components::{EffectsCamera, MainCamera},
     themes::{get_theme_by_name, Theme},
-    ui_plugin::ui_helpers::{Background, InteractiveNode},
     utils::get_theme_key,
 };
 use bevy::{
@@ -18,14 +17,6 @@ pub fn setup_velo_theme(mut commands: Commands, pkv: Res<PkvStore>) {
     commands.insert_resource(theme);
 }
 
-pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>, theme: Res<Theme>) {
-    let mut sprite_bundle = SpriteBundle::default();
-    if let Some(bg_img) = theme.canvas_bg_img.clone() {
-        sprite_bundle.texture = asset_server.load(bg_img);
-    }
-    commands.spawn((sprite_bundle, Background, InteractiveNode));
-}
-
 pub fn setup_camera(mut commands: Commands, theme: Res<Theme>) {
     let mut main_camera = Camera2dBundle::default();
     if let Some(bg_color) = theme.canvas_bg_color {
@@ -33,13 +24,18 @@ pub fn setup_camera(mut commands: Commands, theme: Res<Theme>) {
     } else {
         main_camera.camera_2d.clear_color = ClearColorConfig::Custom(Color::WHITE.with_a(0.1));
     }
+
+    let max_size = theme.max_grid_size;
     commands.spawn((main_camera, MainCamera)).insert(PanCam {
         grab_buttons: vec![MouseButton::Right],
         enabled: true,
         zoom_to_cursor: false,
         min_scale: 1.,
-        max_scale: Some(3.),
-        ..default()
+        max_scale: None,
+        min_x: Some(-max_size / 2.),
+        max_x: Some(max_size / 2.),
+        min_y: Some(-max_size / 2.),
+        max_y: Some(max_size / 2.),
     });
     let mut effects_camera = Camera2dBundle {
         camera: Camera {
