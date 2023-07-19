@@ -20,7 +20,8 @@ impl Plugin for GridPlugin {
             .add_systems(Startup, grid)
             .add_systems(
                 PostUpdate,
-                update_camera_translation.after(TransformSystem::TransformPropagate),
+                (update_camera_translation, update_cell_size)
+                    .after(TransformSystem::TransformPropagate),
             );
     }
 }
@@ -34,6 +35,8 @@ pub struct CustomGridMaterial {
     grid_size: Vec2,
     #[uniform(0)]
     cell_size: Vec2,
+    #[uniform(0)]
+    major: f32,
 }
 
 impl Material2d for CustomGridMaterial {
