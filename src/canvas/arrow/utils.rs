@@ -15,13 +15,13 @@ pub fn create_arrow(
     theme: &Res<Theme>,
     start: Vec2,
     end: Vec2,
+    z: f32,
     arrow_meta: ArrowMeta,
 ) {
     let arrow_path = build_arrow(start, end, arrow_meta);
     commands.spawn((
         ShapeBundle {
-            // TODO: https://github.com/StaffEngineer/velo/issues/195
-            transform: Transform::from_xyz(0.0, 0.0, 0.1),
+            transform: Transform::from_xyz(0.0, 0.0, z),
             path: arrow_path,
             ..default()
         },

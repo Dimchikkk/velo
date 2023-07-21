@@ -4,6 +4,7 @@ use super::components::{ArrowConnect, ArrowMeta};
 use super::events::{CreateArrow, RedrawArrow};
 use super::utils::{build_arrow, create_arrow};
 use crate::themes::Theme;
+use crate::ui_plugin::ui_helpers::VeloNode;
 use crate::ui_plugin::{NodeInteraction, UiState};
 use bevy_prototype_lyon::prelude::Path;
 
@@ -52,6 +53,7 @@ pub fn create_arrow_end(
     mut commands: Commands,
     mut events: EventReader<CreateArrow>,
     arrow_markers: Query<(&ArrowConnect, &GlobalTransform), With<ArrowConnect>>,
+    velo_nodes: Query<(&Transform, &VeloNode), With<VeloNode>>,
     theme: Res<Theme>,
 ) {
     for event in events.iter() {
@@ -65,11 +67,22 @@ pub fn create_arrow_end(
                 end = Some(global_transform.affine().translation.truncate());
             }
             if let (Some(start), Some(end)) = (start, end) {
+                let mut max_z = 0.1;
+                for (transform, velo_node) in velo_nodes.iter() {
+                    if velo_node.id == event.start.id {
+                        max_z = f32::max(max_z, transform.translation.z);
+                    }
+                    if velo_node.id == event.end.id {
+                        max_z = f32::max(max_z, transform.translation.z);
+                    }
+                }
+
                 create_arrow(
                     &mut commands,
                     &theme,
                     start,
                     end,
+                    max_z,
                     ArrowMeta {
                         start: event.start,
                         end: event.end,
