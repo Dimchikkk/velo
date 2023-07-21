@@ -56,7 +56,6 @@ pub fn update_shadows(
     cosmic_query: Query<&CosmicEdit, With<RawText>>,
 ) {
     for (global_transform, children) in velo_node_query.iter() {
-        eprintln!("here");
         let mut velo_shape_children = None;
         let mut mesh_handle = None;
 
