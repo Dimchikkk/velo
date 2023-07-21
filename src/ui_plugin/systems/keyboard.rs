@@ -16,6 +16,7 @@ use std::{collections::VecDeque, convert::TryInto};
 use uuid::Uuid;
 
 use crate::{
+    components::MainCamera,
     resources::{LoadTabRequest, SaveTabRequest},
     themes::Theme,
     utils::bevy_color_to_cosmic,
@@ -41,15 +42,19 @@ pub fn keyboard_input_system(
         (&EditableText, &mut CosmicEdit, &mut CosmicEditHistory),
         With<EditableText>,
     >,
+    mut camera_proj_query: Query<&Transform, With<MainCamera>>,
     theme: Res<Theme>,
 ) {
+    let camera_transform = camera_proj_query.single_mut();
+    let x = camera_transform.translation.x;
+    let y = camera_transform.translation.y;
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
     let command = input.any_pressed([KeyCode::SuperLeft, KeyCode::SuperRight]);
     let shift = input.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
     if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
-        insert_from_clipboard(&mut images, &mut events, scale_factor, &theme);
+        insert_from_clipboard(&mut images, &mut events, x, y, scale_factor, &theme);
     } else if command && shift && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveDocRequest {
             doc_id: app_state.current_document.unwrap(),
@@ -127,6 +132,8 @@ pub fn keyboard_input_system(
 pub fn insert_from_clipboard(
     images: &mut ResMut<Assets<Image>>,
     events: &mut EventWriter<AddRect<(String, Color)>>,
+    x: f32,
+    y: f32,
     scale_factor: f64,
     theme: &Res<Theme>,
 ) {
@@ -158,8 +165,8 @@ pub fn insert_from_clipboard(
                 node: JsonNode {
                     id: Uuid::new_v4(),
                     node_type: crate::NodeType::Rect,
-                    x: 0.0,
-                    y: 0.0,
+                    x,
+                    y,
                     width: width as f32 / scale_factor as f32,
                     height: height as f32 / scale_factor as f32,
                     text: crate::JsonNodeText {

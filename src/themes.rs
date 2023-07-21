@@ -79,7 +79,7 @@ pub fn velo_light() -> Theme {
         clipboard_image_bg: Color::WHITE,
         code_default_lang: "rs".to_string(),
         code_theme: "Solarized (light)".to_string(),
-        color_change_1: Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0),
+        color_change_1: Color::NONE,
         color_change_2: Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
         color_change_3: Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
         color_change_4: Color::rgb(239., 68.0 / 255.0, 68.0 / 255.0),
@@ -118,7 +118,7 @@ pub fn velo_light() -> Theme {
         tab_bg: Color::rgb(0.9, 0.9, 0.9),
         text_pos_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
         tooltip_bg: Color::rgb(1., 1., 1.),
-        max_grid_size: 1000000.,
+        max_grid_size: 1_000_000.,
     }
 }
 
@@ -140,7 +140,7 @@ pub fn velo_dark() -> Theme {
         clipboard_image_bg: Color::BLACK,
         code_default_lang: "rs".to_string(),
         code_theme: "base16-ocean.dark".to_string(),
-        color_change_1: Color::rgb(1., 225.0 / 255.0, 130.0 / 255.0),
+        color_change_1: Color::NONE,
         color_change_2: Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
         color_change_3: Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
         color_change_4: Color::rgb(239., 68.0 / 255.0, 68.0 / 255.0),
@@ -179,7 +179,7 @@ pub fn velo_dark() -> Theme {
         tab_bg: Color::rgb(0.2, 0.2, 0.2),
         text_pos_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         tooltip_bg: Color::rgb(0.2, 0.2, 0.2),
-        max_grid_size: 1000000.,
+        max_grid_size: 1_000_000.,
     }
 }
 

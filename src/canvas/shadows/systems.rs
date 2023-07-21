@@ -1,6 +1,6 @@
 use bevy::{
     prelude::*,
-    render::{mesh::Indices, render_resource::PrimitiveTopology},
+    render::{mesh::Indices, render_resource::PrimitiveTopology, view::NoFrustumCulling},
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 use bevy_cosmic_edit::CosmicEdit;
@@ -38,12 +38,13 @@ pub fn spawn_shadow(
                 color: theme.shadow,
             }),
             transform: Transform {
-                translation: Vec3::new(0.0, 0.0, 0.09),
+                translation: Vec3::new(0.0, 0.0, 0.0009),
                 ..Default::default()
             },
             ..Default::default()
         })
         .insert(Shadow)
+        .insert(NoFrustumCulling)
         .id()
 }
 

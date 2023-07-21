@@ -22,7 +22,7 @@ use super::ui_helpers::{
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
-use crate::components::{Doc, Tab};
+use crate::components::{Doc, MainCamera, Tab};
 use crate::resources::{AppState, FontSystemState, LoadDocRequest, SaveDocRequest};
 use crate::utils::{
     bevy_color_to_cosmic, get_timestamp, load_doc_to_memory, ReflectableUuid, UserPreferences,
@@ -47,8 +47,19 @@ pub fn rec_button_handlers(
     mut drawings: Query<Entity, With<Drawing<(String, Color)>>>,
     mut ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
+    mut camera_proj_query: Query<
+        &Transform,
+        (
+            With<MainCamera>,
+            With<OrthographicProjection>,
+            Without<VeloNode>,
+        ),
+    >,
     theme: Res<Theme>,
 ) {
+    let camera_transform = camera_proj_query.single_mut();
+    let x = camera_transform.translation.x;
+    let y = camera_transform.translation.y;
     for (interaction, button_action) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => match button_action.button_type {
@@ -57,8 +68,8 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Rect,
-                            x: 0.,
-                            y: 0.,
+                            x,
+                            y,
                             width: theme.node_width,
                             height: theme.node_height,
                             text: JsonNodeText {
@@ -76,8 +87,8 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Circle,
-                            x: 0.,
-                            y: 0.,
+                            x,
+                            y,
                             width: theme.node_width,
                             height: theme.node_height,
                             text: JsonNodeText {
@@ -95,8 +106,8 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Paper,
-                            x: 0.,
-                            y: 0.,
+                            x,
+                            y,
                             width: theme.node_width,
                             height: theme.node_height,
                             text: JsonNodeText {
@@ -175,10 +186,10 @@ pub fn rec_button_handlers(
                         for (_, node, mut transform) in velo_node_query.iter_mut() {
                             if node.id == id {
                                 if let Some((_, translation)) = data {
-                                    transform.translation.z = (translation.z + 3.) % f32::MAX;
+                                    transform.translation.z = (translation.z + 0.03) % f32::MAX;
                                 } else {
                                     transform.translation.z =
-                                        (transform.translation.z + 3.) % f32::MAX;
+                                        (transform.translation.z + 0.03) % f32::MAX;
                                 }
                                 if tab.z_index < transform.translation.z {
                                     tab.z_index = transform.translation.z;
@@ -224,10 +235,10 @@ pub fn rec_button_handlers(
                         for (_, node, mut transform) in velo_node_query.iter_mut() {
                             if node.id == id {
                                 if let Some((_, translation)) = data {
-                                    transform.translation.z = f32::max(translation.z - 3., 1.);
+                                    transform.translation.z = f32::max(translation.z - 0.03, 1.);
                                 } else {
                                     transform.translation.z =
-                                        f32::max(transform.translation.z - 3., 1.);
+                                        f32::max(transform.translation.z - 0.03, 1.);
                                 }
                                 break;
                             }
@@ -253,9 +264,9 @@ pub fn change_color_pallete(
         match *interaction {
             Interaction::Pressed => {
                 let pair_color = change_color.pair_color.clone();
-                for (mut stroke, mut velo_border) in velo_border.iter_mut() {
+                for (mut fill, mut velo_border) in velo_border.iter_mut() {
                     if Some(velo_border.id) == ui_state.entity_to_edit {
-                        stroke.color = pair_color.1;
+                        fill.color = pair_color.1;
                         velo_border.pair_color = pair_color;
                         return;
                     }
@@ -338,7 +349,7 @@ pub fn new_doc_handler(
                     name: "Tab 1".to_string(),
                     checkpoints,
                     is_active: true,
-                    z_index: 10.,
+                    z_index: 1.,
                 }];
                 app_state.docs.insert(
                     doc_id,
@@ -684,19 +695,18 @@ pub fn import_from_url(
 
 pub fn button_generic_handler(
     mut generic_button_query: Query<
-        (&Interaction, &mut BackgroundColor, Entity),
+        (&Interaction, Entity),
         (Changed<Interaction>, With<GenericButton>),
     >,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut tooltips_query: Query<(&mut Style, &Parent), With<Tooltip>>,
 ) {
     let mut primary_window = windows.single_mut();
-    for (interaction, mut bg_color, entity) in &mut generic_button_query.iter_mut() {
+    for (interaction, entity) in &mut generic_button_query.iter_mut() {
         match *interaction {
             Interaction::Pressed => {}
             Interaction::Hovered => {
                 primary_window.cursor.icon = CursorIcon::Hand;
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
                 for (mut style, parent) in tooltips_query.iter_mut() {
                     if parent.get() == entity {
                         style.display = Display::Flex;
@@ -705,7 +715,6 @@ pub fn button_generic_handler(
             }
             Interaction::None => {
                 primary_window.cursor.icon = CursorIcon::Default;
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
                 for (mut style, parent) in tooltips_query.iter_mut() {
                     if parent.get() == entity {
                         style.display = Display::None;
