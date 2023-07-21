@@ -264,9 +264,9 @@ pub fn change_color_pallete(
         match *interaction {
             Interaction::Pressed => {
                 let pair_color = change_color.pair_color.clone();
-                for (mut stroke, mut velo_border) in velo_border.iter_mut() {
+                for (mut fill, mut velo_border) in velo_border.iter_mut() {
                     if Some(velo_border.id) == ui_state.entity_to_edit {
-                        stroke.color = pair_color.1;
+                        fill.color = pair_color.1;
                         velo_border.pair_color = pair_color;
                         return;
                     }
@@ -702,12 +702,18 @@ pub fn button_generic_handler(
     mut tooltips_query: Query<(&mut Style, &Parent), With<Tooltip>>,
 ) {
     let mut primary_window = windows.single_mut();
+    let delta = 0.2;
     for (interaction, mut bg_color, entity) in &mut generic_button_query.iter_mut() {
         match *interaction {
             Interaction::Pressed => {}
             Interaction::Hovered => {
                 primary_window.cursor.icon = CursorIcon::Hand;
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 0.8);
+                bg_color.0 = Color::rgba(
+                    bg_color.0.r(),
+                    bg_color.0.g(),
+                    bg_color.0.b(),
+                    bg_color.0.a() - delta,
+                );
                 for (mut style, parent) in tooltips_query.iter_mut() {
                     if parent.get() == entity {
                         style.display = Display::Flex;
@@ -716,7 +722,12 @@ pub fn button_generic_handler(
             }
             Interaction::None => {
                 primary_window.cursor.icon = CursorIcon::Default;
-                bg_color.0 = Color::rgba(bg_color.0.r(), bg_color.0.g(), bg_color.0.b(), 1.);
+                bg_color.0 = Color::rgba(
+                    bg_color.0.r(),
+                    bg_color.0.g(),
+                    bg_color.0.b(),
+                    bg_color.0.a() + delta,
+                );
                 for (mut style, parent) in tooltips_query.iter_mut() {
                     if parent.get() == entity {
                         style.display = Display::None;

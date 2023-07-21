@@ -75,13 +75,8 @@ pub fn resize_entity_run(
     mut raw_text_query: Query<(&Parent, &RawText, &mut CosmicEdit, &mut Sprite), With<RawText>>,
     mut border_query: Query<(&Parent, &VeloShape, &mut Path), With<VeloShape>>,
     mut velo_node_query: Query<
-        (&mut Transform, &Children, &mut Sprite),
-        (
-            With<VeloNode>,
-            Without<ResizeMarker>,
-            Without<ArrowConnect>,
-            Without<RawText>,
-        ),
+        (&mut Transform, &Children),
+        (With<VeloNode>, Without<ResizeMarker>, Without<ArrowConnect>),
     >,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
@@ -100,7 +95,7 @@ pub fn resize_entity_run(
             {
                 let (border_parent, velo_border, mut path) =
                     border_query.get_mut(raw_text_parent.get()).unwrap();
-                let (velo_transform, children, mut velo_sprite) =
+                let (velo_transform, children) =
                     velo_node_query.get_mut(border_parent.get()).unwrap();
                 let pos = velo_transform.translation.truncate();
                 let mut width = f32::max(((cursor_pos.x - pos.x).abs() * 2.).round(), 1.);
@@ -118,7 +113,6 @@ pub fn resize_entity_run(
 
                 cosmic_edit.width = width;
                 cosmic_edit.height = height;
-                velo_sprite.custom_size = Some(Vec2::new(width, height));
                 sprite.custom_size = Some(Vec2::new(width, height));
                 cosmic_edit.editor.buffer_mut().set_redraw(true);
 
