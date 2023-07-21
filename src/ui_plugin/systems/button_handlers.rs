@@ -22,7 +22,7 @@ use super::ui_helpers::{
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
-use crate::components::{Doc, Tab};
+use crate::components::{Doc, MainCamera, Tab};
 use crate::resources::{AppState, FontSystemState, LoadDocRequest, SaveDocRequest};
 use crate::utils::{
     bevy_color_to_cosmic, get_timestamp, load_doc_to_memory, ReflectableUuid, UserPreferences,
@@ -47,8 +47,19 @@ pub fn rec_button_handlers(
     mut drawings: Query<Entity, With<Drawing<(String, Color)>>>,
     mut ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
+    mut camera_proj_query: Query<
+        &Transform,
+        (
+            With<MainCamera>,
+            With<OrthographicProjection>,
+            Without<VeloNode>,
+        ),
+    >,
     theme: Res<Theme>,
 ) {
+    let camera_transform = camera_proj_query.single_mut();
+    let x = camera_transform.translation.x;
+    let y = camera_transform.translation.y;
     for (interaction, button_action) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => match button_action.button_type {
@@ -57,8 +68,8 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Rect,
-                            x: 0.,
-                            y: 0.,
+                            x,
+                            y,
                             width: theme.node_width,
                             height: theme.node_height,
                             text: JsonNodeText {
@@ -76,8 +87,8 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Circle,
-                            x: 0.,
-                            y: 0.,
+                            x,
+                            y,
                             width: theme.node_width,
                             height: theme.node_height,
                             text: JsonNodeText {
@@ -95,8 +106,8 @@ pub fn rec_button_handlers(
                         node: JsonNode {
                             id: Uuid::new_v4(),
                             node_type: NodeType::Paper,
-                            x: 0.,
-                            y: 0.,
+                            x,
+                            y,
                             width: theme.node_width,
                             height: theme.node_height,
                             text: JsonNodeText {
