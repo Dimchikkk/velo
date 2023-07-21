@@ -50,7 +50,10 @@ pub fn spawn_shadow(
 
 pub fn update_shadows(
     mut meshes: ResMut<Assets<Mesh>>,
-    velo_node_query: Query<(&GlobalTransform, &Children), With<VeloNode>>,
+    velo_node_query: Query<
+        (&GlobalTransform, &Children),
+        (Or<(Changed<Transform>, Changed<Sprite>)>, With<VeloNode>),
+    >,
     velo_shape_query: Query<&Children, With<VeloShape>>,
     shadows_query: Query<&Mesh2dHandle, With<Shadow>>,
     cosmic_query: Query<&CosmicEdit, With<RawText>>,
