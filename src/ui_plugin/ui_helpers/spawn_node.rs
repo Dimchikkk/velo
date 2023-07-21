@@ -95,7 +95,7 @@ pub fn spawn_sprite_node(
         .spawn((
             bevy_prototype_lyon::prelude::ShapeBundle {
                 transform: Transform {
-                    translation: Vec3::new(0.0, 0.0, 0.1),
+                    translation: Vec3::new(0.0, 0.0, 0.001),
                     ..default()
                 },
                 path,
@@ -150,7 +150,7 @@ pub fn spawn_sprite_node(
         size: Some((width, height)),
         node: CosmicNode::Sprite(CosmicEditSprite {
             transform: Transform {
-                translation: Vec3::new(0.0, 0.0, 0.2),
+                translation: Vec3::new(0.0, 0.0, 0.002),
                 ..default()
             },
         }),
@@ -271,7 +271,7 @@ fn spawn_resize_marker(
                 ..default()
             },
             transform: Transform {
-                translation: Vec3 { x, y, z: 0.3 },
+                translation: Vec3 { x, y, z: 0.003 },
                 ..default()
             },
             ..default()
@@ -309,7 +309,7 @@ fn spawn_arrow_marker(
                 ..default()
             },
             transform: Transform {
-                translation: Vec3 { x, y, z: 0.3 },
+                translation: Vec3 { x, y, z: 0.003 },
                 ..default()
             },
             ..default()

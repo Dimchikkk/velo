@@ -34,7 +34,7 @@ pub fn create_new_node(
             .iter()
             .find(|x| x.is_active)
             .unwrap();
-        *z_index_local += (tab.z_index + 1.) % f32::MAX;
+        *z_index_local += 0.01 % f32::MAX;
         *ui_state = UiState::default();
         ui_state.entity_to_edit = Some(ReflectableUuid(event.node.id));
         let _ = spawn_sprite_node(
@@ -52,7 +52,7 @@ pub fn create_new_node(
                 image: event.image.clone(),
                 text: event.node.text.text.clone(),
                 pair_bg_color: event.node.bg_color.clone(),
-                position: (event.node.x, event.node.y, *z_index_local),
+                position: (event.node.x, event.node.y, tab.z_index + *z_index_local),
                 text_pos: event.node.text.pos.clone(),
                 is_active: true,
             },

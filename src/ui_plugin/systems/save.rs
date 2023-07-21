@@ -260,7 +260,7 @@ mod tests {
                     is_active: true,
                     name: "Test tab".to_string(),
                     checkpoints: std::collections::VecDeque::new(),
-                    z_index: 10.,
+                    z_index: 1.,
                 }],
             },
         );

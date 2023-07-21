@@ -96,11 +96,15 @@ pub fn drawing(
                                 .draw_color_pair
                                 .clone()
                                 .unwrap_or(pair_struct!(theme.drawing_pencil_btn));
-                            *z_index_local += (tab.z_index + 1.) % f32::MAX;
+                            *z_index_local += 0.01 % f32::MAX;
                             commands.spawn((
                                 ShapeBundle {
                                     path: PathBuilder::new().build(),
-                                    transform: Transform::from_xyz(0., 0., *z_index_local),
+                                    transform: Transform::from_xyz(
+                                        0.,
+                                        0.,
+                                        tab.z_index + *z_index_local,
+                                    ),
                                     ..Default::default()
                                 },
                                 Stroke::new(pair_color.1, 2.),

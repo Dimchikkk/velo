@@ -186,10 +186,10 @@ pub fn rec_button_handlers(
                         for (_, node, mut transform) in velo_node_query.iter_mut() {
                             if node.id == id {
                                 if let Some((_, translation)) = data {
-                                    transform.translation.z = (translation.z + 3.) % f32::MAX;
+                                    transform.translation.z = (translation.z + 0.03) % f32::MAX;
                                 } else {
                                     transform.translation.z =
-                                        (transform.translation.z + 3.) % f32::MAX;
+                                        (transform.translation.z + 0.03) % f32::MAX;
                                 }
                                 if tab.z_index < transform.translation.z {
                                     tab.z_index = transform.translation.z;
@@ -235,10 +235,10 @@ pub fn rec_button_handlers(
                         for (_, node, mut transform) in velo_node_query.iter_mut() {
                             if node.id == id {
                                 if let Some((_, translation)) = data {
-                                    transform.translation.z = f32::max(translation.z - 3., 1.);
+                                    transform.translation.z = f32::max(translation.z - 0.03, 1.);
                                 } else {
                                     transform.translation.z =
-                                        f32::max(transform.translation.z - 3., 1.);
+                                        f32::max(transform.translation.z - 0.03, 1.);
                                 }
                                 break;
                             }
@@ -349,7 +349,7 @@ pub fn new_doc_handler(
                     name: "Tab 1".to_string(),
                     checkpoints,
                     is_active: true,
-                    z_index: 10.,
+                    z_index: 1.,
                 }];
                 app_state.docs.insert(
                     doc_id,

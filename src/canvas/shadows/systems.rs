@@ -38,7 +38,7 @@ pub fn spawn_shadow(
                 color: theme.shadow,
             }),
             transform: Transform {
-                translation: Vec3::new(0.0, 0.0, 0.09),
+                translation: Vec3::new(0.0, 0.0, 0.0009),
                 ..Default::default()
             },
             ..Default::default()
