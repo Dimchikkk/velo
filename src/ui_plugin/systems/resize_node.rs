@@ -2,7 +2,11 @@ use super::{
     ui_helpers::{ResizeMarker, VeloShape},
     NodeInteraction, NodeType, RawText, RedrawArrow, VeloNode,
 };
-use crate::{canvas::arrow::components::ArrowConnect, components::MainCamera, UiState};
+use crate::{
+    canvas::{arrow::components::ArrowConnect, shadows::systems::Shadow},
+    components::MainCamera,
+    UiState,
+};
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_cosmic_edit::CosmicEdit;
 use bevy_prototype_lyon::prelude::Path;
@@ -72,13 +76,17 @@ pub fn resize_entity_run(
         (&ArrowConnect, &mut Transform),
         (With<ArrowConnect>, Without<VeloNode>, Without<ResizeMarker>),
     >,
-    mut raw_text_query: Query<(&Parent, &RawText, &mut CosmicEdit, &mut Sprite), With<RawText>>,
+    mut raw_text_query: Query<
+        (&Parent, &RawText, &mut CosmicEdit, &mut Sprite),
+        (With<RawText>, Without<Shadow>),
+    >,
     mut border_query: Query<(&Parent, &VeloShape, &mut Path), With<VeloShape>>,
     mut velo_node_query: Query<
         (&mut Transform, &Children),
         (With<VeloNode>, Without<ResizeMarker>, Without<ArrowConnect>),
     >,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    mut shadows_q: Query<(&mut Sprite, &Shadow), (With<Shadow>, Without<RawText>)>,
 ) {
     let (camera, camera_transform) = camera_q.single();
 
@@ -117,6 +125,10 @@ pub fn resize_entity_run(
                 cosmic_edit.editor.buffer_mut().set_redraw(true);
 
                 for child in children.iter() {
+                    // update shadows sprite
+                    if let Ok((mut sprite, _)) = shadows_q.get_mut(*child) {
+                        sprite.custom_size = Some(Vec2::new(width, height));
+                    }
                     // update resize markers positions
                     if let Ok(resize) = resize_marker_query.get_mut(*child) {
                         let mut resize_transform = resize.2;
