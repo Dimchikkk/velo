@@ -188,7 +188,8 @@ pub fn spawn_sprite_node(
     }
 
     if item_meta.node_type == NodeType::Paper {
-        let shadow: Entity = spawn_shadow(commands, materials, meshes, theme);
+        let shadow: Entity =
+            spawn_shadow(commands, materials, meshes, theme, Vec2::new(width, height));
         commands.entity(top).add_child(shadow);
     }
 
