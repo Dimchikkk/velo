@@ -32,7 +32,7 @@ pub fn drawing(
         (&mut Path, &mut Drawing<(String, Color)>),
         With<Drawing<(String, Color)>>,
     >,
-    app_state: Res<AppState>,
+    mut app_state: ResMut<AppState>,
     mut z_index_local: Local<f32>,
 ) {
     let (camera, camera_transform) = camera_q.single();
@@ -54,10 +54,10 @@ pub fn drawing(
         }
         let tab = app_state
             .docs
-            .get(&current_document_id)
+            .get_mut(&current_document_id)
             .unwrap()
             .tabs
-            .iter()
+            .iter_mut()
             .find(|x| x.is_active)
             .unwrap();
 
@@ -97,14 +97,12 @@ pub fn drawing(
                                 .clone()
                                 .unwrap_or(pair_struct!(theme.drawing_pencil_btn));
                             *z_index_local += 0.01 % f32::MAX;
+                            tab.z_index += *z_index_local;
+
                             commands.spawn((
                                 ShapeBundle {
                                     path: PathBuilder::new().build(),
-                                    transform: Transform::from_xyz(
-                                        0.,
-                                        0.,
-                                        tab.z_index + *z_index_local,
-                                    ),
+                                    transform: Transform::from_xyz(0., 0., tab.z_index),
                                     ..Default::default()
                                 },
                                 Stroke::new(pair_color.1, 2.),
