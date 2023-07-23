@@ -1,7 +1,10 @@
-use crate::themes::Theme;
+use crate::{components::MainCamera, themes::Theme};
 
 use super::CustomGridMaterial;
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::{
+    prelude::*,
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+};
 
 const CELL_SIZE: f32 = 12.0;
 
@@ -36,45 +39,60 @@ pub fn grid(
         .insert(Grid);
 }
 
-pub fn update_camera_translation(
-    mut query: Query<
-        (&mut Transform, &OrthographicProjection),
-        (
-            Or<(Changed<Transform>, Changed<OrthographicProjection>)>,
-            With<OrthographicProjection>,
-        ),
+pub fn update_grid(
+    camera: Query<
+        (&Camera, &GlobalTransform, &OrthographicProjection),
+        (Changed<OrthographicProjection>, With<MainCamera>),
     >,
-    mut grid_q: Query<
-        (&mut Transform, &mut Visibility),
-        (With<Grid>, Without<OrthographicProjection>),
-    >,
-) {
-    for (mut transform, proj) in query.iter_mut() {
-        transform.translation = transform.translation.round();
-        let (mut grid_transform, mut grid_visibility) = grid_q.single_mut();
-        if proj.scale > 500. {
-            grid_transform.translation.x = transform.translation.x;
-            grid_transform.translation.y = transform.translation.y;
-            *grid_visibility = Visibility::Hidden;
-        } else {
-            *grid_visibility = Visibility::Visible;
-        }
-    }
-}
-
-pub fn update_cell_size(
-    camera: Query<&OrthographicProjection, Changed<OrthographicProjection>>,
-    grid: Query<&Handle<CustomGridMaterial>>,
+    grid: Query<(&Handle<CustomGridMaterial>, &Mesh2dHandle)>,
     mut materials: ResMut<Assets<CustomGridMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    for projection in camera.iter() {
-        for grid_handle in grid.iter() {
+    for (camera, camera_transform, projection) in camera.iter() {
+        for (grid_handle, mesh_handle) in grid.iter() {
+            let current_zoom = projection.scale;
+            let ndc = Vec3::ONE;
+            let world_coords = camera.ndc_to_world(camera_transform, ndc).unwrap();
+            let corner_offset = world_coords - camera_transform.translation();
+            let rect = corner_offset.truncate() * 2.0;
+            let side = rect.max_element();
+            let size = Vec2::splat(side) * 2.0;
+            if let Some(mesh) = meshes.get_mut(&mesh_handle.0) {
+                *mesh = shape::Quad::new(size).into();
+            }
             if let Some(material) = materials.get_mut(grid_handle) {
-                let current_zoom = projection.scale;
                 let exponent = current_zoom.log(material.major);
                 let exponent = exponent.ceil();
                 let grid_scale = material.major.powf(exponent);
                 material.cell_size = Vec2::splat(CELL_SIZE) * grid_scale;
+                material.grid_size = size;
+            }
+        }
+    }
+}
+
+pub fn grid_follows_camera(
+    camera: Query<
+        &GlobalTransform,
+        (
+            With<Camera>,
+            With<MainCamera>,
+            Or<(Changed<OrthographicProjection>, Changed<GlobalTransform>)>,
+        ),
+    >,
+    mut grid: Query<(&mut Transform, &Handle<CustomGridMaterial>)>,
+    materials: Res<Assets<CustomGridMaterial>>,
+) {
+    for (mut transform, material_handle) in grid.iter_mut() {
+        if let Some(material) = materials.get(material_handle) {
+            for camera in camera.iter() {
+                let major_grid_translation = material.cell_size * material.major;
+                let camera_major_grid_translation =
+                    (camera.translation().truncate() / major_grid_translation).trunc();
+                let truncated_camera_major_grid_translation =
+                    camera_major_grid_translation * major_grid_translation;
+                transform.translation.x = truncated_camera_major_grid_translation.x;
+                transform.translation.y = truncated_camera_major_grid_translation.y;
             }
         }
     }

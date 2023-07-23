@@ -20,7 +20,8 @@ impl Plugin for GridPlugin {
             .add_systems(Startup, grid)
             .add_systems(
                 PostUpdate,
-                (update_camera_translation, update_cell_size)
+                (update_grid, grid_follows_camera)
+                    .chain()
                     .after(TransformSystem::TransformPropagate),
             );
     }
