@@ -118,7 +118,7 @@ pub fn velo_light() -> Theme {
         tab_bg: Color::rgb(0.9, 0.9, 0.9),
         text_pos_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
         tooltip_bg: Color::rgb(1., 1., 1.),
-        max_camera_space: f32::MAX,
+        max_camera_space: 1_000_000_000_000_000_000.,
     }
 }
 
@@ -179,7 +179,7 @@ pub fn velo_dark() -> Theme {
         tab_bg: Color::rgb(0.2, 0.2, 0.2),
         text_pos_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         tooltip_bg: Color::rgb(0.2, 0.2, 0.2),
-        max_camera_space: f32::MAX,
+        max_camera_space: 1_000_000_000_000_000_000.,
     }
 }
 
