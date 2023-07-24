@@ -62,10 +62,10 @@ pub fn set_focus_drawing(
                 }
                 ui_state.entity_to_draw_selected = Some(drawing.id);
             }
-            if event.node_interaction_type == NodeInteractionType::LeftMouseHoldAndDrag {
-                if ui_state.entity_to_draw_selected == Some(drawing.id) {
-                    ui_state.entity_to_draw_hold = Some(drawing.id);
-                }
+            if event.node_interaction_type == NodeInteractionType::LeftMouseHoldAndDrag
+                && ui_state.entity_to_draw_selected == Some(drawing.id)
+            {
+                ui_state.entity_to_draw_hold = Some(drawing.id);
             }
         }
         if event.node_interaction_type == NodeInteractionType::LeftMouseRelease {
