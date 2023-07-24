@@ -11,13 +11,68 @@ use crate::{
 };
 
 use super::{
-    ui_helpers::{Drawing, MainPanel},
-    UiState,
+    ui_helpers::{Drawing, InteractiveNode, MainPanel},
+    NodeInteraction, NodeInteractionType, UiState,
 };
 
 #[path = "../../macros.rs"]
 #[macro_use]
 mod macros;
+
+pub fn entity_to_draw_selected_changed(
+    ui_state: Res<UiState>,
+    theme: Res<Theme>,
+    mut last_entity_to_draw: Local<Option<ReflectableUuid>>,
+    mut drawing_q: Query<(&mut Stroke, &Drawing<(String, Color)>), With<Drawing<(String, Color)>>>,
+) {
+    if ui_state.is_changed() && ui_state.entity_to_draw_selected != *last_entity_to_draw {
+        match ui_state.entity_to_draw_selected {
+            Some(entity_to_draw_selected) => {
+                for (mut stroke, drawing) in &mut drawing_q.iter_mut() {
+                    if drawing.id == entity_to_draw_selected {
+                        stroke.color = theme.drawing_selected;
+                    } else {
+                        stroke.color = drawing.drawing_color.1;
+                    }
+                }
+            }
+            None => {
+                for (mut stroke, drawing) in &mut drawing_q.iter_mut() {
+                    stroke.color = drawing.drawing_color.1;
+                }
+            }
+        };
+        *last_entity_to_draw = ui_state.entity_to_draw_selected;
+    }
+}
+
+pub fn set_focus_drawing(
+    mut node_interaction_events: EventReader<NodeInteraction>,
+    mut ui_state: ResMut<UiState>,
+    drawing_container_q: Query<&Drawing<(String, Color)>, With<Drawing<(String, Color)>>>,
+) {
+    for event in node_interaction_events.iter() {
+        if let Ok(drawing) = drawing_container_q.get(event.entity) {
+            if event.node_interaction_type == NodeInteractionType::LeftDoubleClick {
+                if let Some(entity_to_draw_selected) = ui_state.entity_to_draw_selected {
+                    if entity_to_draw_selected == drawing.id {
+                        ui_state.entity_to_draw_selected = None;
+                        continue;
+                    }
+                }
+                ui_state.entity_to_draw_selected = Some(drawing.id);
+            }
+            if event.node_interaction_type == NodeInteractionType::LeftMouseHoldAndDrag
+                && ui_state.entity_to_draw_selected == Some(drawing.id)
+            {
+                ui_state.entity_to_draw_hold = Some(drawing.id);
+            }
+        }
+        if event.node_interaction_type == NodeInteractionType::LeftMouseRelease {
+            ui_state.entity_to_draw_hold = None;
+        }
+    }
+}
 
 pub fn drawing(
     mut commands: Commands,
@@ -35,6 +90,10 @@ pub fn drawing(
     mut app_state: ResMut<AppState>,
     mut z_index_local: Local<f32>,
 ) {
+    if ui_state.entity_to_draw_hold.is_some() || ui_state.entity_to_draw_selected.is_some() {
+        *holding_state = None;
+        return;
+    }
     let (camera, camera_transform) = camera_q.single();
     let mut primary_window = windows.single_mut();
     let now_ms = get_timestamp();
@@ -111,10 +170,54 @@ pub fn drawing(
                                     drawing_color: pair_color,
                                     id,
                                 },
+                                InteractiveNode,
                             ));
                             ui_state.entity_to_draw = Some(id);
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+pub fn update_drawing_position(
+    mut cursor_moved_events: EventReader<CursorMoved>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    ui_state: Res<UiState>,
+    mut previous_position: Local<Option<Vec2>>,
+    mut drawing_q: Query<
+        (&mut Transform, &Drawing<(String, Color)>),
+        With<Drawing<(String, Color)>>,
+    >,
+) {
+    let (camera, camera_transform) = camera_q.single();
+
+    if ui_state.entity_to_draw_hold.is_none() {
+        *previous_position = None;
+        return;
+    }
+
+    if previous_position.is_none() && !cursor_moved_events.is_empty() {
+        if let Some(pos) = camera.viewport_to_world_2d(
+            camera_transform,
+            cursor_moved_events.iter().next().unwrap().position,
+        ) {
+            *previous_position = Some(pos.round());
+        }
+    }
+
+    if previous_position.is_some() {
+        for (mut transform, drawing) in &mut drawing_q.iter_mut() {
+            if ui_state.modal_id.is_none() && Some(drawing.id) == ui_state.entity_to_draw_hold {
+                let event = cursor_moved_events.iter().last();
+                if let Some(pos) = event
+                    .and_then(|event| camera.viewport_to_world_2d(camera_transform, event.position))
+                {
+                    transform.translation.x += (pos.x - previous_position.unwrap().x).round();
+                    transform.translation.y += (pos.y - previous_position.unwrap().y).round();
+                    *previous_position = Some(pos.round());
+                    break;
                 }
             }
         }

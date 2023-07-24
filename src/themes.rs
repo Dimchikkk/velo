@@ -16,6 +16,7 @@ pub struct Theme {
     pub celebrate_btn: Color,
     pub drawing_pencil_btn_bg: Color,
     pub drawing_pencil_btn: Color,
+    pub drawing_selected: Color,
     pub clipboard_image_bg: Color,
     pub code_default_lang: String,
     pub code_theme: String,
@@ -119,6 +120,7 @@ pub fn velo_light() -> Theme {
         text_pos_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
         tooltip_bg: Color::rgb(1., 1., 1.),
         max_camera_space: 1_000_000_000_000_000_000.,
+        drawing_selected: Color::BLUE,
     }
 }
 
@@ -180,6 +182,7 @@ pub fn velo_dark() -> Theme {
         text_pos_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         tooltip_bg: Color::rgb(0.2, 0.2, 0.2),
         max_camera_space: 1_000_000_000_000_000_000.,
+        drawing_selected: Color::BLUE,
     }
 }
 
