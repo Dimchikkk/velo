@@ -44,7 +44,7 @@ pub fn rec_button_handlers(
     border_query: Query<&Parent, With<VeloShape>>,
     mut velo_node_query: Query<(Entity, &VeloNode, &mut Transform), With<VeloNode>>,
     mut arrows: Query<(Entity, &ArrowMeta), (With<ArrowMeta>, Without<Tooltip>)>,
-    mut drawings: Query<Entity, With<Drawing<(String, Color)>>>,
+    mut drawings: Query<(Entity, &Drawing<(String, Color)>), With<Drawing<(String, Color)>>>,
     mut ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
     mut camera_proj_query: Query<
@@ -121,9 +121,12 @@ pub fn rec_button_handlers(
                     });
                 }
                 super::ui_helpers::ButtonTypes::Del => {
-                    if ui_state.drawing_mode {
-                        for entity in &mut drawings.iter_mut() {
-                            commands.entity(entity).despawn_recursive();
+                    if let Some(id) = ui_state.entity_to_draw_selected {
+                        ui_state.entity_to_draw_selected = None;
+                        for (entity, drawing) in &mut drawings.iter_mut() {
+                            if drawing.id == id {
+                                commands.entity(entity).despawn_recursive();
+                            }
                         }
                     }
                     if let Some(id) = ui_state.entity_to_edit {

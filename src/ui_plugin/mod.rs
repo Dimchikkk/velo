@@ -182,6 +182,8 @@ pub struct UiState {
     pub hold_entity: Option<ReflectableUuid>,
     pub entity_to_resize: Option<ReflectableUuid>,
     pub entity_to_draw: Option<ReflectableUuid>,
+    pub entity_to_draw_selected: Option<ReflectableUuid>,
+    pub entity_to_draw_hold: Option<ReflectableUuid>,
     pub draw_color_pair: Option<(String, Color)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
     pub drawing_mode: bool,
@@ -295,11 +297,16 @@ impl Plugin for UiPlugin {
                 save_to_store.after(save_tab),
                 canvas_click,
                 active_editor_changed,
-                interactive_sprite.before(canvas_click),
+                interactive_node.before(canvas_click),
                 change_theme,
                 enable_drawing_mode,
                 drawing,
+                update_drawing_position,
             ),
+        );
+        app.add_systems(
+            Update,
+            (set_focus_drawing, entity_to_draw_selected_changed).chain(),
         );
         app.add_systems(Update, (set_focused_entity, clickable_links).chain());
 

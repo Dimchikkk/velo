@@ -9,7 +9,8 @@ use bevy_prototype_lyon::prelude::{PathBuilder, ShapeBundle, Stroke};
 
 use super::{
     ui_helpers::{
-        add_tab, spawn_sprite_node, BottomPanel, Drawing, NodeMeta, TabContainer, VeloNode,
+        add_tab, spawn_sprite_node, BottomPanel, Drawing, InteractiveNode, NodeMeta, TabContainer,
+        VeloNode,
     },
     DeleteDoc, DeleteTab, DrawingJsonNode,
 };
@@ -261,6 +262,7 @@ pub fn load_tab(
                         points: drawing_json_node.points.clone(),
                         drawing_color: pair_color,
                     },
+                    InteractiveNode,
                 ));
             }
             break;
