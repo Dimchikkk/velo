@@ -209,10 +209,7 @@ pub fn update_drawing_position(
 
     if previous_position.is_some() {
         for (mut transform, drawing) in &mut drawing_q.iter_mut() {
-            if ui_state.drawing_mode
-                && ui_state.modal_id.is_none()
-                && Some(drawing.id) == ui_state.entity_to_draw_hold
-            {
+            if ui_state.modal_id.is_none() && Some(drawing.id) == ui_state.entity_to_draw_hold {
                 let event = cursor_moved_events.iter().last();
                 if let Some(pos) = event
                     .and_then(|event| camera.viewport_to_world_2d(camera_transform, event.position))
