@@ -182,7 +182,7 @@ pub fn velo_dark() -> Theme {
         text_pos_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         tooltip_bg: Color::rgb(0.2, 0.2, 0.2),
         max_camera_space: 1_000_000_000_000_000_000.,
-        drawing_selected: Color::ALICE_BLUE,
+        drawing_selected: Color::BLUE,
     }
 }
 
