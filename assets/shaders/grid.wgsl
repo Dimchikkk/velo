@@ -32,15 +32,8 @@ fn fragment(
     let point = (mesh.uv - vec2(0.5)) * grid_size;
 
     let t = grid(point, cell_size, 0.05);
-    let u = grid(point, cell_size * major, 0.1 / major);
+    let u = grid(point, cell_size * major, 0.2 / major);
     let g = min(t, u);
     let alpha =  1.0 - smoothstep(0.0, fwidth(g), g);
-    
-    // let o = origin(point, 1.);
-    // let fwo = fwidth(o);
-    // if o < 0.0 {
-    //     let alpha = 1.0 - smoothstep(0.0, fwo, o);
-    //     return vec4(1.0, 0., 0., alpha);
-    // }
     return vec4(line_color.rgb, alpha * line_color.a);
 }

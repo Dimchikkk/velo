@@ -101,7 +101,7 @@ pub fn velo_light() -> Theme {
         modal_bg: Color::WHITE,
         modal_text_input_bg: Color::WHITE,
         new_tab_btn_bg: Color::rgb(189.0 / 255.0, 189.0 / 255.0, 189.0 / 255.0),
-        node_bg: Color::rgb(0.98, 0.98, 0.98),
+        node_bg: Color::WHITE,
         node_border: Color::BLACK.with_a(0.8),
         node_found_color: Color::TEAL,
         node_height: 144.,
