@@ -47,8 +47,10 @@ pub fn interactive_node(
         }
         x_min += node_transform.affine().translation.x;
         x_max += node_transform.affine().translation.x;
+        x_min = x_min.min(x_max - 5.);
         y_min += node_transform.affine().translation.y;
         y_max += node_transform.affine().translation.y;
+        y_min = y_min.min(y_max - 5.);
         let z_current = node_transform.affine().translation.z;
 
         if let Some(pos) = primary_window.cursor_position() {
