@@ -12,16 +12,6 @@ suited for quick document sharing, currently, only WebGPU backend enabled for th
 
   [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/4298475a275a41c2156bd9e43f7b3191/raw/94d9cae2afad1936810ca15a9a81b7fd60295693/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/4298475a275a41c2156bd9e43f7b3191/raw/94d9cae2afad1936810ca15a9a81b7fd60295693/velo.json)
 
-## Inspiration
-
-At work, I frequently rely on lucid.app to brainstorm ideas with my
-colleagues or by myself. Typically, I share my ideas by sending either
-the diagrams themselves or screenshots of them. While I tend to stick
-with simple features like rectangles and arrows, I\'ve been
-contemplating the idea of creating a similar tool in Rust. Not only
-would it allow me to learn the language, but it would also be an
-enjoyable project to work on.
-
 ## What\'s implemented:
 -   support rectangle/circle/paperlike notes
 -   add/remove note
