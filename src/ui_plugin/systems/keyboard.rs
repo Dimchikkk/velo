@@ -8,6 +8,7 @@ use bevy::{
 use bevy_cosmic_edit::{
     get_cosmic_text, get_text_spans, CosmicEdit, CosmicEditHistory, EditHistoryItem,
 };
+use bevy_prototype_lyon::prelude::{PathBuilder, ShapeBundle, Stroke};
 use cosmic_text::Edit;
 #[cfg(not(target_arch = "wasm32"))]
 use image::*;
@@ -19,11 +20,11 @@ use crate::{
     components::MainCamera,
     resources::{LoadTabRequest, SaveTabRequest},
     themes::Theme,
-    utils::bevy_color_to_cosmic,
+    utils::{bevy_color_to_cosmic, ReflectableUuid},
     AddRect, UiState,
 };
 
-use super::ui_helpers::EditableText;
+use super::ui_helpers::{Drawing, EditableText, InteractiveNode};
 use crate::resources::{AppState, SaveDocRequest};
 
 #[path = "../../macros.rs"]
@@ -44,17 +45,61 @@ pub fn keyboard_input_system(
     >,
     mut camera_proj_query: Query<&Transform, With<MainCamera>>,
     theme: Res<Theme>,
+    mut copied_drawing: Local<Option<(Drawing<(String, Color)>, f32)>>,
+    mut drawing_q: Query<
+        (&Drawing<(String, Color)>, &GlobalTransform),
+        With<Drawing<(String, Color)>>,
+    >,
 ) {
     let camera_transform = camera_proj_query.single_mut();
     let x = camera_transform.translation.x;
     let y = camera_transform.translation.y;
     let primary_window = windows.single();
     let scale_factor = primary_window.scale_factor();
+    #[cfg(target_os = "macos")]
     let command = input.any_pressed([KeyCode::SuperLeft, KeyCode::SuperRight]);
+    #[cfg(not(target_os = "macos"))]
+    let command = input.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight]);
     let shift = input.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
-    if command && input.just_pressed(KeyCode::V) {
+    if command && input.just_pressed(KeyCode::C) {
+        if ui_state.entity_to_draw_selected.is_some() {
+            for (drawing, gt) in &mut drawing_q.iter_mut() {
+                if drawing.id == ui_state.entity_to_draw_selected.unwrap() {
+                    *copied_drawing = Some((drawing.clone(), gt.affine().translation.z));
+                }
+            }
+        } else {
+            *copied_drawing = None;
+        }
+    } else if command && input.just_pressed(KeyCode::V) {
         #[cfg(not(target_arch = "wasm32"))]
         insert_from_clipboard(&mut images, &mut events, x, y, scale_factor, &theme);
+
+        if let Some((copied_drawing, z_index)) = copied_drawing.clone() {
+            let mut path_builder = PathBuilder::new();
+            let mut points_iter = copied_drawing.points.iter();
+            let start = points_iter.next().unwrap();
+            path_builder.move_to(*start);
+            path_builder.line_to(*start);
+            for point in points_iter {
+                path_builder.line_to(*point);
+            }
+            let path = path_builder.build();
+            commands.spawn((
+                ShapeBundle {
+                    path,
+                    transform: Transform::from_xyz(x, y, z_index + 0.01),
+                    ..Default::default()
+                },
+                Stroke::new(copied_drawing.drawing_color.1, 2.),
+                Drawing {
+                    id: ReflectableUuid::generate(),
+                    points: copied_drawing.points.clone(),
+                    drawing_color: copied_drawing.drawing_color,
+                },
+                InteractiveNode,
+            ));
+        }
     } else if command && shift && input.just_pressed(KeyCode::S) {
         commands.insert_resource(SaveDocRequest {
             doc_id: app_state.current_document.unwrap(),
