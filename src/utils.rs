@@ -61,7 +61,7 @@ pub fn load_doc_to_memory(
                 .docs
                 .insert(doc_id, docs.get(&doc_id).unwrap().clone());
         } else {
-            panic!("Document not found in pkv");
+            error!("Document not found in pkv");
         }
     }
 }
