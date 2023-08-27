@@ -19,7 +19,9 @@ pub fn update_particles_effect(
     // Note: On first frame where the effect spawns, EffectSpawner is spawned during
     // CoreSet::PostUpdate, so will not be available yet. Ignore for a frame if
     // so.
-    let Ok((mut spawner, mut effect_transform)) = q_effect.get_single_mut() else { return; };
+    let Ok((mut spawner, mut effect_transform)) = q_effect.get_single_mut() else {
+        return;
+    };
 
     if let Ok(window) = window.get_single() {
         if let Some(mouse_pos) = window.cursor_position() {

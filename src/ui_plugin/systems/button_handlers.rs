@@ -17,8 +17,9 @@ use crate::themes::Theme;
 use crate::{AddRect, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
-    spawn_modal, ButtonAction, ChangeColor, ChangeTheme, DeleteDoc, DocListItemButton, DrawPencil,
-    Drawing, GenericButton, NewDoc, RawText, SaveDoc, TextPosMode, Tooltip, VeloNode, VeloShape,
+    spawn_modal, ButtonAction, ChangeColor, ChangeTheme, DeleteDoc, DocListItemButton, DrawArrow,
+    DrawLine, DrawPencil, Drawing, GenericButton, NewDoc, RawText, SaveDoc, TextPosMode, Tooltip,
+    VeloNode, VeloShape,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMeta, ArrowMode};
@@ -737,9 +738,71 @@ pub fn enable_drawing_mode(
         match *interaction {
             Interaction::Pressed => {
                 ui_state.drawing_mode = !ui_state.drawing_mode;
+                if ui_state.drawing_mode {
+                    ui_state.drawing_line_mode = false;
+                    ui_state.drawing_arrow_mode = false;
+                }
                 for child in children.iter() {
                     if let Ok(mut text) = text_style_query.get_mut(*child) {
                         if ui_state.drawing_mode {
+                            text.sections[0].style.color = text.sections[0].style.color.with_a(1.)
+                        } else {
+                            text.sections[0].style.color = text.sections[0].style.color.with_a(0.5)
+                        }
+                    }
+                }
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+pub fn enable_drawing_line_mode(
+    mut query: Query<(&Interaction, &Children), (Changed<Interaction>, With<DrawLine>)>,
+    mut text_style_query: Query<&mut Text, With<DrawLine>>,
+    mut ui_state: ResMut<UiState>,
+) {
+    for (interaction, children) in &mut query.iter_mut() {
+        match *interaction {
+            Interaction::Pressed => {
+                ui_state.drawing_line_mode = !ui_state.drawing_line_mode;
+                if ui_state.drawing_line_mode {
+                    ui_state.drawing_mode = false;
+                    ui_state.drawing_arrow_mode = false;
+                }
+                for child in children.iter() {
+                    if let Ok(mut text) = text_style_query.get_mut(*child) {
+                        if ui_state.drawing_line_mode {
+                            text.sections[0].style.color = text.sections[0].style.color.with_a(1.)
+                        } else {
+                            text.sections[0].style.color = text.sections[0].style.color.with_a(0.5)
+                        }
+                    }
+                }
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+pub fn enable_drawing_arrow_mode(
+    mut query: Query<(&Interaction, &Children), (Changed<Interaction>, With<DrawArrow>)>,
+    mut text_style_query: Query<&mut Text, With<DrawArrow>>,
+    mut ui_state: ResMut<UiState>,
+) {
+    for (interaction, children) in &mut query.iter_mut() {
+        match *interaction {
+            Interaction::Pressed => {
+                ui_state.drawing_arrow_mode = !ui_state.drawing_arrow_mode;
+                if ui_state.drawing_arrow_mode {
+                    ui_state.drawing_mode = false;
+                    ui_state.drawing_line_mode = false;
+                }
+                for child in children.iter() {
+                    if let Ok(mut text) = text_style_query.get_mut(*child) {
+                        if ui_state.drawing_arrow_mode {
                             text.sections[0].style.color = text.sections[0].style.color.with_a(1.)
                         } else {
                             text.sections[0].style.color = text.sections[0].style.color.with_a(0.5)
