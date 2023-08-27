@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{f32::consts::PI, time::Duration};
 
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_prototype_lyon::prelude::{Path, PathBuilder, ShapeBundle, Stroke};
@@ -70,6 +70,191 @@ pub fn set_focus_drawing(
         }
         if event.node_interaction_type == NodeInteractionType::LeftMouseRelease {
             ui_state.entity_to_draw_hold = None;
+        }
+    }
+}
+
+pub fn drawing_arrow(
+    mut commands: Commands,
+    ui_state: ResMut<UiState>,
+    mut app_state: ResMut<AppState>,
+    mut z_index_local: Local<f32>,
+    theme: Res<Theme>,
+    buttons: Res<Input<MouseButton>>,
+    mut start: Local<Option<Vec2>>,
+    mut end: Local<Option<Vec2>>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+) {
+    if ui_state.drawing_arrow_mode {
+        let (camera, camera_transform) = camera_q.single();
+        let primary_window = windows.single_mut();
+
+        if buttons.just_pressed(MouseButton::Left) {
+            if let Some(pos) = primary_window.cursor_position() {
+                if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
+                    if start.is_none() {
+                        *start = Some(pos)
+                    } else if end.is_none() {
+                        *end = Some(pos)
+                    }
+                }
+            }
+        }
+        if start.is_none() || end.is_none() {
+            return;
+        }
+        let start_point = start.unwrap();
+        let end_point = end.unwrap();
+        if (f32::abs(start_point.x - end_point.x) < 5.)
+            && (f32::abs(start_point.y - end_point.y) < 5.)
+        {
+            *start = None;
+            *end = None;
+            return;
+        }
+        let current_document_id = app_state.current_document.unwrap();
+        let current_document = app_state.docs.get(&current_document_id);
+        if current_document.is_none() {
+            return;
+        }
+        let tab = app_state
+            .docs
+            .get_mut(&current_document_id)
+            .unwrap()
+            .tabs
+            .iter_mut()
+            .find(|x| x.is_active)
+            .unwrap();
+        let id = ReflectableUuid::generate();
+        let pair_color = ui_state
+            .draw_color_pair
+            .clone()
+            .unwrap_or(pair_struct!(theme.drawing_arrow_btn));
+        *z_index_local += 0.01 % f32::MAX;
+        tab.z_index += *z_index_local;
+        let mut path_builder = PathBuilder::new();
+        let dt = end_point.x - start_point.x;
+        let dy = end_point.y - start_point.y;
+        let angle = dy.atan2(dt);
+        let headlen = 20.0;
+        let first = end_point - headlen * Vec2::from_angle(angle + PI / 6.);
+        let second = end_point - headlen * Vec2::from_angle(angle - PI / 6.);
+        path_builder.move_to(start_point);
+        path_builder.line_to(end_point);
+        path_builder.line_to(first);
+        path_builder.move_to(end_point);
+        path_builder.line_to(second);
+        commands.spawn((
+            ShapeBundle {
+                path: path_builder.build(),
+                transform: Transform::from_xyz(0., 0., tab.z_index),
+                ..Default::default()
+            },
+            Stroke::new(pair_color.1, 2.),
+            Drawing {
+                points: vec![start_point, end_point, first, end_point, second],
+                drawing_color: pair_color,
+                id,
+            },
+            InteractiveNode,
+        ));
+        *start = None;
+        *end = None;
+    } else {
+        if start.is_some() {
+            *start = None;
+        }
+        if end.is_some() {
+            *end = None;
+        }
+    }
+}
+
+pub fn drawing_line(
+    mut commands: Commands,
+    ui_state: ResMut<UiState>,
+    mut app_state: ResMut<AppState>,
+    mut z_index_local: Local<f32>,
+    theme: Res<Theme>,
+    buttons: Res<Input<MouseButton>>,
+    mut start: Local<Option<Vec2>>,
+    mut end: Local<Option<Vec2>>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+) {
+    if ui_state.drawing_line_mode {
+        let (camera, camera_transform) = camera_q.single();
+        let primary_window = windows.single_mut();
+
+        if buttons.just_pressed(MouseButton::Left) {
+            if let Some(pos) = primary_window.cursor_position() {
+                if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
+                    if start.is_none() {
+                        *start = Some(pos)
+                    } else if end.is_none() {
+                        *end = Some(pos)
+                    }
+                }
+            }
+        }
+        if start.is_none() || end.is_none() {
+            return;
+        }
+        let start_point = start.unwrap();
+        let end_point = end.unwrap();
+        if (f32::abs(start_point.x - end_point.x) < 5.)
+            && (f32::abs(start_point.y - end_point.y) < 5.)
+        {
+            *start = None;
+            *end = None;
+            return;
+        }
+        let current_document_id = app_state.current_document.unwrap();
+        let current_document = app_state.docs.get(&current_document_id);
+        if current_document.is_none() {
+            return;
+        }
+        let tab = app_state
+            .docs
+            .get_mut(&current_document_id)
+            .unwrap()
+            .tabs
+            .iter_mut()
+            .find(|x| x.is_active)
+            .unwrap();
+        let id = ReflectableUuid::generate();
+        let pair_color = ui_state
+            .draw_color_pair
+            .clone()
+            .unwrap_or(pair_struct!(theme.drawing_line_btn));
+        *z_index_local += 0.01 % f32::MAX;
+        tab.z_index += *z_index_local;
+        let mut path_builder = PathBuilder::new();
+        path_builder.move_to(start_point);
+        path_builder.line_to(end_point);
+        commands.spawn((
+            ShapeBundle {
+                path: path_builder.build(),
+                transform: Transform::from_xyz(0., 0., tab.z_index),
+                ..Default::default()
+            },
+            Stroke::new(pair_color.1, 2.),
+            Drawing {
+                points: vec![start_point, end_point],
+                drawing_color: pair_color,
+                id,
+            },
+            InteractiveNode,
+        ));
+        *start = None;
+        *end = None;
+    } else {
+        if start.is_some() {
+            *start = None;
+        }
+        if end.is_some() {
+            *end = None;
         }
     }
 }

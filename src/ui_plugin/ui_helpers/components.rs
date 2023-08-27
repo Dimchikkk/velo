@@ -33,6 +33,12 @@ pub struct ParticlesEffect;
 #[derive(Component, Clone)]
 pub struct DrawPencil;
 
+#[derive(Component, Clone)]
+pub struct DrawArrow;
+
+#[derive(Component, Clone)]
+pub struct DrawLine;
+
 #[derive(Component)]
 pub struct DocList;
 
