@@ -372,7 +372,7 @@ pub fn generate_markdown_lines(
                             let default_lang =
                                 bevy_markdown.markdown_theme.code_default_lang.clone();
                             let lang = code.lang.as_ref().unwrap_or(&default_lang);
-                            let syntax = vec![
+                            let syntax = [
                                 ps.find_syntax_by_name(lang.as_str()),
                                 ps.find_syntax_by_extension(lang.as_str()),
                             ]

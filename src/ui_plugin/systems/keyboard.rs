@@ -128,7 +128,7 @@ pub fn keyboard_input_system(
         for (editable_text, mut cosmic_edit, mut cosmit_edit_history) in
             &mut editable_text_query.iter_mut()
         {
-            if vec![ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id)) {
+            if [ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id)) {
                 if input.any_just_pressed([KeyCode::Escape, KeyCode::Return]) {
                     commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                     cosmic_edit.readonly = true;
