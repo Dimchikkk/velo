@@ -209,17 +209,18 @@ pub fn drawing_two_points(
                 let vertices = vec![top, right, bottom, left, top];
                 (path_builder.build(), vertices)
             }
-            super::ui_helpers::TwoPointsDrawType::Square => {
+            super::ui_helpers::TwoPointsDrawType::Rectangle => {
                 let mut path_builder = PathBuilder::new();
 
-                let width = (end_point.x - start_point.x).abs();
-                let height = (end_point.y - start_point.y).abs();
-                let size = f32::max(width, height);
+                let half_width = (end_point.x - start_point.x).abs();
+                let half_height = (end_point.y - start_point.y).abs();
 
-                let top_left = Vec2::new(start_point.x - size, start_point.y - size);
-                let top_right = Vec2::new(start_point.x + size, start_point.y - size);
-                let bottom_right = Vec2::new(start_point.x + size, start_point.y + size);
-                let bottom_left = Vec2::new(start_point.x - size, start_point.y + size);
+                let top_left = Vec2::new(start_point.x - half_width, start_point.y - half_height);
+                let top_right = Vec2::new(start_point.x + half_width, start_point.y - half_height);
+                let bottom_right =
+                    Vec2::new(start_point.x + half_width, start_point.y + half_height);
+                let bottom_left =
+                    Vec2::new(start_point.x - half_width, start_point.y + half_height);
 
                 path_builder.move_to(top_left);
                 path_builder.line_to(top_right);
@@ -227,7 +228,7 @@ pub fn drawing_two_points(
                 path_builder.line_to(bottom_left);
                 path_builder.close();
 
-                let vertices = vec![top_left, top_right, bottom_right, bottom_left, top_left];
+                let vertices = vec![top_left, top_right, bottom_right, bottom_left];
                 (path_builder.build(), vertices)
             }
         };

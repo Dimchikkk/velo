@@ -608,7 +608,7 @@ pub fn init_layout(
         &theme,
         &icon_font,
         TwoPointsDraw {
-            drawing_type: ui_helpers::TwoPointsDrawType::Square,
+            drawing_type: ui_helpers::TwoPointsDrawType::Rectangle,
         },
     );
     commands.entity(two_points_draw).add_child(draw_rect);
