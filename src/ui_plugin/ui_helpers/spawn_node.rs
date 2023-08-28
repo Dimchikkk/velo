@@ -102,7 +102,7 @@ pub fn spawn_sprite_node(
                 ..default()
             },
             Stroke::new(
-                if has_border {
+                if has_border && item_meta.pair_bg_color.1 != Color::NONE {
                     theme.node_border
                 } else {
                     Color::NONE

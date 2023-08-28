@@ -7,7 +7,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use bevy_cosmic_edit::{CosmicEdit, CosmicEditHistory, CosmicFont};
 use bevy_pkv::PkvStore;
-use bevy_prototype_lyon::prelude::Fill;
+use bevy_prototype_lyon::prelude::{Fill, Stroke};
 use cosmic_text::{Cursor, Edit};
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -17,8 +17,8 @@ use crate::themes::Theme;
 use crate::{AddRect, JsonNode, JsonNodeText, NodeType, UiState};
 
 use super::ui_helpers::{
-    spawn_modal, ButtonAction, ChangeColor, ChangeTheme, DeleteDoc, DocListItemButton, DrawArrow,
-    DrawLine, DrawPencil, Drawing, GenericButton, NewDoc, RawText, SaveDoc, TextPosMode, Tooltip,
+    spawn_modal, ButtonAction, ChangeColor, ChangeTheme, DeleteDoc, DocListItemButton, DrawPencil,
+    Drawing, GenericButton, NewDoc, RawText, SaveDoc, TextPosMode, Tooltip, TwoPointsDraw,
     VeloNode, VeloShape,
 };
 use super::{ExportToFile, ImportFromFile, ImportFromUrl, MainPanel, ShareDoc};
@@ -261,16 +261,19 @@ pub fn change_color_pallete(
         (&Interaction, &ChangeColor),
         (Changed<Interaction>, With<ChangeColor>),
     >,
-    mut velo_border: Query<(&mut Fill, &mut VeloShape), With<VeloShape>>,
+    mut velo_border: Query<(&mut Fill, &mut Stroke, &mut VeloShape), With<VeloShape>>,
     mut ui_state: ResMut<UiState>,
 ) {
     for (interaction, change_color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 let pair_color = change_color.pair_color.clone();
-                for (mut fill, mut velo_border) in velo_border.iter_mut() {
+                for (mut fill, mut stroke, mut velo_border) in velo_border.iter_mut() {
                     if Some(velo_border.id) == ui_state.entity_to_edit {
                         fill.color = pair_color.1;
+                        if fill.color == Color::NONE {
+                            stroke.color = Color::NONE;
+                        }
                         velo_border.pair_color = pair_color;
                         return;
                     }
@@ -738,10 +741,6 @@ pub fn enable_drawing_mode(
         match *interaction {
             Interaction::Pressed => {
                 ui_state.drawing_mode = !ui_state.drawing_mode;
-                if ui_state.drawing_mode {
-                    ui_state.drawing_line_mode = false;
-                    ui_state.drawing_arrow_mode = false;
-                }
                 for child in children.iter() {
                     if let Ok(mut text) = text_style_query.get_mut(*child) {
                         if ui_state.drawing_mode {
@@ -758,55 +757,32 @@ pub fn enable_drawing_mode(
     }
 }
 
-pub fn enable_drawing_line_mode(
-    mut query: Query<(&Interaction, &Children), (Changed<Interaction>, With<DrawLine>)>,
-    mut text_style_query: Query<&mut Text, With<DrawLine>>,
+pub fn enable_two_points_draw_mode(
+    mut query: Query<
+        (&Interaction, &Children, &TwoPointsDraw),
+        (Changed<Interaction>, With<TwoPointsDraw>),
+    >,
+    mut text_style_query: Query<&mut Text, With<TwoPointsDraw>>,
     mut ui_state: ResMut<UiState>,
 ) {
-    for (interaction, children) in &mut query.iter_mut() {
+    for (interaction, children, two_point_draw) in &mut query.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
-                ui_state.drawing_line_mode = !ui_state.drawing_line_mode;
-                if ui_state.drawing_line_mode {
-                    ui_state.drawing_mode = false;
-                    ui_state.drawing_arrow_mode = false;
+                let two_points_draw_type = two_point_draw.drawing_type.clone();
+                if ui_state.drawing_two_points_mode == Some(two_points_draw_type.clone()) {
+                    ui_state.drawing_two_points_mode = None;
+                } else {
+                    ui_state.drawing_two_points_mode = Some(two_points_draw_type.clone());
+                }
+                for mut text in text_style_query.iter_mut() {
+                    text.sections[0].style.color = text.sections[0].style.color.with_a(0.5)
                 }
                 for child in children.iter() {
-                    if let Ok(mut text) = text_style_query.get_mut(*child) {
-                        if ui_state.drawing_line_mode {
-                            text.sections[0].style.color = text.sections[0].style.color.with_a(1.)
-                        } else {
-                            text.sections[0].style.color = text.sections[0].style.color.with_a(0.5)
-                        }
-                    }
-                }
-            }
-            Interaction::Hovered => {}
-            Interaction::None => {}
-        }
-    }
-}
-
-pub fn enable_drawing_arrow_mode(
-    mut query: Query<(&Interaction, &Children), (Changed<Interaction>, With<DrawArrow>)>,
-    mut text_style_query: Query<&mut Text, With<DrawArrow>>,
-    mut ui_state: ResMut<UiState>,
-) {
-    for (interaction, children) in &mut query.iter_mut() {
-        match *interaction {
-            Interaction::Pressed => {
-                ui_state.drawing_arrow_mode = !ui_state.drawing_arrow_mode;
-                if ui_state.drawing_arrow_mode {
-                    ui_state.drawing_mode = false;
-                    ui_state.drawing_line_mode = false;
-                }
-                for child in children.iter() {
-                    if let Ok(mut text) = text_style_query.get_mut(*child) {
-                        if ui_state.drawing_arrow_mode {
-                            text.sections[0].style.color = text.sections[0].style.color.with_a(1.)
-                        } else {
-                            text.sections[0].style.color = text.sections[0].style.color.with_a(0.5)
-                        }
+                    if text_style_query.get_mut(*child).is_ok()
+                        && ui_state.drawing_two_points_mode.is_some()
+                    {
+                        let mut text = text_style_query.get_mut(*child).unwrap();
+                        text.sections[0].style.color = text.sections[0].style.color.with_a(1.);
                     }
                 }
             }

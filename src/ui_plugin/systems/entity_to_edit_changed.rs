@@ -6,7 +6,7 @@ use bevy_cosmic_edit::{
     CosmicEditHistory, CosmicFont, CosmicText, EditHistoryItem,
 };
 use bevy_markdown::{generate_markdown_lines, BevyMarkdown, BevyMarkdownTheme};
-use bevy_prototype_lyon::prelude::Stroke;
+use bevy_prototype_lyon::prelude::{Fill, Stroke};
 use cosmic_text::{Cursor, Edit};
 
 use crate::{
@@ -22,7 +22,7 @@ pub fn entity_to_edit_changed(
     app_state: Res<AppState>,
     theme: Res<Theme>,
     mut last_entity_to_edit: Local<Option<ReflectableUuid>>,
-    mut velo_border: Query<(&mut Stroke, &VeloShape), With<VeloShape>>,
+    mut velo_border: Query<(&Fill, &mut Stroke, &VeloShape), With<VeloShape>>,
     mut raw_text_node_query: Query<
         (
             Entity,
@@ -39,13 +39,13 @@ pub fn entity_to_edit_changed(
         match ui_state.entity_to_edit {
             Some(entity_to_edit) => {
                 // Change border for selected node
-                for (mut stroke, velo_border) in velo_border.iter_mut() {
+                for (fill, mut stroke, velo_border) in velo_border.iter_mut() {
                     if velo_border.id == entity_to_edit {
                         stroke.color = theme.selected_node_border;
                         stroke.options.line_width = 2.;
                     } else {
                         let has_border = velo_border.node_type.clone() != NodeType::Paper;
-                        if has_border {
+                        if has_border && fill.color != Color::NONE {
                             stroke.color = theme.node_border;
                         } else {
                             stroke.color = Color::NONE;
@@ -137,9 +137,9 @@ pub fn entity_to_edit_changed(
                 }
             }
             None => {
-                for (mut stroke, velo_border) in velo_border.iter_mut() {
+                for (fill, mut stroke, velo_border) in velo_border.iter_mut() {
                     let has_border = velo_border.node_type.clone() != NodeType::Paper;
-                    if has_border {
+                    if has_border && fill.color != Color::NONE {
                         stroke.color = theme.node_border;
                     } else {
                         stroke.color = Color::NONE;

@@ -187,8 +187,7 @@ pub struct UiState {
     pub draw_color_pair: Option<(String, Color)>,
     pub arrow_to_draw_start: Option<ArrowConnect>,
     pub drawing_mode: bool,
-    pub drawing_line_mode: bool,
-    pub drawing_arrow_mode: bool,
+    pub drawing_two_points_mode: Option<TwoPointsDrawType>,
 }
 
 impl Plugin for UiPlugin {
@@ -306,8 +305,10 @@ impl Plugin for UiPlugin {
                 update_drawing_position,
             ),
         );
-        app.add_systems(Update, (drawing_line, enable_drawing_line_mode).chain());
-        app.add_systems(Update, (drawing_arrow, enable_drawing_arrow_mode).chain());
+        app.add_systems(
+            Update,
+            (drawing_two_points, enable_two_points_draw_mode).chain(),
+        );
         app.add_systems(
             Update,
             (set_focus_drawing, entity_to_draw_selected_changed).chain(),

@@ -7,9 +7,9 @@ use bevy_cosmic_edit::{create_cosmic_font_system, CosmicFont, CosmicFontConfig};
 use bevy_pkv::PkvStore;
 
 use super::ui_helpers::{
-    self, AddTab, BottomPanel, ButtonAction, ChangeTheme, DrawArrow, DrawLine, DrawPencil,
-    LeftPanel, LeftPanelControls, LeftPanelExplorer, MainPanel, Menu, NewDoc, ParticlesEffect,
-    Root, SaveDoc, TextPosMode,
+    self, AddTab, BottomPanel, ButtonAction, ChangeTheme, DrawPencil, LeftPanel, LeftPanelControls,
+    LeftPanelExplorer, MainPanel, Menu, NewDoc, ParticlesEffect, Root, SaveDoc, TextPosMode,
+    TwoPointsDraw,
 };
 use super::{CommChannels, ExportToFile, ImportFromFile, ImportFromUrl, ShareDoc};
 use crate::canvas::arrow::components::{ArrowMode, ArrowType};
@@ -58,13 +58,9 @@ use add_effect::*;
 mod add_pencil;
 use add_pencil::*;
 
-#[path = "add_drawing_arrow.rs"]
-mod add_drawing_arrow;
-use add_drawing_arrow::*;
-
-#[path = "add_drawing_line.rs"]
-mod add_drawing_line;
-use add_drawing_line::*;
+#[path = "add_two_points_draw.rs"]
+mod add_two_points_draw;
+use add_two_points_draw::*;
 
 #[path = "add_search_box.rs"]
 mod add_search_box;
@@ -563,29 +559,71 @@ pub fn init_layout(
     let left_panel_bottom = commands
         .spawn((NodeBundle {
             style: Style {
-                align_items: AlignItems::Center,
+                flex_direction: FlexDirection::Column,
                 width: Val::Percent(90.),
                 height: Val::Percent(10.),
-                margin: UiRect::all(Val::Px(5.)),
-                justify_content: JustifyContent::Start,
+                margin: UiRect {
+                    left: Val::Px(5.),
+                    right: Val::Px(5.),
+                    top: Val::Px(5.),
+                    bottom: Val::Px(20.),
+                },
                 ..default()
             },
             ..default()
         },))
         .id();
-
+    let pencil_panel = commands.spawn(NodeBundle::default()).id();
     #[cfg(not(target_arch = "wasm32"))]
     {
         let effect = add_effect(&mut commands, &theme, &icon_font, ParticlesEffect);
-        commands.entity(left_panel_bottom).add_child(effect);
+        commands.entity(pencil_panel).add_child(effect);
     }
-
     let pencil = add_pencil(&mut commands, &theme, &icon_font, DrawPencil);
-    commands.entity(left_panel_bottom).add_child(pencil);
-    let draw_line = add_drawing_line(&mut commands, &theme, &icon_font, DrawLine);
-    commands.entity(left_panel_bottom).add_child(draw_line);
-    let draw_arrow = add_drawing_arrow(&mut commands, &theme, &icon_font, DrawArrow);
-    commands.entity(left_panel_bottom).add_child(draw_arrow);
+    commands.entity(pencil_panel).add_child(pencil);
+    commands.entity(left_panel_bottom).add_child(pencil_panel);
+
+    let two_points_draw = commands.spawn(NodeBundle::default()).id();
+
+    let draw_line = add_two_points_draw(
+        &mut commands,
+        &theme,
+        &icon_font,
+        TwoPointsDraw {
+            drawing_type: ui_helpers::TwoPointsDrawType::Line,
+        },
+    );
+    commands.entity(two_points_draw).add_child(draw_line);
+    let draw_circle = add_two_points_draw(
+        &mut commands,
+        &theme,
+        &icon_font,
+        TwoPointsDraw {
+            drawing_type: ui_helpers::TwoPointsDrawType::Rhombus,
+        },
+    );
+    commands.entity(two_points_draw).add_child(draw_circle);
+    let draw_rect = add_two_points_draw(
+        &mut commands,
+        &theme,
+        &icon_font,
+        TwoPointsDraw {
+            drawing_type: ui_helpers::TwoPointsDrawType::Square,
+        },
+    );
+    commands.entity(two_points_draw).add_child(draw_rect);
+    let draw_arrow = add_two_points_draw(
+        &mut commands,
+        &theme,
+        &icon_font,
+        TwoPointsDraw {
+            drawing_type: ui_helpers::TwoPointsDrawType::Arrow,
+        },
+    );
+    commands.entity(two_points_draw).add_child(draw_arrow);
+    commands
+        .entity(left_panel_bottom)
+        .add_child(two_points_draw);
 
     commands
         .entity(left_panel_controls)

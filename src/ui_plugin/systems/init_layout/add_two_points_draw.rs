@@ -1,12 +1,15 @@
 use bevy::{prelude::*, text::BreakLineOn};
 
-use crate::{themes::Theme, ui_plugin::ui_helpers::GenericButton};
+use crate::{
+    themes::Theme,
+    ui_plugin::ui_helpers::{GenericButton, TwoPointsDraw},
+};
 
-pub fn add_drawing_arrow(
+pub fn add_two_points_draw(
     commands: &mut Commands,
     theme: &Res<Theme>,
     icon_font: &Handle<Font>,
-    component: impl Component + Clone,
+    component: TwoPointsDraw,
 ) -> Entity {
     let top = commands
         .spawn((NodeBundle {
@@ -29,10 +32,16 @@ pub fn add_drawing_arrow(
             ..default()
         },))
         .id();
+    let code = match component.drawing_type {
+        crate::ui_plugin::ui_helpers::TwoPointsDrawType::Arrow => "\u{f8ce}",
+        crate::ui_plugin::ui_helpers::TwoPointsDrawType::Line => "\u{f108}",
+        crate::ui_plugin::ui_helpers::TwoPointsDrawType::Rhombus => "\u{e418}",
+        crate::ui_plugin::ui_helpers::TwoPointsDrawType::Square => "\u{e3c1}",
+    };
     let button = commands
         .spawn((
             ButtonBundle {
-                background_color: theme.drawing_arrow_btn_bg.into(),
+                background_color: theme.drawing_two_points_btn_bg.into(),
                 style: Style {
                     padding: UiRect::all(Val::Px(10.)),
                     width: Val::Percent(100.),
@@ -49,12 +58,12 @@ pub fn add_drawing_arrow(
         .with_children(|builder| {
             let text_style = TextStyle {
                 font_size: 25.0,
-                color: theme.drawing_arrow_btn.with_a(0.5),
+                color: theme.drawing_two_points_btn.with_a(0.5),
                 font: icon_font.clone(),
             };
             let text = Text {
                 sections: vec![TextSection {
-                    value: "\u{f8ce}".to_string(),
+                    value: code.to_string(),
                     style: text_style,
                 }],
                 alignment: TextAlignment::Center,
