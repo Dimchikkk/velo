@@ -38,7 +38,7 @@ pub enum TwoPointsDrawType {
     Arrow,
     Line,
     Rhombus,
-    Square,
+    Rectangle,
 }
 
 #[derive(Component, Clone)]
