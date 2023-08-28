@@ -50,6 +50,7 @@ suited for quick document sharing, currently, only WebGPU backend enabled for th
 - infinite canvas with zooming (right click to move camera, mouse wheel to zoom)
 - undo/redo for text editing [native target only 🖥️]
 - drawing mode (click on pencil icon to enable it)
+- draw line, arrow, rhombus or rectangle by choosing 2 points
 
 ## Installation
 
