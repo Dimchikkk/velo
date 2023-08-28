@@ -11,7 +11,7 @@ use crate::{
 };
 
 use super::{
-    ui_helpers::{Drawing, InteractiveNode, MainPanel},
+    ui_helpers::{Drawing, InteractiveNode, MainPanel, TwoPointsDrawType},
     NodeInteraction, NodeInteractionType, UiState,
 };
 
@@ -74,7 +74,7 @@ pub fn set_focus_drawing(
     }
 }
 
-pub fn drawing_arrow(
+pub fn drawing_two_points(
     mut commands: Commands,
     ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
@@ -85,105 +85,14 @@ pub fn drawing_arrow(
     mut end: Local<Option<Vec2>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    mut previous_draw_mode: Local<Option<TwoPointsDrawType>>,
 ) {
-    if ui_state.drawing_arrow_mode {
-        let (camera, camera_transform) = camera_q.single();
-        let primary_window = windows.single_mut();
-
-        if buttons.just_pressed(MouseButton::Left) {
-            if let Some(pos) = primary_window.cursor_position() {
-                if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
-                    if start.is_none() {
-                        *start = Some(pos)
-                    } else if end.is_none() {
-                        *end = Some(pos)
-                    }
-                }
-            }
-        }
-        if start.is_none() || end.is_none() {
-            return;
-        }
-        let start_point = start.unwrap();
-        let end_point = end.unwrap();
-        if (f32::abs(start_point.x - end_point.x) < 5.)
-            && (f32::abs(start_point.y - end_point.y) < 5.)
-        {
-            *start = None;
-            *end = None;
-            return;
-        }
-        let current_document_id = app_state.current_document.unwrap();
-        let current_document = app_state.docs.get(&current_document_id);
-        if current_document.is_none() {
-            return;
-        }
-        let tab = app_state
-            .docs
-            .get_mut(&current_document_id)
-            .unwrap()
-            .tabs
-            .iter_mut()
-            .find(|x| x.is_active)
-            .unwrap();
-        let id = ReflectableUuid::generate();
-        let pair_color = ui_state
-            .draw_color_pair
-            .clone()
-            .unwrap_or(pair_struct!(theme.drawing_arrow_btn));
-        *z_index_local += 0.01 % f32::MAX;
-        tab.z_index += *z_index_local;
-        let mut path_builder = PathBuilder::new();
-        let dt = end_point.x - start_point.x;
-        let dy = end_point.y - start_point.y;
-        let angle = dy.atan2(dt);
-        let headlen = 20.0;
-        let first = end_point - headlen * Vec2::from_angle(angle + PI / 6.);
-        let second = end_point - headlen * Vec2::from_angle(angle - PI / 6.);
-        path_builder.move_to(start_point);
-        path_builder.line_to(end_point);
-        path_builder.line_to(first);
-        path_builder.move_to(end_point);
-        path_builder.line_to(second);
-        commands.spawn((
-            ShapeBundle {
-                path: path_builder.build(),
-                transform: Transform::from_xyz(0., 0., tab.z_index),
-                ..Default::default()
-            },
-            Stroke::new(pair_color.1, 2.),
-            Drawing {
-                points: vec![start_point, end_point, first, end_point, second],
-                drawing_color: pair_color,
-                id,
-            },
-            InteractiveNode,
-        ));
+    if *previous_draw_mode != ui_state.drawing_two_points_mode.clone() {
         *start = None;
         *end = None;
-    } else {
-        if start.is_some() {
-            *start = None;
-        }
-        if end.is_some() {
-            *end = None;
-        }
     }
-}
-
-pub fn drawing_line(
-    mut commands: Commands,
-    ui_state: ResMut<UiState>,
-    mut app_state: ResMut<AppState>,
-    mut z_index_local: Local<f32>,
-    theme: Res<Theme>,
-    buttons: Res<Input<MouseButton>>,
-    mut start: Local<Option<Vec2>>,
-    mut end: Local<Option<Vec2>>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-) {
-    if ui_state.drawing_line_mode {
+    if ui_state.drawing_two_points_mode.clone().is_some() {
+        *previous_draw_mode = ui_state.drawing_two_points_mode.clone();
         let (camera, camera_transform) = camera_q.single();
         let primary_window = windows.single_mut();
 
@@ -227,21 +136,88 @@ pub fn drawing_line(
         let pair_color = ui_state
             .draw_color_pair
             .clone()
-            .unwrap_or(pair_struct!(theme.drawing_line_btn));
+            .unwrap_or(pair_struct!(theme.drawing_two_points_btn));
         *z_index_local += 0.01 % f32::MAX;
         tab.z_index += *z_index_local;
-        let mut path_builder = PathBuilder::new();
-        path_builder.move_to(start_point);
-        path_builder.line_to(end_point);
+        let two_points_draw_type = ui_state.drawing_two_points_mode.clone().unwrap();
+        let (path, points) = match two_points_draw_type {
+            super::ui_helpers::TwoPointsDrawType::Arrow => {
+                let mut path_builder = PathBuilder::new();
+                let dt = end_point.x - start_point.x;
+                let dy = end_point.y - start_point.y;
+                let angle = dy.atan2(dt);
+                let headlen = 20.0;
+                let first = end_point - headlen * Vec2::from_angle(angle + PI / 6.);
+                let second = end_point - headlen * Vec2::from_angle(angle - PI / 6.);
+                path_builder.move_to(start_point);
+                path_builder.line_to(end_point);
+                path_builder.line_to(first);
+                path_builder.move_to(end_point);
+                path_builder.line_to(second);
+                (
+                    path_builder.build(),
+                    vec![start_point, end_point, first, end_point, second],
+                )
+            }
+            super::ui_helpers::TwoPointsDrawType::Line => {
+                let mut path_builder = PathBuilder::new();
+                path_builder.move_to(start_point);
+                path_builder.line_to(end_point);
+                (path_builder.build(), vec![start_point, end_point])
+            }
+            super::ui_helpers::TwoPointsDrawType::Rhombus => {
+                let mut path_builder = PathBuilder::new();
+
+                let dx = (end_point.x - start_point.x).abs();
+                let dy = (end_point.y - start_point.y).abs();
+                let size = f32::max(dx, dy);
+
+                let top = Vec2::new(start_point.x, start_point.y - size);
+                let right = Vec2::new(start_point.x + size, start_point.y);
+                let bottom = Vec2::new(start_point.x, start_point.y + size);
+                let left = Vec2::new(start_point.x - size, start_point.y);
+
+                path_builder.move_to(top);
+                path_builder.line_to(right);
+                path_builder.line_to(bottom);
+                path_builder.line_to(left);
+                path_builder.close();
+
+                let vertices = vec![top, right, bottom, left, top];
+                (path_builder.build(), vertices)
+            }
+            super::ui_helpers::TwoPointsDrawType::Square => {
+                let mut path_builder = PathBuilder::new();
+
+                let width = (end_point.x - start_point.x).abs();
+                let height = (end_point.y - start_point.y).abs();
+                let size = f32::max(width, height);
+
+                let top_left = Vec2::new(start_point.x - size, start_point.y - size);
+                let top_right = Vec2::new(start_point.x + size, start_point.y - size);
+                let bottom_right = Vec2::new(start_point.x + size, start_point.y + size);
+                let bottom_left = Vec2::new(start_point.x - size, start_point.y + size);
+
+                path_builder.move_to(top_left);
+                path_builder.line_to(top_right);
+                path_builder.line_to(bottom_right);
+                path_builder.line_to(bottom_left);
+                path_builder.close();
+
+                let vertices = vec![top_left, top_right, bottom_right, bottom_left, top_left];
+                (path_builder.build(), vertices)
+            }
+        };
+
         commands.spawn((
             ShapeBundle {
-                path: path_builder.build(),
+                path,
                 transform: Transform::from_xyz(0., 0., tab.z_index),
                 ..Default::default()
             },
             Stroke::new(pair_color.1, 2.),
             Drawing {
-                points: vec![start_point, end_point],
+                points,
                 drawing_color: pair_color,
                 id,
             },
@@ -249,13 +225,6 @@ pub fn drawing_line(
         ));
         *start = None;
         *end = None;
-    } else {
-        if start.is_some() {
-            *start = None;
-        }
-        if end.is_some() {
-            *end = None;
-        }
     }
 }
 

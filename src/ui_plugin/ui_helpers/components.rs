@@ -33,11 +33,18 @@ pub struct ParticlesEffect;
 #[derive(Component, Clone)]
 pub struct DrawPencil;
 
-#[derive(Component, Clone)]
-pub struct DrawArrow;
+#[derive(Clone, PartialEq, Eq)]
+pub enum TwoPointsDrawType {
+    Arrow,
+    Line,
+    Rhombus,
+    Square,
+}
 
 #[derive(Component, Clone)]
-pub struct DrawLine;
+pub struct TwoPointsDraw {
+    pub drawing_type: TwoPointsDrawType,
+}
 
 #[derive(Component)]
 pub struct DocList;
