@@ -228,7 +228,7 @@ pub fn drawing_two_points(
                 path_builder.line_to(bottom_left);
                 path_builder.close();
 
-                let vertices = vec![top_left, top_right, bottom_right, bottom_left];
+                let vertices = vec![top_left, top_right, bottom_right, bottom_left, top_left];
                 (path_builder.build(), vertices)
             }
         };
