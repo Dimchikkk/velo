@@ -212,15 +212,10 @@ pub fn drawing_two_points(
             super::ui_helpers::TwoPointsDrawType::Rectangle => {
                 let mut path_builder = PathBuilder::new();
 
-                let half_width = (end_point.x - start_point.x).abs();
-                let half_height = (end_point.y - start_point.y).abs();
-
-                let top_left = Vec2::new(start_point.x - half_width, start_point.y - half_height);
-                let top_right = Vec2::new(start_point.x + half_width, start_point.y - half_height);
-                let bottom_right =
-                    Vec2::new(start_point.x + half_width, start_point.y + half_height);
-                let bottom_left =
-                    Vec2::new(start_point.x - half_width, start_point.y + half_height);
+                let top_left = Vec2::new(start_point.x, end_point.y);
+                let top_right = end_point;
+                let bottom_right = Vec2::new(end_point.x, start_point.y);
+                let bottom_left = start_point;
 
                 path_builder.move_to(top_left);
                 path_builder.line_to(top_right);
