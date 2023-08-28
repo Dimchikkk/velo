@@ -83,16 +83,25 @@ pub fn drawing_two_points(
     buttons: Res<Input<MouseButton>>,
     mut start: Local<Option<Vec2>>,
     mut end: Local<Option<Vec2>>,
+    mut drawing_entity: Local<Option<Entity>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut previous_draw_mode: Local<Option<TwoPointsDrawType>>,
+    mut drawing_q: Query<
+        (&mut Path, &mut Drawing<(String, Color)>),
+        With<Drawing<(String, Color)>>,
+    >,
 ) {
-    if *previous_draw_mode != ui_state.drawing_two_points_mode.clone() {
+    if *previous_draw_mode != ui_state.drawing_two_points_mode.clone()
+        || ui_state.entity_to_draw_selected.is_some()
+    {
+        *drawing_entity = None;
         *start = None;
         *end = None;
     }
     if ui_state.drawing_two_points_mode.clone().is_some() {
         *previous_draw_mode = ui_state.drawing_two_points_mode.clone();
+
         let (camera, camera_transform) = camera_q.single();
         let primary_window = windows.single_mut();
 
@@ -107,18 +116,34 @@ pub fn drawing_two_points(
                 }
             }
         }
-        if start.is_none() || end.is_none() {
+
+        if start.is_none() {
             return;
         }
+
         let start_point = start.unwrap();
-        let end_point = end.unwrap();
+        let end_point = match *end {
+            Some(v) => v,
+            None => {
+                if let Some(pos) = primary_window.cursor_position() {
+                    if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
+                        pos
+                    } else {
+                        start_point
+                    }
+                } else {
+                    start_point
+                }
+            }
+        };
+
         if (f32::abs(start_point.x - end_point.x) < 5.)
             && (f32::abs(start_point.y - end_point.y) < 5.)
         {
-            *start = None;
             *end = None;
             return;
         }
+
         let current_document_id = app_state.current_document.unwrap();
         let current_document = app_state.docs.get(&current_document_id);
         if current_document.is_none() {
@@ -137,8 +162,6 @@ pub fn drawing_two_points(
             .draw_color_pair
             .clone()
             .unwrap_or(pair_struct!(theme.drawing_two_points_btn));
-        *z_index_local += 0.01 % f32::MAX;
-        tab.z_index += *z_index_local;
         let two_points_draw_type = ui_state.drawing_two_points_mode.clone().unwrap();
         let (path, points) = match two_points_draw_type {
             super::ui_helpers::TwoPointsDrawType::Arrow => {
@@ -209,22 +232,40 @@ pub fn drawing_two_points(
             }
         };
 
-        commands.spawn((
-            ShapeBundle {
-                path,
-                transform: Transform::from_xyz(0., 0., tab.z_index),
-                ..Default::default()
-            },
-            Stroke::new(pair_color.1, 2.),
-            Drawing {
-                points,
-                drawing_color: pair_color,
-                id,
-            },
-            InteractiveNode,
-        ));
-        *start = None;
-        *end = None;
+        if drawing_entity.is_none() {
+            *z_index_local += 0.01 % f32::MAX;
+            tab.z_index += *z_index_local;
+            let entity = commands
+                .spawn((
+                    ShapeBundle {
+                        path,
+                        transform: Transform::from_xyz(0., 0., tab.z_index),
+                        ..Default::default()
+                    },
+                    Stroke::new(pair_color.1, 2.),
+                    Drawing {
+                        points,
+                        drawing_color: pair_color,
+                        id,
+                    },
+                    InteractiveNode,
+                ))
+                .id();
+            *drawing_entity = Some(entity);
+        } else {
+            if let Ok((mut drawing_path, mut drawing_comp)) =
+                drawing_q.get_mut(drawing_entity.unwrap())
+            {
+                *drawing_path = path;
+                drawing_comp.points = points;
+            }
+
+            if end.is_some() {
+                *drawing_entity = None;
+                *start = None;
+                *end = None;
+            }
+        }
     }
 }
 
