@@ -35,7 +35,7 @@ pub fn add_two_points_draw(
     let code = match component.drawing_type {
         crate::ui_plugin::ui_helpers::TwoPointsDrawType::Arrow => "\u{f8ce}",
         crate::ui_plugin::ui_helpers::TwoPointsDrawType::Line => "\u{f108}",
-        crate::ui_plugin::ui_helpers::TwoPointsDrawType::Rhombus => "\u{e418}",
+        crate::ui_plugin::ui_helpers::TwoPointsDrawType::Rhombus => "\u{e86b}",
         crate::ui_plugin::ui_helpers::TwoPointsDrawType::Square => "\u{e3c1}",
     };
     let button = commands

@@ -80,7 +80,7 @@ pub fn velo_light() -> Theme {
         drawing_pencil_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         drawing_pencil_btn: Color::RED,
         drawing_two_points_btn_bg: Color::rgb(0.9, 0.9, 0.9),
-        drawing_two_points_btn: Color::GRAY.with_a(0.8),
+        drawing_two_points_btn: Color::GRAY.with_a(0.9),
         clipboard_image_bg: Color::WHITE,
         code_default_lang: "rs".to_string(),
         code_theme: "Solarized (light)".to_string(),
