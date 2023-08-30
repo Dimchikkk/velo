@@ -91,6 +91,7 @@ pub fn spawn_sprite_node(
         ),
     };
     let has_border = item_meta.node_type != NodeType::Paper;
+    let is_transparent = item_meta.pair_bg_color.clone().1 == Color::NONE;
     let shape = commands
         .spawn((
             bevy_prototype_lyon::prelude::ShapeBundle {
@@ -102,7 +103,7 @@ pub fn spawn_sprite_node(
                 ..default()
             },
             Stroke::new(
-                if has_border && item_meta.pair_bg_color.1 != Color::NONE {
+                if has_border && !is_transparent {
                     theme.node_border
                 } else {
                     Color::NONE
@@ -155,8 +156,16 @@ pub fn spawn_sprite_node(
             },
         }),
         metrics: CosmicMetrics {
-            font_size: theme.font_size,
-            line_height: theme.line_height,
+            font_size: if is_transparent {
+                3. * theme.font_size
+            } else {
+                theme.font_size
+            },
+            line_height: if is_transparent {
+                3. * theme.line_height
+            } else {
+                theme.line_height
+            },
             scale_factor,
         },
         bg: Color::NONE,

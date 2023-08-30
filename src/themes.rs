@@ -18,6 +18,8 @@ pub struct Theme {
     pub drawing_pencil_btn: Color,
     pub drawing_two_points_btn_bg: Color,
     pub drawing_two_points_btn: Color,
+    pub add_text_btn_bg: Color,
+    pub add_text_btn: Color,
     pub drawing_selected: Color,
     pub clipboard_image_bg: Color,
     pub code_default_lang: String,
@@ -62,6 +64,7 @@ pub struct Theme {
     pub tab_bg: Color,
     pub text_pos_btn_bg: Color,
     pub tooltip_bg: Color,
+    pub color_none: Color,
 }
 
 pub fn velo_light() -> Theme {
@@ -81,10 +84,12 @@ pub fn velo_light() -> Theme {
         drawing_pencil_btn: Color::RED,
         drawing_two_points_btn_bg: Color::rgb(0.9, 0.9, 0.9),
         drawing_two_points_btn: Color::GRAY.with_a(0.9),
+        add_text_btn_bg: Color::rgb(0.9, 0.9, 0.9),
+        add_text_btn: Color::GRAY.with_a(0.9),
         clipboard_image_bg: Color::WHITE,
         code_default_lang: "rs".to_string(),
         code_theme: "Solarized (light)".to_string(),
-        color_change_1: Color::NONE,
+        color_change_1: Color::GRAY.with_a(0.9),
         color_change_2: Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
         color_change_3: Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
         color_change_4: Color::rgb(239., 68.0 / 255.0, 68.0 / 255.0),
@@ -125,6 +130,7 @@ pub fn velo_light() -> Theme {
         tooltip_bg: Color::rgb(1., 1., 1.),
         max_camera_space: 1_000_000_000_000_000_000.,
         drawing_selected: Color::MIDNIGHT_BLUE,
+        color_none: Color::NONE,
     }
 }
 
@@ -145,10 +151,12 @@ pub fn velo_dark() -> Theme {
         drawing_pencil_btn: Color::RED,
         drawing_two_points_btn_bg: Color::GRAY,
         drawing_two_points_btn: Color::BLUE,
+        add_text_btn_bg: Color::GRAY,
+        add_text_btn: Color::BLUE,
         clipboard_image_bg: Color::BLACK,
         code_default_lang: "rs".to_string(),
         code_theme: "base16-ocean.dark".to_string(),
-        color_change_1: Color::NONE,
+        color_change_1: Color::BLUE,
         color_change_2: Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
         color_change_3: Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
         color_change_4: Color::rgb(239., 68.0 / 255.0, 68.0 / 255.0),
@@ -189,6 +197,7 @@ pub fn velo_dark() -> Theme {
         tooltip_bg: Color::rgb(0.2, 0.2, 0.2),
         max_camera_space: 1_000_000_000_000_000_000.,
         drawing_selected: Color::BLUE,
+        color_none: Color::NONE,
     }
 }
 

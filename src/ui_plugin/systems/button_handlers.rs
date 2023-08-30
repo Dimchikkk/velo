@@ -249,6 +249,25 @@ pub fn rec_button_handlers(
                         }
                     }
                 }
+                super::ui_helpers::ButtonTypes::AddText => {
+                    events.send(AddRect {
+                        node: JsonNode {
+                            id: Uuid::new_v4(),
+                            node_type: NodeType::Rect,
+                            x,
+                            y,
+                            width: theme.node_width,
+                            height: theme.node_height,
+                            text: JsonNodeText {
+                                text: "".to_string(),
+                                pos: crate::TextPos::Center,
+                            },
+                            bg_color: pair_struct!(theme.color_none),
+                            ..default()
+                        },
+                        image: None,
+                    });
+                }
             },
             Interaction::Hovered => {}
             Interaction::None => {}
