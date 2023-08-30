@@ -129,7 +129,7 @@ pub fn velo_light() -> Theme {
         text_pos_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
         tooltip_bg: Color::rgb(1., 1., 1.),
         max_camera_space: 1_000_000_000_000_000_000.,
-        drawing_selected: Color::MIDNIGHT_BLUE,
+        drawing_selected: Color::BLUE,
         color_none: Color::NONE,
     }
 }
