@@ -89,7 +89,7 @@ pub fn velo_light() -> Theme {
         clipboard_image_bg: Color::WHITE,
         code_default_lang: "rs".to_string(),
         code_theme: "Solarized (light)".to_string(),
-        color_change_1: Color::GRAY.with_a(0.9),
+        color_change_1: Color::BLACK,
         color_change_2: Color::rgb(215.0 / 255.0, 204.0 / 255.0, 200.0 / 255.0),
         color_change_3: Color::rgb(173.0 / 255.0, 216.0 / 255.0, 230.0 / 255.0),
         color_change_4: Color::rgb(239., 68.0 / 255.0, 68.0 / 255.0),
