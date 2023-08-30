@@ -62,6 +62,10 @@ use add_pencil::*;
 mod add_two_points_draw;
 use add_two_points_draw::*;
 
+#[path = "add_text.rs"]
+mod add_text;
+use add_text::*;
+
 #[path = "add_search_box.rs"]
 mod add_search_box;
 use add_search_box::*;
@@ -621,6 +625,15 @@ pub fn init_layout(
         },
     );
     commands.entity(two_points_draw).add_child(draw_arrow);
+    let add_text = add_text(
+        &mut commands,
+        &theme,
+        &icon_font,
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::AddText,
+        },
+    );
+    commands.entity(two_points_draw).add_child(add_text);
     commands
         .entity(left_panel_bottom)
         .add_child(two_points_draw);

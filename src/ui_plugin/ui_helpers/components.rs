@@ -146,16 +146,17 @@ pub struct VeloNode {
     pub id: ReflectableUuid,
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 pub enum ButtonTypes {
     AddRec,
     AddCircle,
+    AddText,
     AddPaper,
     Del,
     Front,
     Back,
 }
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct ButtonAction {
     pub button_type: ButtonTypes,
 }
