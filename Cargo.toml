@@ -4,7 +4,7 @@ license = "MIT OR Apache-2.0"
 description = "App for brainstorming & sharing ideas 🦀 Learning Project"
 repository = "https://github.com/StaffEngineer/velo.git"
 readme = "Readme.md"
-version = "0.8.15"
+version = "0.9.0"
 edition = "2021"
 
 exclude = ["assets/fonts/*", "velo.gif", "velo.png"]
@@ -43,7 +43,7 @@ ehttp = "0.1.0"
 async-channel = "1.8"
 image = { version = "0.24.5", default-features = false, features = ["ico"] }
 bevy_markdown = { path = "crates/bevy_markdown" }
-bevy_cosmic_edit = { version = "0.9" }
+bevy_cosmic_edit = { version = "0.9.2" }
 bevy_embedded_assets = { version = "0.8" }
 cosmic-text = { version = "0.9" }
 bevy_prototype_lyon = { version = "0.9" }

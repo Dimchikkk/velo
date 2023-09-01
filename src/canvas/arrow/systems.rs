@@ -30,6 +30,7 @@ pub fn create_arrow_start(
                             }
                             state.arrow_to_draw_start = None;
                             create_arrow.send(CreateArrow {
+                                visible: true,
                                 start: start_arrow,
                                 end: *arrow_connect,
                                 arrow_type: state.arrow_type,
@@ -84,6 +85,7 @@ pub fn create_arrow_end(
                     end,
                     max_z,
                     ArrowMeta {
+                        visible: event.visible,
                         start: event.start,
                         end: event.end,
                         arrow_type: event.arrow_type,

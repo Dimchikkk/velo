@@ -19,8 +19,14 @@ pub fn create_arrow(
     arrow_meta: ArrowMeta,
 ) {
     let arrow_path = build_arrow(start, end, arrow_meta);
+    let visibility = if arrow_meta.visible {
+        Visibility::Visible
+    } else {
+        Visibility::Hidden
+    };
     commands.spawn((
         ShapeBundle {
+            visibility,
             transform: Transform::from_xyz(0.0, 0.0, z),
             path: arrow_path,
             ..default()

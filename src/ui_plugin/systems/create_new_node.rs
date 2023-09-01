@@ -56,6 +56,7 @@ pub fn create_new_node(
                 position: (event.node.x, event.node.y, tab.z_index),
                 text_pos: event.node.text.pos.clone(),
                 is_active: true,
+                visible: true,
             },
         );
     }

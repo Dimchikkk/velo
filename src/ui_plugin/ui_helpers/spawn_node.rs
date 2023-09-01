@@ -29,6 +29,7 @@ pub struct NodeMeta {
     pub image: Option<Handle<Image>>,
     pub text_pos: TextPos,
     pub is_active: bool,
+    pub visible: bool,
 }
 
 pub fn spawn_sprite_node(
@@ -49,6 +50,12 @@ pub fn spawn_sprite_node(
     let width: f32 = item_meta.size.0;
     let height = item_meta.size.1;
 
+    let visibility = if item_meta.visible {
+        Visibility::Visible
+    } else {
+        Visibility::Hidden
+    };
+
     let top = commands
         .spawn((
             SpriteBundle {
@@ -56,6 +63,7 @@ pub fn spawn_sprite_node(
                     translation: pos,
                     ..default()
                 },
+                visibility,
                 ..Default::default()
             },
             VeloNode { id: item_meta.id },

@@ -211,6 +211,7 @@ pub fn load_tab(
                         position: (json_node.x, json_node.y, json_node.z),
                         text_pos: json_node.text.pos,
                         is_active: false,
+                        visible: json_node.visible,
                     },
                 );
             }
@@ -219,6 +220,7 @@ pub fn load_tab(
             for arrow in arrows.iter() {
                 let arrow_meta: ArrowMeta = serde_json::from_value(arrow.clone()).unwrap();
                 create_arrow.send(CreateArrow {
+                    visible: arrow_meta.visible,
                     start: arrow_meta.start,
                     end: arrow_meta.end,
                     arrow_type: arrow_meta.arrow_type,

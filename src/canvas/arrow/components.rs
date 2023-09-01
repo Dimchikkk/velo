@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 )]
 #[reflect(Component)]
 pub struct ArrowMeta {
+    pub visible: bool,
     pub arrow_type: ArrowType,
     pub start: ArrowConnect,
     pub end: ArrowConnect,

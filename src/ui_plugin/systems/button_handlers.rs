@@ -43,8 +43,11 @@ pub fn rec_button_handlers(
     >,
     mut raw_text_query: Query<(&mut CosmicEdit, &RawText, &Parent), With<RawText>>,
     border_query: Query<&Parent, With<VeloShape>>,
-    mut velo_node_query: Query<(Entity, &VeloNode, &mut Transform), With<VeloNode>>,
-    mut arrows: Query<(Entity, &ArrowMeta), (With<ArrowMeta>, Without<Tooltip>)>,
+    mut velo_node_query: Query<
+        (Entity, &VeloNode, &mut Transform, &mut Visibility),
+        (With<VeloNode>, Without<ArrowMeta>),
+    >,
+    mut arrows: Query<(Entity, &ArrowMeta, &mut Visibility), (With<ArrowMeta>, Without<VeloNode>)>,
     mut drawings: Query<(Entity, &Drawing<(String, Color)>), With<Drawing<(String, Color)>>>,
     mut ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
@@ -133,12 +136,12 @@ pub fn rec_button_handlers(
                     if let Some(id) = ui_state.entity_to_edit {
                         commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
                         *ui_state = UiState::default();
-                        for (entity, node, _) in velo_node_query.iter() {
+                        for (entity, node, _, _) in velo_node_query.iter() {
                             if node.id == id {
                                 commands.entity(entity).despawn_recursive();
                             }
                         }
-                        for (entity, arrow) in &mut arrows.iter_mut() {
+                        for (entity, arrow, _) in &mut arrows.iter_mut() {
                             if arrow.start.id == id || arrow.end.id == id {
                                 commands.entity(entity).despawn_recursive();
                             }
@@ -187,7 +190,7 @@ pub fn rec_button_handlers(
                             }
                         }
                         // update z_index
-                        for (_, node, mut transform) in velo_node_query.iter_mut() {
+                        for (_, node, mut transform, _) in velo_node_query.iter_mut() {
                             if node.id == id {
                                 if let Some((_, translation)) = data {
                                     transform.translation.z = (translation.z + 0.03) % f32::MAX;
@@ -236,7 +239,7 @@ pub fn rec_button_handlers(
                             }
                         }
                         // update z_index
-                        for (_, node, mut transform) in velo_node_query.iter_mut() {
+                        for (_, node, mut transform, _) in velo_node_query.iter_mut() {
                             if node.id == id {
                                 if let Some((_, translation)) = data {
                                     transform.translation.z = f32::max(translation.z - 0.03, 1.);
@@ -267,6 +270,50 @@ pub fn rec_button_handlers(
                         },
                         image: None,
                     });
+                }
+                super::ui_helpers::ButtonTypes::ShowChildren => {
+                    if let Some(id) = ui_state.entity_to_edit {
+                        let mut nodes = VecDeque::new();
+                        nodes.push_back(id);
+                        while let Some(node_id) = nodes.pop_front() {
+                            for (_, arrow_meta, mut visibility) in &mut arrows.iter_mut() {
+                                if arrow_meta.start.id == node_id {
+                                    *visibility = Visibility::Visible;
+                                    for (_, node, _, mut visibility) in
+                                        &mut velo_node_query.iter_mut()
+                                    {
+                                        if node.id == arrow_meta.end.id {
+                                            *visibility = Visibility::Visible;
+                                            break;
+                                        }
+                                    }
+                                    nodes.push_back(arrow_meta.end.id);
+                                }
+                            }
+                        }
+                    }
+                }
+                super::ui_helpers::ButtonTypes::HideChildren => {
+                    if let Some(id) = ui_state.entity_to_edit {
+                        let mut nodes = VecDeque::new();
+                        nodes.push_back(id);
+                        while let Some(node_id) = nodes.pop_front() {
+                            for (_, arrow_meta, mut visibility) in &mut arrows.iter_mut() {
+                                if arrow_meta.start.id == node_id {
+                                    *visibility = Visibility::Hidden;
+                                    for (_, node, _, mut visibility) in
+                                        &mut velo_node_query.iter_mut()
+                                    {
+                                        if node.id == arrow_meta.end.id {
+                                            *visibility = Visibility::Hidden;
+                                            break;
+                                        }
+                                    }
+                                    nodes.push_back(arrow_meta.end.id);
+                                }
+                            }
+                        }
+                    }
                 }
             },
             Interaction::Hovered => {}

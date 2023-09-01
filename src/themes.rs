@@ -63,6 +63,7 @@ pub struct Theme {
     pub shadow: Color,
     pub tab_bg: Color,
     pub text_pos_btn_bg: Color,
+    pub visibility_btn_bg: Color,
     pub tooltip_bg: Color,
     pub color_none: Color,
 }
@@ -131,6 +132,7 @@ pub fn velo_light() -> Theme {
         max_camera_space: 1_000_000_000_000_000_000.,
         drawing_selected: Color::BLUE,
         color_none: Color::NONE,
+        visibility_btn_bg: Color::rgb(207.0 / 255.0, 216.0 / 255.0, 220.0 / 255.0),
     }
 }
 
@@ -198,6 +200,7 @@ pub fn velo_dark() -> Theme {
         max_camera_space: 1_000_000_000_000_000_000.,
         drawing_selected: Color::BLUE,
         color_none: Color::NONE,
+        visibility_btn_bg: Color::rgb(0.9, 0.9, 0.9),
     }
 }
 

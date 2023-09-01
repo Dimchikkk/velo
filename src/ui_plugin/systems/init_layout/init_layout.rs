@@ -70,6 +70,10 @@ use add_text::*;
 mod add_search_box;
 use add_search_box::*;
 
+#[path = "add_visibility.rs"]
+mod add_visibility;
+use add_visibility::*;
+
 // Think about splitting this function to wasm and native
 pub fn init_layout(
     mut commands: Commands,
@@ -560,6 +564,40 @@ pub fn init_layout(
     commands.entity(text_modes).add_child(text_pos1);
     commands.entity(text_modes).add_child(text_pos2);
 
+    let visibility = commands
+        .spawn((NodeBundle {
+            style: Style {
+                align_items: AlignItems::Center,
+                width: Val::Percent(90.),
+                height: Val::Percent(9.),
+                margin: UiRect::all(Val::Px(5.)),
+                justify_content: JustifyContent::Start,
+                ..default()
+            },
+            ..default()
+        },))
+        .id();
+    let show_children = add_visibility(
+        &mut commands,
+        &theme,
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::ShowChildren,
+        },
+        "Show children notes".to_string(),
+        &icon_font,
+    );
+    let hide_notes = add_visibility(
+        &mut commands,
+        &theme,
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::HideChildren,
+        },
+        "Hide children notes".to_string(),
+        &icon_font,
+    );
+    commands.entity(visibility).add_child(show_children);
+    commands.entity(visibility).add_child(hide_notes);
+
     let left_panel_bottom = commands
         .spawn((NodeBundle {
             style: Style {
@@ -645,6 +683,7 @@ pub fn init_layout(
     commands.entity(left_panel_controls).add_child(arrow_modes);
     commands.entity(left_panel_controls).add_child(text_modes);
     commands.entity(left_panel_controls).add_child(fron_back);
+    commands.entity(left_panel_controls).add_child(visibility);
     commands
         .entity(left_panel_controls)
         .add_child(left_panel_bottom);
