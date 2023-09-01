@@ -127,12 +127,12 @@ pub fn save_to_store(
 
 pub fn save_tab(
     images: Res<Assets<Image>>,
-    arrows: Query<&ArrowMeta, With<ArrowMeta>>,
+    arrows: Query<(&ArrowMeta, &Visibility), With<ArrowMeta>>,
     request: Res<SaveTabRequest>,
     mut app_state: ResMut<AppState>,
     raw_text_query: Query<(&RawText, &CosmicEdit, &Parent), With<RawText>>,
     border_query: Query<(&Parent, &VeloShape), With<VeloShape>>,
-    velo_node_query: Query<&Transform, With<VeloNode>>,
+    velo_node_query: Query<(&Transform, &Visibility), With<VeloNode>>,
     drawing_query: Query<
         (&Transform, &Drawing<(String, Color)>, &Stroke),
         With<Drawing<(String, Color)>>,
@@ -165,12 +165,14 @@ pub fn save_tab(
     let json_nodes = json["nodes"].as_array_mut().unwrap();
     for (raw_text, cosmic_edit, parent) in raw_text_query.iter() {
         let (border_parent, border) = border_query.get(parent.get()).unwrap();
-        let top = velo_node_query.get(border_parent.get()).unwrap();
-        let x = top.translation.x;
-        let y = top.translation.y;
-        let z = top.translation.z;
+        let (top_transform, top_visibility) = velo_node_query.get(border_parent.get()).unwrap();
+        let x = top_transform.translation.x;
+        let y = top_transform.translation.y;
+        let z = top_transform.translation.z;
         let (width, height) = (cosmic_edit.width, cosmic_edit.height);
+        let visible = top_visibility == Visibility::Visible;
         json_nodes.push(json!(JsonNode {
+            visible,
             node_type: border.node_type.clone(),
             id: raw_text.id.0,
             x,
@@ -198,8 +200,10 @@ pub fn save_tab(
     }
 
     let json_arrows = json["arrows"].as_array_mut().unwrap();
-    for arrow_meta in arrows.iter() {
-        json_arrows.push(json!(arrow_meta));
+    for (arrow_meta, visibility) in arrows.iter() {
+        let mut meta = *arrow_meta;
+        meta.visible = visibility == Visibility::Visible;
+        json_arrows.push(json!(meta));
     }
 
     let json_drawing = json["drawings"].as_array_mut().unwrap();

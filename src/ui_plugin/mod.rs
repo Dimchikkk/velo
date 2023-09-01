@@ -155,6 +155,7 @@ pub struct JsonNode<T> {
     pub height: f32,
     pub text: JsonNodeText,
     pub bg_color: T,
+    pub visible: bool,
 }
 
 #[derive(Serialize, Deserialize)]

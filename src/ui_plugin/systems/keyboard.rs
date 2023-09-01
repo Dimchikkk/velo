@@ -208,6 +208,7 @@ pub fn insert_from_clipboard(
             let image = images.add(image);
             events.send(AddRect {
                 node: JsonNode {
+                    visible: true,
                     id: Uuid::new_v4(),
                     node_type: crate::NodeType::Rect,
                     x,
