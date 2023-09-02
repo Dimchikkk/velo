@@ -679,8 +679,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_pkv"
-version = "0.7.0"
-source = "git+https://github.com/StaffEngineer/bevy_pkv?rev=d55de2e#d55de2eb768467a034023bb711ab094de91a9012"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1e0e807560d0660c1e54b139e05ad03cff3ec5773fd87baaaafef0cd3317d73"
 dependencies = [
  "bevy_ecs",
  "cfg_aliases",

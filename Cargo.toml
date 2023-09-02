@@ -48,8 +48,7 @@ bevy_embedded_assets = { version = "0.8" }
 cosmic-text = { version = "0.9" }
 bevy_prototype_lyon = { version = "0.9" }
 bevy_pancam = { version = "0.9" }
-# TODO: point to official release that support bevy 0.11
-bevy_pkv = { git = "https://github.com/StaffEngineer/bevy_pkv", rev = "d55de2e", default-features = true }
+bevy_pkv = { version = "0.8.0", default-features = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.7"
