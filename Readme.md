@@ -52,6 +52,7 @@ suited for quick document sharing, currently, only WebGPU backend enabled for th
 - drawing mode (click on pencil icon to enable it)
 - draw line, arrow, rhombus or rectangle by choosing 2 points
 - hide/show children notes for selected note
+- navigation to random note
 
 ## Installation
 
