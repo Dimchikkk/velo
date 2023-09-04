@@ -595,8 +595,18 @@ pub fn init_layout(
         "Hide children notes".to_string(),
         &icon_font,
     );
+    let show_random = add_visibility(
+        &mut commands,
+        &theme,
+        ButtonAction {
+            button_type: ui_helpers::ButtonTypes::ShowRandom,
+        },
+        "Show random note".to_string(),
+        &icon_font,
+    );
     commands.entity(visibility).add_child(show_children);
     commands.entity(visibility).add_child(hide_notes);
+    commands.entity(visibility).add_child(show_random);
 
     let left_panel_bottom = commands
         .spawn((NodeBundle {

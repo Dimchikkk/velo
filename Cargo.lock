@@ -4125,6 +4125,7 @@ dependencies = [
  "directories",
  "ehttp",
  "env_logger",
+ "getrandom",
  "image",
  "js-sys",
  "linkify",

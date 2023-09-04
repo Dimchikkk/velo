@@ -49,6 +49,8 @@ cosmic-text = { version = "0.9" }
 bevy_prototype_lyon = { version = "0.9" }
 bevy_pancam = { version = "0.9" }
 bevy_pkv = { version = "0.8.0", default-features = true }
+rand = "0.8.5"
+getrandom = { version = "0.2.10", features = ["js"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.7"
@@ -62,7 +64,6 @@ bevy_hanabi = { version = "0.7" }
 arboard = "3.2.0"
 open = "4.0.1"
 toml = "0.7.3"
-rand = "0.8.5"
 tantivy = "0.19.2"
 directories = "5.0"
 env_logger = "0.10.0"
