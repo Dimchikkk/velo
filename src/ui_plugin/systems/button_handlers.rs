@@ -52,7 +52,7 @@ pub fn rec_button_handlers(
     mut ui_state: ResMut<UiState>,
     mut app_state: ResMut<AppState>,
     mut camera_proj_query: Query<
-        &Transform,
+        &mut Transform,
         (
             With<MainCamera>,
             With<OrthographicProjection>,
@@ -61,7 +61,7 @@ pub fn rec_button_handlers(
     >,
     theme: Res<Theme>,
 ) {
-    let camera_transform = camera_proj_query.single_mut();
+    let mut camera_transform = camera_proj_query.single_mut();
     let x = camera_transform.translation.x;
     let y = camera_transform.translation.y;
     for (interaction, button_action) in &mut interaction_query {
@@ -313,6 +313,25 @@ pub fn rec_button_handlers(
                                 }
                             }
                         }
+                    }
+                }
+                super::ui_helpers::ButtonTypes::ShowRandom => {
+                    let mut coords = VecDeque::new();
+                    for (_, _, transform, visibility) in velo_node_query.iter() {
+                        if *visibility == Visibility::Visible {
+                            coords.push_back(transform.translation);
+                        }
+                    }
+                    let len = coords.len();
+                    if len == 0 {
+                        return;
+                    }
+                    let step = rand::distributions::Uniform::new(0, len);
+                    let mut rng = rand::thread_rng();
+                    let choice = rand::prelude::Distribution::sample(&step, &mut rng);
+                    if let Some(v) = coords.get(choice) {
+                        camera_transform.translation.x = v.x;
+                        camera_transform.translation.y = v.y;
                     }
                 }
             },

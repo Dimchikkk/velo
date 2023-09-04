@@ -15,6 +15,7 @@ pub fn add_visibility(
     let icon_code = match button_action.button_type {
         crate::ui_plugin::ui_helpers::ButtonTypes::ShowChildren => "\u{e8f4}".to_string(),
         crate::ui_plugin::ui_helpers::ButtonTypes::HideChildren => "\u{e8f5}".to_string(),
+        crate::ui_plugin::ui_helpers::ButtonTypes::ShowRandom => "\u{e043}".to_string(),
         _ => panic!("unexpected button type"),
     };
 

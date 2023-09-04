@@ -157,6 +157,7 @@ pub enum ButtonTypes {
     Back,
     ShowChildren,
     HideChildren,
+    ShowRandom,
 }
 #[derive(Component, Clone)]
 pub struct ButtonAction {
