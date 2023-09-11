@@ -24,7 +24,7 @@ use crate::{
     AddRect, UiState,
 };
 
-use super::ui_helpers::{Drawing, EditableText, InteractiveNode};
+use super::{ui_helpers::{Drawing, EditableText, InteractiveNode}, JsonNode, NodeType, JsonNodeText};
 use crate::resources::{AppState, SaveDocRequest};
 
 #[path = "../../macros.rs"]
@@ -124,6 +124,24 @@ pub fn keyboard_input_system(
                 });
             }
         }
+    } else if command && input.just_pressed(KeyCode::P) {
+        events.send(AddRect {
+            node: JsonNode {
+                id: Uuid::new_v4(),
+                node_type: NodeType::Paper,
+                x,
+                y,
+                width: theme.node_width,
+                height: theme.node_height,
+                text: JsonNodeText {
+                    text: "".to_string(),
+                    pos: crate::TextPos::Center,
+                },
+                bg_color: pair_struct!(theme.paper_node_bg),
+                ..default()
+            },
+            image: None,
+        });
     } else {
         for (editable_text, mut cosmic_edit, mut cosmit_edit_history) in
             &mut editable_text_query.iter_mut()
@@ -182,8 +200,6 @@ pub fn insert_from_clipboard(
     scale_factor: f64,
     theme: &Res<Theme>,
 ) {
-    use crate::JsonNode;
-
     if let Ok(mut clipboard) = arboard::Clipboard::new() {
         if let Ok(image) = clipboard.get_image() {
             let image: RgbaImage = ImageBuffer::from_raw(
