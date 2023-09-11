@@ -21,7 +21,7 @@ use crate::{
     resources::{LoadTabRequest, SaveTabRequest},
     themes::Theme,
     utils::{bevy_color_to_cosmic, ReflectableUuid},
-    AddRect, UiState, JsonNode, JsonNodeText, NodeType
+    AddRect, JsonNode, JsonNodeText, NodeType, UiState,
 };
 
 use super::ui_helpers::{Drawing, EditableText, InteractiveNode};
