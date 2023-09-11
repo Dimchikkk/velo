@@ -22,9 +22,12 @@ use crate::{
     themes::Theme,
     utils::{bevy_color_to_cosmic, ReflectableUuid},
     AddRect, UiState,
+    JsonNode,
+    NodeType, 
+    JsonNodeText
 };
 
-use super::{ui_helpers::{Drawing, EditableText, InteractiveNode}, JsonNode, NodeType, JsonNodeText};
+use super::ui_helpers::{Drawing, EditableText, InteractiveNode};
 use crate::resources::{AppState, SaveDocRequest};
 
 #[path = "../../macros.rs"]
