@@ -21,10 +21,7 @@ use crate::{
     resources::{LoadTabRequest, SaveTabRequest},
     themes::Theme,
     utils::{bevy_color_to_cosmic, ReflectableUuid},
-    AddRect, UiState,
-    JsonNode,
-    NodeType, 
-    JsonNodeText
+    AddRect, UiState, JsonNode, JsonNodeText, NodeType
 };
 
 use super::ui_helpers::{Drawing, EditableText, InteractiveNode};
@@ -141,7 +138,7 @@ pub fn keyboard_input_system(
                     pos: crate::TextPos::Center,
                 },
                 bg_color: pair_struct!(theme.paper_node_bg),
-                ..default()
+                ..Default::default()
             },
             image: None,
         });
