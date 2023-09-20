@@ -80,7 +80,6 @@ pub fn drawing_two_points(
     mut app_state: ResMut<AppState>,
     mut z_index_local: Local<f32>,
     theme: Res<Theme>,
-    buttons: Res<Input<MouseButton>>,
     mut start: Local<Option<Vec2>>,
     mut end: Local<Option<Vec2>>,
     mut drawing_entity: Local<Option<Entity>>,
@@ -91,6 +90,7 @@ pub fn drawing_two_points(
         (&mut Path, &mut Drawing<(String, Color)>),
         With<Drawing<(String, Color)>>,
     >,
+    interaction_query: Query<&Interaction, (Changed<Interaction>, With<MainPanel>)>,
 ) {
     if *previous_draw_mode != ui_state.drawing_two_points_mode.clone()
         || ui_state.entity_to_draw_selected.is_some()
@@ -105,13 +105,15 @@ pub fn drawing_two_points(
         let (camera, camera_transform) = camera_q.single();
         let primary_window = windows.single_mut();
 
-        if buttons.just_pressed(MouseButton::Left) {
-            if let Some(pos) = primary_window.cursor_position() {
-                if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
-                    if start.is_none() {
-                        *start = Some(pos)
-                    } else if end.is_none() {
-                        *end = Some(pos)
+        for interaction in interaction_query.iter() {
+            if *interaction == Interaction::Pressed {
+                if let Some(pos) = primary_window.cursor_position() {
+                    if let Some(pos) = camera.viewport_to_world_2d(camera_transform, pos) {
+                        if start.is_none() {
+                            *start = Some(pos)
+                        } else if end.is_none() {
+                            *end = Some(pos)
+                        }
                     }
                 }
             }
