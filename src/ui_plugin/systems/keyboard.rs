@@ -24,7 +24,7 @@ use crate::{
     AddRect, JsonNode, JsonNodeText, NodeType, UiState,
 };
 
-use super::ui_helpers::{Drawing, EditableText, InteractiveNode};
+use super::ui_helpers::{Drawing, EditableText, InteractiveNode, VeloNode};
 use crate::resources::{AppState, SaveDocRequest};
 
 #[path = "../../macros.rs"]
@@ -50,6 +50,7 @@ pub fn keyboard_input_system(
         (&Drawing<(String, Color)>, &GlobalTransform),
         With<Drawing<(String, Color)>>,
     >,
+    velo_node_query: Query<(Entity, &VeloNode)>,
 ) {
     let camera_transform = camera_proj_query.single_mut();
     let x = camera_transform.translation.x;
@@ -178,6 +179,14 @@ pub fn keyboard_input_system(
             },
             image: None,
         });
+    } else if input.just_pressed(KeyCode::Delete) {
+        if let Some(id) = ui_state.entity_to_edit {
+            for (entity, node) in velo_node_query.iter() {
+                if node.id == id {
+                    commands.entity(entity).despawn_recursive();
+                }
+            }
+        }
     } else {
         for (editable_text, mut cosmic_edit, mut cosmit_edit_history) in
             &mut editable_text_query.iter_mut()
