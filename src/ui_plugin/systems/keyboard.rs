@@ -6,7 +6,7 @@ use bevy::{
 };
 
 use bevy_cosmic_edit::{
-    get_cosmic_text, get_text_spans, CosmicEdit, CosmicEditHistory, EditHistoryItem,
+    get_cosmic_text, get_text_spans, ActiveEditor, CosmicEdit, CosmicEditHistory, EditHistoryItem,
 };
 use bevy_prototype_lyon::prelude::{PathBuilder, ShapeBundle, Stroke};
 use cosmic_text::Edit;
@@ -142,13 +142,49 @@ pub fn keyboard_input_system(
             },
             image: None,
         });
+    } else if command && input.just_pressed(KeyCode::R) {
+        events.send(AddRect {
+            node: JsonNode {
+                id: Uuid::new_v4(),
+                node_type: NodeType::Rect,
+                x,
+                y,
+                width: theme.node_width,
+                height: theme.node_height,
+                text: JsonNodeText {
+                    text: "".to_string(),
+                    pos: crate::TextPos::Center,
+                },
+                bg_color: pair_struct!(theme.node_bg),
+                ..default()
+            },
+            image: None,
+        });
+    } else if command && input.just_pressed(KeyCode::O) {
+        events.send(AddRect {
+            node: JsonNode {
+                id: Uuid::new_v4(),
+                node_type: NodeType::Circle,
+                x,
+                y,
+                width: theme.node_width,
+                height: theme.node_height,
+                text: JsonNodeText {
+                    text: "".to_string(),
+                    pos: crate::TextPos::Center,
+                },
+                bg_color: pair_struct!(theme.node_bg),
+                ..default()
+            },
+            image: None,
+        });
     } else {
         for (editable_text, mut cosmic_edit, mut cosmit_edit_history) in
             &mut editable_text_query.iter_mut()
         {
             if [ui_state.tab_to_edit, ui_state.doc_to_edit].contains(&Some(editable_text.id)) {
                 if input.any_just_pressed([KeyCode::Escape, KeyCode::Return]) {
-                    commands.insert_resource(bevy_cosmic_edit::ActiveEditor { entity: None });
+                    commands.insert_resource(ActiveEditor { entity: None });
                     cosmic_edit.readonly = true;
                     let mut current_cursor = cosmic_edit.editor.cursor();
                     if ui_state.doc_to_edit.is_some() {
