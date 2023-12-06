@@ -37,7 +37,7 @@ pub fn keyboard_input_system(
     mut app_state: ResMut<AppState>,
     mut ui_state: ResMut<UiState>,
     mut events: EventWriter<AddRect<(String, Color)>>,
-    input: Res<Input<KeyCode>>,
+    mut input: ResMut<Input<KeyCode>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut editable_text_query: Query<
         (&EditableText, &mut CosmicEdit, &mut CosmicEditHistory),
@@ -143,6 +143,7 @@ pub fn keyboard_input_system(
             },
             image: None,
         });
+        input.release_all()
     } else if command && input.just_pressed(KeyCode::R) {
         events.send(AddRect {
             node: JsonNode {
@@ -161,6 +162,7 @@ pub fn keyboard_input_system(
             },
             image: None,
         });
+        input.release_all()
     } else if command && input.just_pressed(KeyCode::O) {
         events.send(AddRect {
             node: JsonNode {
@@ -179,6 +181,7 @@ pub fn keyboard_input_system(
             },
             image: None,
         });
+        input.release_all()
     } else if input.just_pressed(KeyCode::Delete) {
         if let Some(id) = ui_state.entity_to_edit {
             for (entity, node) in velo_node_query.iter() {
@@ -187,6 +190,7 @@ pub fn keyboard_input_system(
                 }
             }
         }
+        input.release_all()
     } else {
         for (editable_text, mut cosmic_edit, mut cosmit_edit_history) in
             &mut editable_text_query.iter_mut()
