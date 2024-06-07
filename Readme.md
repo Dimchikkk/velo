@@ -10,7 +10,7 @@ This app is primarily designed for native desktop platforms, and its
 WebAssembly (wasm) target has a limited feature set. wasm target is best
 suited for quick document sharing, currently, only WebGPU backend enabled for the demo:
 
-  [<https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/bf7d94759abbd7aa722330e5fe4f0bd5/raw/e817be0ba700e94be472d435638d762b9deadf33/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/bf7d94759abbd7aa722330e5fe4f0bd5/raw/e817be0ba700e94be472d435638d762b9deadf33/velo.json)
+  [<https://dimchikkk.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/bf7d94759abbd7aa722330e5fe4f0bd5/raw/e817be0ba700e94be472d435638d762b9deadf33/velo.json>](https://staffengineer.github.io/velo?document=https://gist.githubusercontent.com/StaffEngineer/bf7d94759abbd7aa722330e5fe4f0bd5/raw/e817be0ba700e94be472d435638d762b9deadf33/velo.json)
 
 ## What\'s implemented:
 -   support rectangle/circle/paperlike notes
