@@ -500,7 +500,9 @@ pub fn generate_markdown_lines(
                 })
             }
         }
-        Err(e) => Err(vec![BevyMarkdownError::Parsing { info: e }]),
+        Err(e) => Err(vec![BevyMarkdownError::Parsing {
+            info: e.to_string(),
+        }]),
     }
 }
 
